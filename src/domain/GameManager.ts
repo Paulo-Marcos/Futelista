@@ -58,9 +58,7 @@ export class GameManager {
   }
 
   createTeams(): Team[] {
-    //TEMP
-    this.next = [];
-    if (this.next.length > 1) throw Error("Times já foram criados");
+    if (this.next.length > 0) throw Error("Times já foram criados");
     const createTeam = CreateTeamFactory.fabricate(this.rules.choosingTeams);
     this.next = createTeam.create(this.players, this.rules.playersPerTeam);
     this.notificarObservers("teams", this.next);

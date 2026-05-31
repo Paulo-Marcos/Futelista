@@ -65,10 +65,7 @@ describe('Teste da classe Game', () => {
       );
     });
 
-    // TODO: o método createTeams() hoje faz `this.next = []` ANTES de checar `length > 1`,
-    // então o throw "Times já foram criados" nunca dispara. Bug conhecido em GameManager.
-    // Reativar este teste quando o método for refatorado para validar antes de mutar.
-    it.skip('deve lançar um erro se times já foram criados', () => {
+    it('deve lançar um erro se times já foram criados', () => {
       game.createTeams();
       expect(() => game.createTeams()).toThrowError('Times já foram criados');
     });
