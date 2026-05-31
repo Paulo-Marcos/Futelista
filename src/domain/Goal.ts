@@ -1,7 +1,7 @@
 import { Match } from './Match';
 import { ScreenTime } from './ScreenTime';
 import { Team } from './Team';
-import { Player } from './player';
+import { Player } from './Player';
 
 export class Goal {
   constructor(

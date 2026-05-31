@@ -56,7 +56,10 @@ export class Team {
 
   switchPlayer(playerEnters: Player, playerLeaves: Player): void {
     const index = this.players.indexOf(playerLeaves);
-    this.players.splice(index);
+    // splice(index, 1) remove APENAS o jogador alvo. Sem o segundo argumento,
+    // splice(index) remove do índice até o fim — bug histórico que esvaziava
+    // o time em times maiores que 1 jogador. Regressão em Team.spec.ts.
+    this.players.splice(index, 1);
     this.players.push(playerEnters);
     this.Switches.push(new Switch(playerEnters, playerLeaves, this));
     playerEnters.addTeam(this);

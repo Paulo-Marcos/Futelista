@@ -47,6 +47,27 @@ describe('Teste da classe Team', () => {
       expect(teamA.Switches.length).toBe(2);
       expect(teamA.players?.length).toBe(1);
     });
+    // Regressão: switchPlayer usava `splice(index)` (sem 2º argumento), que
+    // remove do índice até o fim do array. Com mais de 1 jogador, o time era
+    // esvaziado e só sobrava o playerEnters do push. O fix usa splice(index, 1).
+    it('Deverá preservar os outros jogadores ao substituir um do meio', () => {
+      const teamA = new Team(4);
+      const playerA = new Player('A');
+      const playerB = new Player('B');
+      const playerC = new Player('C');
+      const playerEnters = new Player('Entra');
+      teamA.addPlayer(playerA);
+      teamA.addPlayer(playerB);
+      teamA.addPlayer(playerC);
+
+      teamA.switchPlayer(playerEnters, playerB);
+
+      expect(teamA.players.length).toBe(3);
+      expect(teamA.hasPlayer(playerA)).toBe(true);
+      expect(teamA.hasPlayer(playerC)).toBe(true);
+      expect(teamA.hasPlayer(playerEnters)).toBe(true);
+      expect(teamA.hasPlayer(playerB)).toBe(false);
+    });
   });
   describe('Teste de adicionar gol', () => {
     it('Deverá adicionar gol', () => {
