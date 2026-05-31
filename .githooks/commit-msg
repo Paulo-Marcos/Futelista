@@ -1,0 +1,26 @@
+#!/bin/sh
+# Git hook commit-msg - valida travas em features/registry.yaml.
+# Instale uma vez por clone:
+#     git config core.hooksPath .githooks
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# Em Windows, "python3" pode resolver para o alias do Microsoft Store
+# (WindowsApps/python3.exe) que NAO eh um interpretador real e abre o instalador.
+# Por isso preferimos "python" primeiro; se ausente, tentamos "py -3" e por
+# ultimo "python3".
+if command -v python >/dev/null 2>&1; then
+    PY=python
+    PY_ARGS=""
+elif command -v py >/dev/null 2>&1; then
+    PY=py
+    PY_ARGS="-3"
+elif command -v python3 >/dev/null 2>&1; then
+    PY=python3
+    PY_ARGS=""
+else
+    echo "Erro: Python nao encontrado no PATH. Hook abortado." >&2
+    exit 2
+fi
+
+exec "$PY" $PY_ARGS "$ROOT/bin/check-lock.py" hook "$1"
