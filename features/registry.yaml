@@ -3,42 +3,4 @@
 # Ou edite manualmente preservando o schema abaixo.
 
 version: 1
-locks:
-- id: domain-rules
-  description: Politica da pelada (jogadores por time, tempo, gols, modo de escolha)
-  locked_at: '2026-05-31'
-  files:
-  - src/domain/Rules.ts
-  - src/domain/Rules.spec.ts
-- id: domain-team-builder
-  description: Factory + Strategy para criacao de times (BY_ORDER, MIXED, MIXING_TOP_TWO)
-  locked_at: '2026-05-31'
-  files:
-  - src/domain/TeamBuilder/CreateTeam.abstract.ts
-  - src/domain/TeamBuilder/CreateTeam.factory.ts
-  - src/domain/TeamBuilder/CreateTeam.factory.spec.ts
-  - src/domain/TeamBuilder/CreateTeamByOrder.ts
-  - src/domain/TeamBuilder/CreateTeamByOrder.spec.ts
-  - src/domain/TeamBuilder/CreateTeamMixed.ts
-  - src/domain/TeamBuilder/CreateTeamMixed.spec.ts
-  - src/domain/TeamBuilder/CreateTeamMixingTopTwoTeams.ts
-  - src/domain/TeamBuilder/CreateTeamMixingTopTwoTeams.spec.ts
-- id: domain-update-draw
-  description: Chain of Responsibility para pos-partida (vitoria, empate com vantagem,
-    vantagem externa)
-  locked_at: '2026-05-31'
-  files:
-  - src/domain/UpdateDraw/UpdateDraw.handler.ts
-  - src/domain/UpdateDraw/UpdateDraw.handler.spec.ts
-  - src/domain/UpdateDraw/UpdateDray.processor.ts
-  - src/domain/UpdateDraw/UpdateDray.processor.spec.ts
-  - src/domain/UpdateDraw/WithVictory.ts
-  - src/domain/UpdateDraw/WithVictory.spec.ts
-  - src/domain/UpdateDraw/WithDrawAndAdvantageAndTwoTeams.ts
-  - src/domain/UpdateDraw/WithDrawAndAdvantageAndTwoTeams.spec.ts
-  - src/domain/UpdateDraw/WithDrawAndAdvantageAndNotTwoTeams.ts
-  - src/domain/UpdateDraw/WithDrawAndAdvantageAndNotTwoTeams.spec.ts
-  - src/domain/UpdateDraw/WithDrawAndExternalAdvantageAndTwoTeams.ts
-  - src/domain/UpdateDraw/WithDrawAndExternalAdvantageAndTwoTeams.spec.ts
-  - src/domain/UpdateDraw/WithDrawAndExternalAdvantageAndNotTwoTeams.ts
-  - src/domain/UpdateDraw/WithDrawAndExternalAdvantageAndNotTwoTeams.spec.ts
+locks: []
