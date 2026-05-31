@@ -26,40 +26,34 @@ import { ParamListBase } from "@react-navigation/native";
 
 export default function ListScreen() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [text, onChangeText] = React.useState("Useless Text");
+  const [text, onChangeText] = React.useState("");
+  // Mensagem de erro inline. Evita Alert.alert(), que falha silenciosamente
+  // em React Native Web em algumas versoes.
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   let navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   const manager = useSoccer();
 
   const handleAddOnList = () => {
-    // list.push({ id: list.length + 1, name: text });
-    manager.manager.addPlayer(text);
+    const nome = text.trim();
+    if (!nome) return;
+    manager.manager.addPlayer(nome);
     onChangeText("");
     setModalVisible(false);
+    setErrorMsg(null);
   };
 
   const onPress = () => {
-    manager.manager.addPlayerList([
-      "joa",
-      "af",
-      "afas",
-      "afasf",
-      "joa2",
-      "af2",
-      "afas2",
-      "afasf2",
-      "joa3",
-      "af3",
-      "afas3",
-      "afasf3",
-      "joa4",
-      "af4",
-      "afas4",
-      "afasf4",
-    ]);
-    manager.manager.createTeams();
-    navigation.navigate("index2");
+    setErrorMsg(null);
+    try {
+      manager.manager.createTeams();
+      navigation.navigate("index2");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[list.tsx] Falha ao montar times:", error);
+      setErrorMsg(msg);
+    }
   };
   return (
     <ParallaxScrollView
@@ -86,6 +80,11 @@ export default function ListScreen() {
                   style={inputStyles.input}
                   onChangeText={onChangeText}
                   value={text}
+                  placeholder="Nome do jogador"
+                  placeholderTextColor="#aaa"
+                  autoFocus
+                  returnKeyType="done"
+                  onSubmitEditing={handleAddOnList}
                 />
               </ThemedView>
             </ThemedView>
@@ -112,6 +111,12 @@ export default function ListScreen() {
           <ThemedText>Montar TImes</ThemedText>
         </ThemedView>
       </TouchableOpacity>
+
+      {errorMsg && (
+        <ThemedView style={styles.errorBox}>
+          <ThemedText style={styles.errorText}>{errorMsg}</ThemedText>
+        </ThemedView>
+      )}
 
       {manager.manager.players.map((item: Player, index: number) => (
         <ThemedView
@@ -274,6 +279,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "red",
     padding: 10,
+  },
+  errorBox: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#c92a2a",
+    backgroundColor: "#fff5f5",
+  },
+  errorText: {
+    color: "#c92a2a",
+    fontWeight: "600",
   },
   reactLogo: {
     height: 178,
