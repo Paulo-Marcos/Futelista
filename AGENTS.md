@@ -6,6 +6,56 @@ Guia para agentes de IA (Codex, Cursor, Cline, Copilot, Aider, etc.) ao trabalha
 > Conteúdo idêntico ao CLAUDE.md, repetido aqui para descoberta automática por
 > ferramentas que procuram `AGENTS.md`.
 
+---
+
+## Princípios de Engenharia (aplicar com pragmatismo)
+
+Esta é uma aplicação pessoal. Aplique o que faz sentido para o tamanho do projeto; **não invente abstrações para o futuro**. Quando em dúvida sobre escopo, prefira o caminho mais direto.
+
+### Testes
+- Código novo em `domain/` ou `services/` nasce com pelo menos um teste de caminho feliz.
+- Se uma alteração quebra teste existente, a tarefa **não** está pronta — investigue a causa antes de continuar.
+
+### Clean Code (Uncle Bob)
+- Nomes intencionais: verbos para funções, substantivos para entidades de domínio.
+- Funções pequenas, com uma responsabilidade clara.
+- Comente o "porquê" não-óbvio; nunca o "o quê" (o nome já diz).
+- Sem código morto, sem TODO genérico, sem `console.log` / `print` esquecidos.
+
+### Clean Architecture
+Camadas e dependências do backend:
+
+```
+routers/ (HTTP)  →  services/ (orquestração)  →  domain/ (puro)
+                                              ↘  infrastructure/ (n8n, Gemini, FFmpeg)
+```
+
+- `domain/` é **puro**: sem FastAPI, sem SQLAlchemy, sem HTTP, sem cliente externo.
+- Routers só convertem HTTP ↔ serviço; nada de lógica de negócio.
+- Frontend: componente "burro" (UI/JSX) separado de hook/serviço (lógica + I/O).
+
+### DDD pragmático
+- Cada feature travada em `registry.yaml` corresponde aproximadamente a um bounded context.
+- Vocabulário do domínio (`Projeto`, `Corte`, `Short`, `Metadado`, `Ingestão`, `Análise`) é **consistente** em código, banco e UI — não invente sinônimos.
+- Status enums (`StatusProjeto`, `StatusCorte`, `StatusShort`) são parte do contrato; mudanças exigem migração de banco.
+
+### Não-regressão
+- Não "limpe" código adjacente ao que você precisa mudar. Refactor de brinde = PR separado.
+- Antes de declarar uma tarefa pronta: rode os testes que tocam a área alterada.
+- Em mudanças de UI: teste no navegador, não confie só no type-check.
+
+### Em caso de dúvida
+**Pergunte antes de editar.** O custo de uma pergunta é baixo; o custo de uma regressão silenciosa em algo já estável é alto.
+
+### Frontend (vale o mesmo padrão)
+Estas boas práticas valem **também no frontend** deste projeto. Aplique, além disso, as melhores práticas de desenvolvimento de software:
+
+- **Web / React**: componentes pequenos e focados; separação clara entre componente burro (JSX/estilo) e hook (lógica + I/O); estado mínimo necessário e elevado só quando justificado; `key` estável em listas; evitar re-render desnecessário (`useMemo`/`useCallback` quando o profiler indicar, não preventivamente); efeitos com dependências corretas e cleanup; acessibilidade básica (labels, foco, contraste).
+- **Mobile / React Native + Expo**: listas grandes com `FlatList`/`SectionList` (nunca `Array.map` dentro de `ScrollView` para listas variáveis); `keyExtractor` por `id`; respeitar safe area; teste em iOS, Android e Web quando o componente for compartilhado; cuidado com `Image` (cache, dimensões), animações via `Animated`/`Reanimated` no driver nativo quando possível; offline-first quando houver persistência.
+- **Adaptação ao FuteLista**: este projeto não tem backend FastAPI/SQLAlchemy nem `infrastructure/n8n/Gemini/FFmpeg` — a "camada pura" equivalente é [src/domain/](src/domain/), e a "cola" entre UI e domínio são [providers/](providers/), [contexts/](contexts/) e [hooks/](hooks/). O vocabulário aqui é **Pelada / Partida / Time / Jogador / Vantagem / Próximos** (não `Projeto/Corte/Short`). Os enums de contrato são `PlayerSituation`, `TeamSituation`, `TimerStatus`, `ResultMatch`, `ChoosingTeams`. Em "teste no navegador" entenda **teste no Expo Go / emulador / web**.
+
+---
+
 ## Visão Geral
 
 **FuteLista** é um app **Expo Router + React Native** (TypeScript estrito) para gerenciar peladas de futebol: cadastrar jogadores, montar times, gerenciar partidas, trocar jogadores, contabilizar gols, controlar cronômetro e atualizar a fila de "próximos" de acordo com vitória, empate ou vantagem.
