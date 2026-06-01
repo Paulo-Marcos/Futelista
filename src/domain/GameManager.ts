@@ -8,6 +8,15 @@ import { CreateTeamFactory } from "./TeamBuilder/CreateTeam.factory";
 import { Timer, TimerStatus } from "./Timer";
 import { FinalResultProcessor } from "./UpdateDraw/UpdateDray.processor";
 
+/**
+ * GameManager — agregado raiz da pelada.
+ *
+ * Reatividade: implementa o contrato de "external store" do React
+ * (subscribe + version snapshot) para uso com useSyncExternalStore.
+ * Cada metodo publico que muda estado chama `notify()` no final.
+ * O Timer recebe um callback de tick para que decrementos do cronometro
+ * tambem disparem notificacao.
+ */
 export class GameManager {
   id: string = uuid.v4();
   players: Player[] = [];
@@ -18,35 +27,49 @@ export class GameManager {
   timer?: Timer;
   playersWithoutTeam: number = 0;
   private updateResult = new FinalResultProcessor();
-  observers: Function[];
+
+  private _version = 0;
+  private listeners = new Set<() => void>();
+
   constructor(
     readonly name: string,
     readonly rules: Rules,
-  ) {
-    this.observers = [];
-    // , readonly teams: Team[],
-    // this.next = teams.slice(2)
-    // this.matches.push(this.playing)
+  ) {}
+
+  // ----- Reatividade ------------------------------------------------------
+
+  /** Numero monotonico incrementado a cada notify(); usado como snapshot. */
+  get version(): number {
+    return this._version;
   }
 
-  // Método para adicionar observadores
-  adicionarObserver(observer: Function) {
-    this.observers.push(observer);
+  /** Registra um listener; retorna funcao de unsubscribe. */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
-  // Método para notificar os observadores
-  notificarObservers(type: string, value: any) {
-    this.observers.forEach((observer) => observer(type, value));
+  private notify(): void {
+    this._version++;
+    this.listeners.forEach((listener) => listener());
   }
+
+  // ----- Times e jogadores ------------------------------------------------
 
   getTeams(): Team[] {
     return this.next;
   }
 
   addPlayerList(names: string[]): Player[] {
-    //TEMP
     this.players = [];
-    names.forEach((name) => this.addPlayer(name));
+    names.forEach((name) => {
+      const newPlayer = new Player(name);
+      this.players.push(newPlayer);
+      this.playersWithoutTeam++;
+    });
+    this.notify();
     return this.players;
   }
 
@@ -54,6 +77,7 @@ export class GameManager {
     const newPlayer = new Player(name);
     this.players.push(newPlayer);
     this.playersWithoutTeam++;
+    this.notify();
     return newPlayer;
   }
 
@@ -61,7 +85,7 @@ export class GameManager {
     if (this.next.length > 0) throw Error("Times já foram criados");
     const createTeam = CreateTeamFactory.fabricate(this.rules.choosingTeams);
     this.next = createTeam.create(this.players, this.rules.playersPerTeam);
-    this.notificarObservers("teams", this.next);
+    this.notify();
     return this.next;
   }
 
@@ -69,6 +93,7 @@ export class GameManager {
     if (this.playing !== undefined)
       throw Error("Já existe uma partida acontecendo.");
     this.playing = new Match(this.removeFirstNext(), this.removeFirstNext());
+    this.notify();
   }
 
   removeFirstNext(): Team {
@@ -87,11 +112,13 @@ export class GameManager {
     const newTeam = new Team(this.rules.playersPerTeam);
     newTeam.addPlayer(player);
     this.next.push(newTeam);
+    this.notify();
   }
 
   addToLastTeam(player: Player): void {
     const lastTeam = this.getLastTeam();
     lastTeam.fullTeam ? this.addToNewTeam(player) : lastTeam.addPlayer(player);
+    this.notify();
   }
 
   relocatePlayersWithoutTeam(): void {
@@ -101,6 +128,7 @@ export class GameManager {
         this.addToLastTeam(player);
       }
     });
+    this.notify();
   }
 
   switchPlayerLeft(playerIn: Player, playerOut: Player): void {
@@ -110,6 +138,7 @@ export class GameManager {
     teamToIn.removePlayer(playerOut)!;
     teamToIn.addPlayer(playerIn);
     this.updateTeams(teamToOut);
+    this.notify();
   }
 
   resizeTeams(beginTeam?: Team): void {
@@ -132,8 +161,7 @@ export class GameManager {
     this.resizeTeams();
   }
 
-  //remover jogador da pelada sem incluir outro no lugar
-
+  // remover jogador da pelada sem incluir outro no lugar
   updateTeams(beginTeam: Team): void {
     beginTeam.situation === TeamSituation.PLAYING
       ? this.resizePlayingGame(beginTeam)
@@ -145,51 +173,58 @@ export class GameManager {
     team.removePlayer(removedPlayer);
     removedPlayer.setSituation(PlayerSituation.STOPPED);
     this.updateTeams(team);
+    this.notify();
   }
 
-  // Trocar jogador de Times
-
+  // Trocar jogador entre Times
   switchPlayerFromTeam(player1: Player, player2: Player): void {
     const team1 = player1.currentTeam!;
     const team2 = player2.currentTeam!;
     team1.switchPlayer(player2, player1);
     team2.switchPlayer(player1, player2);
+    this.notify();
   }
 
-  //inicia a partida atual
+  // ----- Partida atual ----------------------------------------------------
 
   start(): void {
     if (!this.timer || this.timer.status === TimerStatus.ENDED)
       this.timer = new Timer(
         this.rules.numberTimes,
         this.rules.getDurationMatch(),
+        () => this.notify(),
       );
     this.timer.start();
+    this.notify();
   }
 
   pause(): void {
     this.timer?.pause();
+    this.notify();
   }
 
   continue(): void {
     this.timer?.continue();
+    this.notify();
   }
 
   addGoal(team: Team, playerGoal: Player): void {
     this.playing?.addGoal(team, playerGoal, this.timer!.getTime());
+    this.notify();
   }
 
   setResult(): void {
     this.playing?.setResult();
+    this.notify();
   }
 
   // Atualiza os novos times, considerando o resultado do jogo.
-
   setNextMatch(teamWithExternalAdvantage?: Team): void {
     this.updateResult.process({
       game: this,
       externalAdvantage: teamWithExternalAdvantage,
     });
+    this.notify();
   }
 
   relocateTeam(team: Team): void {
@@ -199,8 +234,7 @@ export class GameManager {
     this.next.push(team);
   }
 
-  //Pegar o outro time que está jogando
-
+  // Pegar o outro time que esta jogando
   getOtherPlayingTeam(team: Team): Team {
     return this.playing!.getOtherTeam(team);
   }

@@ -1,16 +1,27 @@
 import { ScreenTime } from './ScreenTime';
 
+/**
+ * Timer da partida.
+ *
+ * Aceita `onChange` opcional no construtor para que o GameManager seja
+ * notificado a cada tick e em mudancas de status. Sem o callback, o
+ * comportamento e identico ao original (util para testes e uso puro).
+ */
 export class Timer {
   status = TimerStatus.CREATED;
   restTime: number;
   currentNumberTime: number;
-  private timeOutId?: NodeJS.Timeout;
+  private timeOutId?: ReturnType<typeof setInterval>;
+  private readonly onChange?: () => void;
+
   constructor(
     readonly numberTimes: number,
     readonly timeMatch: number,
+    onChange?: () => void,
   ) {
     this.restTime = timeMatch;
     this.currentNumberTime = 1;
+    this.onChange = onChange;
   }
 
   getTime(): ScreenTime {
@@ -23,6 +34,7 @@ export class Timer {
     this.status = TimerStatus.STARTED;
     this.timeOutId = setInterval(() => {
       this.restTime--;
+      this.onChange?.();
       if (this.restTime <= 0) {
         this.restTime = this.timeMatch;
         this.stop();
@@ -33,6 +45,7 @@ export class Timer {
   pause(): void {
     this.status = TimerStatus.PAUSED;
     clearInterval(this.timeOutId);
+    this.onChange?.();
   }
 
   continue() {
@@ -44,10 +57,12 @@ export class Timer {
     clearInterval(this.timeOutId);
     if (this.currentNumberTime + 1 > this.numberTimes) {
       this.status = TimerStatus.ENDED;
+      this.onChange?.();
       return;
     }
     this.currentNumberTime++;
     this.status = TimerStatus.INTERVAL;
+    this.onChange?.();
   }
 }
 
