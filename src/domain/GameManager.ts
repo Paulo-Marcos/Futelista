@@ -2,7 +2,7 @@ import "react-native-get-random-values";
 import * as uuid from "uuid";
 import { Match } from "./Match";
 import { Player, PlayerSituation } from "./Player";
-import { Rules } from "./Rules";
+import { DataRules, Rules } from "./Rules";
 import { Team, TeamSituation } from "./Team";
 import { CreateTeamFactory } from "./TeamBuilder/CreateTeam.factory";
 import { Timer, TimerStatus } from "./Timer";
@@ -26,15 +26,17 @@ export class GameManager {
   advantageToNext?: Team = undefined;
   timer?: Timer;
   playersWithoutTeam: number = 0;
+  name: string;
+  rules: Rules;
   private updateResult = new FinalResultProcessor();
 
   private _version = 0;
   private listeners = new Set<() => void>();
 
-  constructor(
-    readonly name: string,
-    readonly rules: Rules,
-  ) {}
+  constructor(name: string, rules: Rules) {
+    this.name = name;
+    this.rules = rules;
+  }
 
   // ----- Reatividade ------------------------------------------------------
 
@@ -183,6 +185,112 @@ export class GameManager {
     team1.switchPlayer(player2, player1);
     team2.switchPlayer(player1, player2);
     this.notify();
+  }
+
+  // ----- Gestão de jogadores e times --------------------------------------
+
+  /**
+   * Remove um jogador definitivamente da pelada. Se ele estiver em um time,
+   * tira do time primeiro (usando o caminho já testado de removeFromGame).
+   */
+  removePlayer(player: Player): void {
+    const index = this.players.indexOf(player);
+    if (index === -1) throw Error("Jogador não está na pelada.");
+    if (player.currentTeam) {
+      this.removeFromGame(player);
+    } else if (this.playersWithoutTeam > 0) {
+      this.playersWithoutTeam--;
+    }
+    this.players.splice(index, 1);
+    this.notify();
+  }
+
+  /**
+   * Renomeia um jogador da pelada. Delega a validação de nome para Player.rename.
+   */
+  renamePlayer(player: Player, novoNome: string): void {
+    if (!this.players.includes(player))
+      throw Error("Jogador não está na pelada.");
+    player.rename(novoNome);
+    this.notify();
+  }
+
+  /**
+   * Limpa a fila de times e o estado de vantagem, devolvendo todos os jogadores
+   * para a situação "sem time". Permite re-sortear depois com createTeams().
+   *
+   * Bloqueado quando há partida em andamento — mudar times no meio do jogo
+   * deixaria refs inconsistentes em playing.
+   */
+  resetTimes(): void {
+    if (this.playing)
+      throw Error(
+        "Não é possível resetar times com partida em andamento.",
+      );
+    this.next = [];
+    this.advantageToNext = undefined;
+    this.players.forEach((p) => {
+      p.currentTeam = undefined;
+      p.situation = PlayerSituation.NO_TEAM;
+    });
+    this.playersWithoutTeam = this.players.length;
+    this.notify();
+  }
+
+  /**
+   * Atualiza um subconjunto de campos das regras. Campos não informados
+   * preservam o valor atual.
+   *
+   * Guards (independentes da validação de Rules):
+   *  - playersPerTeam: não pode mudar com times já criados ou partida em andamento.
+   *  - numberTimes: não pode mudar com cronômetro ativo (running/paused/interval).
+   *  - choosingTeams: não pode mudar com times já formados (resetar antes).
+   *
+   * As validações de domínio de cada campo (faixa de valores etc) ficam no
+   * próprio construtor de Rules.
+   */
+  atualizarRegras(parcial: DataRules): Rules {
+    this.validarMudancaPlayersPerTeam(parcial.playersPerTeam);
+    this.validarMudancaNumberTimes(parcial.numberTimes);
+    this.validarMudancaChoosingTeams(parcial.choosingTeams);
+
+    this.rules = new Rules({
+      id: this.rules.id,
+      name: parcial.name ?? this.rules.name,
+      playersPerTeam: parcial.playersPerTeam ?? this.rules.playersPerTeam,
+      timeMatch: parcial.timeMatch ?? this.rules.timeMatch,
+      numberTimes: parcial.numberTimes ?? this.rules.numberTimes,
+      goalLimit: parcial.goalLimit ?? this.rules.goalLimit,
+      choosingTeams: parcial.choosingTeams ?? this.rules.choosingTeams,
+    });
+    this.notify();
+    return this.rules;
+  }
+
+  private validarMudancaPlayersPerTeam(novo?: number): void {
+    if (novo === undefined || novo === this.rules.playersPerTeam) return;
+    if (this.playing || this.next.length > 0)
+      throw Error(
+        "Não é possível mudar jogadores por time com times montados ou partida em andamento.",
+      );
+  }
+
+  private validarMudancaNumberTimes(novo?: number): void {
+    if (novo === undefined || novo === this.rules.numberTimes) return;
+    if (!this.timer) return;
+    const status = this.timer.status;
+    if (status !== TimerStatus.CREATED && status !== TimerStatus.ENDED)
+      throw Error(
+        "Não é possível mudar o número de tempos com cronômetro ativo.",
+      );
+  }
+
+  private validarMudancaChoosingTeams(novo?: number): void {
+    if (novo === undefined || novo === this.rules.choosingTeams) return;
+    if (this.next.length > 0)
+      throw Error(
+        "Não é possível mudar o modo de sorteio com times já formados. Resete os times antes.",
+      );
   }
 
   // ----- Partida atual ----------------------------------------------------

@@ -10,7 +10,9 @@ export function ExternalLink({ href, ...rest }: Props) {
     <Link
       target="_blank"
       {...rest}
-      href={href}
+      // typedRoutes do expo-router exige Href tipado; aqui o href é uma URL
+      // externa arbitrária, então o cast é intencional.
+      href={href as never}
       onPress={async (event) => {
         if (Platform.OS !== "web") {
           event.preventDefault();

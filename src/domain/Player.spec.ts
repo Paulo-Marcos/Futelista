@@ -60,4 +60,32 @@ describe('Teste da classe Player', () => {
       'Jogador não pertence a essa partida',
     );
   });
+
+  describe('Quando renomear o jogador', () => {
+    it('deverá atualizar o nome com a string informada', () => {
+      const player = new Player('Antigo');
+      player.rename('Novo Nome');
+      expect(player.name).toBe('Novo Nome');
+    });
+
+    it('deverá remover espaços nas pontas', () => {
+      const player = new Player('Antigo');
+      player.rename('   Pedro   ');
+      expect(player.name).toBe('Pedro');
+    });
+
+    it('deverá lançar erro quando o novo nome é vazio', () => {
+      const player = new Player('Antigo');
+      expect(() => player.rename('')).toThrowError(
+        'Nome do jogador não pode ser vazio.',
+      );
+    });
+
+    it('deverá lançar erro quando o novo nome é só espaços', () => {
+      const player = new Player('Antigo');
+      expect(() => player.rename('   ')).toThrowError(
+        'Nome do jogador não pode ser vazio.',
+      );
+    });
+  });
 });

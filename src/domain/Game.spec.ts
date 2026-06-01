@@ -340,4 +340,151 @@ describe('Teste da classe Game', () => {
       }, 2000);
     });
   });
+
+  describe('Quando remover um jogador da pelada', () => {
+    it('deverá remover jogador sem time e decrementar playersWithoutTeam', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const ana = game.addPlayer('Ana');
+      game.addPlayer('Bia');
+      game.removePlayer(ana);
+      expect(game.players).toHaveLength(1);
+      expect(game.players[0].name).toBe('Bia');
+      expect(game.playersWithoutTeam).toBe(1);
+    });
+
+    it('deverá tirar o jogador do time antes de remover da pelada', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      const ana = game.players.find((p) => p.name === 'Ana')!;
+      const time = ana.currentTeam!;
+      game.removePlayer(ana);
+      expect(game.players).toHaveLength(3);
+      expect(time.hasPlayer(ana)).toBe(false);
+      expect(ana.situation).toBe(PlayerSituation.STOPPED);
+    });
+
+    it('deverá lançar erro ao tentar remover jogador inexistente', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const fantasma = new Player('Fantasma');
+      expect(() => game.removePlayer(fantasma)).toThrowError(
+        'Jogador não está na pelada.',
+      );
+    });
+  });
+
+  describe('Quando renomear um jogador da pelada', () => {
+    it('deverá renomear o jogador via Player.rename', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const player = game.addPlayer('Antigo');
+      game.renamePlayer(player, 'Novo');
+      expect(player.name).toBe('Novo');
+    });
+
+    it('deverá lançar erro ao renomear jogador que não está na pelada', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const fantasma = new Player('Fantasma');
+      expect(() => game.renamePlayer(fantasma, 'Algo')).toThrowError(
+        'Jogador não está na pelada.',
+      );
+    });
+  });
+
+  describe('Quando resetar os times', () => {
+    let game: GameManager;
+    beforeEach(() => {
+      game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+    });
+
+    it('deverá esvaziar a fila de próximos', () => {
+      game.resetTimes();
+      expect(game.next).toHaveLength(0);
+    });
+
+    it('deverá zerar advantageToNext', () => {
+      game.advantageToNext = game.players[0].currentTeam!;
+      game.resetTimes();
+      expect(game.advantageToNext).toBeUndefined();
+    });
+
+    it('deverá deixar todos os jogadores sem time e sem situação ACTIVE', () => {
+      game.resetTimes();
+      game.players.forEach((p) => {
+        expect(p.currentTeam).toBeUndefined();
+        expect(p.situation).toBe(PlayerSituation.NO_TEAM);
+      });
+      expect(game.playersWithoutTeam).toBe(4);
+    });
+
+    it('deverá permitir createTeams novamente após reset', () => {
+      game.resetTimes();
+      expect(() => game.createTeams()).not.toThrow();
+      expect(game.next.length).toBeGreaterThan(0);
+    });
+
+    it('deverá lançar erro se houver partida em andamento', () => {
+      game.setPlayingGame();
+      expect(() => game.resetTimes()).toThrowError(
+        'Não é possível resetar times com partida em andamento.',
+      );
+    });
+  });
+
+  describe('Quando atualizar as regras da pelada', () => {
+    function pelada(): GameManager {
+      return new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+    }
+
+    it('deverá atualizar apenas os campos informados', () => {
+      const game = pelada();
+      game.atualizarRegras({ goalLimit: 5, name: 'Champions' });
+      expect(game.rules.goalLimit).toBe(5);
+      expect(game.rules.name).toBe('Champions');
+      expect(game.rules.playersPerTeam).toBe(2);
+    });
+
+    it('deverá preservar o id das regras ao atualizar', () => {
+      const game = pelada();
+      const idAntes = game.rules.id;
+      game.atualizarRegras({ goalLimit: 3 });
+      expect(game.rules.id).toBe(idAntes);
+    });
+
+    it('deverá validar o novo valor via Rules (faixa)', () => {
+      const game = pelada();
+      expect(() => game.atualizarRegras({ playersPerTeam: 0 })).toThrowError(
+        'Limite mínimo de jogadores por time é 1.',
+      );
+    });
+
+    it('deverá lançar erro ao mudar playersPerTeam com times montados', () => {
+      const game = pelada();
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      expect(() => game.atualizarRegras({ playersPerTeam: 3 })).toThrowError(
+        /Não é possível mudar jogadores por time/,
+      );
+    });
+
+    it('deverá lançar erro ao mudar choosingTeams com times montados', () => {
+      const game = pelada();
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      expect(() =>
+        game.atualizarRegras({ choosingTeams: ChoosingTeams.BY_MIXING_TEAMS }),
+      ).toThrowError(/modo de sorteio/);
+    });
+
+    it('deverá permitir alterar timeMatch e goalLimit a qualquer momento', () => {
+      const game = pelada();
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.setPlayingGame();
+      game.atualizarRegras({ timeMatch: '00:05:00', goalLimit: 10 });
+      expect(game.rules.timeMatch).toBe('00:05:00');
+      expect(game.rules.goalLimit).toBe(10);
+    });
+  });
 });

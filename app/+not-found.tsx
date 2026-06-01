@@ -1,20 +1,20 @@
 import { Link, Stack } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { ThemedText } from "@/src/shared/ui/ThemedText";
-import { ThemedView } from "@/src/shared/ui/ThemedView";
+import { usePalette } from "@/src/shared/hooks/usePalette";
+import { EmptyState } from "@/src/shared/ui/EmptyState";
 
-export default function NotFoundScreen({ route }: { route: any }) {
+export default function NotFoundScreen() {
+  const palette = usePalette();
   return (
     <>
-      <Stack.Screen options={{ title: "Oops!" }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">Essa página não existe.</ThemedText>
-        <ThemedText type="title">{route}</ThemedText>
-        <Link href="/(tabs)" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+      <Stack.Screen options={{ title: "Não encontrado" }} />
+      <View style={[styles.container, { backgroundColor: palette.background }]}>
+        <EmptyState icon="map-search-outline" title="Essa página não existe." />
+        <Link href="/jogadores" style={styles.link}>
+          Voltar à pelada
         </Link>
-      </ThemedView>
+      </View>
     </>
   );
 }

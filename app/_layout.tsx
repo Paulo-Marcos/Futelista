@@ -1,7 +1,6 @@
 import {
   DarkTheme,
   DefaultTheme,
-  NavigationContainer,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -10,10 +9,9 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/src/shared/hooks/useColorScheme";
 import { MyProviders } from "@/src/app-shell/myProviders";
+import { useColorScheme } from "@/src/shared/hooks/useColorScheme";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -33,15 +31,31 @@ export default function RootLayout() {
   }
 
   return (
-    // <NavigationContainer>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <MyProviders>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(pelada)" />
+          <Stack.Screen
+            name="partida"
+            options={{ headerShown: false, animation: "slide_from_right" }}
+          />
+          <Stack.Screen
+            name="resultado"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="regras"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
       </MyProviders>
     </ThemeProvider>
-    // </NavigationContainer>
   );
 }

@@ -11,7 +11,17 @@ export class Player {
   matches: Match[] = [];
   currentTeam?: Team;
   situation = PlayerSituation.NO_TEAM;
-  constructor(readonly name: string) {}
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  rename(novoNome: string): void {
+    const limpo = novoNome.trim();
+    if (limpo.length === 0)
+      throw Error("Nome do jogador não pode ser vazio.");
+    this.name = limpo;
+  }
 
   addGoal(goal: Goal): void {
     if (goal.player.id !== this.id)
