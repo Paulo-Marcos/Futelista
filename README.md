@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# FuteLista ⚽
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App mobile para **organizar peladas de futebol**: cadastrar jogadores, montar times, gerenciar partidas, contar gols, controlar o cronômetro e atualizar a fila de "próximos" segundo o resultado (vitória, empate, vantagem).
 
-## Get started
+> Pessoal, aberto a evolução. iOS, Android e Web (mesmo código).
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Stack
 
-2. Start the app
+| Camada     | Tecnologia                                     |
+| ---------- | ---------------------------------------------- |
+| App        | [Expo](https://expo.dev) 51, React Native 0.74 |
+| Roteamento | [Expo Router](https://docs.expo.dev/router) 3  |
+| Linguagem  | TypeScript estrito                             |
+| Testes     | Jest (preset `jest-expo`)                      |
+| Lint       | ESLint (config Expo) + Prettier                |
 
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Como rodar
 
 ```bash
-npm run reset-project
+npm install
+npm start            # escolhe iOS, Android, Web ou Expo Go
+npm run android      # direto no emulador Android
+npm run ios          # direto no simulador iOS
+npm run web          # versão web
+npm test             # testes em watch mode
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Pré-requisitos completos em [docs/desenvolvedor/instalacao.md](docs/desenvolvedor/instalacao.md).
 
-## Learn more
+## Para quem é cada doc
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Vai usar o app** → comece em [docs/usuario/primeiros-passos.md](docs/usuario/primeiros-passos.md).
+- **Vai mexer no código** → comece em [docs/desenvolvedor/arquitetura.md](docs/desenvolvedor/arquitetura.md).
+- **É um agente de IA** (Claude, Cursor, Copilot…) → leia [CLAUDE.md](CLAUDE.md) e [AGENTS.md](AGENTS.md) **antes** de editar qualquer arquivo.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Índice completo da documentação em [docs/README.md](docs/README.md). Decisões de arquitetura registradas em [docs/adr/](docs/adr/). Política de privacidade em [PRIVACY.md](PRIVACY.md).
 
-## Join the community
+## Vocabulário do domínio
 
-Join our community of developers creating universal apps.
+O código e a UI usam **um vocabulário só**, em português. Se um termo aparecer aqui, é o termo certo em todo lugar:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Termo         | Significado                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **Pelada**    | A sessão inteira: lista de jogadores, regras, fila de times e histórico de partidas.       |
+| **Partida**   | Um jogo entre dois times. Tem gols, vencedor (ou empate), tempo.                           |
+| **Time**      | Grupo de N jogadores (`playersPerTeam`). Pode estar jogando, parado ou na fila.            |
+| **Jogador**   | Pessoa cadastrada na pelada. Tem nome, gols, situação.                                     |
+| **Próximos** | Fila dos times que ainda não jogaram (ou perderam e voltaram pro fim).                     |
+| **Vantagem** | Direito do time campeão (ou que empatou em condição prévia) de seguir na próxima partida. |
+
+Detalhes em [docs/usuario/regras.md](docs/usuario/regras.md) e [docs/desenvolvedor/dominio.md](docs/desenvolvedor/dominio.md).
+
+## Estado do projeto
+
+- ✅ **Domínio** (`src/domain/`): completo, puro, com ~20 specs Jest.
+- 🚧 **UI** (`app/`, `components/`): em construção.
+- ❌ **Persistência**: ainda não existe. Recarregar o app perde a pelada em andamento.
+- ❌ **Lojas**: ainda não publicado.
+
+Roteiro de refatoração em [COMMITS_PLAN.md](COMMITS_PLAN.md).
+
+## Licença
+
+[MIT](LICENSE). Pode usar, copiar, modificar e distribuir — mantendo o aviso de copyright e a nota de licença nos arquivos derivados.
