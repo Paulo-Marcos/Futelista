@@ -1,13 +1,14 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useState } from "react";
 import { useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { ParamListBase } from "@react-navigation/native";
 
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useSoccer } from "@/hooks/useSoccer";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/src/shared/ui/ThemedText";
+import { ThemedView } from "@/src/shared/ui/ThemedView";
+import { useSoccer } from "@/src/app-shell/useSoccer";
+import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import ParallaxScrollView from "@/src/shared/ui/ParallaxScrollView";
 import { Player } from "@/src/domain/Player";
 import { Team } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
@@ -22,22 +23,19 @@ function formatTime(seconds: number): string {
 }
 
 export default function CurrentGameScreen() {
-  const manager = useSoccer();
+  const { manager: game } = useSoccer();
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
-  // TODO(COMMIT 2.1): substituir tick por padrao reativo (useSyncExternalStore
-  // + observer tipado no GameManager). Hoje o tick a cada 1s forca re-render
-  // para refletir mudanca de cronometro/status.
-  const [, forceRender] = useReducer((n: number) => n + 1, 0);
-  useEffect(() => {
-    const id = setInterval(forceRender, 1000);
-    return () => clearInterval(id);
-  }, []);
+  // Slices reativos: o componente re-renderiza somente quando o
+  // GameManager emite notify (incluindo cada tick do cronometro).
+  const playing = useGameSlice((g) => g.playing);
+  const status = useGameSlice((g) => g.timer?.status);
+  const restTime = useGameSlice((g) => g.timer?.restTime ?? 0);
+  const currentNumberTime = useGameSlice((g) => g.timer?.currentNumberTime);
+  const numberTimes = useGameSlice((g) => g.timer?.numberTimes);
+  const goals = useGameSlice((g) => g.playing?.countGoals());
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const game = manager.manager;
-  const playing = game.playing;
 
   if (!playing) {
     return (
@@ -61,8 +59,6 @@ export default function CurrentGameScreen() {
     );
   }
 
-  const goals = playing.countGoals();
-  const status = game.timer?.status;
   const canStart =
     !status || status === TimerStatus.CREATED || status === TimerStatus.ENDED;
   const canPause = status === TimerStatus.STARTED;
@@ -110,15 +106,15 @@ export default function CurrentGameScreen() {
 
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">
-          {goals.teamA} x {goals.teamB}
+          {goals?.teamA ?? 0} x {goals?.teamB ?? 0}
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.titleContainer}>
         <ThemedText>
-          Tempo: {formatTime(game.timer?.restTime ?? 0)}
-          {game.timer
-            ? `  ·  ${game.timer.currentNumberTime}/${game.timer.numberTimes}`
+          Tempo: {formatTime(restTime)}
+          {currentNumberTime !== undefined && numberTimes !== undefined
+            ? `  ·  ${currentNumberTime}/${numberTimes}`
             : ""}
           {status !== undefined ? `  ·  ${TimerStatus[status]}` : ""}
         </ThemedText>

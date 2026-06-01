@@ -1,5 +1,5 @@
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/src/shared/ui/ThemedText";
+import { ThemedView } from "@/src/shared/ui/ThemedView";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import React, { useState } from "react";
-import { useSoccer } from "@/hooks/useSoccer";
+import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import Carousel, {
   ICarouselInstance,
   Pagination,
@@ -28,11 +28,7 @@ interface props {
 }
 
 export default function TeamsScreen() {
-  const isCarousel = React.useRef(null);
-  const [index, setIndex] = React.useState(0);
-  const manager = useSoccer();
-
-  const [teams] = useState(manager.manager.next);
+  const teams = useGameSlice((g) => g.next);
 
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);

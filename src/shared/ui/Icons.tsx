@@ -1,11 +1,3 @@
-// import React from 'react';
-// import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-// import MaterialIconsIcon from 'react-native-vector-icons/MaterialIcons';
-// import AntDesignIcon from 'react-native-vector-icons/AntDesign';
-// import FeatherIcon from 'react-native-vector-icons/Feather';
-// import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-// import IonIcon from 'react-native-vector-icons/Ionicons';
-
 import {
   AntDesign,
   Feather,
@@ -16,26 +8,14 @@ import {
 } from "@expo/vector-icons";
 import React, { ComponentProps } from "react";
 
-interface IconProps2 {
+interface IconProps {
   name: string;
-  //   ComponentProps<typeof MaterialIcons>['name']  |
-  //   ComponentProps<typeof AntDesign>['name'] |
-  //   ComponentProps<typeof Feather>['name'] |
-  //   ComponentProps<typeof MaterialCommunityIcons>['name'] |
-  //   ComponentProps<typeof Ionicons>['name'] |
-  //   ComponentProps<typeof FontAwesome>['name'];
   size: number;
   color: string;
   type: string;
 }
-// IconProps<ComponentProps<typeof MaterialIcons>['name']> &
-export default function Icon({ name, size, color, type }: IconProps2) {
-  const iconProps = {
-    name,
-    size,
-    color,
-  };
-  //   size={28} style={[{ marginBottom: -3 }, style]} {...rest}
+
+export default function Icon({ name, size, color, type }: IconProps) {
   switch (type) {
     case "AntDesign":
       return (
@@ -95,5 +75,3 @@ export default function Icon({ name, size, color, type }: IconProps2) {
       );
   }
 }
-
-// export default Icon;

@@ -1,10 +1,10 @@
 import { Image, StyleSheet, Platform, TouchableOpacity } from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ButtonIcon } from "@/components/ButtonIcon";
+import { HelloWave } from "@/src/shared/ui/HelloWave";
+import ParallaxScrollView from "@/src/shared/ui/ParallaxScrollView";
+import { ThemedText } from "@/src/shared/ui/ThemedText";
+import { ThemedView } from "@/src/shared/ui/ThemedView";
+import { ButtonIcon } from "@/src/shared/ui/ButtonIcon";
 import { Link } from "expo-router";
 
 export default function HomeScreen() {

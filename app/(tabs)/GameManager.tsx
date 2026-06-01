@@ -1,23 +1,40 @@
-import { Image, StyleSheet, Platform, TouchableOpacity } from "react-native";
-
-import { HelloWave } from "@/components/HelloWave";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useSoccer } from "@/hooks/useSoccer";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { ParamListBase } from "@react-navigation/native";
 
-export default function GameManagerScreen() {
-  const manager = useSoccer();
-  // const [teams] = useState(manager.next);
+import { HelloWave } from "@/src/shared/ui/HelloWave";
+import { ThemedText } from "@/src/shared/ui/ThemedText";
+import { ThemedView } from "@/src/shared/ui/ThemedView";
+import { useSoccer } from "@/src/app-shell/useSoccer";
+import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import ParallaxScrollView from "@/src/shared/ui/ParallaxScrollView";
 
-  let navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+export default function GameManagerScreen() {
+  const { manager } = useSoccer();
+  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+
+  const totalTimes = useGameSlice((g) => g.next.length);
+  const totalJogadores = useGameSlice((g) => g.players.length);
+  const totalJogos = useGameSlice((g) => g.matches.length);
+  const vantagemId = useGameSlice((g) => g.advantageToNext?.id);
+  const proxA = useGameSlice((g) => g.next[0]?.id);
+  const proxB = useGameSlice((g) => g.next[1]?.id);
+  const temPartida = useGameSlice((g) => g.playing !== undefined);
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const onPress = () => {
-    manager.manager.setPlayingGame();
-    navigation.navigate("currentGame");
+    setErrorMsg(null);
+    try {
+      manager.setPlayingGame();
+      navigation.navigate("currentGame");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[GameManager] Falha ao iniciar partida:", error);
+      setErrorMsg(msg);
+    }
   };
 
   return (
@@ -32,36 +49,39 @@ export default function GameManagerScreen() {
     >
       <ThemedView style={styles.titleContainer}>
         <HelloWave />
+        <ThemedText type="title">Times: {totalTimes}</ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Jogadores: {totalJogadores}</ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Jogos Realizados: {totalJogos}</ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">
-          Times: {manager.manager.next.length}
+          Time com vantagem: {vantagemId ?? "—"}
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">
-          Jogadores: {manager.manager.players.length}
+          Próxima Partida: {proxA ?? "—"} x {proxB ?? "—"}
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">
-          Jogos Realizados: {manager.manager.matches.length}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">
-          Time Com vantagem: {manager.manager.advantageToNext?.id}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">
-          Proxima Partida: {manager.manager.next[0]?.id} x{" "}
-          {manager.manager.next[1]?.id}
-        </ThemedText>
-      </ThemedView>
+      {temPartida && (
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText>Há uma partida em andamento.</ThemedText>
+        </ThemedView>
+      )}
       <TouchableOpacity onPress={onPress}>
         <ThemedView style={styles.button}>
           <ThemedText>Iniciar Partida</ThemedText>
         </ThemedView>
       </TouchableOpacity>
+      {errorMsg && (
+        <ThemedView style={styles.errorBox}>
+          <ThemedText style={styles.errorText}>{errorMsg}</ThemedText>
+        </ThemedView>
+      )}
       <ThemedView style={styles.titleContainer}></ThemedView>
       <ThemedView style={styles.titleContainer}></ThemedView>
       <ThemedView style={styles.titleContainer}></ThemedView>
@@ -88,6 +108,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "red",
     padding: 10,
+  },
+  errorBox: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#c92a2a",
+    backgroundColor: "#fff5f5",
+  },
+  errorText: {
+    color: "#c92a2a",
+    fontWeight: "600",
   },
   reactLogo: {
     height: 178,

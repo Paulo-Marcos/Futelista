@@ -11,15 +11,16 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ButtonIcon } from "@/components/ButtonIcon";
+import { HelloWave } from "@/src/shared/ui/HelloWave";
+import ParallaxScrollView from "@/src/shared/ui/ParallaxScrollView";
+import { ThemedText } from "@/src/shared/ui/ThemedText";
+import { ThemedView } from "@/src/shared/ui/ThemedView";
+import { ButtonIcon } from "@/src/shared/ui/ButtonIcon";
 import { Link, useNavigation } from "expo-router";
 import React, { useState } from "react";
-import Icon from "@/components/Icons";
-import { useSoccer } from "@/hooks/useSoccer";
+import Icon from "@/src/shared/ui/Icons";
+import { useSoccer } from "@/src/app-shell/useSoccer";
+import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { Player } from "@/src/domain/Player";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { ParamListBase } from "@react-navigation/native";
@@ -31,14 +32,15 @@ export default function ListScreen() {
   // em React Native Web em algumas versoes.
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  let navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
-  const manager = useSoccer();
+  const { manager } = useSoccer();
+  const players = useGameSlice((g) => g.players);
 
   const handleAddOnList = () => {
     const nome = text.trim();
     if (!nome) return;
-    manager.manager.addPlayer(nome);
+    manager.addPlayer(nome);
     onChangeText("");
     setModalVisible(false);
     setErrorMsg(null);
@@ -47,7 +49,7 @@ export default function ListScreen() {
   const onPress = () => {
     setErrorMsg(null);
     try {
-      manager.manager.createTeams();
+      manager.createTeams();
       navigation.navigate("index2");
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -118,7 +120,7 @@ export default function ListScreen() {
         </ThemedView>
       )}
 
-      {manager.manager.players.map((item: Player, index: number) => (
+      {players.map((item: Player, index: number) => (
         <ThemedView
           style={[
             categoryStyles.transactionContainer,

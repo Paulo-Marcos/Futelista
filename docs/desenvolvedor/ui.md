@@ -156,7 +156,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 ### Como um componente lê estado
 
 ```tsx
-import { useGameSlice } from "@/hooks/useGameSlice";
+import { useGameSlice } from "@/src/app-shell/useGameSlice";
 
 function PlayerCount() {
   const total = useGameSlice((g) => g.players.length);
@@ -175,7 +175,7 @@ function Scoreboard() {
 Quando o componente **só precisa chamar** um método (sem ler estado), `useSoccer()` basta:
 
 ```tsx
-import { useSoccer } from "@/hooks/useSoccer";
+import { useSoccer } from "@/src/app-shell/useSoccer";
 
 function StartButton() {
   const { manager } = useSoccer();

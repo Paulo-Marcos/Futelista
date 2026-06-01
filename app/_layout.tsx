@@ -10,8 +10,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { MyProviders } from "@/providers/myProviders";
+import { useColorScheme } from "@/src/shared/hooks/useColorScheme";
+import { MyProviders } from "@/src/app-shell/myProviders";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

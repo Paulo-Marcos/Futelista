@@ -5,7 +5,7 @@ import { View } from "react-native";
 
 import ListScreen from "@/app/(tabs)/list";
 import HomeScreen from ".";
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { TabBarIcon } from "@/src/shared/navigation/TabBarIcon";
 import TeamsScreen from "./Teams";
 import GameManagerScreen from "./GameManager";
 import CurrentGameScreen from "./CurrentGame";
