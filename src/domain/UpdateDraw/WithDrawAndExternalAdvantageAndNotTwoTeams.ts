@@ -2,6 +2,13 @@ import { GameManager } from '../GameManager';
 import { Match, ResultMatch } from '../Match';
 import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
 
+/**
+ * Cenário pós-partida: EMPATE com **vantagem externa** (definida manualmente)
+ * e fila parcial.
+ *
+ * Time apontado pela vantagem externa segue jogando contra o primeiro da
+ * fila; o outro time da partida vai pro fim. `advantageToNext` é zerada.
+ */
 export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseUpdateDrawHandler {
   override handle(input: HandleInput): void {
     if (

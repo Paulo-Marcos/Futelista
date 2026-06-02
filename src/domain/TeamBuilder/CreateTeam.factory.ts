@@ -4,6 +4,11 @@ import { CreateTeamByOrder } from "./CreateTeamByOrder";
 import { CreateTeamMixed } from "./CreateTeamMixed";
 import { CreateTeamMixingTopTwoTeams } from "./CreateTeamMixingTopTwoTeams";
 
+/**
+ * Factory que mapeia o enum `ChoosingTeams` para a estratégia concreta de
+ * montagem de times. Mantém o consumidor (`GameManager.createTeams`) cego ao
+ * conjunto de estratégias disponíveis e ao critério de escolha de cada uma.
+ */
 export class CreateTeamFactory {
   static fabricate(choosingTeams: ChoosingTeams): CreateTeam {
     switch (choosingTeams) {

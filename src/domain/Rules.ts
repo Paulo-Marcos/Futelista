@@ -1,6 +1,16 @@
 import "react-native-get-random-values";
 import * as uuid from "uuid";
 
+/**
+ * Política de uma pelada — número de jogadores por time, duração da partida,
+ * número de tempos, limite de gols e modo de escolha dos times.
+ *
+ * Imutável por convenção: para "mudar" regras, sempre construa uma nova
+ * instância (ex.: `GameManager.atualizarRegras` e `Pelada.atualizarRegras`).
+ * Por valor — não há relação cíclica com outras entidades.
+ *
+ * Defaults em `RULES_DEFAULTS`. Validações por campo nos métodos `check*`.
+ */
 export class Rules {
   playersPerTeam: number;
   timeMatch: string;
@@ -58,6 +68,15 @@ export class Rules {
   }
 }
 
+/**
+ * Estratégia de montagem dos times a partir da lista de jogadores.
+ *
+ *  - BY_ORDER:                          respeita a ordem de cadastro.
+ *  - BY_ORDER_MIXING_TOP_TWO_TEAMS:     embaralha apenas os 2× primeiros (top 2 times).
+ *  - BY_MIXING_TEAMS:                   embaralha todos os jogadores.
+ *
+ * Resolvida por `CreateTeamFactory.fabricate`.
+ */
 export enum ChoosingTeams {
   BY_ORDER,
   BY_ORDER_MIXING_TOP_TWO_TEAMS,

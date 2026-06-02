@@ -1,6 +1,12 @@
 import { Player } from '../Player';
 import { Team } from '../Team';
 
+/**
+ * Estratégia BY_ORDER_MIXING_TOP_TWO_TEAMS — embaralha apenas os primeiros
+ * 2 × playersPerTeam jogadores (os "top 2 times"), preservando a ordem dos
+ * demais. Útil quando os primeiros a chegar competem entre si, mas o restante
+ * mantém a ordem de espera.
+ */
 export class CreateTeamMixingTopTwoTeams {
   shuffledList?: Player[];
 

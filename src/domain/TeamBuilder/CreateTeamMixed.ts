@@ -1,6 +1,13 @@
 import { Player } from '../Player';
 import { Team } from '../Team';
 
+/**
+ * Estratégia BY_MIXING_TEAMS — embaralha todos os jogadores antes de
+ * distribuir em times. Independente da ordem de cadastro.
+ *
+ * `shuffledList` fica exposto para que testes/UI consigam mostrar a lista
+ * final usada pela rodada.
+ */
 export class CreateTeamMixed {
   shuffledList?: Player[];
 

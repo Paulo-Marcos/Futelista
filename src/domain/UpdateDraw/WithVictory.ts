@@ -1,6 +1,12 @@
 import { Match, ResultMatch } from '../Match';
 import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
 
+/**
+ * Cenário pós-partida: VITÓRIA.
+ *
+ * Vencedor segue jogando contra o primeiro da fila e recebe `advantageToNext`.
+ * Perdedor é realocado ao fim da fila.
+ */
 export class WithVictory extends BaseUpdateDrawHandler {
   override handle(input: HandleInput): void {
     if (input.game.playing?.result === ResultMatch.VICTORY) {

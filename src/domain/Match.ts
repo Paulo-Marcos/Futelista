@@ -5,6 +5,15 @@ import { Team, TeamSituation } from "./Team";
 import { Player } from "./Player";
 import { ScreenTime } from "./ScreenTime";
 
+/**
+ * Partida entre dois times. Mantém o conjunto de gols, decide vencedor e
+ * perdedor via `setResult()` e expõe troca de jogador delegando ao próprio Team.
+ *
+ * O construtor tem efeitos colaterais: registra a partida em ambos os times
+ * (`addMatch`) e muda a situação deles para PLAYING. Por isso, na
+ * reidratação de payload, instâncias de Match são montadas via Object.create
+ * para evitar re-disparar esses efeitos.
+ */
 export class Match {
   winner?: Team = undefined;
   loser?: Team = undefined;
@@ -81,6 +90,12 @@ export class Match {
   }
 }
 
+/**
+ * Resultado final de uma partida.
+ *
+ *  - DRAW:    empate (ambos os times com mesmo número de gols).
+ *  - VICTORY: vitória de um dos times — `winner` e `loser` definidos.
+ */
 export enum ResultMatch {
   DRAW,
   VICTORY,

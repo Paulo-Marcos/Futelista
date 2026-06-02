@@ -2,6 +2,13 @@ import { GameManager } from '../GameManager';
 import { Match, ResultMatch } from '../Match';
 import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
 
+/**
+ * Cenário pós-partida: EMPATE com `advantageToNext` setada e fila cheia
+ * (≥ 2 times completos esperando).
+ *
+ * Ambos os times da partida vão pro fim da fila (vantagem primeiro) e a
+ * próxima partida sai dos 2 primeiros da fila restante.
+ */
 export class WithDrawAndAdvantageAndTwoTeams extends BaseUpdateDrawHandler {
   override handle(input: HandleInput): void {
     if (

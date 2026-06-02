@@ -2,6 +2,13 @@ import { GameManager } from '../GameManager';
 import { Match, ResultMatch } from '../Match';
 import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
 
+/**
+ * Cenário pós-partida: EMPATE com `advantageToNext` setada e fila parcial
+ * (sem 2 times completos esperando).
+ *
+ * Time com vantagem permanece e enfrenta o primeiro da fila; o outro time
+ * da partida vai pro fim. Vantagem é "consumida".
+ */
 export class WithDrawAndAdvantageAndNotTwoTeams extends BaseUpdateDrawHandler {
   override handle(input: HandleInput): void {
     if (

@@ -5,6 +5,19 @@ import { Player, PlayerSituation } from "./Player";
 import { Switch } from "./Switch";
 import * as uuid from "uuid";
 
+/**
+ * Time de pelada — agrupamento de até `limit` jogadores.
+ *
+ * Acumula histórico de partidas (vitórias, empates, derrotas), gols marcados,
+ * trocas de jogador e bandeira `advantage` (vantagem para a próxima partida).
+ * `fullTeam` espelha `players.length === limit` e é atualizado em qualquer
+ * mutação da lista.
+ *
+ * Invariantes:
+ *  - addPlayer respeita `limit`.
+ *  - removePlayer marca o jogador como STOPPED.
+ *  - addGoal exige que o autor pertença ao time, exceto em gol-contra.
+ */
 export class Team {
   players: Player[] = [];
   matches: Match[] = [];
@@ -83,6 +96,14 @@ export class Team {
   }
 }
 
+/**
+ * Situação atual do time na fila/partida.
+ *
+ *  - CREATED:  recém-formado, ainda não entrou na fila de próximos.
+ *  - ON_NEXT:  aguardando na fila para entrar em partida.
+ *  - PLAYING:  jogando partida atual.
+ *  - STOPPED:  saiu da rodada (perdeu, foi removido manualmente etc.).
+ */
 export enum TeamSituation {
   PLAYING,
   STOPPED,
