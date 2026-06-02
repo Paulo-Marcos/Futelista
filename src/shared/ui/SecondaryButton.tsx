@@ -12,6 +12,7 @@ export type SecondaryButtonProps = {
   fullWidth?: boolean;
   destructive?: boolean;
   testID?: string;
+  accessibilityLabel?: string;
 };
 
 /**
@@ -26,6 +27,7 @@ export function SecondaryButton({
   fullWidth,
   destructive,
   testID,
+  accessibilityLabel,
 }: SecondaryButtonProps) {
   const palette = usePalette();
   const tint = destructive ? palette.error : palette.primary;
@@ -34,6 +36,9 @@ export function SecondaryButton({
       onPress={onPress}
       disabled={disabled}
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={{ disabled: !!disabled }}
       style={({ pressed }) => [
         styles.base,
         {

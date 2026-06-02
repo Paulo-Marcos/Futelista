@@ -295,6 +295,48 @@ export class GameManager {
   }
 
   /**
+   * Move um time da fila para o fim (operação manual de reordenação).
+   * Diferente de `relocateTeam` — esse método não redistribui jogadores;
+   * apenas reposiciona. Bloqueia se o time está em partida em andamento.
+   */
+  moverTimeParaFim(team: Team): void {
+    // Checa partida ANTES de indexOf: um time em partida saiu de `next` ao
+    // entrar em `playing`, então `indexOf` seria -1 e a mensagem ficaria errada.
+    if (this.playing?.teams.has(team))
+      throw Error("Não é possível mover time que está em partida em andamento.");
+    const index = this.next.indexOf(team);
+    if (index === -1) throw Error("Time não está na fila.");
+    if (index === this.next.length - 1) return;
+    this.next.splice(index, 1);
+    this.next.push(team);
+    this.notify();
+  }
+
+  /**
+   * Esvazia o time: todos os jogadores voltam para a situação "sem time"
+   * (currentTeam zerado, situação NO_TEAM) e o time é removido da fila.
+   * Bloqueia se o time está em partida em andamento.
+   */
+  esvaziarTime(team: Team): void {
+    // Mesma ordem que moverTimeParaFim: partida primeiro, fila depois.
+    if (this.playing?.teams.has(team))
+      throw Error(
+        "Não é possível esvaziar time que está em partida em andamento.",
+      );
+    const index = this.next.indexOf(team);
+    if (index === -1) throw Error("Time não está na fila.");
+    [...team.players].forEach((player) => {
+      team.removePlayer(player);
+      player.currentTeam = undefined;
+      player.setSituation(PlayerSituation.NO_TEAM);
+      this.playersWithoutTeam++;
+    });
+    this.next.splice(index, 1);
+    if (this.advantageToNext === team) this.advantageToNext = undefined;
+    this.notify();
+  }
+
+  /**
    * Limpa a fila de times e o estado de vantagem, devolvendo todos os jogadores
    * para a situação "sem time". Permite re-sortear depois com createTeams().
    *

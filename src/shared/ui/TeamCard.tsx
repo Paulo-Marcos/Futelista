@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -14,27 +14,52 @@ type TeamCardProps = {
   title: string;
   state: TeamState;
   showAdvantage?: boolean;
+  /** Id do jogador atualmente selecionado (modo "trocar"). */
+  selectedPlayerId?: string;
+  onPlayerPress?: (playerId: string) => void;
   onPlayerLongPress?: (playerId: string) => void;
+  /**
+   * Quando definido, exibe um botão de menu (3-pontinhos) à direita do título
+   * e dispara essa callback no toque. A tela hospedeira decide o que abrir
+   * (geralmente um `escolherOpcao`).
+   */
+  onActionsPress?: () => void;
 };
 
 /**
- * Card de time. Mostra título, badge de estado, lista de jogadores e
- * (opcional) badge de "Vantagem" quando o time tem prioridade na próxima partida.
+ * Card de time. Mostra título, badge de estado, contador "X/Y jogadores",
+ * lista de jogadores e (opcional) badge de "Vantagem" quando o time tem
+ * prioridade na próxima partida.
+ *
+ * Quando `actions` é fornecido junto com `onActionsPress`, exibe um botão de
+ * menu (3-pontinhos) à direita do título — a tela hospedeira é quem decide
+ * o que fazer no toque (geralmente abrir um `escolherOpcao`).
  */
 export function TeamCard({
   team,
   title,
   state,
   showAdvantage,
+  selectedPlayerId,
+  onPlayerPress,
   onPlayerLongPress,
+  onActionsPress,
 }: TeamCardProps) {
   const palette = usePalette();
   return (
     <Card variant={state === "playing" ? "primary" : "surface"}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: palette.onSurface }]}>
-          {title}
-        </Text>
+        <View style={styles.titleArea}>
+          <Text style={[styles.title, { color: palette.onSurface }]}>
+            {title}
+          </Text>
+          <Text
+            style={[styles.subtitle, { color: palette.onSurfaceVariant }]}
+            accessibilityLabel={`${team.players.length} de ${team.limit} jogadores`}
+          >
+            {team.players.length}/{team.limit} jogadores
+          </Text>
+        </View>
         <View style={styles.badges}>
           {showAdvantage ? (
             <View
@@ -59,6 +84,21 @@ export function TeamCard({
             </View>
           ) : null}
           <StateBadge state={state} />
+          {onActionsPress ? (
+            <Pressable
+              onPress={onActionsPress}
+              accessibilityRole="button"
+              accessibilityLabel={`Ações do ${title}`}
+              style={styles.menuButton}
+              android_ripple={{ color: palette.primary + "22" }}
+            >
+              <MaterialCommunityIcons
+                name="dots-vertical"
+                size={20}
+                color={palette.onSurfaceVariant}
+              />
+            </Pressable>
+          ) : null}
         </View>
       </View>
       <View style={styles.list}>
@@ -72,6 +112,10 @@ export function TeamCard({
               key={player.id}
               player={player}
               compact
+              selected={selectedPlayerId === player.id}
+              onPress={
+                onPlayerPress ? () => onPlayerPress(player.id) : undefined
+              }
               onLongPress={
                 onPlayerLongPress
                   ? () => onPlayerLongPress(player.id)
@@ -103,16 +147,25 @@ function StateBadge({ state }: { state: TeamState }) {
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     marginBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  titleArea: {
+    flex: 1,
   },
   title: {
     ...Typography.title,
     fontSize: 20,
   },
+  subtitle: {
+    ...Typography.label,
+    marginTop: 2,
+  },
   badges: {
     flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.xs,
   },
   badge: {
@@ -125,6 +178,13 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...Typography.label,
+  },
+  menuButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   list: {
     gap: Spacing.xs,

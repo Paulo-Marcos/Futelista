@@ -9,6 +9,7 @@ type FabProps = {
   onPress: () => void;
   extended?: string;
   testID?: string;
+  accessibilityLabel?: string;
 };
 
 /**
@@ -18,12 +19,20 @@ type FabProps = {
  *
  * Variante `extended` mostra texto ao lado do ícone.
  */
-export function Fab({ icon, onPress, extended, testID }: FabProps) {
+export function Fab({
+  icon,
+  onPress,
+  extended,
+  testID,
+  accessibilityLabel,
+}: FabProps) {
   const palette = usePalette();
   return (
     <Pressable
       onPress={onPress}
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? extended}
       style={({ pressed }) => [
         styles.base,
         styles.elevation,

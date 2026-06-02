@@ -11,6 +11,7 @@ export type PrimaryButtonProps = {
   disabled?: boolean;
   fullWidth?: boolean;
   testID?: string;
+  accessibilityLabel?: string;
 };
 
 /**
@@ -24,6 +25,7 @@ export function PrimaryButton({
   disabled,
   fullWidth,
   testID,
+  accessibilityLabel,
 }: PrimaryButtonProps) {
   const palette = usePalette();
   return (
@@ -31,6 +33,9 @@ export function PrimaryButton({
       onPress={onPress}
       disabled={disabled}
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={{ disabled: !!disabled }}
       style={({ pressed }) => [
         styles.base,
         {

@@ -508,6 +508,118 @@ describe('Teste da classe Game', () => {
     });
   });
 
+  describe('Quando mover um time para o fim da fila', () => {
+    function peladaComTimes(): GameManager {
+      const game = new GameManager(
+        'Pelada',
+        new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
+      );
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
+      game.createTeams();
+      return game;
+    }
+
+    it('deverá reposicionar o time mantendo os jogadores', () => {
+      const game = peladaComTimes();
+      const time1 = game.next[0];
+      const playersAntes = [...time1.players];
+      game.moverTimeParaFim(time1);
+      expect(game.next.indexOf(time1)).toBe(game.next.length - 1);
+      expect(time1.players).toEqual(playersAntes);
+    });
+
+    it('deverá ser no-op se o time já é o último', () => {
+      const game = peladaComTimes();
+      const ultimo = game.next[game.next.length - 1];
+      const ordemAntes = [...game.next];
+      game.moverTimeParaFim(ultimo);
+      expect(game.next).toEqual(ordemAntes);
+    });
+
+    it('deverá lançar erro se o time não está na fila', () => {
+      const game = peladaComTimes();
+      const fantasma = new Team(2);
+      expect(() => game.moverTimeParaFim(fantasma)).toThrowError(
+        'Time não está na fila.',
+      );
+    });
+
+    it('deverá lançar erro ao mover time em partida em andamento', () => {
+      const game = peladaComTimes();
+      game.setPlayingGame();
+      const emPartida = [...game.playing!.teams][0];
+      expect(() => game.moverTimeParaFim(emPartida)).toThrowError(
+        'Não é possível mover time que está em partida em andamento.',
+      );
+    });
+  });
+
+  describe('Quando esvaziar um time', () => {
+    function peladaComTimes(): GameManager {
+      const game = new GameManager(
+        'Pelada',
+        new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
+      );
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      return game;
+    }
+
+    it('deverá remover o time da fila', () => {
+      const game = peladaComTimes();
+      const tamanhoAntes = game.next.length;
+      const time = game.next[0];
+      game.esvaziarTime(time);
+      expect(game.next).toHaveLength(tamanhoAntes - 1);
+      expect(game.next.includes(time)).toBe(false);
+    });
+
+    it('deverá devolver os jogadores para a situação sem time', () => {
+      const game = peladaComTimes();
+      const time = game.next[0];
+      const jogadoresDoTime = [...time.players];
+      game.esvaziarTime(time);
+      jogadoresDoTime.forEach((p) => {
+        expect(p.currentTeam).toBeUndefined();
+        expect(p.situation).toBe(PlayerSituation.NO_TEAM);
+      });
+    });
+
+    it('deverá incrementar playersWithoutTeam pelos jogadores liberados', () => {
+      const game = peladaComTimes();
+      const time = game.next[0];
+      const liberados = time.players.length;
+      const antes = game.playersWithoutTeam;
+      game.esvaziarTime(time);
+      expect(game.playersWithoutTeam).toBe(antes + liberados);
+    });
+
+    it('deverá zerar advantageToNext se o time esvaziado tinha vantagem', () => {
+      const game = peladaComTimes();
+      const time = game.next[0];
+      game.advantageToNext = time;
+      game.esvaziarTime(time);
+      expect(game.advantageToNext).toBeUndefined();
+    });
+
+    it('deverá lançar erro se o time não está na fila', () => {
+      const game = peladaComTimes();
+      const fantasma = new Team(2);
+      expect(() => game.esvaziarTime(fantasma)).toThrowError(
+        'Time não está na fila.',
+      );
+    });
+
+    it('deverá lançar erro ao esvaziar time em partida em andamento', () => {
+      const game = peladaComTimes();
+      game.setPlayingGame();
+      const emPartida = [...game.playing!.teams][0];
+      expect(() => game.esvaziarTime(emPartida)).toThrowError(
+        'Não é possível esvaziar time que está em partida em andamento.',
+      );
+    });
+  });
+
   describe('Quando bloquear remoção em partida ativa', () => {
     it('deverá lançar erro ao remover jogador de time que está em partida', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
