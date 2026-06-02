@@ -53,6 +53,34 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="peladas"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="pelada-nova"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="salvar-como-pelada"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="dev"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
       </MyProviders>
