@@ -26,8 +26,13 @@ jest.mock("expo-router", () => {
     dismiss: jest.fn(),
     dismissAll: jest.fn(),
   };
+  let searchParams: Record<string, string> = {};
   return {
     __router: router,
+    /** Setter para testes que precisam injetar params (ex.: /peladas/[id]). */
+    __setSearchParams: (p: Record<string, string>) => {
+      searchParams = p;
+    },
     useRouter: () => router,
     useFocusEffect: (cb: () => void | (() => void)) => {
       React.useEffect(() => {
@@ -35,8 +40,8 @@ jest.mock("expo-router", () => {
         return typeof cleanup === "function" ? cleanup : undefined;
       }, [cb]);
     },
-    useLocalSearchParams: () => ({}),
-    useGlobalSearchParams: () => ({}),
+    useLocalSearchParams: () => searchParams,
+    useGlobalSearchParams: () => searchParams,
     usePathname: () => "/",
     useSegments: () => [],
     Link: ({ children }: { children: React.ReactNode }) => children,
