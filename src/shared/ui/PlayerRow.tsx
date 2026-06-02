@@ -13,6 +13,8 @@ type PlayerRowProps = {
   showSituation?: boolean;
   showGoals?: boolean;
   compact?: boolean;
+  /** Destaca a linha (borda/fundo) para indicar seleção ativa. */
+  selected?: boolean;
 };
 
 /**
@@ -29,6 +31,7 @@ export function PlayerRow({
   showSituation = false,
   showGoals = false,
   compact = false,
+  selected = false,
 }: PlayerRowProps) {
   const palette = usePalette();
   const avatarColor = colorForId(player.id, palette.primary, palette.secondary);
@@ -44,8 +47,9 @@ export function PlayerRow({
       style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: palette.surface,
-          borderColor: palette.outlineVariant,
+          backgroundColor: selected ? palette.primaryContainer : palette.surface,
+          borderColor: selected ? palette.primary : palette.outlineVariant,
+          borderWidth: selected ? 2 : 1,
           paddingVertical: compact ? Spacing.sm : Spacing.md,
           opacity: interativo && pressed ? 0.7 : 1,
         },
@@ -64,9 +68,21 @@ export function PlayerRow({
           {player.name}
         </Text>
         {showSituation ? (
-          <Text style={[styles.subtitle, { color: palette.onSurfaceVariant }]}>
-            {labelSituacao(player.situation)}
-          </Text>
+          <View
+            style={[
+              styles.situationChip,
+              { backgroundColor: corDeFundoSituacao(player.situation, palette) },
+            ]}
+          >
+            <Text
+              style={[
+                styles.situationText,
+                { color: corDeTextoSituacao(player.situation, palette) },
+              ]}
+            >
+              {labelSituacao(player.situation)}
+            </Text>
+          </View>
         ) : null}
       </View>
       {showGoals && player.goals.length > 0 ? (
@@ -94,6 +110,30 @@ function labelSituacao(s: PlayerSituation): string {
       return "Parou";
     case PlayerSituation.NO_TEAM:
       return "Sem time";
+  }
+}
+
+type Palette = ReturnType<typeof usePalette>;
+
+function corDeFundoSituacao(s: PlayerSituation, palette: Palette): string {
+  switch (s) {
+    case PlayerSituation.ACTIVE:
+      return palette.primaryContainer;
+    case PlayerSituation.STOPPED:
+      return palette.errorContainer;
+    case PlayerSituation.NO_TEAM:
+      return palette.surfaceVariant;
+  }
+}
+
+function corDeTextoSituacao(s: PlayerSituation, palette: Palette): string {
+  switch (s) {
+    case PlayerSituation.ACTIVE:
+      return palette.onPrimaryContainer;
+    case PlayerSituation.STOPPED:
+      return palette.error;
+    case PlayerSituation.NO_TEAM:
+      return palette.onSurfaceVariant;
   }
 }
 
@@ -148,6 +188,17 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.label,
     marginTop: 2,
+  },
+  situationChip: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radius.pill,
+  },
+  situationText: {
+    ...Typography.label,
+    fontSize: 11,
   },
   goalsBadge: {
     flexDirection: "row",

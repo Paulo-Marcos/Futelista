@@ -97,11 +97,41 @@ export class GameManager {
   }
 
   addPlayer(name: string): Player {
-    const newPlayer = new Player(name);
+    const limpo = name.trim();
+    if (limpo.length === 0) throw Error("Nome do jogador não pode ser vazio.");
+    if (this.encontrarPorNome(limpo))
+      throw Error(`Já existe jogador chamado "${limpo}" na pelada.`);
+    const newPlayer = new Player(limpo);
     this.players.push(newPlayer);
     this.playersWithoutTeam++;
     this.notify();
     return newPlayer;
+  }
+
+  /**
+   * Acrescenta vários jogadores de uma vez sem resetar a lista.
+   * Nomes vazios são ignorados; duplicatas (entre os já existentes ou dentro
+   * do próprio lote) também — sem lançar erro. Retorna apenas os criados.
+   */
+  addPlayers(names: string[]): Player[] {
+    const criados: Player[] = [];
+    names.forEach((name) => {
+      const limpo = name.trim();
+      if (limpo.length === 0) return;
+      if (this.encontrarPorNome(limpo)) return;
+      const novo = new Player(limpo);
+      this.players.push(novo);
+      this.playersWithoutTeam++;
+      criados.push(novo);
+    });
+    if (criados.length > 0) this.notify();
+    return criados;
+  }
+
+  /** Busca jogador pelo nome normalizado (trim + case-insensitive). */
+  private encontrarPorNome(nome: string): Player | undefined {
+    const alvo = nome.trim().toLowerCase();
+    return this.players.find((p) => p.name.toLowerCase() === alvo);
   }
 
   createTeams(): Team[] {
@@ -224,10 +254,17 @@ export class GameManager {
   /**
    * Remove um jogador definitivamente da pelada. Se ele estiver em um time,
    * tira do time primeiro (usando o caminho já testado de removeFromGame).
+   *
+   * Bloqueia se o jogador está em time que está em partida em andamento —
+   * mexer na composição de um time jogando deixaria o placar inconsistente.
    */
   removePlayer(player: Player): void {
     const index = this.players.indexOf(player);
     if (index === -1) throw Error("Jogador não está na pelada.");
+    if (this.estaEmPartidaAtiva(player))
+      throw Error(
+        "Não é possível remover jogador que está em partida em andamento.",
+      );
     if (player.currentTeam) {
       this.removeFromGame(player);
     } else if (this.playersWithoutTeam > 0) {
@@ -237,12 +274,22 @@ export class GameManager {
     this.notify();
   }
 
+  private estaEmPartidaAtiva(player: Player): boolean {
+    if (!this.playing || !player.currentTeam) return false;
+    return this.playing.teams.has(player.currentTeam);
+  }
+
   /**
-   * Renomeia um jogador da pelada. Delega a validação de nome para Player.rename.
+   * Renomeia um jogador da pelada. Delega a validação de nome para Player.rename
+   * e adiciona checagem de duplicata com outros jogadores.
    */
   renamePlayer(player: Player, novoNome: string): void {
     if (!this.players.includes(player))
       throw Error("Jogador não está na pelada.");
+    const limpo = novoNome.trim();
+    const outro = this.encontrarPorNome(limpo);
+    if (outro && outro !== player)
+      throw Error(`Já existe jogador chamado "${limpo}" na pelada.`);
     player.rename(novoNome);
     this.notify();
   }

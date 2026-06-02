@@ -405,6 +405,132 @@ describe('Teste da classe Game', () => {
         'Jogador não está na pelada.',
       );
     });
+
+    it('deverá lançar erro ao renomear para nome já usado por outro jogador', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      const bia = game.addPlayer('Bia');
+      expect(() => game.renamePlayer(bia, 'Ana')).toThrowError(
+        'Já existe jogador chamado "Ana" na pelada.',
+      );
+    });
+
+    it('deverá tratar duplicata na renomeação ignorando caixa e espaços', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      const bia = game.addPlayer('Bia');
+      expect(() => game.renamePlayer(bia, '  ana  ')).toThrowError(
+        'Já existe jogador chamado "ana" na pelada.',
+      );
+    });
+
+    it('deverá permitir renomear para o mesmo nome (no-op de duplicata)', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const ana = game.addPlayer('Ana');
+      expect(() => game.renamePlayer(ana, 'Ana')).not.toThrow();
+    });
+  });
+
+  describe('Quando adicionar um jogador (addPlayer)', () => {
+    it('deverá fazer trim do nome antes de criar', () => {
+      const game = new GameManager('Pelada', new Rules());
+      const p = game.addPlayer('   Pedro   ');
+      expect(p.name).toBe('Pedro');
+    });
+
+    it('deverá lançar erro quando o nome é vazio', () => {
+      const game = new GameManager('Pelada', new Rules());
+      expect(() => game.addPlayer('')).toThrowError(
+        'Nome do jogador não pode ser vazio.',
+      );
+    });
+
+    it('deverá lançar erro quando o nome só tem espaços', () => {
+      const game = new GameManager('Pelada', new Rules());
+      expect(() => game.addPlayer('    ')).toThrowError(
+        'Nome do jogador não pode ser vazio.',
+      );
+    });
+
+    it('deverá lançar erro ao adicionar jogador com nome já existente', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      expect(() => game.addPlayer('Ana')).toThrowError(
+        'Já existe jogador chamado "Ana" na pelada.',
+      );
+    });
+
+    it('deverá considerar duplicata ignorando caixa e espaços', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      expect(() => game.addPlayer('  ANA  ')).toThrowError(
+        'Já existe jogador chamado "ANA" na pelada.',
+      );
+    });
+  });
+
+  describe('Quando adicionar vários jogadores em lote (addPlayers)', () => {
+    it('deverá acrescentar todos os nomes válidos sem resetar a lista', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      const criados = game.addPlayers(['Bia', 'Caio', 'Davi']);
+      expect(criados).toHaveLength(3);
+      expect(game.players.map((p) => p.name)).toEqual([
+        'Ana',
+        'Bia',
+        'Caio',
+        'Davi',
+      ]);
+      expect(game.playersWithoutTeam).toBe(4);
+    });
+
+    it('deverá ignorar nomes vazios e duplicatas sem lançar erro', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      const criados = game.addPlayers([
+        '',
+        '   ',
+        'Bia',
+        'Ana',
+        'bia',
+        '  Caio  ',
+      ]);
+      expect(criados.map((p) => p.name)).toEqual(['Bia', 'Caio']);
+      expect(game.players.map((p) => p.name)).toEqual(['Ana', 'Bia', 'Caio']);
+    });
+
+    it('deverá retornar lista vazia quando nada é criado', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.addPlayer('Ana');
+      const criados = game.addPlayers(['', 'Ana', '   ']);
+      expect(criados).toEqual([]);
+      expect(game.players).toHaveLength(1);
+    });
+  });
+
+  describe('Quando bloquear remoção em partida ativa', () => {
+    it('deverá lançar erro ao remover jogador de time que está em partida', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.setPlayingGame();
+      const playingPlayer = [...game.playing!.teams]
+        .flatMap((t) => t.players)[0];
+      expect(() => game.removePlayer(playingPlayer)).toThrowError(
+        'Não é possível remover jogador que está em partida em andamento.',
+      );
+    });
+
+    it('deverá permitir remover jogador que NÃO está na partida atual', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
+      game.createTeams();
+      game.setPlayingGame();
+      const semPartida = game.players.find(
+        (p) => p.currentTeam && !game.playing!.teams.has(p.currentTeam),
+      )!;
+      expect(() => game.removePlayer(semPartida)).not.toThrow();
+    });
   });
 
   describe('Quando resetar os times', () => {
