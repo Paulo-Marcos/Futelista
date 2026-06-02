@@ -34,7 +34,11 @@ export function EmptyState({
         size={64}
         color={palette.onSurfaceVariant}
       />
-      <Text style={[styles.title, { color: palette.onSurface }]} selectable>
+      <Text
+        style={[styles.title, { color: palette.onSurface }]}
+        accessibilityRole="header"
+        selectable
+      >
         {title}
       </Text>
       {description ? (

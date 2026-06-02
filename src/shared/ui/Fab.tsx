@@ -4,6 +4,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
+/** Altura/diâmetro do FAB em pixels. Exposto para que telas hospedeiras
+ *  possam calcular padding inferior sem duplicar a constante. */
+export const FAB_SIZE = 56;
+
 type FabProps = {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   onPress: () => void;
@@ -40,7 +44,7 @@ export function Fab({
           backgroundColor: palette.primary,
           opacity: pressed ? 0.85 : 1,
           paddingHorizontal: extended ? Spacing.lg : 0,
-          width: extended ? undefined : 56,
+          width: extended ? undefined : FAB_SIZE,
         },
       ]}
       android_ripple={{ color: palette.onPrimary + "33" }}
@@ -66,7 +70,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: Spacing.lg,
     bottom: Spacing.lg,
-    height: 56,
+    height: FAB_SIZE,
     borderRadius: Radius.lg,
     alignItems: "center",
     justifyContent: "center",
