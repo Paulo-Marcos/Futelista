@@ -3,7 +3,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Player, PlayerSituation } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
+import {
+  AvatarPalette,
+  Radius,
+  Spacing,
+  Typography,
+} from "@/src/shared/theme/Colors";
 
 type PlayerRowProps = {
   player: Player;
@@ -34,7 +39,7 @@ export function PlayerRow({
   selected = false,
 }: PlayerRowProps) {
   const palette = usePalette();
-  const avatarColor = colorForId(player.id, palette.primary, palette.secondary);
+  const avatarColor = colorForId(player.id);
   const inicial = player.name.charAt(0).toUpperCase();
   const interativo = !!(onPress || onLongPress);
 
@@ -137,24 +142,13 @@ function corDeTextoSituacao(s: PlayerSituation, palette: Palette): string {
   }
 }
 
-const AVATAR_COLORS = [
-  "#1976D2",
-  "#388E3C",
-  "#F57C00",
-  "#7B1FA2",
-  "#C62828",
-  "#00838F",
-  "#5D4037",
-  "#455A64",
-];
-
-function colorForId(id: string, _primary: string, _secondary: string): string {
+function colorForId(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = (hash * 31 + id.charCodeAt(i)) | 0;
   }
-  const index = Math.abs(hash) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
+  const index = Math.abs(hash) % AvatarPalette.length;
+  return AvatarPalette[index];
 }
 
 const styles = StyleSheet.create({

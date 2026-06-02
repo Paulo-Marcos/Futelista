@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
+  AUTOSAVE_DEBOUNCE_MS,
+  NOME_AVULSA_DEFAULT,
+} from "@/src/app-shell/constants";
+import {
   definirPeladaAtivaId,
   lerPeladaAtivaId,
   limparPeladaAtivaId,
@@ -15,9 +19,6 @@ import {
 } from "@/src/domain/ports/RepositorioPelada";
 import { DataRules, Rules } from "@/src/domain/Rules";
 import { AsyncStoragePeladaRepository } from "@/src/infrastructure/storage/AsyncStoragePeladaRepository";
-
-const AUTOSAVE_DEBOUNCE_MS = 500;
-const NOME_AVULSA_DEFAULT = "Pelada avulsa";
 
 /**
  * Provider raiz que orquestra Pelada (tipo) e Execução (sessão).

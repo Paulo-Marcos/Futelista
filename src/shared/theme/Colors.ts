@@ -125,3 +125,21 @@ export const Typography = {
   body: { fontSize: 14, fontWeight: "400" },
   label: { fontSize: 12, fontWeight: "500" },
 } as const;
+
+/**
+ * Paleta determinística usada para colorir avatares de jogador a partir do id.
+ *
+ * Fica fora de `Colors` (light/dark) porque o avatar usa fundo escuro com
+ * texto branco em ambos os temas — uma única tabela basta. Hashing do id em
+ * `colorForId` (PlayerRow) escolhe o índice de forma estável.
+ */
+export const AvatarPalette = [
+  "#1976D2",
+  "#388E3C",
+  "#F57C00",
+  "#7B1FA2",
+  "#C62828",
+  "#00838F",
+  "#5D4037",
+  "#455A64",
+] as const;

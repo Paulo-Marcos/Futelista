@@ -18,6 +18,12 @@ import {
   Payload,
   serializeGameManager,
 } from "./serializer";
+import {
+  STORAGE_KEYS,
+  execucaoKey,
+  execucaoKeyLegado,
+  peladaTipoKey,
+} from "./storageKeys";
 
 /**
  * Adapter de persistência sobre AsyncStorage.
@@ -34,30 +40,26 @@ import {
  * descartados silenciosamente.
  */
 export class AsyncStoragePeladaRepository implements RepositorioPelada {
-  private static readonly EXECUCAO_PREFIX = "futelista:execucao:";
-  private static readonly EXECUCAO_PREFIX_LEGADO = "futelista:pelada:";
-  private static readonly PELADA_PREFIX = "futelista:peladaTipo:";
-
   // ---- Execução -------------------------------------------------------
 
   async carregar(execucaoId: string): Promise<GameManager | null> {
     const raw =
-      (await AsyncStorage.getItem(this.execucaoKey(execucaoId))) ??
-      (await AsyncStorage.getItem(this.execucaoKeyLegado(execucaoId)));
+      (await AsyncStorage.getItem(execucaoKey(execucaoId))) ??
+      (await AsyncStorage.getItem(execucaoKeyLegado(execucaoId)));
     if (!raw) return null;
     return deserializeGameManager(raw);
   }
 
   async salvar(jogo: GameManager): Promise<void> {
     const raw = serializeGameManager(jogo);
-    await AsyncStorage.setItem(this.execucaoKey(jogo.id), raw);
+    await AsyncStorage.setItem(execucaoKey(jogo.id), raw);
     // Limpa cópia legada se existir (evita item-fantasma após upgrade).
-    await AsyncStorage.removeItem(this.execucaoKeyLegado(jogo.id));
+    await AsyncStorage.removeItem(execucaoKeyLegado(jogo.id));
   }
 
   async limpar(execucaoId: string): Promise<void> {
-    await AsyncStorage.removeItem(this.execucaoKey(execucaoId));
-    await AsyncStorage.removeItem(this.execucaoKeyLegado(execucaoId));
+    await AsyncStorage.removeItem(execucaoKey(execucaoId));
+    await AsyncStorage.removeItem(execucaoKeyLegado(execucaoId));
   }
 
   async listar(): Promise<ResumoExecucao[]> {
@@ -74,13 +76,13 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
 
   private async lerTodasExecucoes(): Promise<ResumoExecucao[]> {
     const keys = await AsyncStorage.getAllKeys();
-    const execucaoKeys = keys.filter(
+    const execKeys = keys.filter(
       (k) =>
-        k.startsWith(AsyncStoragePeladaRepository.EXECUCAO_PREFIX) ||
-        k.startsWith(AsyncStoragePeladaRepository.EXECUCAO_PREFIX_LEGADO),
+        k.startsWith(STORAGE_KEYS.EXEC) ||
+        k.startsWith(STORAGE_KEYS.EXEC_LEGACY),
     );
-    if (execucaoKeys.length === 0) return [];
-    const entries = await AsyncStorage.multiGet(execucaoKeys);
+    if (execKeys.length === 0) return [];
+    const entries = await AsyncStorage.multiGet(execKeys);
     const resumos: ResumoExecucao[] = [];
     for (const [, raw] of entries) {
       if (!raw) continue;
@@ -93,26 +95,26 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
   // ---- Pelada (tipo) --------------------------------------------------
 
   async carregarPelada(peladaId: string): Promise<Pelada | null> {
-    const raw = await AsyncStorage.getItem(this.peladaKey(peladaId));
+    const raw = await AsyncStorage.getItem(peladaTipoKey(peladaId));
     if (!raw) return null;
     return deserializePelada(raw);
   }
 
   async salvarPelada(pelada: Pelada): Promise<void> {
     await AsyncStorage.setItem(
-      this.peladaKey(pelada.id),
+      peladaTipoKey(pelada.id),
       serializePelada(pelada),
     );
   }
 
   async excluirPelada(peladaId: string): Promise<void> {
-    await AsyncStorage.removeItem(this.peladaKey(peladaId));
+    await AsyncStorage.removeItem(peladaTipoKey(peladaId));
   }
 
   async listarPeladas(): Promise<ResumoPeladaTipo[]> {
     const keys = await AsyncStorage.getAllKeys();
     const peladaKeys = keys.filter((k) =>
-      k.startsWith(AsyncStoragePeladaRepository.PELADA_PREFIX),
+      k.startsWith(STORAGE_KEYS.PELADA_TIPO),
     );
     if (peladaKeys.length === 0) return [];
     const entries = await AsyncStorage.multiGet(peladaKeys);
@@ -137,18 +139,6 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
       });
     }
     return resumos.sort((a, b) => b.createdAt - a.createdAt);
-  }
-
-  // ---- Chaves ---------------------------------------------------------
-
-  private execucaoKey(id: string): string {
-    return `${AsyncStoragePeladaRepository.EXECUCAO_PREFIX}${id}`;
-  }
-  private execucaoKeyLegado(id: string): string {
-    return `${AsyncStoragePeladaRepository.EXECUCAO_PREFIX_LEGADO}${id}`;
-  }
-  private peladaKey(id: string): string {
-    return `${AsyncStoragePeladaRepository.PELADA_PREFIX}${id}`;
   }
 }
 

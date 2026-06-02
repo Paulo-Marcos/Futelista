@@ -2,8 +2,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { TimerStatus } from "@/src/domain/Timer";
+import { ROUTES } from "@/src/app-shell/constants";
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { RULES_DEFAULTS } from "@/src/domain/Rules";
+import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Spacing, Typography } from "@/src/shared/theme/Colors";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
@@ -21,10 +23,14 @@ export function PeladaHeader() {
   const router = useRouter();
 
   const nome = useGameSlice((g) => g.name) ?? "Pelada";
-  const playersPerTeam = useGameSlice((g) => g.rules.playersPerTeam) ?? 4;
-  const timeMatch = useGameSlice((g) => g.rules.timeMatch) ?? "00:10:00";
-  const numberTimes = useGameSlice((g) => g.rules.numberTimes) ?? 1;
-  const goalLimit = useGameSlice((g) => g.rules.goalLimit) ?? 2;
+  const playersPerTeam =
+    useGameSlice((g) => g.rules.playersPerTeam) ?? RULES_DEFAULTS.playersPerTeam;
+  const timeMatch =
+    useGameSlice((g) => g.rules.timeMatch) ?? RULES_DEFAULTS.timeMatch;
+  const numberTimes =
+    useGameSlice((g) => g.rules.numberTimes) ?? RULES_DEFAULTS.numberTimes;
+  const goalLimit =
+    useGameSlice((g) => g.rules.goalLimit) ?? RULES_DEFAULTS.goalLimit;
   const totalJogadores = useGameSlice((g) => g.players.length) ?? 0;
   const totalTimes = useGameSlice((g) => g.next.length) ?? 0;
   const temPartida = useGameSlice((g) => g.playing !== undefined) ?? false;
@@ -67,7 +73,7 @@ export function PeladaHeader() {
           </Text>
         </View>
         <Pressable
-          onPress={() => router.push("/regras")}
+          onPress={() => router.push(ROUTES.REGRAS)}
           style={({ pressed }) => [
             styles.iconButton,
             {
@@ -125,13 +131,13 @@ function decidirCta(params: {
   if (params.temPartida) {
     return {
       label: "Voltar à partida",
-      href: "/partida",
+      href: ROUTES.PARTIDA,
       icon: "play-circle-outline",
     };
   }
   if (params.totalJogadores < 2 * params.playersPerTeam) return null;
   if (params.totalTimes === 0) return null; // tab Times tem o CTA
-  return { label: "Iniciar partida", href: "/partida", icon: "whistle" };
+  return { label: "Iniciar partida", href: ROUTES.PARTIDA, icon: "whistle" };
 }
 
 function labelEstado(params: {

@@ -12,12 +12,12 @@ export class Rules {
 
   constructor(input?: DataRules) {
     this.id = input?.id ?? uuid.v4();
-    this.name = input?.name ?? "Padrão";
-    this.playersPerTeam = input?.playersPerTeam ?? 4;
-    this.timeMatch = input?.timeMatch ?? "00:10:00";
-    this.numberTimes = input?.numberTimes ?? 1;
-    this.goalLimit = input?.goalLimit ?? 2;
-    this.choosingTeams = input?.choosingTeams ?? ChoosingTeams.BY_ORDER;
+    this.name = input?.name ?? RULES_DEFAULTS.name;
+    this.playersPerTeam = input?.playersPerTeam ?? RULES_DEFAULTS.playersPerTeam;
+    this.timeMatch = input?.timeMatch ?? RULES_DEFAULTS.timeMatch;
+    this.numberTimes = input?.numberTimes ?? RULES_DEFAULTS.numberTimes;
+    this.goalLimit = input?.goalLimit ?? RULES_DEFAULTS.goalLimit;
+    this.choosingTeams = input?.choosingTeams ?? RULES_DEFAULTS.choosingTeams;
 
     this.checkPlayersPerTeam(this.playersPerTeam);
     this.checkTimeMatch(this.timeMatch);
@@ -63,6 +63,20 @@ export enum ChoosingTeams {
   BY_ORDER_MIXING_TOP_TWO_TEAMS,
   BY_MIXING_TEAMS,
 }
+
+/**
+ * Valores default de uma `Rules`. Fonte única para qualquer consumidor
+ * (ex.: telas de cadastro, devSeed) que precise criar regras com a mesma
+ * base do construtor sem repetir literais.
+ */
+export const RULES_DEFAULTS = {
+  name: "Padrão",
+  playersPerTeam: 4,
+  timeMatch: "00:10:00",
+  numberTimes: 1,
+  goalLimit: 2,
+  choosingTeams: ChoosingTeams.BY_ORDER,
+} as const;
 
 export type DataRules = {
   playersPerTeam?: number;

@@ -1,9 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { NOME_AVULSA_DEFAULT } from "@/src/app-shell/constants";
 import { GameManager } from "@/src/domain/GameManager";
 import { Pelada } from "@/src/domain/Pelada";
 import { RepositorioPelada } from "@/src/domain/ports/RepositorioPelada";
-import { ChoosingTeams, Rules } from "@/src/domain/Rules";
+import { ChoosingTeams, RULES_DEFAULTS, Rules } from "@/src/domain/Rules";
+import {
+  STORAGE_KEYS,
+  STORAGE_NAMESPACE,
+} from "@/src/infrastructure/storage/storageKeys";
 
 /**
  * Helpers de "dev seed" — geram cenários de teste no repositório real
@@ -13,11 +18,11 @@ import { ChoosingTeams, Rules } from "@/src/domain/Rules";
  * atrás de `__DEV__` quando expor para a UI.
  */
 
-const TIME_DEFAULT = "00:10:00";
+const TIME_DEFAULT = RULES_DEFAULTS.timeMatch;
 
 export async function devLimparStorage(): Promise<void> {
   const keys = await AsyncStorage.getAllKeys();
-  const peladaKeys = keys.filter((k) => k.startsWith("futelista:"));
+  const peladaKeys = keys.filter((k) => k.startsWith(STORAGE_NAMESPACE));
   if (peladaKeys.length > 0) {
     await AsyncStorage.multiRemove(peladaKeys);
   }
@@ -136,7 +141,7 @@ async function cenarioTresPeladasMix(repo: RepositorioPelada): Promise<void> {
 
   const cef = new Pelada({
     nome: "Fute CEF",
-    regras: { playersPerTeam: 4, timeMatch: "00:10:00", goalLimit: 2 },
+    regras: { playersPerTeam: 4, timeMatch: TIME_DEFAULT, goalLimit: 2 },
   });
   const bb = new Pelada({
     nome: "Fute BB",
@@ -169,8 +174,8 @@ async function cenarioAvulsaEmAndamento(
   repo: RepositorioPelada,
 ): Promise<void> {
   const exec = new GameManager(
-    "Pelada avulsa",
-    new Rules({ playersPerTeam: 3, timeMatch: "00:10:00", goalLimit: 2 }),
+    NOME_AVULSA_DEFAULT,
+    new Rules({ playersPerTeam: 3, timeMatch: TIME_DEFAULT, goalLimit: 2 }),
   );
   exec.addPlayerList(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
   exec.iniciar();
@@ -193,7 +198,7 @@ function execucaoBase(pelada: Pelada, createdAt: number): GameManager {
 }
 
 async function definirAtiva(id: string): Promise<void> {
-  await AsyncStorage.setItem("futelista:pelada:ativa-id", id);
+  await AsyncStorage.setItem(STORAGE_KEYS.ATIVA_ID, id);
 }
 
 const NOMES_CEF = [

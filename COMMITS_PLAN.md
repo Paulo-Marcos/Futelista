@@ -201,6 +201,97 @@ Itens que impedem o app de ser usado de ponta a ponta.
 
 ---
 
+### Etapa 7 — Refatoração de organização e centralização
+
+Disparada em 2026-06-02 a partir de uma análise completa do `src/`. Cada
+PR aqui é independente e roda `npm test` antes do merge.
+
+#### COMMIT 7.1 — refactor: centralizar constantes em pontos únicos
+**Status:** `[~]`
+
+**Problema:** literais espalhados em 3+ arquivos sem fonte única — chave de storage `"futelista:pelada:ativa-id"` repetida em `peladaAtiva.ts` e `devSeed.ts`; prefixos `"futelista:execucao:"` etc com filtro cru `"futelista:"` em `devSeed.ts:19`; defaults de Rules (`4`, `"00:10:00"`) reaparecem em `devSeed.ts`; `"Pelada avulsa"` em `soccerProvider.tsx` e `devSeed.ts`; rotas `"/regras"`, `"/partida"` literais em `PeladaHeader.tsx`; `AVATAR_COLORS` solto em `PlayerRow.tsx`.
+
+**Mudança:**
+- `src/domain/defaults.ts` — `RULES_DEFAULTS` (playersPerTeam, timeMatch, numberTimes, goalLimit, choosingTeams). Domínio fica puro e tem seus defaults exportados.
+- `src/infrastructure/storage/storageKeys.ts` — `STORAGE_NAMESPACE`, `STORAGE_KEYS` com prefixes e key de pelada ativa.
+- `src/app-shell/constants.ts` — `AUTOSAVE_DEBOUNCE_MS`, `NOME_AVULSA_DEFAULT`, `ROUTES`.
+- `src/shared/theme/Colors.ts` — adicionar `AvatarPalette` (mover os 8 hexa do `PlayerRow`).
+- Atualizar todos os consumidores: `Rules.ts`, `peladaAtiva.ts`, `AsyncStoragePeladaRepository.ts`, `devSeed.ts`, `soccerProvider.tsx`, `PeladaHeader.tsx`, `PlayerRow.tsx`.
+
+**Critério:** `npm test` continua verde; trocar uma constante (ex.: namespace de storage) reflete em todo o app via 1 edição.
+
+---
+
+#### COMMIT 7.2 — docs: JSDoc completo + 3 READMEs + catálogo UI
+**Status:** `[ ]`
+
+**Problema:** cobertura desigual de JSDoc — `GameManager`/`Pelada`/`Timer`/`SoccerProvider`/`serializer` documentados; `Player`/`Team`/`Match`/`Goal`/`Switch`/`Rules`/`ScreenTime`/`CreateTeam*`/`UpdateDraw*` sem doc. Sem catálogo de componentes UI.
+
+**Mudança:**
+- JSDoc em todas as classes/funções públicas faltantes (uma linha de propósito + invariantes não-óbvias).
+- `src/domain/README.md` — mapa entidade × responsabilidade, padrões usados.
+- `src/infrastructure/storage/README.md` — chaves, versão de payload, política de migração.
+- `src/shared/ui/README.md` — catálogo: cada componente com props, exemplo curto, quando usar.
+
+**Critério:** nenhum arquivo de runtime muda; PR só de docs.
+
+---
+
+#### COMMIT 7.3 — refactor(domain): Rules.toData() + Rules.merge(parcial)
+**Status:** `[ ]`
+
+**Problema:** conversão `Rules → DataRules` duplicada em `soccerProvider.tsx:322` e clonagem em `devSeed.ts:181`; reconstrução dos 6 campos em `GameManager.atualizarRegras:378` e `Pelada.atualizarRegras:48`.
+
+**Mudança:** mover ambas operações para métodos estáticos/instância em `Rules` e atualizar consumidores.
+
+**Critério:** specs continuam verdes; `atualizarRegras` em `GameManager` e `Pelada` vira ~2 linhas.
+
+---
+
+#### COMMIT 7.4 — refactor(domain): DRY em handlers e estratégias
+**Status:** `[ ]`
+
+**Problema:**
+- `hasSecondNextAndIsFull(game)` idêntico em 4 handlers de `UpdateDraw/`.
+- `createTeams(players, perTeam)` quase idêntico em 3 estratégias de `TeamBuilder/`.
+- `shuffleList()` duplicado em `Mixed` e `MixingTopTwoTeams`.
+- Só `CreateTeamByOrder` herda `CreateTeam` abstract.
+
+**Mudança:**
+- `BaseUpdateDrawHandler` ganha `protected hasSecondNextAndIsFull(game)`.
+- `CreateTeam` abstract ganha `protected distribuir(players, perTeam)` e `protected shuffle(list)`.
+- Strategies só implementam `prepararLista()`.
+
+**Critério:** specs verdes; redução visível de linhas e duplicação zero.
+
+---
+
+#### COMMIT 7.5 — refactor: renomeações de baixo risco
+**Status:** `[ ]`
+
+**Mudança:**
+- Pasta `UpdateDraw/` → `FinalResult/` (sobre o pós-partida em geral, não só empate).
+- Arquivo `UpdateDray.processor.ts` → `FinalResult.processor.ts` (typo corrigido).
+- `team.Switches` → `team.switches` (campo + serializer + spec).
+- `GameManager.addPlayerList` → `setPlayers` (deixa claro que substitui).
+- Decidir destino de `WithDrawAndExternalAdvantageAndTwoTeams.ts` (não está montado na cadeia em `UpdateDray.processor.ts:11-19`): incluir na cadeia ou deletar.
+
+**Critério:** `npm test` verde; busca por `Switches` e `UpdateDray` retorna 0.
+
+---
+
+#### COMMIT 7.6 — fix: ajustes pontuais (Timer.continue, Player.id via ctor, playersWithoutTeam)
+**Status:** `[ ]`
+
+**Mudança:**
+- `Timer.continue(): void` (anotar retorno explícito).
+- `Player` aceita `id` opcional no construtor — elimina cast `(player as { id }).id = dto.id` no serializer.
+- `setPlayers` (ex-`addPlayerList`) zera `playersWithoutTeam` antes do loop em vez de só incrementar.
+
+**Critério:** specs verdes; cast `as { id: string }` removido de `serializer.ts`.
+
+---
+
 ## 🛌 Em pausa (re-ativar depois)
 
 ### Sistema de travas (locks)
