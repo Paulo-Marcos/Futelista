@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
 import { PlayerSituation } from "@/src/domain/Player";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 import { TeamSituation } from "@/src/domain/Team";
@@ -120,6 +120,63 @@ describe("serializer (round-trip GameManager)", () => {
     expect(recriada.advantageToNext?.id).toBe(teamVencedor.id);
     expect(recriada.playing).toBeDefined();
     expect(recriada.playing!.teamA.id).toBe(teamVencedor.id);
+  });
+
+  it("preserva status e timestamps de ciclo de vida da pelada", () => {
+    const original = buildPeladaComJogadores();
+    original.iniciar();
+    original.finalizar();
+
+    const recriada = deserializeGameManager(serializeGameManager(original));
+
+    expect(recriada.status).toBe(PeladaStatus.FINALIZADA);
+    expect(recriada.createdAt).toBe(original.createdAt);
+    expect(recriada.startedAt).toBe(original.startedAt);
+    expect(recriada.endedAt).toBe(original.endedAt);
+  });
+
+  it("migra payload v1 (sem status/timestamps) marcando como ATIVA", () => {
+    const original = buildPeladaComJogadores();
+    const raw = serializeGameManager(original);
+    const payload = JSON.parse(raw);
+    payload.version = 1;
+    delete payload.pelada.status;
+    delete payload.pelada.createdAt;
+    delete payload.pelada.startedAt;
+    delete payload.pelada.endedAt;
+    delete payload.pelada.peladaId;
+
+    const recriada = deserializeGameManager(JSON.stringify(payload));
+
+    expect(recriada.status).toBe(PeladaStatus.ATIVA);
+    expect(recriada.createdAt).toBe(0);
+    expect(recriada.startedAt).toBeUndefined();
+    expect(recriada.endedAt).toBeUndefined();
+    expect(recriada.peladaId).toBeUndefined();
+  });
+
+  it("preserva peladaId (vínculo com Pelada tipo) no round-trip", () => {
+    const original = buildPeladaComJogadores();
+    original.peladaId = "pelada-tipo-123";
+
+    const recriada = deserializeGameManager(serializeGameManager(original));
+
+    expect(recriada.peladaId).toBe("pelada-tipo-123");
+  });
+
+  it("migra payload v2 (com lifecycle, sem peladaId) preservando os campos", () => {
+    const original = buildPeladaComJogadores();
+    original.iniciar();
+    const raw = serializeGameManager(original);
+    const payload = JSON.parse(raw);
+    payload.version = 2;
+    delete payload.pelada.peladaId;
+
+    const recriada = deserializeGameManager(JSON.stringify(payload));
+
+    expect(recriada.status).toBe(PeladaStatus.ATIVA);
+    expect(recriada.startedAt).toBe(original.startedAt);
+    expect(recriada.peladaId).toBeUndefined();
   });
 
   it("dispara notify do GameManager reidratado quando o Timer ticka", () => {

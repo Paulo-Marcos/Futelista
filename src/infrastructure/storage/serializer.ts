@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
 import { Goal } from "@/src/domain/Goal";
 import { Match, ResultMatch } from "@/src/domain/Match";
 import { Player, PlayerSituation } from "@/src/domain/Player";
@@ -27,7 +27,7 @@ import { Timer, TimerStatus } from "@/src/domain/Timer";
  * é "estava rodando, foi pausado".
  */
 
-const PAYLOAD_VERSION = 1;
+const PAYLOAD_VERSION = 3;
 
 type GoalDTO = {
   playerId: string;
@@ -100,6 +100,11 @@ export type Payload = {
     playersWithoutTeam: number;
     advantageToNextTeamId: string | null;
     playingMatchId: string | null;
+    status: PeladaStatus;
+    createdAt: number;
+    startedAt: number | null;
+    endedAt: number | null;
+    peladaId: string | null;
   };
   rules: RulesDTO;
   players: PlayerDTO[];
@@ -116,12 +121,34 @@ export function serializeGameManager(game: GameManager): string {
 
 export function deserializeGameManager(raw: string): GameManager {
   const payload = JSON.parse(raw) as Payload;
-  if (payload.version !== PAYLOAD_VERSION) {
+  if (payload.version > PAYLOAD_VERSION) {
     throw Error(
-      `Versão de payload incompatível: esperava ${PAYLOAD_VERSION}, recebi ${payload.version}.`,
+      `Versão de payload incompatível: máxima suportada ${PAYLOAD_VERSION}, recebi ${payload.version}.`,
     );
   }
-  return buildGameManager(payload);
+  return buildGameManager(migrarPayload(payload));
+}
+
+/**
+ * Preenche campos novos com defaults conservadores quando lemos um
+ * payload mais antigo. Hoje só sobe de v1 para v2 (lifecycle de pelada).
+ * Payloads salvos antes do conceito de status são tratados como ATIVA
+ * (a única possibilidade prática naquele momento).
+ */
+function migrarPayload(payload: Payload): Payload {
+  if (payload.version === PAYLOAD_VERSION) return payload;
+  return {
+    ...payload,
+    version: PAYLOAD_VERSION,
+    pelada: {
+      ...payload.pelada,
+      status: payload.pelada.status ?? PeladaStatus.ATIVA,
+      createdAt: payload.pelada.createdAt ?? 0,
+      startedAt: payload.pelada.startedAt ?? null,
+      endedAt: payload.pelada.endedAt ?? null,
+      peladaId: payload.pelada.peladaId ?? null,
+    },
+  };
 }
 
 // ---------- Serialização ------------------------------------------------------
@@ -142,6 +169,11 @@ function buildPayload(game: GameManager): Payload {
       playersWithoutTeam: game.playersWithoutTeam,
       advantageToNextTeamId: game.advantageToNext?.id ?? null,
       playingMatchId: game.playing?.id ?? null,
+      status: game.status,
+      createdAt: game.createdAt,
+      startedAt: game.startedAt ?? null,
+      endedAt: game.endedAt ?? null,
+      peladaId: game.peladaId ?? null,
     },
     rules: buildRulesDTO(game.rules),
     players: game.players.map(buildPlayerDTO),
@@ -254,9 +286,14 @@ function buildTimerDTO(timer: Timer): TimerDTO {
 
 function buildGameManager(payload: Payload): GameManager {
   const rules = new Rules(payload.rules);
-  const game = new GameManager(payload.pelada.name, rules);
-  // Sobrescreve o id gerado pelo construtor para preservar o id da pelada.
-  (game as { id: string }).id = payload.pelada.id;
+  const game = new GameManager(payload.pelada.name, rules, {
+    id: payload.pelada.id,
+    status: payload.pelada.status,
+    createdAt: payload.pelada.createdAt,
+    startedAt: payload.pelada.startedAt ?? undefined,
+    endedAt: payload.pelada.endedAt ?? undefined,
+    peladaId: payload.pelada.peladaId ?? undefined,
+  });
   game.playersWithoutTeam = payload.pelada.playersWithoutTeam;
 
   const playersById = rehydratePlayers(payload.players);
