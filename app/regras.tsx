@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Pressable,
@@ -11,7 +11,8 @@ import {
 } from "react-native";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { GameManager } from "@/src/domain/GameManager";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -22,15 +23,20 @@ import { Stepper } from "@/src/shared/ui/Stepper";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function RegrasScreen() {
+  const { manager } = useSoccer();
+  if (!manager) return <Redirect href="/" />;
+  return <RegrasInner manager={manager} />;
+}
+
+function RegrasInner({ manager }: { manager: GameManager }) {
   const palette = usePalette();
   const router = useRouter();
-  const { manager } = useSoccer();
 
-  const rules = useGameSlice((g) => g.rules);
-  const temPartida = useGameSlice((g) => g.playing !== undefined);
-  const temTimes = useGameSlice((g) => g.next.length > 0);
-  const statusTimer = useGameSlice((g) => g.timer?.status);
-  const totalJogadores = useGameSlice((g) => g.players.length);
+  const rules = useGameSliceRequired((g) => g.rules);
+  const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
+  const temTimes = useGameSliceRequired((g) => g.next.length > 0);
+  const statusTimer = useGameSliceRequired((g) => g.timer?.status);
+  const totalJogadores = useGameSliceRequired((g) => g.players.length);
 
   const [nome, setNome] = useState(manager.name);
   const [playersPerTeam, setPlayersPerTeam] = useState(rules.playersPerTeam);

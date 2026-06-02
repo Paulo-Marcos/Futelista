@@ -1,11 +1,12 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { GameManager } from "@/src/domain/GameManager";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
@@ -17,17 +18,22 @@ import { TeamCard } from "@/src/shared/ui/TeamCard";
 import { Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function TimesScreen() {
+  const { manager } = useSoccer();
+  if (!manager) return <Redirect href="/" />;
+  return <TimesInner manager={manager} />;
+}
+
+function TimesInner({ manager }: { manager: GameManager }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { manager } = useSoccer();
 
-  const next = useGameSlice((g) => g.next);
-  const advantageId = useGameSlice((g) => g.advantageToNext?.id);
-  const totalJogadores = useGameSlice((g) => g.players.length);
-  const playersPerTeam = useGameSlice((g) => g.rules.playersPerTeam);
-  const playersWithoutTeam = useGameSlice((g) => g.playersWithoutTeam);
-  const temPartida = useGameSlice((g) => g.playing !== undefined);
+  const next = useGameSliceRequired((g) => g.next);
+  const advantageId = useGameSliceRequired((g) => g.advantageToNext?.id);
+  const totalJogadores = useGameSliceRequired((g) => g.players.length);
+  const playersPerTeam = useGameSliceRequired((g) => g.rules.playersPerTeam);
+  const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
+  const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
 
   const [erro, setErro] = useState<string | null>(null);
 

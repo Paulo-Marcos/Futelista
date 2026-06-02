@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { GameManager } from "@/src/domain/GameManager";
 import { ResultMatch } from "@/src/domain/Match";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -19,15 +20,22 @@ type Cenario =
   | { kind: "draw_manual"; teamA: Team; teamB: Team };
 
 export default function ResultadoScreen() {
+  const { manager } = useSoccer();
+  if (!manager) return <Redirect href="/" />;
+  return <ResultadoInner manager={manager} />;
+}
+
+function ResultadoInner({ manager }: { manager: GameManager }) {
   const palette = usePalette();
   const router = useRouter();
-  const { manager } = useSoccer();
 
-  const result = useGameSlice((g) => g.playing?.result);
-  const playing = useGameSlice((g) => g.playing);
-  const advantagePrevia = useGameSlice((g) => g.advantageToNext);
-  const segundoNextCheio = useGameSlice((g) => g.next[1]?.fullTeam === true);
-  const goals = useGameSlice((g) => g.playing?.countGoals());
+  const result = useGameSliceRequired((g) => g.playing?.result);
+  const playing = useGameSliceRequired((g) => g.playing);
+  const advantagePrevia = useGameSliceRequired((g) => g.advantageToNext);
+  const segundoNextCheio = useGameSliceRequired(
+    (g) => g.next[1]?.fullTeam === true,
+  );
+  const goals = useGameSliceRequired((g) => g.playing?.countGoals());
 
   const [escolhidoId, setEscolhidoId] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);

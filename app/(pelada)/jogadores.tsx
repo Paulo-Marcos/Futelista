@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Redirect } from "expo-router";
 import { useState } from "react";
 import {
   FlatList,
@@ -11,7 +12,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { GameManager } from "@/src/domain/GameManager";
 import { Player } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
@@ -20,12 +22,17 @@ import { TabHeader } from "@/src/shared/ui/TabHeader";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function JogadoresScreen() {
+  const { manager } = useSoccer();
+  if (!manager) return <Redirect href="/" />;
+  return <JogadoresInner manager={manager} />;
+}
+
+function JogadoresInner({ manager }: { manager: GameManager }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
-  const { manager } = useSoccer();
 
-  const players = useGameSlice((g) => g.players);
-  const playersWithoutTeam = useGameSlice((g) => g.playersWithoutTeam);
+  const players = useGameSliceRequired((g) => g.players);
+  const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
 
   const [novoNome, setNovoNome] = useState("");
   const [erro, setErro] = useState<string | null>(null);

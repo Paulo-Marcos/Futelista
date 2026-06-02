@@ -1,11 +1,12 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSlice } from "@/src/app-shell/useGameSlice";
+import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { GameManager } from "@/src/domain/GameManager";
 import { Player } from "@/src/domain/Player";
 import { Team } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
@@ -20,18 +21,23 @@ import { TimerDisplay } from "@/src/shared/ui/TimerDisplay";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function PartidaScreen() {
+  const { manager } = useSoccer();
+  if (!manager) return <Redirect href="/" />;
+  return <PartidaInner manager={manager} />;
+}
+
+function PartidaInner({ manager }: { manager: GameManager }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { manager } = useSoccer();
 
-  const playing = useGameSlice((g) => g.playing);
-  const status = useGameSlice((g) => g.timer?.status);
-  const restTime = useGameSlice((g) => g.timer?.restTime ?? 0);
-  const currentHalf = useGameSlice((g) => g.timer?.currentNumberTime);
-  const totalHalves = useGameSlice((g) => g.timer?.numberTimes);
-  const goals = useGameSlice((g) => g.playing?.countGoals());
-  const proximoTime = useGameSlice((g) => g.next[0]);
+  const playing = useGameSliceRequired((g) => g.playing);
+  const status = useGameSliceRequired((g) => g.timer?.status);
+  const restTime = useGameSliceRequired((g) => g.timer?.restTime ?? 0);
+  const currentHalf = useGameSliceRequired((g) => g.timer?.currentNumberTime);
+  const totalHalves = useGameSliceRequired((g) => g.timer?.numberTimes);
+  const goals = useGameSliceRequired((g) => g.playing?.countGoals());
+  const proximoTime = useGameSliceRequired((g) => g.next[0]);
 
   const [erro, setErro] = useState<string | null>(null);
 

@@ -20,14 +20,14 @@ export function PeladaHeader() {
   const palette = usePalette();
   const router = useRouter();
 
-  const nome = useGameSlice((g) => g.name);
-  const playersPerTeam = useGameSlice((g) => g.rules.playersPerTeam);
-  const timeMatch = useGameSlice((g) => g.rules.timeMatch);
-  const numberTimes = useGameSlice((g) => g.rules.numberTimes);
-  const goalLimit = useGameSlice((g) => g.rules.goalLimit);
-  const totalJogadores = useGameSlice((g) => g.players.length);
-  const totalTimes = useGameSlice((g) => g.next.length);
-  const temPartida = useGameSlice((g) => g.playing !== undefined);
+  const nome = useGameSlice((g) => g.name) ?? "Pelada";
+  const playersPerTeam = useGameSlice((g) => g.rules.playersPerTeam) ?? 4;
+  const timeMatch = useGameSlice((g) => g.rules.timeMatch) ?? "00:10:00";
+  const numberTimes = useGameSlice((g) => g.rules.numberTimes) ?? 1;
+  const goalLimit = useGameSlice((g) => g.rules.goalLimit) ?? 2;
+  const totalJogadores = useGameSlice((g) => g.players.length) ?? 0;
+  const totalTimes = useGameSlice((g) => g.next.length) ?? 0;
+  const temPartida = useGameSlice((g) => g.playing !== undefined) ?? false;
   const statusTimer = useGameSlice((g) => g.timer?.status);
 
   const cta = decidirCta({

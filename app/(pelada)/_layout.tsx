@@ -1,14 +1,21 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { useSoccer } from "@/src/app-shell/useSoccer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 
 /**
- * Tabs internas da pelada: Pelada (home), Jogadores e Times.
- * Header customizado é renderizado dentro de cada tela.
+ * Tabs internas da pelada.
+ *
+ * Sem execução ativa (manager null), só a tab "Pelada" aparece — as
+ * tabs Jogadores e Times não fazem sentido sem um GameManager carregado
+ * e são escondidas via `href: null`.
  */
 export default function PeladaLayout() {
   const palette = usePalette();
+  const { manager } = useSoccer();
+  const temExecucao = manager !== null;
+
   return (
     <Tabs
       screenOptions={{
@@ -45,6 +52,7 @@ export default function PeladaLayout() {
         name="jogadores"
         options={{
           title: "Jogadores",
+          href: temExecucao ? "/jogadores" : null,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-multiple"
@@ -58,6 +66,7 @@ export default function PeladaLayout() {
         name="times"
         options={{
           title: "Times",
+          href: temExecucao ? "/times" : null,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="shield-account"
