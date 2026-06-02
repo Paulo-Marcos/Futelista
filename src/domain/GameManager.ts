@@ -16,6 +16,11 @@ import { FinalResultProcessor } from "./UpdateDraw/UpdateDray.processor";
  * Cada metodo publico que muda estado chama `notify()` no final.
  * O Timer recebe um callback de tick para que decrementos do cronometro
  * tambem disparem notificacao.
+ *
+ * Ciclo de vida (status):
+ *  - CREATED:    pelada acabou de ser criada, ainda nao foi "iniciada".
+ *  - ATIVA:      pelada em curso (jogadores chegando, partidas rodando).
+ *  - FINALIZADA: pelada encerrada — arquivada como histórico.
  */
 export class GameManager {
   id: string = uuid.v4();
@@ -28,14 +33,30 @@ export class GameManager {
   playersWithoutTeam: number = 0;
   name: string;
   rules: Rules;
+  status: PeladaStatus;
+  createdAt: number;
+  startedAt?: number;
+  endedAt?: number;
+  /**
+   * Id da Pelada (tipo cadastrado) à qual essa execução pertence.
+   * Pode ser undefined para execuções "avulsas" — peladas criadas antes
+   * do conceito de tipo, ou criadas direto sem associar a um tipo.
+   */
+  peladaId?: string;
   private updateResult = new FinalResultProcessor();
 
   private _version = 0;
   private listeners = new Set<() => void>();
 
-  constructor(name: string, rules: Rules) {
+  constructor(name: string, rules: Rules, opcionais?: DadosExecucao) {
     this.name = name;
     this.rules = rules;
+    if (opcionais?.id) this.id = opcionais.id;
+    this.status = opcionais?.status ?? PeladaStatus.CREATED;
+    this.createdAt = opcionais?.createdAt ?? Date.now();
+    this.startedAt = opcionais?.startedAt;
+    this.endedAt = opcionais?.endedAt;
+    this.peladaId = opcionais?.peladaId;
   }
 
   // ----- Reatividade ------------------------------------------------------
@@ -87,8 +108,19 @@ export class GameManager {
     if (this.next.length > 0) throw Error("Times já foram criados");
     const createTeam = CreateTeamFactory.fabricate(this.rules.choosingTeams);
     this.next = createTeam.create(this.players, this.rules.playersPerTeam);
+    this.recomputePlayersWithoutTeam();
     this.notify();
     return this.next;
+  }
+
+  /**
+   * Recalcula o contador a partir da fonte de verdade (player.currentTeam).
+   * Usar sempre que uma operação puder ter mexido na composição dos times.
+   */
+  private recomputePlayersWithoutTeam(): void {
+    this.playersWithoutTeam = this.players.filter(
+      (p) => !p.currentTeam,
+    ).length;
   }
 
   setPlayingGame(): void {
@@ -346,4 +378,77 @@ export class GameManager {
   getOtherPlayingTeam(team: Team): Team {
     return this.playing!.getOtherTeam(team);
   }
+
+  // ----- Ciclo de vida da pelada -----------------------------------------
+
+  /**
+   * Marca a pelada como iniciada — registra `startedAt` e troca o status
+   * para ATIVA. Só vale uma vez (a partir de CREATED).
+   */
+  iniciar(): void {
+    if (this.status !== PeladaStatus.CREATED)
+      throw Error("Pelada já foi iniciada.");
+    this.status = PeladaStatus.ATIVA;
+    this.startedAt = Date.now();
+    this.notify();
+  }
+
+  /**
+   * Encerra a pelada — registra `endedAt`, transição para FINALIZADA.
+   * Bloqueia se houver partida em andamento (encerre a partida antes).
+   */
+  finalizar(): void {
+    if (this.status === PeladaStatus.FINALIZADA)
+      throw Error("Pelada já foi finalizada.");
+    if (this.playing)
+      throw Error(
+        "Não é possível finalizar a pelada com partida em andamento.",
+      );
+    this.status = PeladaStatus.FINALIZADA;
+    this.endedAt = Date.now();
+    this.notify();
+  }
+
+  /**
+   * Remove todos os jogadores e times da pelada atual, preservando regras,
+   * nome, status e histórico de partidas. Útil quando o usuário quer começar
+   * a montagem do zero sem trocar de pelada.
+   *
+   * Bloqueia se houver partida em andamento ou cronômetro ativo — limpar
+   * nesse estado deixaria refs penduradas em playing/matches.
+   */
+  limparJogadoresETimes(): void {
+    if (this.playing)
+      throw Error(
+        "Não é possível limpar jogadores e times com partida em andamento.",
+      );
+    const timerAtivo =
+      this.timer &&
+      this.timer.status !== TimerStatus.CREATED &&
+      this.timer.status !== TimerStatus.ENDED;
+    if (timerAtivo)
+      throw Error(
+        "Não é possível limpar jogadores e times com cronômetro ativo.",
+      );
+    this.players = [];
+    this.next = [];
+    this.advantageToNext = undefined;
+    this.playersWithoutTeam = 0;
+    this.notify();
+  }
 }
+
+export enum PeladaStatus {
+  CREATED = "CREATED",
+  ATIVA = "ATIVA",
+  FINALIZADA = "FINALIZADA",
+}
+
+export type DadosExecucao = {
+  id?: string;
+  status?: PeladaStatus;
+  createdAt?: number;
+  startedAt?: number;
+  endedAt?: number;
+  peladaId?: string;
+};

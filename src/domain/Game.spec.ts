@@ -1,4 +1,4 @@
-import { GameManager } from './GameManager';
+import { GameManager, PeladaStatus } from './GameManager';
 import { ResultMatch } from './Match';
 import { Player, PlayerSituation } from './Player';
 import { ChoosingTeams, Rules } from './Rules';
@@ -46,6 +46,23 @@ describe('Teste da classe Game', () => {
       expect(CreateTeamFactory.fabricate).toHaveBeenCalledWith(choosingTeams);
       expect(next).toBeDefined();
       expect(next.length).toBeGreaterThan(0);
+    });
+
+    it('createTeams zera playersWithoutTeam (todos passam a ter time)', () => {
+      // Regressão: o contador continuava marcando o nº original de jogadores
+      // mesmo após todos serem distribuídos em times.
+      expect(game.playersWithoutTeam).toBe(4);
+      game.createTeams();
+      expect(game.playersWithoutTeam).toBe(0);
+      game.players.forEach((p) => expect(p.currentTeam).toBeDefined());
+    });
+
+    it('createTeams reflete jogadores que sobraram sem time', () => {
+      // 5 jogadores em times de 2 → 2 times de 2 + 1 sobrando.
+      game.addPlayer('Quinto');
+      game.createTeams();
+      const semTime = game.players.filter((p) => !p.currentTeam).length;
+      expect(game.playersWithoutTeam).toBe(semTime);
     });
 
     it('deverá criar uma partida a partir das próximas', () => {
@@ -485,6 +502,107 @@ describe('Teste da classe Game', () => {
       game.atualizarRegras({ timeMatch: '00:05:00', goalLimit: 10 });
       expect(game.rules.timeMatch).toBe('00:05:00');
       expect(game.rules.goalLimit).toBe(10);
+    });
+  });
+
+  describe('Ciclo de vida da pelada', () => {
+    it('nasce com status CREATED e createdAt populado', () => {
+      const antes = Date.now();
+      const game = new GameManager('Pelada', new Rules());
+      const depois = Date.now();
+      expect(game.status).toBe(PeladaStatus.CREATED);
+      expect(game.createdAt).toBeGreaterThanOrEqual(antes);
+      expect(game.createdAt).toBeLessThanOrEqual(depois);
+      expect(game.startedAt).toBeUndefined();
+      expect(game.endedAt).toBeUndefined();
+    });
+
+    it('aceita timestamps no construtor (para reidratação)', () => {
+      const game = new GameManager('Pelada', new Rules(), {
+        status: PeladaStatus.ATIVA,
+        createdAt: 123,
+        startedAt: 456,
+      });
+      expect(game.status).toBe(PeladaStatus.ATIVA);
+      expect(game.createdAt).toBe(123);
+      expect(game.startedAt).toBe(456);
+    });
+
+    it('iniciar() transiciona CREATED → ATIVA e marca startedAt', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.iniciar();
+      expect(game.status).toBe(PeladaStatus.ATIVA);
+      expect(game.startedAt).toBeDefined();
+    });
+
+    it('iniciar() falha quando já está ATIVA', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.iniciar();
+      expect(() => game.iniciar()).toThrowError('Pelada já foi iniciada.');
+    });
+
+    it('finalizar() transiciona ATIVA → FINALIZADA e marca endedAt', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.iniciar();
+      game.finalizar();
+      expect(game.status).toBe(PeladaStatus.FINALIZADA);
+      expect(game.endedAt).toBeDefined();
+    });
+
+    it('finalizar() falha se houver partida em andamento', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.iniciar();
+      game.setPlayingGame();
+      expect(() => game.finalizar()).toThrowError(
+        /partida em andamento/,
+      );
+    });
+
+    it('finalizar() é idempotência-protegido', () => {
+      const game = new GameManager('Pelada', new Rules());
+      game.iniciar();
+      game.finalizar();
+      expect(() => game.finalizar()).toThrowError('Pelada já foi finalizada.');
+    });
+  });
+
+  describe('Quando limpar jogadores e times', () => {
+    it('esvazia jogadores, fila e jogadores-sem-time preservando regras e nome', () => {
+      const game = new GameManager('Sábado', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.limparJogadoresETimes();
+      expect(game.players).toHaveLength(0);
+      expect(game.next).toHaveLength(0);
+      expect(game.playersWithoutTeam).toBe(0);
+      expect(game.advantageToNext).toBeUndefined();
+      expect(game.name).toBe('Sábado');
+      expect(game.rules.playersPerTeam).toBe(2);
+    });
+
+    it('preserva o histórico de partidas', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.setPlayingGame();
+      game.setResult();
+      // Move playing para matches manualmente para simular fim de partida.
+      game.matches.push(game.playing!);
+      game.playing = undefined;
+      game.limparJogadoresETimes();
+      expect(game.matches).toHaveLength(1);
+    });
+
+    it('bloqueia limpeza com partida em andamento', () => {
+      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.createTeams();
+      game.setPlayingGame();
+      expect(() => game.limparJogadoresETimes()).toThrowError(
+        /partida em andamento/,
+      );
     });
   });
 });
