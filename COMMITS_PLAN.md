@@ -16,6 +16,16 @@ Foco: app funcional ponta-a-ponta, persistente e visualmente apresentável.
 - `[X]` `bd76049` fix(domain): casing de import e bug em Team.switchPlayer
 - `[X]` `9ae9ad0` chore(lock): trava features estáveis do domínio
 - `[X]` _próximo_: chore(docs): adormece sistema de locks e reorganiza plano de estabilização
+- `[X]` Etapa 7 — Refatoração de organização e centralização (9 commits):
+  - `[X]` `94af3c4` refactor(config): centraliza constantes em pontos únicos
+  - `[X]` `5b23f6b` docs: JSDoc no domínio e READMEs por subpasta de src/
+  - `[X]` `c51be12` refactor(domain): Rules.toData() + Rules.merge() como fonte única
+  - `[X]` `8440390` refactor(domain): DRY em handlers pós-partida e estratégias de time
+  - `[X]` `e582006` refactor(domain): renomeia UpdateDraw → FinalResult
+  - `[X]` `5e44359` refactor(domain): team.Switches → team.switches (camelCase)
+  - `[X]` `a405473` refactor(domain): addPlayerList → setPlayers (semântica destrutiva)
+  - `[X]` `5b1210b` refactor(domain): removeFirstNext → tirarDaFila
+  - `[X]` `82977a5` refactor(domain): Player/Team aceitam input object; Timer.continue retorna void
 
 ---
 
@@ -207,7 +217,7 @@ Disparada em 2026-06-02 a partir de uma análise completa do `src/`. Cada
 PR aqui é independente e roda `npm test` antes do merge.
 
 #### COMMIT 7.1 — refactor: centralizar constantes em pontos únicos
-**Status:** `[~]`
+**Status:** `[X]` `94af3c4`
 
 **Problema:** literais espalhados em 3+ arquivos sem fonte única — chave de storage `"futelista:pelada:ativa-id"` repetida em `peladaAtiva.ts` e `devSeed.ts`; prefixos `"futelista:execucao:"` etc com filtro cru `"futelista:"` em `devSeed.ts:19`; defaults de Rules (`4`, `"00:10:00"`) reaparecem em `devSeed.ts`; `"Pelada avulsa"` em `soccerProvider.tsx` e `devSeed.ts`; rotas `"/regras"`, `"/partida"` literais em `PeladaHeader.tsx`; `AVATAR_COLORS` solto em `PlayerRow.tsx`.
 
@@ -223,7 +233,7 @@ PR aqui é independente e roda `npm test` antes do merge.
 ---
 
 #### COMMIT 7.2 — docs: JSDoc completo + 3 READMEs + catálogo UI
-**Status:** `[ ]`
+**Status:** `[X]` `5b23f6b`
 
 **Problema:** cobertura desigual de JSDoc — `GameManager`/`Pelada`/`Timer`/`SoccerProvider`/`serializer` documentados; `Player`/`Team`/`Match`/`Goal`/`Switch`/`Rules`/`ScreenTime`/`CreateTeam*`/`UpdateDraw*` sem doc. Sem catálogo de componentes UI.
 
@@ -238,7 +248,7 @@ PR aqui é independente e roda `npm test` antes do merge.
 ---
 
 #### COMMIT 7.3 — refactor(domain): Rules.toData() + Rules.merge(parcial)
-**Status:** `[ ]`
+**Status:** `[X]` `c51be12`
 
 **Problema:** conversão `Rules → DataRules` duplicada em `soccerProvider.tsx:322` e clonagem em `devSeed.ts:181`; reconstrução dos 6 campos em `GameManager.atualizarRegras:378` e `Pelada.atualizarRegras:48`.
 
@@ -249,7 +259,9 @@ PR aqui é independente e roda `npm test` antes do merge.
 ---
 
 #### COMMIT 7.4 — refactor(domain): DRY em handlers e estratégias
-**Status:** `[ ]`
+**Status:** `[X]` `8440390`
+
+**Bônus aplicado:** `WithDrawAndExternalAdvantageAndTwoTeams` (que estava órfão) foi incluído na cadeia em `FinalResult.processor` — decisão tomada aqui, não no 7.5.
 
 **Problema:**
 - `hasSecondNextAndIsFull(game)` idêntico em 4 handlers de `UpdateDraw/`.
@@ -267,28 +279,29 @@ PR aqui é independente e roda `npm test` antes do merge.
 ---
 
 #### COMMIT 7.5 — refactor: renomeações de baixo risco
-**Status:** `[ ]`
+**Status:** `[X]` (fragmentado em 4 sub-commits para revisão isolada)
 
-**Mudança:**
-- Pasta `UpdateDraw/` → `FinalResult/` (sobre o pós-partida em geral, não só empate).
-- Arquivo `UpdateDray.processor.ts` → `FinalResult.processor.ts` (typo corrigido).
-- `team.Switches` → `team.switches` (campo + serializer + spec).
-- `GameManager.addPlayerList` → `setPlayers` (deixa claro que substitui).
-- Decidir destino de `WithDrawAndExternalAdvantageAndTwoTeams.ts` (não está montado na cadeia em `UpdateDray.processor.ts:11-19`): incluir na cadeia ou deletar.
+**Sub-commits aplicados:**
+- `[X]` `e582006` 7.5a — Pasta `UpdateDraw/` → `FinalResult/` + arquivo `UpdateDray.processor.ts` → `FinalResult.processor.ts` (typo) + `UpdateDraw.handler.ts` → `FinalResult.handler.ts`.
+- `[X]` `5e44359` 7.5b — `team.Switches` → `team.switches` (camelCase).
+- `[X]` `a405473` 7.5c — `GameManager.addPlayerList` → `setPlayers` + reset de `playersWithoutTeam` antes do loop.
+- `[X]` `5b1210b` 7.5d — `GameManager.removeFirstNext` → `tirarDaFila` (vocabulário do domínio).
 
-**Critério:** `npm test` verde; busca por `Switches` e `UpdateDray` retorna 0.
+**Follow-up consciente (não feito):** os identificadores TS `UpdateDrawHandler` e `BaseUpdateDrawHandler` continuam com o nome antigo apesar do arquivo se chamar `FinalResult.handler.ts`. Renomear é PR separado.
+
+**Critério atendido:** `npm test` verde após cada sub-commit (39/381). Busca por `Switches`, `UpdateDray`, `removeFirstNext`, `addPlayerList` retorna 0 no código.
 
 ---
 
 #### COMMIT 7.6 — fix: ajustes pontuais (Timer.continue, Player.id via ctor, playersWithoutTeam)
-**Status:** `[ ]`
+**Status:** `[X]` `82977a5` (mais fix do `playersWithoutTeam` antecipado no 7.5c)
 
-**Mudança:**
-- `Timer.continue(): void` (anotar retorno explícito).
-- `Player` aceita `id` opcional no construtor — elimina cast `(player as { id }).id = dto.id` no serializer.
-- `setPlayers` (ex-`addPlayerList`) zera `playersWithoutTeam` antes do loop em vez de só incrementar.
+**Mudanças aplicadas:**
+- `Timer.continue(): void` — retorno explícito.
+- `Player` e `Team` aceitam **objeto de input** (`PlayerInput`/`TeamInput`) com `id?` opcional. Elimina os casts feios `(player as { id }).id = dto.id` e `(team as { id }).id = dto.id` no serializer. Chamadores passam de `new Player('X')` para `new Player({ name: 'X' })` e de `new Team(N)` para `new Team({ limit: N })`.
+- `setPlayers` zera `playersWithoutTeam` antes do loop — **já feito no 7.5c** como parte do renomeação (semântica de "set" exige reset).
 
-**Critério:** specs verdes; cast `as { id: string }` removido de `serializer.ts`.
+**Critério atendido:** specs verdes; `as { id: string }` removido do serializer.
 
 ---
 
