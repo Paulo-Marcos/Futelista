@@ -64,12 +64,3 @@ export type ResumoPeladaTipo = {
   /** Quantas execuções já existem registradas para essa Pelada. */
   totalExecucoes: number;
 };
-
-/**
- * Alias retro-compatível. O nome antigo era "ResumoPelada" e referia-se
- * à execução. Mantido como `ResumoPelada` por compatibilidade com código
- * que ainda não migrou.
- *
- * @deprecated Use ResumoExecucao para execuções ou ResumoPeladaTipo para tipos.
- */
-export type ResumoPelada = ResumoExecucao;

@@ -19,5 +19,4 @@ export type {
   RepositorioPelada,
   ResumoExecucao,
   ResumoPeladaTipo,
-  ResumoPelada,
 } from "./ports/RepositorioPelada";
