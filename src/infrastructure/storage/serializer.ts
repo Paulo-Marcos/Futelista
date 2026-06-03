@@ -301,8 +301,7 @@ function buildGameManager(payload: Payload): GameManager {
 function rehydratePlayers(dtos: PlayerDTO[]): Map<string, Player> {
   const map = new Map<string, Player>();
   dtos.forEach((dto) => {
-    const player = new Player(dto.name);
-    (player as { id: string }).id = dto.id;
+    const player = new Player({ name: dto.name, id: dto.id });
     player.situation = dto.situation;
     map.set(dto.id, player);
   });
@@ -315,8 +314,7 @@ function rehydrateTeams(
 ): Map<string, Team> {
   const map = new Map<string, Team>();
   dtos.forEach((dto) => {
-    const team = new Team(dto.limit);
-    (team as { id: string }).id = dto.id;
+    const team = new Team({ limit: dto.limit, id: dto.id });
     team.victories = dto.victories;
     team.draws = dto.draws;
     team.loses = dto.loses;

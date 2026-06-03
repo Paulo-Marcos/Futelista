@@ -5,8 +5,8 @@ import { Team } from './Team';
 
 describe('Teste da classe Match', () => {
   it('Deverá criar uma partida', () => {
-    const teamA = new Team(4);
-    const teamB = new Team(4);
+    const teamA = new Team({ limit: 4 });
+    const teamB = new Team({ limit: 4 });
     const match = new Match(teamA, teamB);
     expect(match).toBeDefined();
     expect(teamA.matches[0].id).toBe(match.id);
@@ -17,11 +17,11 @@ describe('Teste da classe Match', () => {
   });
   describe('Teste do Resultado', () => {
     it('Deverá definir o ganhador da partida TimeA', () => {
-      const teamA = new Team(4);
-      const playerA = new Player('teste');
+      const teamA = new Team({ limit: 4 });
+      const playerA = new Player({ name: 'teste' });
       teamA.addPlayer(playerA);
-      const teamB = new Team(4);
-      const playerB = new Player('teste');
+      const teamB = new Team({ limit: 4 });
+      const playerB = new Player({ name: 'teste' });
       teamB.addPlayer(playerB);
       const match = new Match(teamA, teamB);
       match.addGoal(teamA, playerA, new ScreenTime(2, 6));
@@ -31,11 +31,11 @@ describe('Teste da classe Match', () => {
       expect(match.loser).toEqual(teamB);
     });
     it('Deverá definir o ganhador da partida TimeB', () => {
-      const teamA = new Team(4);
-      const playerA = new Player('teste');
+      const teamA = new Team({ limit: 4 });
+      const playerA = new Player({ name: 'teste' });
       teamA.addPlayer(playerA);
-      const teamB = new Team(4);
-      const playerB = new Player('teste');
+      const teamB = new Team({ limit: 4 });
+      const playerB = new Player({ name: 'teste' });
       teamB.addPlayer(playerB);
       const match = new Match(teamA, teamB);
       match.addGoal(teamB, playerB, new ScreenTime(2, 6));
@@ -45,11 +45,11 @@ describe('Teste da classe Match', () => {
       expect(match.loser).toEqual(teamA);
     });
     it('Deverá resultar em empate', () => {
-      const teamA = new Team(4);
-      const playerA = new Player('teste');
+      const teamA = new Team({ limit: 4 });
+      const playerA = new Player({ name: 'teste' });
       teamA.addPlayer(playerA);
-      const teamB = new Team(4);
-      const playerB = new Player('teste');
+      const teamB = new Team({ limit: 4 });
+      const playerB = new Player({ name: 'teste' });
       teamB.addPlayer(playerB);
       const match = new Match(teamA, teamB);
       match.setResult();
@@ -60,10 +60,10 @@ describe('Teste da classe Match', () => {
   });
   describe('Quando adiciona gol', () => {
     it('Deverá adicionar corretamente', () => {
-      const player = new Player('teste');
-      const teamA = new Team(4);
+      const player = new Player({ name: 'teste' });
+      const teamA = new Team({ limit: 4 });
       teamA.addPlayer(player);
-      const teamB = new Team(4);
+      const teamB = new Team({ limit: 4 });
       const match = new Match(teamA, teamB);
       match.addGoal(teamA, player, new ScreenTime(2, 6));
       expect(match.goals.length).toBe(1);
@@ -71,11 +71,11 @@ describe('Teste da classe Match', () => {
       expect(player.goals.length).toBe(1);
     });
     it('Deverá adicionar um gol contra', () => {
-      const player = new Player('teste');
-      const teamA = new Team(4);
+      const player = new Player({ name: 'teste' });
+      const teamA = new Team({ limit: 4 });
       teamA.addPlayer(player);
-      const playerB = new Player('teste');
-      const teamB = new Team(4);
+      const playerB = new Player({ name: 'teste' });
+      const teamB = new Team({ limit: 4 });
       teamB.addPlayer(playerB);
       const match = new Match(teamA, teamB);
       match.addGoal(teamA, playerB, new ScreenTime(2, 6));
@@ -84,37 +84,37 @@ describe('Teste da classe Match', () => {
       expect(playerB.goals.length).toBe(0);
     });
     it('Deverá lançar erro se o gol não for da partida', () => {
-      const player = new Player('teste');
-      const teamA = new Team(4);
+      const player = new Player({ name: 'teste' });
+      const teamA = new Team({ limit: 4 });
       teamA.addPlayer(player);
-      const teamB = new Team(4);
+      const teamB = new Team({ limit: 4 });
       const match = new Match(teamA, teamB);
 
       expect(() => {
-        match.addGoal(new Team(5), player, new ScreenTime(2, 6));
+        match.addGoal(new Team({ limit: 5 }), player, new ScreenTime(2, 6));
       }).toThrowError('Time que fez o gol não está nessa partida.');
     });
   });
   describe('Quando substitui um jogador', () => {
     it('Deverá substituir corretamente', () => {
-      const player = new Player('teste');
-      const teamA = new Team(4);
+      const player = new Player({ name: 'teste' });
+      const teamA = new Team({ limit: 4 });
       teamA.addPlayer(player);
-      const teamB = new Team(4);
+      const teamB = new Team({ limit: 4 });
       const match = new Match(teamA, teamB);
-      const newPlayer = new Player('teste');
+      const newPlayer = new Player({ name: 'teste' });
       expect(match.teamA.hasPlayer(player)).toBe(true);
       match.switchPlayer(newPlayer, player, teamA);
       expect(match.teamA.hasPlayer(newPlayer)).toBe(true);
     });
     it('Deverá lançar erro quando o time não estiver na partida', () => {
-      const player = new Player('teste');
-      const teamA = new Team(4);
+      const player = new Player({ name: 'teste' });
+      const teamA = new Team({ limit: 4 });
       teamA.addPlayer(player);
-      const teamB = new Team(4);
+      const teamB = new Team({ limit: 4 });
       const match = new Match(teamA, teamB);
-      const newPlayer = new Player('teste');
-      expect(() => match.switchPlayer(newPlayer, player, new Team(5))).toThrowError(
+      const newPlayer = new Player({ name: 'teste' });
+      expect(() => match.switchPlayer(newPlayer, player, new Team({ limit: 5 }))).toThrowError(
         'Timer para troca não está nessa partida.',
       );
     });

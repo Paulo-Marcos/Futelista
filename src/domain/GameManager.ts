@@ -95,7 +95,7 @@ export class GameManager {
     this.players = [];
     this.playersWithoutTeam = 0;
     names.forEach((name) => {
-      const newPlayer = new Player(name);
+      const newPlayer = new Player({ name });
       this.players.push(newPlayer);
       this.playersWithoutTeam++;
     });
@@ -108,7 +108,7 @@ export class GameManager {
     if (limpo.length === 0) throw Error("Nome do jogador não pode ser vazio.");
     if (this.encontrarPorNome(limpo))
       throw Error(`Já existe jogador chamado "${limpo}" na pelada.`);
-    const newPlayer = new Player(limpo);
+    const newPlayer = new Player({ name: limpo });
     this.players.push(newPlayer);
     this.playersWithoutTeam++;
     this.notify();
@@ -126,7 +126,7 @@ export class GameManager {
       const limpo = name.trim();
       if (limpo.length === 0) return;
       if (this.encontrarPorNome(limpo)) return;
-      const novo = new Player(limpo);
+      const novo = new Player({ name: limpo });
       this.players.push(novo);
       this.playersWithoutTeam++;
       criados.push(novo);
@@ -180,7 +180,7 @@ export class GameManager {
   }
 
   addToNewTeam(player: Player): void {
-    const newTeam = new Team(this.rules.playersPerTeam);
+    const newTeam = new Team({ limit: this.rules.playersPerTeam });
     newTeam.addPlayer(player);
     this.next.push(newTeam);
     this.notify();

@@ -106,15 +106,15 @@ describe('Teste da classe Game', () => {
     });
 
     it('addToNewTeam deve adicionar jogador a um novo time', () => {
-      const mockPlayer = new Player('JogadorTeste');
+      const mockPlayer = new Player({ name: 'JogadorTeste' });
       game.addToNewTeam(mockPlayer);
       expect(game.getNthNext(1).players.length).toBe(1);
       expect(game.getNthNext(1).players[0]).toBe(mockPlayer);
     });
 
     it('addToLastTeam deve adicionar jogador ao último time', () => {
-      const mockPlayer = new Player('JogadorTeste');
-      const mockLastTeam = new Team(3);
+      const mockPlayer = new Player({ name: 'JogadorTeste' });
+      const mockLastTeam = new Team({ limit: 3 });
       jest.spyOn(game, 'getLastTeam').mockReturnValue(mockLastTeam);
       game.addToLastTeam(mockPlayer);
       expect(mockLastTeam.players.length).toBe(1);
@@ -122,9 +122,9 @@ describe('Teste da classe Game', () => {
     });
 
     it('addToLastTeam deve criar novo time se o último estiver cheio', () => {
-      const mockPlayer = new Player('JogadorTeste');
-      const mockLastTeam = new Team(1);
-      mockLastTeam.addPlayer(new Player('teste'));
+      const mockPlayer = new Player({ name: 'JogadorTeste' });
+      const mockLastTeam = new Team({ limit: 1 });
+      mockLastTeam.addPlayer(new Player({ name: 'teste' }));
       jest.spyOn(game, 'getLastTeam').mockReturnValue(mockLastTeam);
       game.addToLastTeam(mockPlayer);
       expect(game.getNthNext(1).players.length).toBe(1);
@@ -133,7 +133,7 @@ describe('Teste da classe Game', () => {
 
     it('relocatePlayersWithoutTeam deve adicionar jogadores sem time ao último time', () => {
       game.createTeams();
-      const mockLastTeam = new Team(3);
+      const mockLastTeam = new Team({ limit: 3 });
       jest.spyOn(game, 'getLastTeam').mockReturnValue(mockLastTeam);
       const addedPlayer = game.addPlayer('JogadorSemTime');
       game.relocatePlayersWithoutTeam();
@@ -383,7 +383,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro ao tentar remover jogador inexistente', () => {
       const game = new GameManager('Pelada', new Rules());
-      const fantasma = new Player('Fantasma');
+      const fantasma = new Player({ name: 'Fantasma' });
       expect(() => game.removePlayer(fantasma)).toThrowError(
         'Jogador não está na pelada.',
       );
@@ -400,7 +400,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro ao renomear jogador que não está na pelada', () => {
       const game = new GameManager('Pelada', new Rules());
-      const fantasma = new Player('Fantasma');
+      const fantasma = new Player({ name: 'Fantasma' });
       expect(() => game.renamePlayer(fantasma, 'Algo')).toThrowError(
         'Jogador não está na pelada.',
       );
@@ -538,7 +538,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro se o time não está na fila', () => {
       const game = peladaComTimes();
-      const fantasma = new Team(2);
+      const fantasma = new Team({ limit: 2 });
       expect(() => game.moverTimeParaFim(fantasma)).toThrowError(
         'Time não está na fila.',
       );
@@ -604,7 +604,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro se o time não está na fila', () => {
       const game = peladaComTimes();
-      const fantasma = new Team(2);
+      const fantasma = new Team({ limit: 2 });
       expect(() => game.esvaziarTime(fantasma)).toThrowError(
         'Time não está na fila.',
       );

@@ -18,6 +18,13 @@ import * as uuid from "uuid";
  *  - removePlayer marca o jogador como STOPPED.
  *  - addGoal exige que o autor pertença ao time, exceto em gol-contra.
  */
+export type TeamInput = {
+  /** Quantos jogadores cabem no time (definido pelas Rules da pelada). */
+  limit: number;
+  /** Id preexistente — usado em reidratação para manter identidade. */
+  id?: string;
+};
+
 export class Team {
   players: Player[] = [];
   matches: Match[] = [];
@@ -30,7 +37,12 @@ export class Team {
   advantage: boolean = false;
   fullTeam: boolean = false;
   situation = TeamSituation.CREATED;
-  constructor(readonly limit: number) {}
+  readonly limit: number;
+
+  constructor(input: TeamInput) {
+    this.limit = input.limit;
+    if (input.id) this.id = input.id;
+  }
 
   setSituation(situation: TeamSituation): void {
     this.situation = situation;

@@ -47,7 +47,8 @@ export abstract class CreateTeam {
   protected distribuir(players: Player[], playersPerTeam: number): Team[] {
     const teams: Team[] = [];
     players.forEach((player, index) => {
-      if (index % playersPerTeam === 0) teams.push(new Team(playersPerTeam));
+      if (index % playersPerTeam === 0)
+        teams.push(new Team({ limit: playersPerTeam }));
       const indexTeam = Math.floor(index / playersPerTeam);
       teams[indexTeam].addPlayer(player);
     });

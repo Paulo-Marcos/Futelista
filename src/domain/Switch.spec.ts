@@ -4,9 +4,9 @@ import { Team } from './Team';
 
 describe('Teste da classe Switch', () => {
   it('Deverá criar uma Substituição', () => {
-    const teamA = new Team(5);
-    const player = new Player('teste');
+    const teamA = new Team({ limit: 5 });
+    const player = new Player({ name: 'teste' });
     teamA.addPlayer(player);
-    expect(new Switch(new Player('teste'), player, teamA)).toBeDefined();
+    expect(new Switch(new Player({ name: 'teste' }), player, teamA)).toBeDefined();
   });
 });

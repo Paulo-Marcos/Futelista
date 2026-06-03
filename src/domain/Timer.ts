@@ -48,7 +48,7 @@ export class Timer {
     this.onChange?.();
   }
 
-  continue() {
+  continue(): void {
     this.status = TimerStatus.STARTED;
     this.start();
   }

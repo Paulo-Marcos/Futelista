@@ -14,6 +14,12 @@ import { Match } from "./Match";
  * Sempre que entra em um Time, `Player` é registrado em `teams` e a
  * situação vira ACTIVE — feito a partir do próprio `Team.addPlayer`.
  */
+export type PlayerInput = {
+  name: string;
+  /** Id preexistente — usado em reidratação para manter identidade. */
+  id?: string;
+};
+
 export class Player {
   id: string = uuid.v4();
   goals: Goal[] = [];
@@ -22,8 +28,9 @@ export class Player {
   currentTeam?: Team;
   situation = PlayerSituation.NO_TEAM;
   name: string;
-  constructor(name: string) {
-    this.name = name;
+  constructor(input: PlayerInput) {
+    this.name = input.name;
+    if (input.id) this.id = input.id;
   }
 
   /** Renomeia o jogador. Recusa nome vazio (whitespace só). */
