@@ -3,7 +3,7 @@ import { Match, ResultMatch } from '../Match';
 import { Player } from '../Player';
 import { ChoosingTeams, Rules } from '../Rules';
 import { Team } from '../Team';
-import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
 import { WithDrawAndAdvantageAndNotTwoTeams } from './WithDrawAndAdvantageAndNotTwoTeams';
 
 describe('WithDrawAndAdvantageAndNotTwoTeams', () => {
@@ -51,8 +51,8 @@ describe('WithDrawAndAdvantageAndNotTwoTeams', () => {
   it('deve chamar super.handle quando o resultado do jogo não é um empate', () => {
     game.playing!.result = ResultMatch.VICTORY;
     const input: HandleInput = { game };
-    const baseUpdateDrawHandlerSpy = jest.spyOn(BaseUpdateDrawHandler.prototype, 'handle');
+    const baseFinalResultHandlerSpy = jest.spyOn(BaseFinalResultHandler.prototype, 'handle');
     withDraw.handle(input);
-    expect(baseUpdateDrawHandlerSpy).toHaveBeenCalledWith(input);
+    expect(baseFinalResultHandlerSpy).toHaveBeenCalledWith(input);
   });
 });

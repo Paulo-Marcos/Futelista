@@ -1,5 +1,5 @@
 import { Match, ResultMatch } from '../Match';
-import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
 
 /**
  * Cenário pós-partida: EMPATE com **vantagem externa** (definida manualmente)
@@ -8,7 +8,7 @@ import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
  * Time apontado pela vantagem externa segue jogando contra o primeiro da
  * fila; o outro time da partida vai pro fim. `advantageToNext` é zerada.
  */
-export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseUpdateDrawHandler {
+export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
     if (
       input.game.playing?.result === ResultMatch.DRAW &&

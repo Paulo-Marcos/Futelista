@@ -8,8 +8,8 @@ import { Team } from '../Team';
  * O encadeamento é montado em `FinalResultProcessor`. Apesar do nome do
  * arquivo, a cadeia cobre vitória + diferentes cenários de empate.
  */
-export interface UpdateDrawHandler {
-  setNextHandler(handler: UpdateDrawHandler): UpdateDrawHandler;
+export interface FinalResultHandler {
+  setNextHandler(handler: FinalResultHandler): FinalResultHandler;
   handle(input: HandleInput): void;
 }
 
@@ -18,10 +18,10 @@ export interface UpdateDrawHandler {
  * Handlers concretos sobrescrevem `handle` chamando `super.handle(input)`
  * quando o cenário não bate com o seu critério.
  */
-export abstract class BaseUpdateDrawHandler implements UpdateDrawHandler {
-  private nextHandler?: UpdateDrawHandler;
+export abstract class BaseFinalResultHandler implements FinalResultHandler {
+  private nextHandler?: FinalResultHandler;
 
-  setNextHandler(handler: UpdateDrawHandler): UpdateDrawHandler {
+  setNextHandler(handler: FinalResultHandler): FinalResultHandler {
     this.nextHandler = handler;
     return handler;
   }

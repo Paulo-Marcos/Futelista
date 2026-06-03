@@ -1,4 +1,4 @@
-import { HandleInput, UpdateDrawHandler } from './FinalResult.handler';
+import { HandleInput, FinalResultHandler } from './FinalResult.handler';
 import { WithDrawAndAdvantageAndNotTwoTeams } from './WithDrawAndAdvantageAndNotTwoTeams';
 import { WithDrawAndAdvantageAndTwoTeams } from './WithDrawAndAdvantageAndTwoTeams';
 import { WithDrawAndExternalAdvantageAndNotTwoTeams } from './WithDrawAndExternalAdvantageAndNotTwoTeams';
@@ -13,7 +13,7 @@ import { WithVictory } from './WithVictory';
  * o cenário bate; caso contrário delega ao próximo.
  */
 export class FinalResultProcessor {
-  private handlerChain: UpdateDrawHandler;
+  private handlerChain: FinalResultHandler;
 
   constructor() {
     const withVictory = new WithVictory();

@@ -1,21 +1,21 @@
 import { GameManager } from '../GameManager';
 import { Rules } from '../Rules';
 import {
-  BaseUpdateDrawHandler,
-  UpdateDrawHandler,
+  BaseFinalResultHandler,
+  FinalResultHandler,
   HandleInput,
 } from './FinalResult.handler';
 
-class ConcreteUpdateDrawHandler extends BaseUpdateDrawHandler {}
+class ConcreteFinalResultHandler extends BaseFinalResultHandler {}
 
-describe('BaseUpdateDrawHandler', () => {
-  let baseHandler: BaseUpdateDrawHandler;
-  let nextHandler: UpdateDrawHandler;
+describe('BaseFinalResultHandler', () => {
+  let baseHandler: BaseFinalResultHandler;
+  let nextHandler: FinalResultHandler;
   let input: HandleInput;
 
   beforeEach(() => {
-    baseHandler = new ConcreteUpdateDrawHandler();
-    nextHandler = { handle: jest.fn() } as unknown as UpdateDrawHandler;
+    baseHandler = new ConcreteFinalResultHandler();
+    nextHandler = { handle: jest.fn() } as unknown as FinalResultHandler;
     input = {
       game: new GameManager('teste', new Rules()),
     };
@@ -28,7 +28,7 @@ describe('BaseUpdateDrawHandler', () => {
   });
 
   it('não deve chamar o próximo manipulador se não estiver configurado', () => {
-    const nextHandlerSpy = { handle: jest.fn() } as unknown as UpdateDrawHandler;
+    const nextHandlerSpy = { handle: jest.fn() } as unknown as FinalResultHandler;
     baseHandler.handle(input);
     expect(nextHandlerSpy.handle).not.toHaveBeenCalled();
   });

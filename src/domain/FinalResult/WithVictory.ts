@@ -1,5 +1,5 @@
 import { Match, ResultMatch } from '../Match';
-import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
 
 /**
  * Cenário pós-partida: VITÓRIA.
@@ -7,7 +7,7 @@ import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
  * Vencedor segue jogando contra o primeiro da fila e recebe `advantageToNext`.
  * Perdedor é realocado ao fim da fila.
  */
-export class WithVictory extends BaseUpdateDrawHandler {
+export class WithVictory extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
     if (input.game.playing?.result === ResultMatch.VICTORY) {
       input.game.relocateTeam(input.game.playing?.loser!);

@@ -1,13 +1,13 @@
 import { GameManager } from '../GameManager';
 import { Rules } from '../Rules';
 import {
-  UpdateDrawHandler,
+  FinalResultHandler,
   HandleInput,
-  BaseUpdateDrawHandler,
+  BaseFinalResultHandler,
 } from './FinalResult.handler';
 import { FinalResultProcessor } from './FinalResult.processor';
 
-class MockHandler extends BaseUpdateDrawHandler implements UpdateDrawHandler {
+class MockHandler extends BaseFinalResultHandler implements FinalResultHandler {
   override handle(input: HandleInput): void {
     super.handle(input);
   }

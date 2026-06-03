@@ -1,5 +1,5 @@
 import { Match, ResultMatch } from '../Match';
-import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
 
 /**
  * Cenário pós-partida: EMPATE com `advantageToNext` setada e fila cheia
@@ -8,7 +8,7 @@ import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
  * Ambos os times da partida vão pro fim da fila (vantagem primeiro) e a
  * próxima partida sai dos 2 primeiros da fila restante.
  */
-export class WithDrawAndAdvantageAndTwoTeams extends BaseUpdateDrawHandler {
+export class WithDrawAndAdvantageAndTwoTeams extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
     if (
       input.game.playing?.result === ResultMatch.DRAW &&
