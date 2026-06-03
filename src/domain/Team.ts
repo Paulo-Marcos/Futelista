@@ -22,7 +22,7 @@ export class Team {
   players: Player[] = [];
   matches: Match[] = [];
   goals: Goal[] = [];
-  Switches: Switch[] = [];
+  switches: Switch[] = [];
   victories: number = 0;
   draws: number = 0;
   loses: number = 0;
@@ -74,7 +74,7 @@ export class Team {
     // o time em times maiores que 1 jogador. Regressão em Team.spec.ts.
     this.players.splice(index, 1);
     this.players.push(playerEnters);
-    this.Switches.push(new Switch(playerEnters, playerLeaves, this));
+    this.switches.push(new Switch(playerEnters, playerLeaves, this));
     playerEnters.addTeam(this);
   }
 

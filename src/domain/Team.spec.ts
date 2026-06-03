@@ -44,7 +44,7 @@ describe('Teste da classe Team', () => {
       teamA.addPlayer(player);
       teamA.switchPlayer(playerEnters, player);
       teamA.switchPlayer(player, playerEnters);
-      expect(teamA.Switches.length).toBe(2);
+      expect(teamA.switches.length).toBe(2);
       expect(teamA.players?.length).toBe(1);
     });
     // Regressão: switchPlayer usava `splice(index)` (sem 2º argumento), que

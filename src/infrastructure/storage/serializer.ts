@@ -226,7 +226,7 @@ function buildTeamDTO(team: Team): TeamDTO {
     advantage: team.advantage,
     fullTeam: team.fullTeam,
     situation: team.situation,
-    switches: team.Switches.map((s) => ({
+    switches: team.switches.map((s) => ({
       playerEntersId: s.playerEnters.id,
       playerLeavesId: s.playerLeaves.id,
     })),
@@ -324,7 +324,7 @@ function rehydrateTeams(
     team.fullTeam = dto.fullTeam;
     team.situation = dto.situation;
     team.players = dto.playerIds.map((pid) => playersById.get(pid)!);
-    team.Switches = dto.switches.map(
+    team.switches = dto.switches.map(
       (s) =>
         new Switch(
           playersById.get(s.playerEntersId)!,
