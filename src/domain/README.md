@@ -25,7 +25,7 @@ Detalhes da regra: [`.claude/rules/domain.md`](../../.claude/rules/domain.md).
 
 - **Aggregate Root**: `GameManager` é o único ponto de entrada para mudanças no estado da execução.
 - **Factory + Strategy** ([`TeamBuilder/`](TeamBuilder)): `CreateTeamFactory.fabricate(enum)` resolve a estratégia concreta de montagem dos times.
-- **Chain of Responsibility** ([`UpdateDraw/`](UpdateDraw)): `FinalResultProcessor` encadeia handlers que decidem o que fazer após uma partida (vitória, empate com vantagem etc.). _Nome da pasta será renomeado para `FinalResult/` no PR 7.5._
+- **Chain of Responsibility** ([`FinalResult/`](FinalResult)): `FinalResultProcessor` encadeia handlers que decidem o que fazer após uma partida (vitória, empate com vantagem interna, empate com vantagem externa).
 - **Ports & Adapters**: [`ports/RepositorioPelada.ts`](ports/RepositorioPelada.ts) declara o contrato de persistência. Adapters concretos ficam em [`src/infrastructure/storage/`](../infrastructure/storage/).
 - **Observer + External Store**: `GameManager.subscribe(listener)` + `version` snapshot, consumido por `useGameSlice` (em [`src/app-shell/`](../app-shell/)) via `useSyncExternalStore`.
 

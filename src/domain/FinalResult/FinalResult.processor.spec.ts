@@ -4,8 +4,8 @@ import {
   UpdateDrawHandler,
   HandleInput,
   BaseUpdateDrawHandler,
-} from './UpdateDraw.handler';
-import { FinalResultProcessor } from './UpdateDray.processor';
+} from './FinalResult.handler';
+import { FinalResultProcessor } from './FinalResult.processor';
 
 class MockHandler extends BaseUpdateDrawHandler implements UpdateDrawHandler {
   override handle(input: HandleInput): void {

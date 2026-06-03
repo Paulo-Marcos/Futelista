@@ -6,7 +6,7 @@ import { DataRules, Rules } from "./Rules";
 import { Team, TeamSituation } from "./Team";
 import { CreateTeamFactory } from "./TeamBuilder/CreateTeam.factory";
 import { Timer, TimerStatus } from "./Timer";
-import { FinalResultProcessor } from "./UpdateDraw/UpdateDray.processor";
+import { FinalResultProcessor } from "./FinalResult/FinalResult.processor";
 
 /**
  * GameManager — agregado raiz da pelada.

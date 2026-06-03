@@ -1,4 +1,4 @@
-import { HandleInput, UpdateDrawHandler } from './UpdateDraw.handler';
+import { HandleInput, UpdateDrawHandler } from './FinalResult.handler';
 import { WithDrawAndAdvantageAndNotTwoTeams } from './WithDrawAndAdvantageAndNotTwoTeams';
 import { WithDrawAndAdvantageAndTwoTeams } from './WithDrawAndAdvantageAndTwoTeams';
 import { WithDrawAndExternalAdvantageAndNotTwoTeams } from './WithDrawAndExternalAdvantageAndNotTwoTeams';

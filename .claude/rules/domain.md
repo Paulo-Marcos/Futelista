@@ -50,7 +50,7 @@ import { Player } from './player';
 ## Padrões já aplicados (não reinventar)
 
 - **Factory + Strategy** para escolha de times: [TeamBuilder/CreateTeam.factory.ts](../../src/domain/TeamBuilder/CreateTeam.factory.ts).
-- **Chain of Responsibility** para pós-partida: [UpdateDraw/UpdateDray.processor.ts](../../src/domain/UpdateDraw/UpdateDray.processor.ts).
+- **Chain of Responsibility** para pós-partida: [FinalResult/FinalResult.processor.ts](../../src/domain/FinalResult/FinalResult.processor.ts).
 - **Aggregate Root** = `GameManager`: tudo que muda fluxo da pelada passa por ele.
 
 ## Quando adicionar uma classe nova

@@ -3,17 +3,17 @@ import { Match, ResultMatch } from '../Match';
 import { Player } from '../Player';
 import { ChoosingTeams, Rules } from '../Rules';
 import { Team } from '../Team';
-import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
-import { WithVictory } from './WithVictory';
+import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { WithDrawAndExternalAdvantageAndNotTwoTeams } from './WithDrawAndExternalAdvantageAndNotTwoTeams';
 
-describe('WithVictory', () => {
-  let withVictory: WithVictory;
+describe('WithDrawAndExternalAdvantageAndNotTwoTeams', () => {
+  let withDraw: WithDrawAndExternalAdvantageAndNotTwoTeams;
   let game: GameManager;
   let players: Player[];
   let teams: Team[];
   let rules: Rules;
   beforeEach(() => {
-    withVictory = new WithVictory();
+    withDraw = new WithDrawAndExternalAdvantageAndNotTwoTeams();
     rules = new Rules({
       playersPerTeam: 2,
       choosingTeams: ChoosingTeams.BY_ORDER,
@@ -26,36 +26,32 @@ describe('WithVictory', () => {
       'Oliveira',
       'Matos',
       'Peres',
-      'Solto',
-      'Ramos',
-      'Otavio',
     ]);
     teams = game.createTeams();
     game.setPlayingGame();
   });
 
-  it('deve realocar a equipe perdedora e iniciar um novo jogo ao lidar com uma vitória', () => {
+  it('deve realocar a equipe perdedora considerando uma vantagem externa e iniciar um novo jogo ao lidar com uma vitória', () => {
+    game.advantageToNext = undefined;
+    game.playing!.result = ResultMatch.DRAW;
     const teamA = game.playing!.teamA;
     const teamB = game.playing!.teamB;
     const nextTeam = game.getNthNext(1);
-    game.playing!.result = ResultMatch.VICTORY;
-    game.playing!.loser = teamA;
-    game.playing!.winner = teamB;
+    const input: HandleInput = { game, externalAdvantage: teamA };
     jest.spyOn(game, 'relocateTeam');
-    const input: HandleInput = { game };
-    withVictory.handle(input);
-    expect(game.relocateTeam).toHaveBeenCalledWith(teamA);
+    withDraw.handle(input);
+    expect(game.relocateTeam).toHaveBeenCalledWith(teamB);
     expect(game.playing).toEqual(expect.any(Match));
-    expect(game.playing!.teamA).toEqual(teamB);
+    expect(game.playing!.teamA).toEqual(teamA);
     expect(game.playing!.teamB).toEqual(nextTeam);
-    expect(game.advantageToNext).toBe(teamB);
+    expect(game.advantageToNext).toBeUndefined();
   });
 
-  it('deve chamar super.handle quando o resultado do jogo não é uma vitória', () => {
-    game.playing!.result = ResultMatch.DRAW;
+  it('deve chamar super.handle quando o resultado do jogo não é um empate', () => {
+    game.playing!.result = ResultMatch.VICTORY;
     const input: HandleInput = { game };
     const baseUpdateDrawHandlerSpy = jest.spyOn(BaseUpdateDrawHandler.prototype, 'handle');
-    withVictory.handle(input);
+    withDraw.handle(input);
     expect(baseUpdateDrawHandlerSpy).toHaveBeenCalledWith(input);
   });
 });

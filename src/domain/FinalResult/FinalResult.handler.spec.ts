@@ -4,7 +4,7 @@ import {
   BaseUpdateDrawHandler,
   UpdateDrawHandler,
   HandleInput,
-} from './UpdateDraw.handler';
+} from './FinalResult.handler';
 
 class ConcreteUpdateDrawHandler extends BaseUpdateDrawHandler {}
 

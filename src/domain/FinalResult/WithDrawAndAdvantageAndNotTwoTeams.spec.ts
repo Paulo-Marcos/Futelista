@@ -3,7 +3,7 @@ import { Match, ResultMatch } from '../Match';
 import { Player } from '../Player';
 import { ChoosingTeams, Rules } from '../Rules';
 import { Team } from '../Team';
-import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
+import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
 import { WithDrawAndAdvantageAndNotTwoTeams } from './WithDrawAndAdvantageAndNotTwoTeams';
 
 describe('WithDrawAndAdvantageAndNotTwoTeams', () => {

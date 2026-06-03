@@ -3,17 +3,17 @@ import { Match, ResultMatch } from '../Match';
 import { Player } from '../Player';
 import { ChoosingTeams, Rules } from '../Rules';
 import { Team } from '../Team';
-import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
-import { WithDrawAndExternalAdvantageAndNotTwoTeams } from './WithDrawAndExternalAdvantageAndNotTwoTeams';
+import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
+import { WithDrawAndExternalAdvantageAndTwoTeams } from './WithDrawAndExternalAdvantageAndTwoTeams';
 
-describe('WithDrawAndExternalAdvantageAndNotTwoTeams', () => {
-  let withDraw: WithDrawAndExternalAdvantageAndNotTwoTeams;
+describe('WithDrawAndExternalAdvantageAndTwoTeams', () => {
+  let withDraw: WithDrawAndExternalAdvantageAndTwoTeams;
   let game: GameManager;
   let players: Player[];
   let teams: Team[];
   let rules: Rules;
   beforeEach(() => {
-    withDraw = new WithDrawAndExternalAdvantageAndNotTwoTeams();
+    withDraw = new WithDrawAndExternalAdvantageAndTwoTeams();
     rules = new Rules({
       playersPerTeam: 2,
       choosingTeams: ChoosingTeams.BY_ORDER,
@@ -26,6 +26,8 @@ describe('WithDrawAndExternalAdvantageAndNotTwoTeams', () => {
       'Oliveira',
       'Matos',
       'Peres',
+      'otavio',
+      'mesquita',
     ]);
     teams = game.createTeams();
     game.setPlayingGame();
@@ -37,13 +39,15 @@ describe('WithDrawAndExternalAdvantageAndNotTwoTeams', () => {
     const teamA = game.playing!.teamA;
     const teamB = game.playing!.teamB;
     const nextTeam = game.getNthNext(1);
+    const nextTeam2 = game.getNthNext(2);
     const input: HandleInput = { game, externalAdvantage: teamA };
     jest.spyOn(game, 'relocateTeam');
     withDraw.handle(input);
+    expect(game.relocateTeam).toHaveBeenCalledWith(teamA);
     expect(game.relocateTeam).toHaveBeenCalledWith(teamB);
     expect(game.playing).toEqual(expect.any(Match));
-    expect(game.playing!.teamA).toEqual(teamA);
-    expect(game.playing!.teamB).toEqual(nextTeam);
+    expect(game.playing!.teamA).toEqual(nextTeam);
+    expect(game.playing!.teamB).toEqual(nextTeam2);
     expect(game.advantageToNext).toBeUndefined();
   });
 

@@ -1,5 +1,5 @@
 import { Match, ResultMatch } from '../Match';
-import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
+import { BaseUpdateDrawHandler, HandleInput } from './FinalResult.handler';
 
 /**
  * Cenário pós-partida: EMPATE com `advantageToNext` setada e fila cheia

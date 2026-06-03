@@ -83,7 +83,7 @@ src/
     Player, Team, Match, Goal, Switch, ScreenTime, Timer, Rules
     GameManager        ← Agregado raiz / orquestrador
     TeamBuilder/       ← Factory + Strategy: criação de times
-    UpdateDraw/        ← Chain of Responsibility: pós-partida
+    FinalResult/       ← Chain of Responsibility: pós-partida
 components/             ← Componentes RN reutilizáveis (ThemedText, ParallaxScrollView…)
 contexts/               ← React Contexts (SoccerContext)
 providers/              ← Provider que injeta o GameManager via Context
@@ -123,12 +123,13 @@ Implementado via **Factory + Strategy** em [src/domain/TeamBuilder](src/domain/T
 
 ### Pós-partida (`FinalResultProcessor`)
 
-Cadeia em [src/domain/UpdateDraw](src/domain/UpdateDraw) decide quem vai pra próxima:
+Cadeia em [src/domain/FinalResult](src/domain/FinalResult) decide quem vai pra próxima:
 
 1. `WithVictory` — vitória: perdedor vai pro fim, vencedor segue com vantagem.
 2. `WithDrawAndAdvantageAndTwoTeams` — empate com vantagem prévia e fila cheia.
 3. `WithDrawAndAdvantageAndNotTwoTeams` — empate com vantagem prévia e fila parcial.
-4. `WithDrawAndExternalAdvantageAndNotTwoTeams` — empate com vantagem externa (manual).
+4. `WithDrawAndExternalAdvantageAndNotTwoTeams` — empate com vantagem externa (manual) e fila parcial.
+5. `WithDrawAndExternalAdvantageAndTwoTeams` — empate com vantagem externa (manual) e fila cheia.
 
 ## Regras de Código
 
