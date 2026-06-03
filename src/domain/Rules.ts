@@ -66,7 +66,51 @@ export class Rules {
     const seconds = parseInt(parts[2]);
     return hoursInSeconds + minutesInSeconds + seconds;
   }
+
+  /**
+   * Retorna o conteúdo da regra como objeto puro (sem id).
+   *
+   * "Por valor": o caller pode clonar/passar adiante sem arrastar a
+   * identidade. Para persistir mantendo o id, combine com `rules.id`
+   * no chamador (ver `serializer.ts`).
+   */
+  toData(): Omit<RulesData, "id"> {
+    return {
+      name: this.name,
+      playersPerTeam: this.playersPerTeam,
+      timeMatch: this.timeMatch,
+      numberTimes: this.numberTimes,
+      goalLimit: this.goalLimit,
+      choosingTeams: this.choosingTeams,
+    };
+  }
+
+  /**
+   * Cria uma nova Rules mesclando os campos atuais com `parcial`. Campos
+   * ausentes no parcial preservam o valor atual.
+   *
+   * O id da regra original é mantido — `merge` não cria nova identidade;
+   * representa "uma evolução da mesma regra". Um eventual `parcial.id`
+   * é ignorado por design.
+   */
+  merge(parcial: DataRules): Rules {
+    return new Rules({
+      id: this.id,
+      name: parcial.name ?? this.name,
+      playersPerTeam: parcial.playersPerTeam ?? this.playersPerTeam,
+      timeMatch: parcial.timeMatch ?? this.timeMatch,
+      numberTimes: parcial.numberTimes ?? this.numberTimes,
+      goalLimit: parcial.goalLimit ?? this.goalLimit,
+      choosingTeams: parcial.choosingTeams ?? this.choosingTeams,
+    });
+  }
 }
+
+/**
+ * Snapshot completo de uma Rules — todos os campos preenchidos, incluindo
+ * `id`. Útil como contrato de payload (ver `serializer.ts`).
+ */
+export type RulesData = Required<DataRules>;
 
 /**
  * Estratégia de montagem dos times a partir da lista de jogadores.

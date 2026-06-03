@@ -186,13 +186,7 @@ async function cenarioAvulsaEmAndamento(
 function execucaoBase(pelada: Pelada, createdAt: number): GameManager {
   return new GameManager(
     pelada.nome,
-    new Rules({
-      playersPerTeam: pelada.regras.playersPerTeam,
-      timeMatch: pelada.regras.timeMatch,
-      numberTimes: pelada.regras.numberTimes,
-      goalLimit: pelada.regras.goalLimit,
-      choosingTeams: pelada.regras.choosingTeams,
-    }),
+    new Rules(pelada.regras.toData()),
     { peladaId: pelada.id, createdAt },
   );
 }

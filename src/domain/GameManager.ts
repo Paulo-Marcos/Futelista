@@ -375,15 +375,7 @@ export class GameManager {
     this.validarMudancaNumberTimes(parcial.numberTimes);
     this.validarMudancaChoosingTeams(parcial.choosingTeams);
 
-    this.rules = new Rules({
-      id: this.rules.id,
-      name: parcial.name ?? this.rules.name,
-      playersPerTeam: parcial.playersPerTeam ?? this.rules.playersPerTeam,
-      timeMatch: parcial.timeMatch ?? this.rules.timeMatch,
-      numberTimes: parcial.numberTimes ?? this.rules.numberTimes,
-      goalLimit: parcial.goalLimit ?? this.rules.goalLimit,
-      choosingTeams: parcial.choosingTeams ?? this.rules.choosingTeams,
-    });
+    this.rules = this.rules.merge(parcial);
     this.notify();
     return this.rules;
   }

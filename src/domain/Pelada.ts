@@ -45,15 +45,7 @@ export class Pelada {
    * mantêm as regras com que foram criadas (regras viajam por valor).
    */
   atualizarRegras(novas: DataRules): void {
-    this.regras = new Rules({
-      id: this.regras.id,
-      name: novas.name ?? this.regras.name,
-      playersPerTeam: novas.playersPerTeam ?? this.regras.playersPerTeam,
-      timeMatch: novas.timeMatch ?? this.regras.timeMatch,
-      numberTimes: novas.numberTimes ?? this.regras.numberTimes,
-      goalLimit: novas.goalLimit ?? this.regras.goalLimit,
-      choosingTeams: novas.choosingTeams ?? this.regras.choosingTeams,
-    });
+    this.regras = this.regras.merge(novas);
   }
 }
 

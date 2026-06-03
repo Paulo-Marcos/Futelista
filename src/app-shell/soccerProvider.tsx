@@ -186,7 +186,7 @@ export const SoccerProvider = ({
       const pelada = await repoRef.current.carregarPelada(peladaId);
       if (!pelada) throw Error("Pelada não encontrada.");
       const nome = opcoes?.nomeExecucao?.trim() || pelada.nome;
-      const nova = new GameManager(nome, new Rules(snapshotRegras(pelada)), {
+      const nova = new GameManager(nome, new Rules(pelada.regras.toData()), {
         peladaId,
       });
       if (opcoes?.herdarJogadores) {
@@ -235,7 +235,7 @@ export const SoccerProvider = ({
     async (nome: string, regras?: DataRules): Promise<Pelada> => {
       if (!manager)
         throw Error("Não há execução ativa para salvar como pelada.");
-      const regrasFinais = regras ?? regrasDeRules(manager.rules);
+      const regrasFinais = regras ?? manager.rules.toData();
       const pelada = new Pelada({ nome, regras: regrasFinais });
       manager.peladaId = pelada.id;
       await marcarSalvamento(async () => {
@@ -298,10 +298,6 @@ export const SoccerProvider = ({
   );
 };
 
-function snapshotRegras(pelada: Pelada): DataRules {
-  return regrasDeRules(pelada.regras);
-}
-
 /**
  * Busca a execução mais recente associada à pelada e devolve os nomes
  * dos jogadores dela. Array vazio se não houver execução anterior.
@@ -318,15 +314,4 @@ async function jogadoresDaUltimaExecucaoDe(
   const ultima = await repo.carregar(resumos[0].id);
   if (!ultima) return [];
   return ultima.players.map((p) => p.name);
-}
-
-function regrasDeRules(r: Rules): DataRules {
-  return {
-    name: r.name,
-    playersPerTeam: r.playersPerTeam,
-    timeMatch: r.timeMatch,
-    numberTimes: r.numberTimes,
-    goalLimit: r.goalLimit,
-    choosingTeams: r.choosingTeams,
-  };
 }

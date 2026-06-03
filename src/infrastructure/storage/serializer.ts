@@ -2,7 +2,7 @@ import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
 import { Goal } from "@/src/domain/Goal";
 import { Match, ResultMatch } from "@/src/domain/Match";
 import { Player, PlayerSituation } from "@/src/domain/Player";
-import { ChoosingTeams, Rules } from "@/src/domain/Rules";
+import { Rules, RulesData } from "@/src/domain/Rules";
 import { ScreenTime } from "@/src/domain/ScreenTime";
 import { Switch } from "@/src/domain/Switch";
 import { Team, TeamSituation } from "@/src/domain/Team";
@@ -74,16 +74,6 @@ type MatchDTO = {
   goals: GoalDTO[];
 };
 
-type RulesDTO = {
-  id: string;
-  name: string;
-  playersPerTeam: number;
-  timeMatch: string;
-  numberTimes: number;
-  goalLimit: number;
-  choosingTeams: ChoosingTeams;
-};
-
 type TimerDTO = {
   numberTimes: number;
   timeMatch: number;
@@ -106,7 +96,7 @@ export type Payload = {
     endedAt: number | null;
     peladaId: string | null;
   };
-  rules: RulesDTO;
+  rules: RulesData;
   players: PlayerDTO[];
   teams: TeamDTO[];
   matches: MatchDTO[];
@@ -175,7 +165,7 @@ function buildPayload(game: GameManager): Payload {
       endedAt: game.endedAt ?? null,
       peladaId: game.peladaId ?? null,
     },
-    rules: buildRulesDTO(game.rules),
+    rules: { id: game.rules.id, ...game.rules.toData() },
     players: game.players.map(buildPlayerDTO),
     teams: collectAllTeams(game).map(buildTeamDTO),
     matches: allMatches.map(buildMatchDTO),
@@ -211,18 +201,6 @@ function collectAllTeams(game: GameManager): Team[] {
   }
   add(game.advantageToNext);
   return [...map.values()];
-}
-
-function buildRulesDTO(rules: Rules): RulesDTO {
-  return {
-    id: rules.id,
-    name: rules.name,
-    playersPerTeam: rules.playersPerTeam,
-    timeMatch: rules.timeMatch,
-    numberTimes: rules.numberTimes,
-    goalLimit: rules.goalLimit,
-    choosingTeams: rules.choosingTeams,
-  };
 }
 
 function buildPlayerDTO(player: Player): PlayerDTO {
