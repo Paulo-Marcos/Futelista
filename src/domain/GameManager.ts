@@ -163,11 +163,11 @@ export class GameManager {
   setPlayingGame(): void {
     if (this.playing !== undefined)
       throw Error("Já existe uma partida acontecendo.");
-    this.playing = new Match(this.removeFirstNext(), this.removeFirstNext());
+    this.playing = new Match(this.tirarDaFila(), this.tirarDaFila());
     this.notify();
   }
 
-  removeFirstNext(): Team {
+  tirarDaFila(): Team {
     return this.next.shift()!;
   }
 

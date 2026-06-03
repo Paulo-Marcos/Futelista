@@ -17,7 +17,7 @@ export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseUpdateDrawHa
       input.game.relocateTeam(input.game.getOtherPlayingTeam(input.externalAdvantage!));
       input.game.playing = new Match(
         input.externalAdvantage!,
-        input.game.removeFirstNext(),
+        input.game.tirarDaFila(),
       );
       input.game.advantageToNext = undefined;
       return;

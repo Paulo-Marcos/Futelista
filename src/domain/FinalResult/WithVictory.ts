@@ -14,7 +14,7 @@ export class WithVictory extends BaseUpdateDrawHandler {
       input.game.advantageToNext = input.game.playing.winner!;
       input.game.playing = new Match(
         input.game.playing?.winner!,
-        input.game.removeFirstNext(),
+        input.game.tirarDaFila(),
       );
       return;
     }

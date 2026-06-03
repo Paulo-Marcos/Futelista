@@ -96,7 +96,7 @@ describe('Teste da classe Game', () => {
     it('deve retirar um time das próximas', () => {
       game.createTeams();
       const team = game.getNthNext(1);
-      expect(game.removeFirstNext()).toEqual(team);
+      expect(game.tirarDaFila()).toEqual(team);
     });
 
     it('getLastTeam deve retornar o último time', () => {

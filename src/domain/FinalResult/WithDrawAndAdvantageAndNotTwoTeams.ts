@@ -18,7 +18,7 @@ export class WithDrawAndAdvantageAndNotTwoTeams extends BaseUpdateDrawHandler {
       input.game.relocateTeam(loser);
       input.game.playing = new Match(
         input.game.advantageToNext!,
-        input.game.removeFirstNext(),
+        input.game.tirarDaFila(),
       );
       return;
     }
