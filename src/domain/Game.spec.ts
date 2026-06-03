@@ -14,7 +14,7 @@ describe('Teste da classe Game', () => {
   describe('Quando for tratar a lista de jogadores', () => {
     it('Deverá cadastrar uma lista de jogadores', () => {
       const game = new GameManager('Futebol de quarta', new Rules());
-      game.addPlayerList(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
+      game.setPlayers(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
       expect(game.players.length).toBe(4);
       expect(game.players[0]).toBeInstanceOf(Player);
       expect(game.playersWithoutTeam).toBe(4);
@@ -36,7 +36,7 @@ describe('Teste da classe Game', () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
       game = new GameManager('Futebol de quarta', rules);
-      game.addPlayerList(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
+      game.setPlayers(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
     });
 
     it('deve chamar CreateTeamFactory corretamente e definir this.next', () => {
@@ -158,7 +158,7 @@ describe('Teste da classe Game', () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
       game = new GameManager('Futebol de quarta', rules);
-      players = game.addPlayerList([
+      players = game.setPlayers([
         'Paulo',
         'Marcos',
         'Rodrigues',
@@ -297,7 +297,7 @@ describe('Teste da classe Game', () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
       game = new GameManager('Futebol de quarta', rules);
-      players = game.addPlayerList([
+      players = game.setPlayers([
         'Paulo',
         'Marcos',
         'Rodrigues',
@@ -371,7 +371,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá tirar o jogador do time antes de remover da pelada', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       const ana = game.players.find((p) => p.name === 'Ana')!;
       const time = ana.currentTeam!;
@@ -514,7 +514,7 @@ describe('Teste da classe Game', () => {
         'Pelada',
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
       game.createTeams();
       return game;
     }
@@ -560,7 +560,7 @@ describe('Teste da classe Game', () => {
         'Pelada',
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       return game;
     }
@@ -623,7 +623,7 @@ describe('Teste da classe Game', () => {
   describe('Quando bloquear remoção em partida ativa', () => {
     it('deverá lançar erro ao remover jogador de time que está em partida', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
       const playingPlayer = [...game.playing!.teams]
@@ -635,7 +635,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá permitir remover jogador que NÃO está na partida atual', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
       game.createTeams();
       game.setPlayingGame();
       const semPartida = game.players.find(
@@ -649,7 +649,7 @@ describe('Teste da classe Game', () => {
     let game: GameManager;
     beforeEach(() => {
       game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
     });
 
@@ -716,7 +716,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro ao mudar playersPerTeam com times montados', () => {
       const game = pelada();
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       expect(() => game.atualizarRegras({ playersPerTeam: 3 })).toThrowError(
         /Não é possível mudar jogadores por time/,
@@ -725,7 +725,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá lançar erro ao mudar choosingTeams com times montados', () => {
       const game = pelada();
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       expect(() =>
         game.atualizarRegras({ choosingTeams: ChoosingTeams.BY_MIXING_TEAMS }),
@@ -734,7 +734,7 @@ describe('Teste da classe Game', () => {
 
     it('deverá permitir alterar timeMatch e goalLimit a qualquer momento', () => {
       const game = pelada();
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
       game.atualizarRegras({ timeMatch: '00:05:00', goalLimit: 10 });
@@ -789,7 +789,7 @@ describe('Teste da classe Game', () => {
 
     it('finalizar() falha se houver partida em andamento', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.iniciar();
       game.setPlayingGame();
@@ -809,7 +809,7 @@ describe('Teste da classe Game', () => {
   describe('Quando limpar jogadores e times', () => {
     it('esvazia jogadores, fila e jogadores-sem-time preservando regras e nome', () => {
       const game = new GameManager('Sábado', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.limparJogadoresETimes();
       expect(game.players).toHaveLength(0);
@@ -822,7 +822,7 @@ describe('Teste da classe Game', () => {
 
     it('preserva o histórico de partidas', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
       game.setResult();
@@ -835,7 +835,7 @@ describe('Teste da classe Game', () => {
 
     it('bloqueia limpeza com partida em andamento', () => {
       const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
-      game.addPlayerList(['Ana', 'Bia', 'Caio', 'Davi']);
+      game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
       expect(() => game.limparJogadoresETimes()).toThrowError(

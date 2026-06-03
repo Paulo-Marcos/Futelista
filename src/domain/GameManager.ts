@@ -85,8 +85,15 @@ export class GameManager {
     return this.next;
   }
 
-  addPlayerList(names: string[]): Player[] {
+  /**
+   * Substitui a lista de jogadores pela informada — comportamento
+   * destrutivo. Para acrescentar mantendo os existentes use `addPlayers`.
+   *
+   * Útil em boot (hidratar pelada a partir de nomes salvos) e em devSeed.
+   */
+  setPlayers(names: string[]): Player[] {
     this.players = [];
+    this.playersWithoutTeam = 0;
     names.forEach((name) => {
       const newPlayer = new Player(name);
       this.players.push(newPlayer);

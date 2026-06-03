@@ -19,7 +19,7 @@ describe('WithDrawAndAdvantageAndTwoTeams', () => {
       choosingTeams: ChoosingTeams.BY_ORDER,
     });
     game = new GameManager('Futebol de quarta', rules);
-    players = game.addPlayerList([
+    players = game.setPlayers([
       'Paulo',
       'Marcos',
       'Rodrigues',

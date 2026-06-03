@@ -194,7 +194,7 @@ export const SoccerProvider = ({
           repoRef.current,
           peladaId,
         );
-        if (jogadores.length > 0) nova.addPlayerList(jogadores);
+        if (jogadores.length > 0) nova.setPlayers(jogadores);
       }
       nova.iniciar();
       await trocarManager(nova);

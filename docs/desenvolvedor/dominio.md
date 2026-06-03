@@ -95,7 +95,7 @@ Ponto único de entrada para tudo que muda a pelada. Implementa _external store_
 | Método                         | Faz                                                                       |
 | ------------------------------ | ------------------------------------------------------------------------- |
 | `addPlayer(name)`              | Cria e adiciona um jogador.                                               |
-| `addPlayerList(names)`         | Substitui a lista por jogadores criados a partir desses nomes.            |
+| `setPlayers(names)`            | Substitui a lista por jogadores criados a partir desses nomes.            |
 | `createTeams()`                | Monta a fila `next` usando a strategy do `choosingTeams`.                 |
 | `setPlayingGame()`             | Tira os 2 primeiros de `next` e cria a `Match` em `playing`.              |
 | `start() / pause() / continue()` | Controla o `Timer` da partida atual.                                    |

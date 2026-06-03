@@ -19,7 +19,7 @@ describe("serializer (round-trip GameManager)", () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       }),
     );
-    game.addPlayerList(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
+    game.setPlayers(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
     return game;
   }
 

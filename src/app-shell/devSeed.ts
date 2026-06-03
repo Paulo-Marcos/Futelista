@@ -121,7 +121,7 @@ async function cenarioCefComTresExecucoes(
   // Duas execuções antigas finalizadas.
   for (let i = 2; i >= 1; i--) {
     const exec = execucaoBase(pelada, agora - i * 7 * dia);
-    exec.addPlayerList(NOMES_CEF);
+    exec.setPlayers(NOMES_CEF);
     exec.iniciar();
     exec.finalizar();
     await repo.salvar(exec);
@@ -129,7 +129,7 @@ async function cenarioCefComTresExecucoes(
 
   // Execução ativa: 8 jogadores, sem partida ainda.
   const ativa = execucaoBase(pelada, agora);
-  ativa.addPlayerList(NOMES_CEF);
+  ativa.setPlayers(NOMES_CEF);
   ativa.iniciar();
   await repo.salvar(ativa);
   await definirAtiva(ativa.id);
@@ -156,14 +156,14 @@ async function cenarioTresPeladasMix(repo: RepositorioPelada): Promise<void> {
   // CEF: 2 execuções finalizadas
   for (let i = 2; i >= 1; i--) {
     const exec = execucaoBase(cef, agora - i * 7 * dia);
-    exec.addPlayerList(NOMES_CEF);
+    exec.setPlayers(NOMES_CEF);
     exec.iniciar();
     exec.finalizar();
     await repo.salvar(exec);
   }
   // BB: 1 finalizada
   const execBB = execucaoBase(bb, agora - 14 * dia);
-  execBB.addPlayerList(NOMES_BB);
+  execBB.setPlayers(NOMES_BB);
   execBB.iniciar();
   execBB.finalizar();
   await repo.salvar(execBB);
@@ -177,7 +177,7 @@ async function cenarioAvulsaEmAndamento(
     NOME_AVULSA_DEFAULT,
     new Rules({ playersPerTeam: 3, timeMatch: TIME_DEFAULT, goalLimit: 2 }),
   );
-  exec.addPlayerList(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
+  exec.setPlayers(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
   exec.iniciar();
   await repo.salvar(exec);
   await definirAtiva(exec.id);
