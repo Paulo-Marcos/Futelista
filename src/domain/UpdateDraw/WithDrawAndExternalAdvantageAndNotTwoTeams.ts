@@ -1,4 +1,3 @@
-import { GameManager } from '../GameManager';
 import { Match, ResultMatch } from '../Match';
 import { BaseUpdateDrawHandler, HandleInput } from './UpdateDraw.handler';
 
@@ -27,18 +26,10 @@ export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseUpdateDrawHa
   }
 
   isDrawWithExternalAdvantageAndNotTwoTeams(input: HandleInput): boolean {
-    if (
+    return (
       !input.game.advantageToNext &&
-      input.externalAdvantage &&
-      !this.hasSecondNextAndIsFull(input.game)
-    )
-      return true;
-    return false;
-  }
-
-  hasSecondNextAndIsFull(game: GameManager): boolean {
-    if (!game.getNthNext(2)) return false;
-    if (!game.getNthNext(2).fullTeam) return false;
-    return true;
+      !!input.externalAdvantage &&
+      !this.filaTemDoisTimesCheios(input.game)
+    );
   }
 }

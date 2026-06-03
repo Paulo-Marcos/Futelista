@@ -31,6 +31,16 @@ export abstract class BaseUpdateDrawHandler implements UpdateDrawHandler {
       this.nextHandler.handle(input);
     }
   }
+
+  /**
+   * `true` quando há um segundo time completo na fila — usado para
+   * distinguir cenários "fila cheia" (≥ 2 times prontos) de "fila parcial"
+   * em vários handlers de empate.
+   */
+  protected filaTemDoisTimesCheios(game: GameManager): boolean {
+    const segundo = game.getNthNext(2);
+    return !!segundo && segundo.fullTeam;
+  }
 }
 
 /**
