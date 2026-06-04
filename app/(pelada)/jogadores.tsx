@@ -28,12 +28,12 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 const AUTO_DISMISS_ERRO_MS = 5000;
 
 export default function JogadoresScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  return <JogadoresInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  return <JogadoresInner gestor={gestor} />;
 }
 
-function JogadoresInner({ manager }: { manager: GestorJogo }) {
+function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
@@ -68,7 +68,7 @@ function JogadoresInner({ manager }: { manager: GestorJogo }) {
     const nome = novoNome.trim();
     if (!nome) return;
     try {
-      manager.addPlayer(nome);
+      gestor.addPlayer(nome);
       setNovoNome("");
       setErro(null);
       // Rolar até o fim para tornar visível o jogador recém-criado.
@@ -80,7 +80,7 @@ function JogadoresInner({ manager }: { manager: GestorJogo }) {
 
   const adicionarLote = (nomes: string[]) => {
     try {
-      const criados = manager.addPlayers(nomes);
+      const criados = gestor.addPlayers(nomes);
       setLoteAberto(false);
       if (criados.length === 0) {
         setErro("Nenhum jogador adicionado (todos vazios ou duplicados).");
@@ -102,7 +102,7 @@ function JogadoresInner({ manager }: { manager: GestorJogo }) {
     });
     if (!ok) return;
     try {
-      manager.removePlayer(p);
+      gestor.removePlayer(p);
       setErro(null);
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));
@@ -127,7 +127,7 @@ function JogadoresInner({ manager }: { manager: GestorJogo }) {
       return;
     }
     try {
-      manager.renamePlayer(p, editingNome);
+      gestor.renamePlayer(p, editingNome);
       cancelarEdicao();
       setErro(null);
     } catch (e) {

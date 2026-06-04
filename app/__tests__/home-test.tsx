@@ -83,7 +83,7 @@ function mockAlert(
 }
 
 // ===========================================================================
-// MODO GESTÃO (manager = null)
+// MODO GESTÃO (gestor = null)
 // ===========================================================================
 
 describe("Home — modo gestão (sem execução)", () => {
@@ -238,13 +238,13 @@ describe("Home — modo gestão (sem execução)", () => {
 });
 
 // ===========================================================================
-// MODO EXECUÇÃO (manager = GestorJogo real)
+// MODO EXECUÇÃO (gestor = GestorJogo real)
 // ===========================================================================
 
-describe("Home — modo execução (com manager)", () => {
+describe("Home — modo execução (com gestor)", () => {
   it("renderiza o nome da execução e CTA de adicionar jogadores", async () => {
-    const manager = buildManager({ name: "Treino quarta" });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ name: "Treino quarta" });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     expect(await screen.findByText("Treino quarta")).toBeTruthy();
     expect(
@@ -253,22 +253,22 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("mostra badge AVULSA quando peladaId não está definido", () => {
-    const manager = buildManager({ peladaId: undefined });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ peladaId: undefined });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     expect(screen.getByText("AVULSA")).toBeTruthy();
   });
 
   it("não mostra badge AVULSA quando vinculada a uma Pelada", () => {
-    const manager = buildManager({ peladaId: "p1" });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ peladaId: "p1" });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     expect(screen.queryByText("AVULSA")).toBeNull();
   });
 
   it("CTA 'Adicionar jogadores' navega para /jogadores", () => {
-    const manager = buildManager();
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager();
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
       screen.getByRole("button", { name: "Adicionar jogadores" }),
@@ -278,8 +278,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("StatCard de jogadores navega para /jogadores", () => {
-    const manager = buildManager();
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager();
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
       screen.getByLabelText(/0 jogadores. Toque para abrir lista\./),
@@ -289,8 +289,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("StatCard de times navega para /times", () => {
-    const manager = buildManager();
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager();
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
       screen.getByLabelText(/0 times no total. Toque para abrir lista\./),
@@ -300,8 +300,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("botão regras (ícone) navega para /regras", () => {
-    const manager = buildManager();
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager();
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
       screen.getByRole("button", { name: "Editar regras da execução" }),
@@ -311,9 +311,9 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Voltar para minhas peladas' chama voltarParaGestao", async () => {
-    const manager = buildManager();
+    const gestor = buildManager();
     const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { manager },
+      soccer: { gestor },
     });
 
     fireEvent.press(
@@ -326,9 +326,9 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Finalizar esta execução' confirma e chama finalizarExecucao", async () => {
-    const manager = buildManager();
+    const gestor = buildManager();
     const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { manager },
+      soccer: { gestor },
     });
     const alertSpy = mockAlert((b) => b.text === "Finalizar");
 
@@ -343,9 +343,9 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Finalizar' cancelado não chama finalizarExecucao", async () => {
-    const manager = buildManager();
+    const gestor = buildManager();
     const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { manager },
+      soccer: { gestor },
     });
     const alertSpy = mockAlert((b) => b.style === "cancel");
 
@@ -359,9 +359,9 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Limpar jogadores e times' confirma e chama limparJogadoresETimes", async () => {
-    const manager = buildManager();
+    const gestor = buildManager();
     const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { manager },
+      soccer: { gestor },
     });
     const alertSpy = mockAlert((b) => b.text === "Limpar");
 
@@ -376,8 +376,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Salvar como pelada cadastrada' aparece e navega quando avulsa", () => {
-    const manager = buildManager({ peladaId: undefined });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ peladaId: undefined });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
       screen.getByRole("button", { name: "Salvar como pelada cadastrada" }),
@@ -387,8 +387,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("'Salvar como pelada cadastrada' NÃO aparece quando vinculada a uma Pelada", () => {
-    const manager = buildManager({ peladaId: "p1" });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ peladaId: "p1" });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     expect(
       screen.queryByRole("button", {
@@ -398,8 +398,8 @@ describe("Home — modo execução (com manager)", () => {
   });
 
   it("execução finalizada: Finalizar e Limpar desaparecem", () => {
-    const manager = buildManager({ status: PeladaStatus.FINALIZADA });
-    renderWithProviders(<HomeScreen />, { soccer: { manager } });
+    const gestor = buildManager({ status: PeladaStatus.FINALIZADA });
+    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     expect(
       screen.queryByRole("button", { name: "Finalizar esta execução" }),

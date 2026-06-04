@@ -20,12 +20,12 @@ type Cenario =
   | { kind: "draw_manual"; teamA: Team; teamB: Team };
 
 export default function ResultadoScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  return <ResultadoInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  return <ResultadoInner gestor={gestor} />;
 }
 
-function ResultadoInner({ manager }: { manager: GestorJogo }) {
+function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
 
@@ -62,7 +62,7 @@ function ResultadoInner({ manager }: { manager: GestorJogo }) {
 
   const confirmar = (timeExterno?: Team) => {
     try {
-      manager.setNextMatch(timeExterno);
+      gestor.setNextMatch(timeExterno);
       router.replace("/times");
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));

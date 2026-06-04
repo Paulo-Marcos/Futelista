@@ -128,7 +128,7 @@ describe("Peladas (lista) — render dos cards", () => {
     });
     renderWithProviders(<PeladasScreen />, {
       soccer: {
-        manager: m,
+        gestor: m,
         listarPeladas: jest.fn().mockResolvedValue(peladas),
       },
     });

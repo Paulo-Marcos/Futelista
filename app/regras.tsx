@@ -23,12 +23,12 @@ import { Stepper } from "@/src/shared/ui/Stepper";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function RegrasScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  return <RegrasInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  return <RegrasInner gestor={gestor} />;
 }
 
-function RegrasInner({ manager }: { manager: GestorJogo }) {
+function RegrasInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
 
@@ -38,7 +38,7 @@ function RegrasInner({ manager }: { manager: GestorJogo }) {
   const statusTimer = useGameSliceRequired((g) => g.timer?.status);
   const totalJogadores = useGameSliceRequired((g) => g.players.length);
 
-  const [nome, setNome] = useState(manager.name);
+  const [nome, setNome] = useState(gestor.name);
   const [playersPerTeam, setPlayersPerTeam] = useState(rules.playersPerTeam);
   const [numberTimes, setNumberTimes] = useState(rules.numberTimes);
   const [goalLimit, setGoalLimit] = useState(rules.goalLimit);
@@ -60,8 +60,8 @@ function RegrasInner({ manager }: { manager: GestorJogo }) {
 
   const salvar = () => {
     try {
-      manager.name = nome.trim() || manager.name;
-      manager.atualizarRegras({
+      gestor.name = nome.trim() || gestor.name;
+      gestor.atualizarRegras({
         name: nome.trim() || rules.name,
         playersPerTeam,
         numberTimes,

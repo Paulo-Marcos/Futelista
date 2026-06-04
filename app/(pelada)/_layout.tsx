@@ -7,14 +7,14 @@ import { usePalette } from "@/src/shared/hooks/usePalette";
 /**
  * Tabs internas da pelada.
  *
- * Sem execução ativa (manager null), só a tab "Pelada" aparece — as
+ * Sem execução ativa (gestor null), só a tab "Pelada" aparece — as
  * tabs Jogadores e Times não fazem sentido sem um GestorJogo carregado
  * e são escondidas via `href: null`.
  */
 export default function PeladaLayout() {
   const palette = usePalette();
-  const { manager } = useSoccer();
-  const temExecucao = manager !== null;
+  const { gestor } = useSoccer();
+  const temExecucao = gestor !== null;
 
   return (
     <Tabs

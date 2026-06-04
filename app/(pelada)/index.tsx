@@ -36,8 +36,8 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  *    stats, próximos, última partida, ações de ciclo de vida).
  */
 export default function HomeScreen() {
-  const { manager } = useSoccer();
-  return manager ? <ExecucaoHome /> : <GestaoHome />;
+  const { gestor } = useSoccer();
+  return gestor ? <ExecucaoHome /> : <GestaoHome />;
 }
 
 // ====================================================================
@@ -255,7 +255,7 @@ function PeladaTipoCard({
 }
 
 // ====================================================================
-// MODO EXECUÇÃO (com manager ativo)
+// MODO EXECUÇÃO (com gestor ativo)
 // ====================================================================
 
 function ExecucaoHome() {

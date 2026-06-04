@@ -24,13 +24,13 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  * informa um nome e as regras default são herdadas da execução.
  */
 export default function SalvarComoPeladaScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  if (manager.peladaId) return <Redirect href="/" />;
-  return <SalvarComoPeladaInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  if (gestor.peladaId) return <Redirect href="/" />;
+  return <SalvarComoPeladaInner gestor={gestor} />;
 }
 
-function SalvarComoPeladaInner({ manager }: { manager: GestorJogo }) {
+function SalvarComoPeladaInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
   const { salvarExecucaoAtualComoPelada } = useSoccer();

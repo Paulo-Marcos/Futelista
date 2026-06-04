@@ -26,7 +26,7 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 /**
- * Constrói um manager com partida em andamento e (opcionalmente) define
+ * Constrói um gestor com partida em andamento e (opcionalmente) define
  * winner/loser/result diretamente — atalho de teste para evitar dependência
  * do Timer.
  */
@@ -34,7 +34,7 @@ function buildResultadoManager(opts: {
   /** Quantidade total de jogadores (cria N/playersPerTeam times). */
   totalJogadores?: number;
   result: ResultMatch;
-  /** Define manager.advantageToNext = teamA (para empate automático). */
+  /** Define gestor.advantageToNext = teamA (para empate automático). */
   comAdvantage?: boolean;
   /** "A" → winner=teamA; "B" → winner=teamB. */
   vencedor?: "A" | "B";
@@ -59,8 +59,8 @@ function buildResultadoManager(opts: {
   return m;
 }
 
-function renderResultado(manager: GestorJogo | null) {
-  return renderWithProviders(<ResultadoScreen />, { soccer: { manager } });
+function renderResultado(gestor: GestorJogo | null) {
+  return renderWithProviders(<ResultadoScreen />, { soccer: { gestor } });
 }
 
 // ===========================================================================
@@ -68,12 +68,12 @@ function renderResultado(manager: GestorJogo | null) {
 // ===========================================================================
 
 describe("Resultado — guards", () => {
-  it("sem manager: não renderiza (Redirect)", () => {
+  it("sem gestor: não renderiza (Redirect)", () => {
     renderResultado(null);
     expect(screen.queryByText(/×/)).toBeNull();
   });
 
-  it("manager sem playing/result: 'Nenhum resultado pendente'", () => {
+  it("gestor sem playing/result: 'Nenhum resultado pendente'", () => {
     const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
     renderResultado(m);
 

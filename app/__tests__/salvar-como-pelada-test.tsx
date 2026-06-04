@@ -32,23 +32,23 @@ function buildVinculada() {
 // ===========================================================================
 
 describe("SalvarComoPelada — guards", () => {
-  it("sem manager: Redirect (não renderiza título)", () => {
+  it("sem gestor: Redirect (não renderiza título)", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: null },
+      soccer: { gestor: null },
     });
     expect(screen.queryByText("Salvar como pelada")).toBeNull();
   });
 
-  it("com manager vinculado a uma Pelada: Redirect", () => {
+  it("com gestor vinculado a uma Pelada: Redirect", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildVinculada() },
+      soccer: { gestor: buildVinculada() },
     });
     expect(screen.queryByText("Salvar como pelada")).toBeNull();
   });
 
   it("avulsa: renderiza título e o campo Nome", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa() },
+      soccer: { gestor: buildAvulsa() },
     });
     expect(screen.getByText("Salvar como pelada")).toBeTruthy();
     expect(screen.getByPlaceholderText("Ex.: Fute CEF")).toBeTruthy();
@@ -62,7 +62,7 @@ describe("SalvarComoPelada — guards", () => {
 describe("SalvarComoPelada — prefill do nome", () => {
   it("nome 'Pelada avulsa' começa vazio (sem prefill)", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa("Pelada avulsa") },
+      soccer: { gestor: buildAvulsa("Pelada avulsa") },
     });
 
     const input = screen.getByPlaceholderText("Ex.: Fute CEF");
@@ -71,7 +71,7 @@ describe("SalvarComoPelada — prefill do nome", () => {
 
   it("nome diferente vem preenchido como sugestão", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa("Treino quarta") },
+      soccer: { gestor: buildAvulsa("Treino quarta") },
     });
 
     expect(screen.getByDisplayValue("Treino quarta")).toBeTruthy();
@@ -87,7 +87,7 @@ describe("SalvarComoPelada — salvar", () => {
     const salvar = jest.fn().mockResolvedValue({ id: "p1" });
     renderWithProviders(<SalvarComoPeladaScreen />, {
       soccer: {
-        manager: buildAvulsa(),
+        gestor: buildAvulsa(),
         salvarExecucaoAtualComoPelada: salvar,
       },
     });
@@ -105,7 +105,7 @@ describe("SalvarComoPelada — salvar", () => {
     const salvar = jest.fn().mockResolvedValue({ id: "p1" });
     renderWithProviders(<SalvarComoPeladaScreen />, {
       soccer: {
-        manager: buildAvulsa(),
+        gestor: buildAvulsa(),
         salvarExecucaoAtualComoPelada: salvar,
       },
     });
@@ -124,7 +124,7 @@ describe("SalvarComoPelada — salvar", () => {
     const salvar = jest.fn().mockRejectedValue(new Error("Nome em uso"));
     renderWithProviders(<SalvarComoPeladaScreen />, {
       soccer: {
-        manager: buildAvulsa(),
+        gestor: buildAvulsa(),
         salvarExecucaoAtualComoPelada: salvar,
       },
     });
@@ -143,7 +143,7 @@ describe("SalvarComoPelada — salvar", () => {
     const salvar = jest.fn().mockResolvedValue({ id: "p1" });
     renderWithProviders(<SalvarComoPeladaScreen />, {
       soccer: {
-        manager: buildAvulsa(),
+        gestor: buildAvulsa(),
         salvarExecucaoAtualComoPelada: salvar,
       },
     });
@@ -163,7 +163,7 @@ describe("SalvarComoPelada — salvar", () => {
 describe("SalvarComoPelada — cancelar/fechar", () => {
   it("Cancelar chama router.back", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa() },
+      soccer: { gestor: buildAvulsa() },
     });
     fireEvent.press(screen.getByRole("button", { name: "Cancelar" }));
     expect(router.back).toHaveBeenCalledTimes(1);
@@ -171,7 +171,7 @@ describe("SalvarComoPelada — cancelar/fechar", () => {
 
   it("Fechar (X) chama router.back", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa() },
+      soccer: { gestor: buildAvulsa() },
     });
     fireEvent.press(screen.getByRole("button", { name: "Fechar" }));
     expect(router.back).toHaveBeenCalledTimes(1);
@@ -185,7 +185,7 @@ describe("SalvarComoPelada — cancelar/fechar", () => {
 describe("SalvarComoPelada — preview das regras", () => {
   it("formata regras (4×4 · 10min · 1 tempo · limite 2 gols)", () => {
     renderWithProviders(<SalvarComoPeladaScreen />, {
-      soccer: { manager: buildAvulsa() },
+      soccer: { gestor: buildAvulsa() },
     });
 
     expect(

@@ -51,8 +51,8 @@ function buildManager(opts?: {
   return m;
 }
 
-function renderTimes(manager: GestorJogo | null) {
-  return renderWithProviders(<TimesScreen />, { soccer: { manager } });
+function renderTimes(gestor: GestorJogo | null) {
+  return renderWithProviders(<TimesScreen />, { soccer: { gestor } });
 }
 
 function mockAlert(pick: (b: { text?: string; style?: string }) => boolean) {
@@ -73,7 +73,7 @@ function getPressableByLabel(label: string) {
 // ===========================================================================
 
 describe("Times — guards e EmptyState", () => {
-  it("sem manager: Redirect (não renderiza Times)", () => {
+  it("sem gestor: Redirect (não renderiza Times)", () => {
     renderTimes(null);
     expect(screen.queryByText("Times")).toBeNull();
   });

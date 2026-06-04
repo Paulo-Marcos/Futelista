@@ -49,8 +49,8 @@ function mockAlert(
   });
 }
 
-function renderJogadores(manager: GestorJogo) {
-  return renderWithProviders(<JogadoresScreen />, { soccer: { manager } });
+function renderJogadores(gestor: GestorJogo) {
+  return renderWithProviders(<JogadoresScreen />, { soccer: { gestor } });
 }
 
 // ===========================================================================
@@ -58,8 +58,8 @@ function renderJogadores(manager: GestorJogo) {
 // ===========================================================================
 
 describe("Jogadores — guard de rota", () => {
-  it("sem manager: não renderiza o header (Redirect)", () => {
-    renderWithProviders(<JogadoresScreen />, { soccer: { manager: null } });
+  it("sem gestor: não renderiza o header (Redirect)", () => {
+    renderWithProviders(<JogadoresScreen />, { soccer: { gestor: null } });
     // O Redirect do mock retorna null; a tela não aparece.
     expect(screen.queryByText("Jogadores")).toBeNull();
   });
@@ -88,8 +88,8 @@ describe("Jogadores — adicionar via input + botão", () => {
   });
 
   it("press do '+' adiciona o jogador (trimado) na lista", () => {
-    const manager = buildManager();
-    renderJogadores(manager);
+    const gestor = buildManager();
+    renderJogadores(gestor);
 
     fireEvent.changeText(
       screen.getByLabelText("Nome do novo jogador"),
@@ -97,7 +97,7 @@ describe("Jogadores — adicionar via input + botão", () => {
     );
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
 
-    expect(manager.players.map((p) => p.name)).toEqual(["Ana"]);
+    expect(gestor.players.map((p) => p.name)).toEqual(["Ana"]);
     expect(screen.getByText("Ana")).toBeTruthy();
   });
 
@@ -112,8 +112,8 @@ describe("Jogadores — adicionar via input + botão", () => {
   });
 
   it("nome só com espaços não adiciona", () => {
-    const manager = buildManager();
-    renderJogadores(manager);
+    const gestor = buildManager();
+    renderJogadores(gestor);
 
     fireEvent.changeText(
       screen.getByLabelText("Nome do novo jogador"),
@@ -121,18 +121,18 @@ describe("Jogadores — adicionar via input + botão", () => {
     );
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
 
-    expect(manager.players).toHaveLength(0);
+    expect(gestor.players).toHaveLength(0);
   });
 
   it("onSubmitEditing também adiciona", () => {
-    const manager = buildManager();
-    renderJogadores(manager);
+    const gestor = buildManager();
+    renderJogadores(gestor);
 
     const input = screen.getByLabelText("Nome do novo jogador");
     fireEvent.changeText(input, "Bia");
     fireEvent(input, "submitEditing");
 
-    expect(manager.players.map((p) => p.name)).toEqual(["Bia"]);
+    expect(gestor.players.map((p) => p.name)).toEqual(["Bia"]);
   });
 });
 
@@ -142,8 +142,8 @@ describe("Jogadores — adicionar via input + botão", () => {
 
 describe("Jogadores — erro ao adicionar duplicata", () => {
   it("mostra mensagem de erro quando o domínio rejeita", () => {
-    const manager = buildManager(["Ana"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    renderJogadores(gestor);
 
     fireEvent.changeText(
       screen.getByLabelText("Nome do novo jogador"),
@@ -157,8 +157,8 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
   });
 
   it("botão X do banner fecha o erro", () => {
-    const manager = buildManager(["Ana"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    renderJogadores(gestor);
 
     fireEvent.changeText(
       screen.getByLabelText("Nome do novo jogador"),
@@ -176,8 +176,8 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
   it("erro some sozinho após o timeout (5s)", () => {
     jest.useFakeTimers();
     try {
-      const manager = buildManager(["Ana"]);
-      renderJogadores(manager);
+      const gestor = buildManager(["Ana"]);
+      renderJogadores(gestor);
 
       fireEvent.changeText(
         screen.getByLabelText("Nome do novo jogador"),
@@ -214,8 +214,8 @@ describe("Jogadores — empty states", () => {
   });
 
   it("com busca sem match: mostra 'Nenhum jogador encontrado'", () => {
-    const manager = buildManager(["Ana", "Bia", "Caio", "Diego", "Eva"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana", "Bia", "Caio", "Diego", "Eva"]);
+    renderJogadores(gestor);
 
     fireEvent.changeText(
       screen.getByLabelText("Buscar jogador por nome"),
@@ -242,13 +242,13 @@ describe("Jogadores — contador", () => {
   });
 
   it("omite o sufixo 'sem time' quando todos têm time", () => {
-    const manager = buildManager(["Ana", "Bia"]);
+    const gestor = buildManager(["Ana", "Bia"]);
     // Cria times: cada um vai pra um time (Rules.playersPerTeam default = 4).
     // Como temos só 2 jogadores e o time exige 4, o createTeams ainda
     // distribui — mas pra simplificar o teste, simulo zerando o
     // playersWithoutTeam diretamente (válido para o cenário visual).
-    manager.playersWithoutTeam = 0;
-    renderWithProviders(<JogadoresScreen />, { soccer: { manager } });
+    gestor.playersWithoutTeam = 0;
+    renderWithProviders(<JogadoresScreen />, { soccer: { gestor } });
 
     expect(screen.getByText("2 jogadores")).toBeTruthy();
   });
@@ -310,22 +310,22 @@ describe("Jogadores — editar", () => {
   });
 
   it("confirmar com novo nome renomeia o jogador", () => {
-    const manager = buildManager(["Ana"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
     const input = screen.getByLabelText("Editar nome do jogador");
     fireEvent.changeText(input, "Anabel");
     fireEvent.press(screen.getByRole("button", { name: "Confirmar edição" }));
 
-    expect(manager.players[0].name).toBe("Anabel");
+    expect(gestor.players[0].name).toBe("Anabel");
     expect(screen.queryByLabelText("Editar nome do jogador")).toBeNull();
   });
 
   it("confirmar com mesmo nome é no-op (não altera nada)", () => {
-    const manager = buildManager(["Ana"]);
-    const renameSpy = jest.spyOn(manager, "renamePlayer");
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    const renameSpy = jest.spyOn(gestor, "renamePlayer");
+    renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
     fireEvent.press(screen.getByRole("button", { name: "Confirmar edição" }));
@@ -335,9 +335,9 @@ describe("Jogadores — editar", () => {
   });
 
   it("cancelar edição não chama renamePlayer", () => {
-    const manager = buildManager(["Ana"]);
-    const renameSpy = jest.spyOn(manager, "renamePlayer");
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    const renameSpy = jest.spyOn(gestor, "renamePlayer");
+    renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
     fireEvent.changeText(
@@ -347,12 +347,12 @@ describe("Jogadores — editar", () => {
     fireEvent.press(screen.getByRole("button", { name: "Cancelar edição" }));
 
     expect(renameSpy).not.toHaveBeenCalled();
-    expect(manager.players[0].name).toBe("Ana");
+    expect(gestor.players[0].name).toBe("Ana");
   });
 
   it("erro do renamePlayer aparece no banner", () => {
-    const manager = buildManager(["Ana", "Bia"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana", "Bia"]);
+    renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
     fireEvent.changeText(
@@ -373,29 +373,29 @@ describe("Jogadores — editar", () => {
 
 describe("Jogadores — remover", () => {
   it("confirma e remove o jogador", async () => {
-    const manager = buildManager(["Ana", "Bia"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana", "Bia"]);
+    renderJogadores(gestor);
 
     const alertSpy = mockAlert((b) => b.text === "Remover");
 
     fireEvent.press(screen.getByRole("button", { name: "Remover Ana" }));
 
     await waitFor(() =>
-      expect(manager.players.map((p) => p.name)).toEqual(["Bia"]),
+      expect(gestor.players.map((p) => p.name)).toEqual(["Bia"]),
     );
     alertSpy.mockRestore();
   });
 
   it("cancela e mantém o jogador na lista", async () => {
-    const manager = buildManager(["Ana"]);
-    renderJogadores(manager);
+    const gestor = buildManager(["Ana"]);
+    renderJogadores(gestor);
 
     const alertSpy = mockAlert((b) => b.style === "cancel");
 
     fireEvent.press(screen.getByRole("button", { name: "Remover Ana" }));
 
     await waitFor(() => expect(alertSpy).toHaveBeenCalled());
-    expect(manager.players.map((p) => p.name)).toEqual(["Ana"]);
+    expect(gestor.players.map((p) => p.name)).toEqual(["Ana"]);
     alertSpy.mockRestore();
   });
 });
@@ -430,8 +430,8 @@ describe("Jogadores — adicionar vários (lote)", () => {
   });
 
   it("confirmar lote adiciona todos os nomes válidos", () => {
-    const manager = buildManager();
-    renderJogadores(manager);
+    const gestor = buildManager();
+    renderJogadores(gestor);
 
     fireEvent.press(
       screen.getByRole("button", { name: "Adicionar vários jogadores" }),
@@ -444,12 +444,12 @@ describe("Jogadores — adicionar vários (lote)", () => {
       screen.getByRole("button", { name: "Confirmar adição em lote" }),
     );
 
-    expect(manager.players.map((p) => p.name)).toEqual(["Ana", "Bia", "Caio"]);
+    expect(gestor.players.map((p) => p.name)).toEqual(["Ana", "Bia", "Caio"]);
   });
 
   it("cancelar fecha o modal sem adicionar", () => {
-    const manager = buildManager();
-    renderJogadores(manager);
+    const gestor = buildManager();
+    renderJogadores(gestor);
 
     fireEvent.press(
       screen.getByRole("button", { name: "Adicionar vários jogadores" }),
@@ -462,7 +462,7 @@ describe("Jogadores — adicionar vários (lote)", () => {
       screen.getByRole("button", { name: "Cancelar adição em lote" }),
     );
 
-    expect(manager.players).toHaveLength(0);
+    expect(gestor.players).toHaveLength(0);
   });
 
   it("confirmar com input vazio é no-op (botão desabilitado)", () => {

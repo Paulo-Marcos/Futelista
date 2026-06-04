@@ -9,7 +9,7 @@ const noopUnsubscribe = () => {};
  * Lê um "slice" do GestorJogo e re-renderiza o componente quando
  * qualquer parte do agregado muda (incluindo ticks do cronômetro).
  *
- * Quando `manager` no contexto é null (sem execução ativa), o seletor
+ * Quando `gestor` no contexto é null (sem execução ativa), o seletor
  * não roda e o hook retorna undefined. Útil para componentes dual-mode
  * (gestão vs execução). Componentes que SÓ existem dentro de uma
  * execução devem usar `useGameSliceRequired`.
@@ -17,8 +17,8 @@ const noopUnsubscribe = () => {};
 export function useGameSlice<T>(
   selector: (game: GestorJogo) => T,
 ): T | undefined {
-  const manager = useSubscribeAoManager();
-  return manager ? selector(manager) : undefined;
+  const gestor = useSubscribeAoManager();
+  return gestor ? selector(gestor) : undefined;
 }
 
 /**
@@ -26,30 +26,30 @@ export function useGameSlice<T>(
  * componentes garantidos por guard de rota.
  */
 export function useGameSliceRequired<T>(selector: (game: GestorJogo) => T): T {
-  const manager = useSubscribeAoManager();
-  if (!manager) {
+  const gestor = useSubscribeAoManager();
+  if (!gestor) {
     throw Error(
       "useGameSliceRequired usado sem execução ativa — adicione um guard.",
     );
   }
-  return selector(manager);
+  return selector(gestor);
 }
 
 /**
- * Subscreve o componente ao `manager` corrente (ou roda no-op quando
+ * Subscreve o componente ao `gestor` corrente (ou roda no-op quando
  * null). Centraliza o `useSyncExternalStore` para os dois hooks acima.
  */
 function useSubscribeAoManager(): GestorJogo | null {
-  const { manager } = useSoccer();
+  const { gestor } = useSoccer();
   const subscribe = useCallback(
     (listener: () => void) =>
-      manager ? manager.subscribe(listener) : noopUnsubscribe,
-    [manager],
+      gestor ? gestor.subscribe(listener) : noopUnsubscribe,
+    [gestor],
   );
   const getSnapshot = useCallback(
-    () => (manager ? manager.version : 0),
-    [manager],
+    () => (gestor ? gestor.version : 0),
+    [gestor],
   );
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return manager;
+  return gestor;
 }

@@ -59,9 +59,9 @@ function buildPartidaManager(opts?: {
   return m;
 }
 
-function renderPartida(manager: GestorJogo | null) {
+function renderPartida(gestor: GestorJogo | null) {
   return renderWithProviders(<PartidaScreen />, {
-    soccer: { manager },
+    soccer: { gestor },
   });
 }
 
@@ -70,12 +70,12 @@ function renderPartida(manager: GestorJogo | null) {
 // ===========================================================================
 
 describe("Partida — guards", () => {
-  it("sem manager: não renderiza (Redirect)", () => {
+  it("sem gestor: não renderiza (Redirect)", () => {
     renderPartida(null);
     expect(screen.queryByText("Partida")).toBeNull();
   });
 
-  it("manager sem `playing`: mostra EmptyState 'Nenhuma partida em andamento'", () => {
+  it("gestor sem `playing`: mostra EmptyState 'Nenhuma partida em andamento'", () => {
     const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
     renderPartida(m);
 
@@ -97,7 +97,7 @@ describe("Partida — guards", () => {
 // ===========================================================================
 
 describe("Partida — CTA dinâmica", () => {
-  it("sem timer ainda (status undefined): CTA 'Iniciar' e dispara manager.start", () => {
+  it("sem timer ainda (status undefined): CTA 'Iniciar' e dispara gestor.start", () => {
     const m = buildPartidaManager();
     const startSpy = jest.spyOn(m, "start").mockImplementation(() => {});
     renderPartida(m);
@@ -107,7 +107,7 @@ describe("Partida — CTA dinâmica", () => {
     expect(startSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("status STARTED: CTA 'Pausar' e dispara manager.pause", () => {
+  it("status STARTED: CTA 'Pausar' e dispara gestor.pause", () => {
     const m = buildPartidaManager({ status: TimerStatus.STARTED });
     const pauseSpy = jest.spyOn(m, "pause").mockImplementation(() => {});
     renderPartida(m);
@@ -117,7 +117,7 @@ describe("Partida — CTA dinâmica", () => {
     expect(pauseSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("status PAUSED: CTA 'Continuar' e dispara manager.continue", () => {
+  it("status PAUSED: CTA 'Continuar' e dispara gestor.continue", () => {
     const m = buildPartidaManager({ status: TimerStatus.PAUSED });
     const continueSpy = jest
       .spyOn(m, "continue")
@@ -129,7 +129,7 @@ describe("Partida — CTA dinâmica", () => {
     expect(continueSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("status INTERVAL: CTA 'Próximo tempo' e dispara manager.start", () => {
+  it("status INTERVAL: CTA 'Próximo tempo' e dispara gestor.start", () => {
     const m = buildPartidaManager({ status: TimerStatus.INTERVAL });
     const startSpy = jest.spyOn(m, "start").mockImplementation(() => {});
     renderPartida(m);

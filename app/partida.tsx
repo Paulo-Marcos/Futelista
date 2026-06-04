@@ -21,12 +21,12 @@ import { TimerDisplay } from "@/src/shared/ui/TimerDisplay";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export default function PartidaScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  return <PartidaInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  return <PartidaInner gestor={gestor} />;
 }
 
-function PartidaInner({ manager }: { manager: GestorJogo }) {
+function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -86,32 +86,32 @@ function PartidaInner({ manager }: { manager: GestorJogo }) {
       return {
         label: "Pausar",
         icon: "pause" as const,
-        action: () => safeAction(() => manager.pause()),
+        action: () => safeAction(() => gestor.pause()),
       };
     if (canContinue)
       return {
         label: "Continuar",
         icon: "play" as const,
-        action: () => safeAction(() => manager.continue()),
+        action: () => safeAction(() => gestor.continue()),
       };
     if (isInterval)
       return {
         label: "Próximo tempo",
         icon: "skip-next" as const,
-        action: () => safeAction(() => manager.start()),
+        action: () => safeAction(() => gestor.start()),
       };
     if (canStart)
       return {
         label: "Iniciar",
         icon: "play" as const,
-        action: () => safeAction(() => manager.start()),
+        action: () => safeAction(() => gestor.start()),
       };
     return null;
   })();
 
   const encerrar = () =>
     safeAction(() => {
-      manager.setResult();
+      gestor.setResult();
       router.replace("/resultado");
     });
 
@@ -189,17 +189,17 @@ function PartidaInner({ manager }: { manager: GestorJogo }) {
             team={playing.teamA}
             placar={goals?.teamA ?? 0}
             onGol={(player) =>
-              safeAction(() => manager.addGoal(playing.teamA, player))
+              safeAction(() => gestor.addGoal(playing.teamA, player))
             }
             onTirar={(player) =>
-              safeAction(() => manager.removeFromGame(player))
+              safeAction(() => gestor.removeFromGame(player))
             }
             onSubstituir={(player) =>
               safeAction(() => {
                 if (!proximoTime || proximoTime.players.length === 0) {
                   throw Error("Não há jogador no próximo time para entrar.");
                 }
-                manager.switchPlayerLeft(proximoTime.players[0], player);
+                gestor.switchPlayerLeft(proximoTime.players[0], player);
               })
             }
           />
@@ -208,17 +208,17 @@ function PartidaInner({ manager }: { manager: GestorJogo }) {
             team={playing.teamB}
             placar={goals?.teamB ?? 0}
             onGol={(player) =>
-              safeAction(() => manager.addGoal(playing.teamB, player))
+              safeAction(() => gestor.addGoal(playing.teamB, player))
             }
             onTirar={(player) =>
-              safeAction(() => manager.removeFromGame(player))
+              safeAction(() => gestor.removeFromGame(player))
             }
             onSubstituir={(player) =>
               safeAction(() => {
                 if (!proximoTime || proximoTime.players.length === 0) {
                   throw Error("Não há jogador no próximo time para entrar.");
                 }
-                manager.switchPlayerLeft(proximoTime.players[0], player);
+                gestor.switchPlayerLeft(proximoTime.players[0], player);
               })
             }
           />

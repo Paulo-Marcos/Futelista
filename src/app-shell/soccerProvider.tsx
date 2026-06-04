@@ -26,7 +26,7 @@ import { AsyncStoragePeladaRepository } from "@/src/infrastructure/storage/Async
  * Boot:
  *  1. Lê o id da execução ativa em AsyncStorage.
  *  2. Carrega via repositório; se não houver execução ativa, mantém
- *     `manager` como null — a UI assume estado de "gestão".
+ *     `gestor` como null — a UI assume estado de "gestão".
  *
  * Diferente da versão anterior, **não cria** execução default no boot:
  *  isso forçava o usuário a ver uma pelada vazia que ele nunca pediu.
@@ -45,7 +45,7 @@ export const SoccerProvider = ({
   const repoRef = useRef<RepositorioPelada>(
     repositorio ?? new AsyncStoragePeladaRepository(),
   );
-  const [manager, setManager] = useState<GestorJogo | null>(null);
+  const [gestor, setManager] = useState<GestorJogo | null>(null);
   const [bootConcluido, setBootConcluido] = useState(false);
   const [saving, setSaving] = useState(false);
   const escritasPendentesRef = useRef(0);
@@ -87,13 +87,13 @@ export const SoccerProvider = ({
   }, []);
 
   useEffect(() => {
-    if (!manager) return;
+    if (!gestor) return;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const salvarDebounced = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        marcarSalvamento(() => repoRef.current.salvar(manager)).catch(
+        marcarSalvamento(() => repoRef.current.salvar(gestor)).catch(
           (erro) => {
             console.warn("[SoccerProvider] Falha ao salvar execução:", erro);
           },
@@ -101,12 +101,12 @@ export const SoccerProvider = ({
       }, AUTOSAVE_DEBOUNCE_MS);
     };
 
-    const desinscrever = manager.subscribe(salvarDebounced);
+    const desinscrever = gestor.subscribe(salvarDebounced);
     return () => {
       desinscrever();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [manager, marcarSalvamento]);
+  }, [gestor, marcarSalvamento]);
 
   /**
    * Salva a execução anterior (se existir), persiste a próxima execução
@@ -115,9 +115,9 @@ export const SoccerProvider = ({
   const trocarManager = useCallback(
     async (proximo: GestorJogo): Promise<void> => {
       await marcarSalvamento(async () => {
-        if (manager) {
+        if (gestor) {
           try {
-            await repoRef.current.salvar(manager);
+            await repoRef.current.salvar(gestor);
           } catch (erro) {
             console.warn(
               "[SoccerProvider] Falha ao salvar execução anterior:",
@@ -130,7 +130,7 @@ export const SoccerProvider = ({
       });
       setManager(proximo);
     },
-    [manager, marcarSalvamento],
+    [gestor, marcarSalvamento],
   );
 
   // ----- Pelada (tipo cadastrado) ------------------------------------
@@ -213,54 +213,54 @@ export const SoccerProvider = ({
   );
 
   const finalizarExecucao = useCallback(async (): Promise<void> => {
-    if (!manager) return;
-    manager.finalizar();
+    if (!gestor) return;
+    gestor.finalizar();
     await marcarSalvamento(async () => {
-      await repoRef.current.salvar(manager);
+      await repoRef.current.salvar(gestor);
       await limparPeladaAtivaId();
     });
     setManager(null);
-  }, [manager, marcarSalvamento]);
+  }, [gestor, marcarSalvamento]);
 
   const voltarParaGestao = useCallback(async (): Promise<void> => {
-    if (!manager) return;
+    if (!gestor) return;
     await marcarSalvamento(async () => {
-      await repoRef.current.salvar(manager);
+      await repoRef.current.salvar(gestor);
       await limparPeladaAtivaId();
     });
     setManager(null);
-  }, [manager, marcarSalvamento]);
+  }, [gestor, marcarSalvamento]);
 
   const salvarExecucaoAtualComoPelada = useCallback(
     async (nome: string, regras?: DataRules): Promise<Pelada> => {
-      if (!manager)
+      if (!gestor)
         throw Error("Não há execução ativa para salvar como pelada.");
-      const regrasFinais = regras ?? manager.rules.toData();
+      const regrasFinais = regras ?? gestor.rules.toData();
       const pelada = new Pelada({ nome, regras: regrasFinais });
-      manager.peladaId = pelada.id;
+      gestor.peladaId = pelada.id;
       await marcarSalvamento(async () => {
         await repoRef.current.salvarPelada(pelada);
-        await repoRef.current.salvar(manager);
+        await repoRef.current.salvar(gestor);
       });
       return pelada;
     },
-    [manager, marcarSalvamento],
+    [gestor, marcarSalvamento],
   );
 
   const limparJogadoresETimes = useCallback(async (): Promise<void> => {
-    if (!manager) return;
-    manager.limparJogadoresETimes();
-    await marcarSalvamento(() => repoRef.current.salvar(manager));
-  }, [manager, marcarSalvamento]);
+    if (!gestor) return;
+    gestor.limparJogadoresETimes();
+    await marcarSalvamento(() => repoRef.current.salvar(gestor));
+  }, [gestor, marcarSalvamento]);
 
   const selecionarExecucao = useCallback(
     async (id: string): Promise<void> => {
-      if (manager && manager.id === id) return;
+      if (gestor && gestor.id === id) return;
       const carregada = await repoRef.current.carregar(id);
       if (!carregada) throw Error("Execução não encontrada.");
       await trocarManager(carregada);
     },
-    [manager, trocarManager],
+    [gestor, trocarManager],
   );
 
   const listarExecucoesDe = useCallback(
@@ -275,7 +275,7 @@ export const SoccerProvider = ({
   return (
     <SoccerContext.Provider
       value={{
-        manager,
+        gestor,
         saving,
         criarPelada,
         atualizarPelada,

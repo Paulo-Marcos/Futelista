@@ -49,8 +49,8 @@ function buildManager(opts?: {
   return m;
 }
 
-function renderRegras(manager: GestorJogo | null) {
-  return renderWithProviders(<RegrasScreen />, { soccer: { manager } });
+function renderRegras(gestor: GestorJogo | null) {
+  return renderWithProviders(<RegrasScreen />, { soccer: { gestor } });
 }
 
 function getPressableByLabel(label: string) {
@@ -64,7 +64,7 @@ function getPressableByLabel(label: string) {
 // ===========================================================================
 
 describe("Regras — guards e navegação", () => {
-  it("sem manager: não renderiza (Redirect)", () => {
+  it("sem gestor: não renderiza (Redirect)", () => {
     renderRegras(null);
     expect(screen.queryByText("Regras")).toBeNull();
   });
@@ -111,7 +111,7 @@ describe("Regras — salvar", () => {
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
-  it("editar o nome e salvar atualiza manager.name e envia name novo", () => {
+  it("editar o nome e salvar atualiza gestor.name e envia name novo", () => {
     const m = buildManager();
     const spy = jest.spyOn(m, "atualizarRegras");
     renderRegras(m);

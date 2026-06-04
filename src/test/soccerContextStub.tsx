@@ -15,7 +15,7 @@ export function buildSoccerContextValue(
   const noop = jest.fn<Promise<any>, any[]>().mockResolvedValue(undefined);
 
   return {
-    manager: null as GestorJogo | null,
+    gestor: null as GestorJogo | null,
     saving: false,
 
     criarPelada: jest.fn().mockResolvedValue({ id: "pelada-1", nome: "Stub" }),

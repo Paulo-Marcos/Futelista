@@ -23,14 +23,14 @@ const AUTO_DISMISS_ERRO_MS = 5000;
 const AUTO_DISMISS_SUCESSO_MS = 2500;
 
 export default function TimesScreen() {
-  const { manager } = useSoccer();
-  if (!manager) return <Redirect href="/" />;
-  return <TimesInner manager={manager} />;
+  const { gestor } = useSoccer();
+  if (!gestor) return <Redirect href="/" />;
+  return <TimesInner gestor={gestor} />;
 }
 
 type AcaoTime = "mover-fim" | "esvaziar" | "cancelar";
 
-function TimesInner({ manager }: { manager: GestorJogo }) {
+function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -52,7 +52,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
   );
 
   // Lê o nome do jogador selecionado pelo seletor — assim subscrevemos
-  // apenas a fatia mínima do agregado e evitamos `manager.players` no JSX.
+  // apenas a fatia mínima do agregado e evitamos `gestor.players` no JSX.
   const nomeJogadorSelecionado = useGameSliceRequired((g) =>
     jogadorSelecionado
       ? (g.players.find((p) => p.id === jogadorSelecionado)?.name ?? "")
@@ -88,7 +88,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
     }
   };
 
-  const montar = () => safeAction(() => manager.createTeams());
+  const montar = () => safeAction(() => gestor.createTeams());
 
   const sortearNovamente = async () => {
     const ok = await confirmAcao({
@@ -99,13 +99,13 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
     });
     if (!ok) return;
     safeAction(() => {
-      manager.resetTimes();
-      manager.createTeams();
+      gestor.resetTimes();
+      gestor.createTeams();
     });
   };
 
   const alocarSemTime = () =>
-    safeAction(() => manager.relocatePlayersWithoutTeam());
+    safeAction(() => gestor.relocatePlayersWithoutTeam());
 
   const iniciarPartida = async () => {
     if (playersWithoutTeam > 0) {
@@ -119,7 +119,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
       if (!ok) return;
     }
     safeAction(() => {
-      manager.setPlayingGame();
+      gestor.setPlayingGame();
       router.push("/partida");
     });
   };
@@ -133,8 +133,8 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
       setJogadorSelecionado(null);
       return;
     }
-    const p1 = manager.players.find((p) => p.id === jogadorSelecionado);
-    const p2 = manager.players.find((p) => p.id === playerId);
+    const p1 = gestor.players.find((p) => p.id === jogadorSelecionado);
+    const p2 = gestor.players.find((p) => p.id === playerId);
     if (!p1 || !p2) {
       setErro("Jogador não encontrado.");
       return;
@@ -150,7 +150,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
       return;
     }
     safeAction(() => {
-      manager.switchPlayerFromTeam(p1, p2);
+      gestor.switchPlayerFromTeam(p1, p2);
       setJogadorSelecionado(null);
       setSucesso(`${p1.name} ↔ ${p2.name} trocados.`);
     });
@@ -182,7 +182,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
     });
     if (!escolha || escolha === "cancelar") return;
     if (escolha === "mover-fim") {
-      safeAction(() => manager.moverTimeParaFim(team));
+      safeAction(() => gestor.moverTimeParaFim(team));
       return;
     }
     const confirmou = await confirmAcao({
@@ -193,7 +193,7 @@ function TimesInner({ manager }: { manager: GestorJogo }) {
       destrutivo: true,
     });
     if (!confirmou) return;
-    safeAction(() => manager.esvaziarTime(team));
+    safeAction(() => gestor.esvaziarTime(team));
   };
 
   const ultimoTimeCheio = next[next.length - 1]?.fullTeam ?? true;

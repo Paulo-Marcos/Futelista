@@ -14,7 +14,7 @@ export type SoccerContextValue = {
    * Execução ativa, ou null quando nenhuma execução está aberta — o app
    * volta ao "estado de gestão" (tela inicial só com peladas cadastradas).
    */
-  manager: GestorJogo | null;
+  gestor: GestorJogo | null;
   saving: boolean;
 
   // ----- Pelada (tipo cadastrado) ------------------------------------
