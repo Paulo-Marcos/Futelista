@@ -26,6 +26,12 @@ Foco: app funcional ponta-a-ponta, persistente e visualmente apresentável.
   - `[X]` `a405473` refactor(domain): addPlayerList → setPlayers (semântica destrutiva)
   - `[X]` `5b1210b` refactor(domain): removeFirstNext → tirarDaFila
   - `[X]` `82977a5` refactor(domain): Player/Team aceitam input object; Timer.continue retorna void
+- `[X]` Etapa 8 — Follow-ups da Etapa 7 (6 commits):
+  - `[X]` `6d6a455` refactor(domain): UpdateDrawHandler → FinalResultHandler (alinha identificadores ao arquivo)
+  - `[X]` `4a70b4d` chore(domain): remove type deprecated ResumoPelada
+  - `[X]` `03f7ba4` refactor(domain): GameManager → GestorJogo (classe, arquivo, imports e docs)
+  - `[X]` `8e45858` refactor: renomeia variável 'manager' → 'gestor' (app-shell + UI)
+  - `[X]` `a717b67` refactor: renomeia variável/atributo 'game' → 'jogo' (domínio + serializer)
 
 ---
 
