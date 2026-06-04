@@ -449,7 +449,7 @@ export class GestorJogo {
   // Atualiza os novos times, considerando o resultado do jogo.
   setNextMatch(teamWithExternalAdvantage?: Team): void {
     this.updateResult.process({
-      game: this,
+      jogo: this,
       externalAdvantage: teamWithExternalAdvantage,
     });
     this.notify();

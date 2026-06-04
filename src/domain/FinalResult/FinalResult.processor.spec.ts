@@ -20,7 +20,7 @@ describe('FinalResultProcessor', () => {
   beforeEach(() => {
     finalResultProcessor = new FinalResultProcessor();
     input = {
-      game: new GestorJogo('teste', new Rules()),
+      jogo: new GestorJogo('teste', new Rules()),
     };
   });
 

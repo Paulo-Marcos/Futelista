@@ -9,12 +9,12 @@ import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
  */
 export class WithVictory extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
-    if (input.game.playing?.result === ResultMatch.VICTORY) {
-      input.game.relocateTeam(input.game.playing?.loser!);
-      input.game.advantageToNext = input.game.playing.winner!;
-      input.game.playing = new Match(
-        input.game.playing?.winner!,
-        input.game.tirarDaFila(),
+    if (input.jogo.playing?.result === ResultMatch.VICTORY) {
+      input.jogo.relocateTeam(input.jogo.playing?.loser!);
+      input.jogo.advantageToNext = input.jogo.playing.winner!;
+      input.jogo.playing = new Match(
+        input.jogo.playing?.winner!,
+        input.jogo.tirarDaFila(),
       );
       return;
     }

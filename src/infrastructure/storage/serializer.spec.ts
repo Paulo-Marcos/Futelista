@@ -8,7 +8,7 @@ import { deserializeGestorJogo, serializeGestorJogo } from "./serializer";
 
 describe("serializer (round-trip GestorJogo)", () => {
   function buildPeladaComJogadores(): GestorJogo {
-    const game = new GestorJogo(
+    const jogo = new GestorJogo(
       "Pelada do Sábado",
       new Rules({
         name: "Padrão",
@@ -19,8 +19,8 @@ describe("serializer (round-trip GestorJogo)", () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       }),
     );
-    game.setPlayers(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
-    return game;
+    jogo.setPlayers(["Ana", "Bia", "Caio", "Davi", "Eva", "Fê"]);
+    return jogo;
   }
 
   it("preserva nome, regras e jogadores em uma pelada recém-criada", () => {

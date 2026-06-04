@@ -17,7 +17,7 @@ describe('BaseFinalResultHandler', () => {
     baseHandler = new ConcreteFinalResultHandler();
     nextHandler = { handle: jest.fn() } as unknown as FinalResultHandler;
     input = {
-      game: new GestorJogo('teste', new Rules()),
+      jogo: new GestorJogo('teste', new Rules()),
     };
   });
 

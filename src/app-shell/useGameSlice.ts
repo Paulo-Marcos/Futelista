@@ -15,7 +15,7 @@ const noopUnsubscribe = () => {};
  * execução devem usar `useGameSliceRequired`.
  */
 export function useGameSlice<T>(
-  selector: (game: GestorJogo) => T,
+  selector: (jogo: GestorJogo) => T,
 ): T | undefined {
   const gestor = useSubscribeAoManager();
   return gestor ? selector(gestor) : undefined;
@@ -25,7 +25,7 @@ export function useGameSlice<T>(
  * Versão estrita — lança se chamado sem execução ativa. Reservar para
  * componentes garantidos por guard de rota.
  */
-export function useGameSliceRequired<T>(selector: (game: GestorJogo) => T): T {
+export function useGameSliceRequired<T>(selector: (jogo: GestorJogo) => T): T {
   const gestor = useSubscribeAoManager();
   if (!gestor) {
     throw Error(

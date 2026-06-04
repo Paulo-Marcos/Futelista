@@ -53,20 +53,20 @@ describe("AsyncStoragePeladaRepository", () => {
   });
 
   it("limpar remove a pelada do storage", async () => {
-    const game = new GestorJogo("Para deletar", new Rules());
-    await repo.salvar(game);
+    const jogo = new GestorJogo("Para deletar", new Rules());
+    await repo.salvar(jogo);
 
-    await repo.limpar(game.id);
+    await repo.limpar(jogo.id);
 
-    expect(await repo.carregar(game.id)).toBeNull();
+    expect(await repo.carregar(jogo.id)).toBeNull();
   });
 
   it("usa chave prefixada para evitar colisão com outros dados", async () => {
-    const game = new GestorJogo("Sábado", new Rules());
-    await repo.salvar(game);
+    const jogo = new GestorJogo("Sábado", new Rules());
+    await repo.salvar(jogo);
 
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-      `futelista:execucao:${game.id}`,
+      `futelista:execucao:${jogo.id}`,
       expect.any(String),
     );
   });
@@ -121,19 +121,19 @@ describe("AsyncStoragePeladaRepository", () => {
         "futelista:peladaTipo:abc",
         '{"version":1,"id":"abc","nome":"T","createdAt":0,"regras":{}}',
       );
-      const game = new GestorJogo("Pelada", new Rules());
-      await repo.salvar(game);
+      const jogo = new GestorJogo("Pelada", new Rules());
+      await repo.salvar(jogo);
 
       const resumos = await repo.listar();
       expect(resumos).toHaveLength(1);
-      expect(resumos[0].id).toBe(game.id);
+      expect(resumos[0].id).toBe(jogo.id);
     });
 
     it("traz status, nome e totais no resumo", async () => {
-      const game = new GestorJogo("Quinta", new Rules());
-      game.addPlayer("Ana");
-      game.iniciar();
-      await repo.salvar(game);
+      const jogo = new GestorJogo("Quinta", new Rules());
+      jogo.addPlayer("Ana");
+      jogo.iniciar();
+      await repo.salvar(jogo);
 
       const [resumo] = await repo.listar();
       expect(resumo.name).toBe("Quinta");
@@ -162,8 +162,8 @@ describe("AsyncStoragePeladaRepository", () => {
         "futelista:execucao:lixo",
         "isso-nao-eh-json",
       );
-      const game = new GestorJogo("Boa", new Rules());
-      await repo.salvar(game);
+      const jogo = new GestorJogo("Boa", new Rules());
+      await repo.salvar(jogo);
 
       const resumos = await repo.listar();
       expect(resumos).toHaveLength(1);

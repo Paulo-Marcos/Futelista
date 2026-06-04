@@ -11,14 +11,14 @@ import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
 export class WithDrawAndAdvantageAndNotTwoTeams extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
     if (
-      input.game.playing?.result === ResultMatch.DRAW &&
+      input.jogo.playing?.result === ResultMatch.DRAW &&
       this.isDrawWithAdvantageAndNotTwoTeams(input)
     ) {
-      const loser = input.game.getOtherPlayingTeam(input.game.advantageToNext!);
-      input.game.relocateTeam(loser);
-      input.game.playing = new Match(
-        input.game.advantageToNext!,
-        input.game.tirarDaFila(),
+      const loser = input.jogo.getOtherPlayingTeam(input.jogo.advantageToNext!);
+      input.jogo.relocateTeam(loser);
+      input.jogo.playing = new Match(
+        input.jogo.advantageToNext!,
+        input.jogo.tirarDaFila(),
       );
       return;
     }
@@ -27,9 +27,9 @@ export class WithDrawAndAdvantageAndNotTwoTeams extends BaseFinalResultHandler {
 
   isDrawWithAdvantageAndNotTwoTeams(input: HandleInput): boolean {
     return (
-      !!input.game.advantageToNext &&
+      !!input.jogo.advantageToNext &&
       !input.externalAdvantage &&
-      !this.filaTemDoisTimesCheios(input.game)
+      !this.filaTemDoisTimesCheios(input.jogo)
     );
   }
 }

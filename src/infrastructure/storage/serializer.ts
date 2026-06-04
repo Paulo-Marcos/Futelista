@@ -105,8 +105,8 @@ export type Payload = {
   timer: TimerDTO | null;
 };
 
-export function serializeGestorJogo(game: GestorJogo): string {
-  return JSON.stringify(buildPayload(game));
+export function serializeGestorJogo(jogo: GestorJogo): string {
+  return JSON.stringify(buildPayload(jogo));
 }
 
 export function deserializeGestorJogo(raw: string): GestorJogo {
@@ -143,35 +143,35 @@ function migrarPayload(payload: Payload): Payload {
 
 // ---------- Serialização ------------------------------------------------------
 
-function buildPayload(game: GestorJogo): Payload {
+function buildPayload(jogo: GestorJogo): Payload {
   // Inclui a partida em andamento na lista de matches do payload para que
   // o id em playingMatchId resolva no Map de reidratação. matchHistoryIds
-  // continua apontando só para o histórico (game.matches).
-  const allMatches: Match[] = [...game.matches];
-  if (game.playing && !allMatches.some((m) => m.id === game.playing!.id)) {
-    allMatches.push(game.playing);
+  // continua apontando só para o histórico (jogo.matches).
+  const allMatches: Match[] = [...jogo.matches];
+  if (jogo.playing && !allMatches.some((m) => m.id === jogo.playing!.id)) {
+    allMatches.push(jogo.playing);
   }
   return {
     version: PAYLOAD_VERSION,
     pelada: {
-      id: game.id,
-      name: game.name,
-      playersWithoutTeam: game.playersWithoutTeam,
-      advantageToNextTeamId: game.advantageToNext?.id ?? null,
-      playingMatchId: game.playing?.id ?? null,
-      status: game.status,
-      createdAt: game.createdAt,
-      startedAt: game.startedAt ?? null,
-      endedAt: game.endedAt ?? null,
-      peladaId: game.peladaId ?? null,
+      id: jogo.id,
+      name: jogo.name,
+      playersWithoutTeam: jogo.playersWithoutTeam,
+      advantageToNextTeamId: jogo.advantageToNext?.id ?? null,
+      playingMatchId: jogo.playing?.id ?? null,
+      status: jogo.status,
+      createdAt: jogo.createdAt,
+      startedAt: jogo.startedAt ?? null,
+      endedAt: jogo.endedAt ?? null,
+      peladaId: jogo.peladaId ?? null,
     },
-    rules: { id: game.rules.id, ...game.rules.toData() },
-    players: game.players.map(buildPlayerDTO),
-    teams: collectAllTeams(game).map(buildTeamDTO),
+    rules: { id: jogo.rules.id, ...jogo.rules.toData() },
+    players: jogo.players.map(buildPlayerDTO),
+    teams: collectAllTeams(jogo).map(buildTeamDTO),
     matches: allMatches.map(buildMatchDTO),
-    nextTeamIds: game.next.map((t) => t.id),
-    matchHistoryIds: game.matches.map((m) => m.id),
-    timer: game.timer ? buildTimerDTO(game.timer) : null,
+    nextTeamIds: jogo.next.map((t) => t.id),
+    matchHistoryIds: jogo.matches.map((m) => m.id),
+    timer: jogo.timer ? buildTimerDTO(jogo.timer) : null,
   };
 }
 
@@ -184,22 +184,22 @@ function buildPayload(game: GestorJogo): Payload {
  *
  * Junta tudo num Set por id pra não duplicar.
  */
-function collectAllTeams(game: GestorJogo): Team[] {
+function collectAllTeams(jogo: GestorJogo): Team[] {
   const map = new Map<string, Team>();
   const add = (team?: Team) => {
     if (team) map.set(team.id, team);
   };
-  game.next.forEach(add);
-  game.matches.forEach((m) => {
+  jogo.next.forEach(add);
+  jogo.matches.forEach((m) => {
     add(m.teamA);
     add(m.teamB);
   });
-  game.players.forEach((p) => p.teams.forEach(add));
-  if (game.playing) {
-    add(game.playing.teamA);
-    add(game.playing.teamB);
+  jogo.players.forEach((p) => p.teams.forEach(add));
+  if (jogo.playing) {
+    add(jogo.playing.teamA);
+    add(jogo.playing.teamB);
   }
-  add(game.advantageToNext);
+  add(jogo.advantageToNext);
   return [...map.values()];
 }
 
@@ -264,7 +264,7 @@ function buildTimerDTO(timer: Timer): TimerDTO {
 
 function buildGestorJogo(payload: Payload): GestorJogo {
   const rules = new Rules(payload.rules);
-  const game = new GestorJogo(payload.pelada.name, rules, {
+  const jogo = new GestorJogo(payload.pelada.name, rules, {
     id: payload.pelada.id,
     status: payload.pelada.status,
     createdAt: payload.pelada.createdAt,
@@ -272,7 +272,7 @@ function buildGestorJogo(payload: Payload): GestorJogo {
     endedAt: payload.pelada.endedAt ?? undefined,
     peladaId: payload.pelada.peladaId ?? undefined,
   });
-  game.playersWithoutTeam = payload.pelada.playersWithoutTeam;
+  jogo.playersWithoutTeam = payload.pelada.playersWithoutTeam;
 
   const playersById = rehydratePlayers(payload.players);
   const teamsById = rehydrateTeams(payload.teams, playersById);
@@ -281,21 +281,21 @@ function buildGestorJogo(payload: Payload): GestorJogo {
   relinkPlayerHistories(payload.players, playersById, teamsById, matchesById);
   relinkTeamHistories(payload.teams, teamsById, matchesById);
 
-  game.players = payload.players.map((p) => playersById.get(p.id)!);
-  game.next = payload.nextTeamIds.map((id) => teamsById.get(id)!);
-  game.matches = payload.matchHistoryIds.map((id) => matchesById.get(id)!);
-  game.playing = payload.pelada.playingMatchId
+  jogo.players = payload.players.map((p) => playersById.get(p.id)!);
+  jogo.next = payload.nextTeamIds.map((id) => teamsById.get(id)!);
+  jogo.matches = payload.matchHistoryIds.map((id) => matchesById.get(id)!);
+  jogo.playing = payload.pelada.playingMatchId
     ? matchesById.get(payload.pelada.playingMatchId)
     : undefined;
-  game.advantageToNext = payload.pelada.advantageToNextTeamId
+  jogo.advantageToNext = payload.pelada.advantageToNextTeamId
     ? teamsById.get(payload.pelada.advantageToNextTeamId)
     : undefined;
 
   if (payload.timer) {
-    game.timer = rehydrateTimer(payload.timer, () => game["notify"]?.());
+    jogo.timer = rehydrateTimer(payload.timer, () => jogo["notify"]?.());
   }
 
-  return game;
+  return jogo;
 }
 
 function rehydratePlayers(dtos: PlayerDTO[]): Map<string, Player> {
