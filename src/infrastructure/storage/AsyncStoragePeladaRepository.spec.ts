@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 
@@ -41,7 +41,7 @@ describe("AsyncStoragePeladaRepository", () => {
   });
 
   it("salva e recarrega uma pelada preservando o nome", async () => {
-    const original = new GameManager("Pelada Quarta", new Rules());
+    const original = new GestorJogo("Pelada Quarta", new Rules());
     original.addPlayer("Zé");
 
     await repo.salvar(original);
@@ -53,7 +53,7 @@ describe("AsyncStoragePeladaRepository", () => {
   });
 
   it("limpar remove a pelada do storage", async () => {
-    const game = new GameManager("Para deletar", new Rules());
+    const game = new GestorJogo("Para deletar", new Rules());
     await repo.salvar(game);
 
     await repo.limpar(game.id);
@@ -62,7 +62,7 @@ describe("AsyncStoragePeladaRepository", () => {
   });
 
   it("usa chave prefixada para evitar colisão com outros dados", async () => {
-    const game = new GameManager("Sábado", new Rules());
+    const game = new GestorJogo("Sábado", new Rules());
     await repo.salvar(game);
 
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
@@ -72,7 +72,7 @@ describe("AsyncStoragePeladaRepository", () => {
   });
 
   it("carrega execução salva na chave legada (futelista:pelada:<id>)", async () => {
-    const legacyGame = new GameManager("Legada", new Rules());
+    const legacyGame = new GestorJogo("Legada", new Rules());
     // Simula payload escrito pela versão anterior do app na chave legada.
     const raw = JSON.stringify({
       version: 2,
@@ -121,7 +121,7 @@ describe("AsyncStoragePeladaRepository", () => {
         "futelista:peladaTipo:abc",
         '{"version":1,"id":"abc","nome":"T","createdAt":0,"regras":{}}',
       );
-      const game = new GameManager("Pelada", new Rules());
+      const game = new GestorJogo("Pelada", new Rules());
       await repo.salvar(game);
 
       const resumos = await repo.listar();
@@ -130,7 +130,7 @@ describe("AsyncStoragePeladaRepository", () => {
     });
 
     it("traz status, nome e totais no resumo", async () => {
-      const game = new GameManager("Quinta", new Rules());
+      const game = new GestorJogo("Quinta", new Rules());
       game.addPlayer("Ana");
       game.iniciar();
       await repo.salvar(game);
@@ -144,10 +144,10 @@ describe("AsyncStoragePeladaRepository", () => {
     });
 
     it("ordena mais recente primeiro", async () => {
-      const antiga = new GameManager("Antiga", new Rules(), {
+      const antiga = new GestorJogo("Antiga", new Rules(), {
         createdAt: 100,
       });
-      const recente = new GameManager("Recente", new Rules(), {
+      const recente = new GestorJogo("Recente", new Rules(), {
         createdAt: 200,
       });
       await repo.salvar(antiga);
@@ -162,7 +162,7 @@ describe("AsyncStoragePeladaRepository", () => {
         "futelista:execucao:lixo",
         "isso-nao-eh-json",
       );
-      const game = new GameManager("Boa", new Rules());
+      const game = new GestorJogo("Boa", new Rules());
       await repo.salvar(game);
 
       const resumos = await repo.listar();
@@ -197,13 +197,13 @@ describe("AsyncStoragePeladaRepository", () => {
     it("listarPeladas devolve resumo com totalExecucoes", async () => {
       const pelada = new Pelada({ nome: "Fute BB" });
       await repo.salvarPelada(pelada);
-      const g1 = new GameManager("BB 01/jun", new Rules(), {
+      const g1 = new GestorJogo("BB 01/jun", new Rules(), {
         peladaId: pelada.id,
       });
-      const g2 = new GameManager("BB 08/jun", new Rules(), {
+      const g2 = new GestorJogo("BB 08/jun", new Rules(), {
         peladaId: pelada.id,
       });
-      const orfa = new GameManager("Avulsa", new Rules());
+      const orfa = new GestorJogo("Avulsa", new Rules());
       await repo.salvar(g1);
       await repo.salvar(g2);
       await repo.salvar(orfa);
@@ -220,8 +220,8 @@ describe("AsyncStoragePeladaRepository", () => {
       const b = new Pelada({ nome: "B" });
       await repo.salvarPelada(a);
       await repo.salvarPelada(b);
-      const exA = new GameManager("ex-a", new Rules(), { peladaId: a.id });
-      const exB = new GameManager("ex-b", new Rules(), { peladaId: b.id });
+      const exA = new GestorJogo("ex-a", new Rules(), { peladaId: a.id });
+      const exB = new GestorJogo("ex-b", new Rules(), { peladaId: b.id });
       await repo.salvar(exA);
       await repo.salvar(exB);
 

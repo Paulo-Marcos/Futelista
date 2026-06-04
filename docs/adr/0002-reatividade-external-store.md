@@ -1,11 +1,11 @@
-# 0002 — Reatividade via External Store no GameManager
+# 0002 — Reatividade via External Store no GestorJogo
 
 **Status:** aceito
 **Data:** 2026-05-22
 
 ## Contexto
 
-O `GameManager` é o **agregado raiz** do domínio. Ele e as entidades que orquestra (`Player`, `Team`, `Match`, `Timer`) são **mutáveis** — métodos como `addPlayer`, `addGoal`, `start` mudam estado in-place.
+O `GestorJogo` é o **agregado raiz** do domínio. Ele e as entidades que orquestra (`Player`, `Team`, `Match`, `Timer`) são **mutáveis** — métodos como `addPlayer`, `addGoal`, `start` mudam estado in-place.
 
 React, por outro lado, depende de **comparação de referência** para decidir re-render. Duas opções clássicas:
 
@@ -14,16 +14,16 @@ React, por outro lado, depende de **comparação de referência** para decidir r
 
 Adicionalmente, o `Timer` decrementa via `setInterval` — cada tick precisa atualizar a UI sem que ninguém precise chamar `forceUpdate`.
 
-Antes desta decisão, alguns componentes usavam o anti-padrão `setState([])` para forçar re-render manual após chamar um método do `GameManager`. Funcionava, mas escondia o fluxo, esquecia em pontos e re-renderizava demais.
+Antes desta decisão, alguns componentes usavam o anti-padrão `setState([])` para forçar re-render manual após chamar um método do `GestorJogo`. Funcionava, mas escondia o fluxo, esquecia em pontos e re-renderizava demais.
 
 ## Decisão
 
-Implementar o contrato de **external store do React** no próprio `GameManager`, e consumir via **`useSyncExternalStore`** num hook dedicado (`useGameSlice`).
+Implementar o contrato de **external store do React** no próprio `GestorJogo`, e consumir via **`useSyncExternalStore`** num hook dedicado (`useGameSlice`).
 
 O contrato tem três peças:
 
 ```ts
-class GameManager {
+class GestorJogo {
   private _version = 0;
   private listeners = new Set<() => void>();
 
@@ -41,12 +41,12 @@ class GameManager {
 }
 ```
 
-Todo método público que muda estado chama `notify()` no final. O `Timer` recebe um callback `onChange` no construtor; o `GameManager` passa `() => this.notify()` para que ticks também propaguem.
+Todo método público que muda estado chama `notify()` no final. O `Timer` recebe um callback `onChange` no construtor; o `GestorJogo` passa `() => this.notify()` para que ticks também propaguem.
 
 O hook em [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts):
 
 ```ts
-export function useGameSlice<T>(selector: (game: GameManager) => T): T {
+export function useGameSlice<T>(selector: (game: GestorJogo) => T): T {
   const { manager } = useSoccer();
   const subscribe = useCallback(
     (l) => manager.subscribe(l),
@@ -60,7 +60,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 
 ## Alternativas consideradas
 
-### A. External Store no próprio GameManager (escolhida)
+### A. External Store no próprio GestorJogo (escolhida)
 
 **Prós**
 - Sem dependência nova (Zustand, Jotai, Redux).
@@ -83,7 +83,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 - ~20 specs do domínio precisariam mudar.
 - Custo de cópia em cada `addGoal` durante uma partida com cronômetro rodando.
 
-### C. Adapter externo (Zustand/Jotai) envolvendo o GameManager
+### C. Adapter externo (Zustand/Jotai) envolvendo o GestorJogo
 
 **Prós**
 - Seletor com igualdade — re-render mínimo.
@@ -91,7 +91,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 
 **Contras**
 - Dependência adicional.
-- Duplica o "estado" do GameManager dentro do store — fonte da verdade em dois lugares.
+- Duplica o "estado" do GestorJogo dentro do store — fonte da verdade em dois lugares.
 - Para o tamanho do app (pessoal, escopo pequeno), é abstração futura.
 
 ### D. `setState([])` ad hoc (o que existia)
@@ -108,7 +108,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 ## Consequências
 
 ### Boas
-- Reatividade automática para **qualquer** método do `GameManager`, incluindo ticks do `Timer`, sem que componente precise lembrar de "atualizar".
+- Reatividade automática para **qualquer** método do `GestorJogo`, incluindo ticks do `Timer`, sem que componente precise lembrar de "atualizar".
 - Hook único (`useGameSlice`) padroniza o consumo. Quem vai escrever uma tela nova sabe exatamente o padrão.
 - Migração incremental — onde havia `setState([])`, troca por `useGameSlice` com selector.
 
@@ -122,7 +122,7 @@ export function useGameSlice<T>(selector: (game: GameManager) => T): T {
 ## Referências
 
 - [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts) — implementação.
-- [src/domain/GameManager.ts](../../src/domain/GameManager.ts) → `subscribe`, `version`, `notify`.
+- [src/domain/GestorJogo.ts](../../src/domain/GestorJogo.ts) → `subscribe`, `version`, `notify`.
 - [src/domain/Timer.ts](../../src/domain/Timer.ts) → callback `onChange`.
 - [docs/desenvolvedor/ui.md → Reatividade](../desenvolvedor/ui.md#reatividade-usegameslice)
 - [React docs — useSyncExternalStore](https://react.dev/reference/react/useSyncExternalStore).

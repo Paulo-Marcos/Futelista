@@ -12,7 +12,7 @@ import {
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -28,7 +28,7 @@ export default function RegrasScreen() {
   return <RegrasInner manager={manager} />;
 }
 
-function RegrasInner({ manager }: { manager: GameManager }) {
+function RegrasInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
 

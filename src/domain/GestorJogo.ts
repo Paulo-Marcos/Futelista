@@ -9,7 +9,7 @@ import { Timer, TimerStatus } from "./Timer";
 import { FinalResultProcessor } from "./FinalResult/FinalResult.processor";
 
 /**
- * GameManager — agregado raiz da pelada.
+ * GestorJogo — agregado raiz da pelada.
  *
  * Reatividade: implementa o contrato de "external store" do React
  * (subscribe + version snapshot) para uso com useSyncExternalStore.
@@ -22,7 +22,7 @@ import { FinalResultProcessor } from "./FinalResult/FinalResult.processor";
  *  - ATIVA:      pelada em curso (jogadores chegando, partidas rodando).
  *  - FINALIZADA: pelada encerrada — arquivada como histórico.
  */
-export class GameManager {
+export class GestorJogo {
   id: string = uuid.v4();
   players: Player[] = [];
   next: Team[] = [];

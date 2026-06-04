@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ResultMatch } from "@/src/domain/Match";
 import { Rules } from "@/src/domain/Rules";
 import {
@@ -39,7 +39,7 @@ function buildResultadoManager(opts: {
   /** "A" → winner=teamA; "B" → winner=teamB. */
   vencedor?: "A" | "B";
 }) {
-  const m = new GameManager("Pelada", new Rules({ playersPerTeam: 4 }));
+  const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
   const total = opts.totalJogadores ?? 12;
   m.addPlayers(
     Array.from({ length: total }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
@@ -59,7 +59,7 @@ function buildResultadoManager(opts: {
   return m;
 }
 
-function renderResultado(manager: GameManager | null) {
+function renderResultado(manager: GestorJogo | null) {
   return renderWithProviders(<ResultadoScreen />, { soccer: { manager } });
 }
 
@@ -74,7 +74,7 @@ describe("Resultado — guards", () => {
   });
 
   it("manager sem playing/result: 'Nenhum resultado pendente'", () => {
-    const m = new GameManager("Pelada", new Rules({ playersPerTeam: 4 }));
+    const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
     renderResultado(m);
 
     expect(screen.getByText("Nenhum resultado pendente")).toBeTruthy();

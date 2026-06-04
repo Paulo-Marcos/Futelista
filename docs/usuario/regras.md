@@ -84,7 +84,7 @@ Caso especial: dois times empataram e nenhum dos dois tinha vantagem. O app trat
 
 ### A cadeia completa
 
-Implementada em [src/domain/UpdateDraw/UpdateDray.processor.ts](../../src/domain/UpdateDraw/UpdateDray.processor.ts) como **Chain of Responsibility**. Cada handler testa uma condição; o primeiro que casa decide.
+Implementada em [src/domain/FinalResult/FinalResult.processor.ts](../../src/domain/FinalResult/FinalResult.processor.ts) como **Chain of Responsibility**. Cada handler testa uma condição; o primeiro que casa decide.
 
 Ordem dos handlers:
 

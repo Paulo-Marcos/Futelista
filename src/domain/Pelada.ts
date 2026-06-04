@@ -6,7 +6,7 @@ import { DataRules, Rules } from "./Rules";
 /**
  * Pelada — o **tipo** cadastrado pelo usuário (ex.: "Fute CEF", "Fute BB").
  *
- * Não confunda com `GameManager`, que representa uma **execução** específica
+ * Não confunda com `GestorJogo`, que representa uma **execução** específica
  * (uma sessão jogada num dia). A Pelada agrupa execuções que compartilham
  * nome e regras default.
  *

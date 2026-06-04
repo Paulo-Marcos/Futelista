@@ -12,7 +12,7 @@ import {
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
@@ -30,7 +30,7 @@ export default function SalvarComoPeladaScreen() {
   return <SalvarComoPeladaInner manager={manager} />;
 }
 
-function SalvarComoPeladaInner({ manager }: { manager: GameManager }) {
+function SalvarComoPeladaInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
   const { salvarExecucaoAtualComoPelada } = useSoccer();

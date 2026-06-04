@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
   RepositorioPelada,
@@ -14,7 +14,7 @@ export type SoccerContextValue = {
    * Execução ativa, ou null quando nenhuma execução está aberta — o app
    * volta ao "estado de gestão" (tela inicial só com peladas cadastradas).
    */
-  manager: GameManager | null;
+  manager: GestorJogo | null;
   saving: boolean;
 
   // ----- Pelada (tipo cadastrado) ------------------------------------

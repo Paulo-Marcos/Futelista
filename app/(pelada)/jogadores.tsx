@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
@@ -33,7 +33,7 @@ export default function JogadoresScreen() {
   return <JogadoresInner manager={manager} />;
 }
 
-function JogadoresInner({ manager }: { manager: GameManager }) {
+function JogadoresInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 

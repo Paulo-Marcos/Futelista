@@ -10,11 +10,11 @@ Esta página descreve **cada entidade** de `src/domain/`: propósito, propriedad
 
 ```mermaid
 classDiagram
-  GameManager "1" o-- "*" Player
-  GameManager "1" o-- "*" Team : next + playing
-  GameManager "1" o-- "*" Match : histórico
-  GameManager "1" --> "1" Rules
-  GameManager "1" --> "0..1" Timer
+  GestorJogo "1" o-- "*" Player
+  GestorJogo "1" o-- "*" Team : next + playing
+  GestorJogo "1" o-- "*" Match : histórico
+  GestorJogo "1" --> "1" Rules
+  GestorJogo "1" --> "0..1" Timer
   Match "1" --> "2" Team
   Match "1" o-- "*" Goal
   Team "1" o-- "*" Player
@@ -26,7 +26,7 @@ classDiagram
   Switch "1" --> "2" Player
   Switch "1" --> "1" Team
 
-  class GameManager{
+  class GestorJogo{
     +players: Player[]
     +next: Team[]
     +playing?: Match
@@ -70,9 +70,9 @@ classDiagram
   }
 ```
 
-## `GameManager` — agregado raiz
+## `GestorJogo` — agregado raiz
 
-Arquivo: [src/domain/GameManager.ts](../../src/domain/GameManager.ts).
+Arquivo: [src/domain/GestorJogo.ts](../../src/domain/GestorJogo.ts).
 
 Ponto único de entrada para tudo que muda a pelada. Implementa _external store_ (subscribe + version) para integração com React via `useSyncExternalStore`.
 
@@ -101,7 +101,7 @@ Ponto único de entrada para tudo que muda a pelada. Implementa _external store_
 | `start() / pause() / continue()` | Controla o `Timer` da partida atual.                                    |
 | `addGoal(team, player)`        | Registra um gol na partida atual (com instante via `Timer.getTime()`).    |
 | `setResult()`                  | Computa vencedor/empate ao final da partida.                              |
-| `setNextMatch(externalAdv?)`   | Aplica a chain do `UpdateDraw` e prepara a próxima partida.               |
+| `setNextMatch(externalAdv?)`   | Aplica a chain do `FinalResult` e prepara a próxima partida.               |
 | `switchPlayerFromTeam(p1, p2)` | Troca dois jogadores entre os times deles (durante a partida).            |
 | `switchPlayerLeft(in, out)`    | Substitui um jogador em campo por um da fila.                             |
 | `removeFromGame(player)`       | Tira o jogador da pelada; redimensiona times automaticamente.             |
@@ -218,7 +218,7 @@ Registro de uma substituição: `playerEnters`, `playerLeaves`, `team`. Imutáve
 
 Arquivo: [src/domain/Timer.ts](../../src/domain/Timer.ts).
 
-Cronômetro da partida. Aceita callback `onChange` no construtor — usado pelo `GameManager` pra que cada tick dispare `notify()` na árvore React.
+Cronômetro da partida. Aceita callback `onChange` no construtor — usado pelo `GestorJogo` pra que cada tick dispare `notify()` na árvore React.
 
 | Propriedade            | Tipo               | Notas                                           |
 | ---------------------- | ------------------ | ----------------------------------------------- |
@@ -248,11 +248,11 @@ Cria a lista inicial de `Team[]` a partir da lista de `Player[]` e do `choosingT
 3. Registre no factory.
 4. Escreva o `*.spec.ts`.
 
-Sem tocar `GameManager`, sem `if` extra.
+Sem tocar `GestorJogo`, sem `if` extra.
 
-## `UpdateDraw/` — Chain of Responsibility
+## `FinalResult/` — Chain of Responsibility
 
-Pasta: [src/domain/UpdateDraw/](../../src/domain/UpdateDraw/).
+Pasta: [src/domain/FinalResult/](../../src/domain/FinalResult/).
 
 Decide o que acontece **depois** que `Match.setResult()` rodou:
 
@@ -286,7 +286,7 @@ Roteiro pragmático:
 1. **Tem invariante de negócio?** Vira entidade ou Value Object.
 2. **É só dados sem comportamento?** Use `type`/`interface`.
 3. **Tem variação de comportamento (3+ casos)?** Strategy + Factory (siga `TeamBuilder`).
-4. **Cadeia de decisões mutuamente excludentes?** Chain of Responsibility (siga `UpdateDraw`).
+4. **Cadeia de decisões mutuamente excludentes?** Chain of Responsibility (siga `FinalResult`).
 5. **Crie o `*.spec.ts` antes ou junto** da implementação.
 
 ## Próximo passo

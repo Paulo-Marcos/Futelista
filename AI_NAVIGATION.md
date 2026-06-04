@@ -18,12 +18,12 @@ Atualize quando criar fluxos, telas, regras de domínio ou decisões importantes
 ### Camada de domínio (puro TS, testado)
 
 - Entidades: [src/domain/Player.ts](src/domain/Player.ts), [src/domain/Team.ts](src/domain/Team.ts), [src/domain/Match.ts](src/domain/Match.ts), [src/domain/Goal.ts](src/domain/Goal.ts), [src/domain/Switch.ts](src/domain/Switch.ts), [src/domain/ScreenTime.ts](src/domain/ScreenTime.ts), [src/domain/Timer.ts](src/domain/Timer.ts), [src/domain/Rules.ts](src/domain/Rules.ts)
-- Agregado raiz: [src/domain/GameManager.ts](src/domain/GameManager.ts)
+- Agregado raiz: [src/domain/GestorJogo.ts](src/domain/GestorJogo.ts)
 - Criação de times (Factory + Strategy): [src/domain/TeamBuilder/](src/domain/TeamBuilder)
   - Factory: [CreateTeam.factory.ts](src/domain/TeamBuilder/CreateTeam.factory.ts)
   - Estratégias: `CreateTeamByOrder`, `CreateTeamMixed`, `CreateTeamMixingTopTwoTeams`
-- Pós-partida (Chain of Responsibility): [src/domain/UpdateDraw/](src/domain/UpdateDraw)
-  - Processor: [UpdateDray.processor.ts](src/domain/UpdateDraw/UpdateDray.processor.ts)
+- Pós-partida (Chain of Responsibility): [src/domain/FinalResult/](src/domain/FinalResult)
+  - Processor: [FinalResult.processor.ts](src/domain/FinalResult/FinalResult.processor.ts)
   - Handlers: `WithVictory`, `WithDrawAndAdvantageAndTwoTeams`, `WithDrawAndAdvantageAndNotTwoTeams`, `WithDrawAndExternalAdvantage*`
 
 ### Camada de UI (Expo Router)
@@ -34,7 +34,7 @@ Atualize quando criar fluxos, telas, regras de domínio ou decisões importantes
   - Home: [app/(tabs)/index.tsx](app/(tabs)/index.tsx)
   - Lista de jogadores: [app/(tabs)/list.tsx](app/(tabs)/list.tsx)
   - Times (carrossel): [app/(tabs)/Teams.tsx](app/(tabs)/Teams.tsx)
-  - Gerenciamento: [app/(tabs)/GameManager.tsx](app/(tabs)/GameManager.tsx)
+  - Gerenciamento: [app/(tabs)/GestorJogo.tsx](app/(tabs)/GestorJogo.tsx)
   - Partida atual: [app/(tabs)/CurrentGame.tsx](app/(tabs)/CurrentGame.tsx)
 
 ### Cola React ↔ domínio

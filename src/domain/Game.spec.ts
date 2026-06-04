@@ -1,4 +1,4 @@
-import { GameManager, PeladaStatus } from './GameManager';
+import { GestorJogo, PeladaStatus } from './GestorJogo';
 import { ResultMatch } from './Match';
 import { Player, PlayerSituation } from './Player';
 import { ChoosingTeams, Rules } from './Rules';
@@ -8,19 +8,19 @@ import { TimerStatus } from './Timer';
 
 describe('Teste da classe Game', () => {
   it('Deverá criar uma jogo qualquer', () => {
-    const game = new GameManager('Futebol de quarta', new Rules());
+    const game = new GestorJogo('Futebol de quarta', new Rules());
     expect(game).toBeDefined();
   });
   describe('Quando for tratar a lista de jogadores', () => {
     it('Deverá cadastrar uma lista de jogadores', () => {
-      const game = new GameManager('Futebol de quarta', new Rules());
+      const game = new GestorJogo('Futebol de quarta', new Rules());
       game.setPlayers(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
       expect(game.players.length).toBe(4);
       expect(game.players[0]).toBeInstanceOf(Player);
       expect(game.playersWithoutTeam).toBe(4);
     });
     it('Deverá adicionar um jogador', () => {
-      const game = new GameManager('Futebol de quarta', new Rules());
+      const game = new GestorJogo('Futebol de quarta', new Rules());
       game.addPlayer('Pedro');
       expect(game.players.find((player) => player.name === 'Pedro')).toBeInstanceOf(
         Player,
@@ -29,13 +29,13 @@ describe('Teste da classe Game', () => {
     });
   });
   describe('Quando for lidar com times', () => {
-    let game: GameManager;
+    let game: GestorJogo;
     beforeEach(() => {
       const rules = new Rules({
         playersPerTeam: 2,
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
-      game = new GameManager('Futebol de quarta', rules);
+      game = new GestorJogo('Futebol de quarta', rules);
       game.setPlayers(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
     });
 
@@ -149,7 +149,7 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando houver troca de jogador', () => {
-    let game: GameManager;
+    let game: GestorJogo;
     let players: Player[];
     let teams: Team[];
     beforeEach(() => {
@@ -157,7 +157,7 @@ describe('Teste da classe Game', () => {
         playersPerTeam: 2,
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
-      game = new GameManager('Futebol de quarta', rules);
+      game = new GestorJogo('Futebol de quarta', rules);
       players = game.setPlayers([
         'Paulo',
         'Marcos',
@@ -287,7 +287,7 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando for controlar a partida atual', () => {
-    let game: GameManager;
+    let game: GestorJogo;
     let players: Player[];
     let teams: Team[];
     let rules: Rules;
@@ -296,7 +296,7 @@ describe('Teste da classe Game', () => {
         playersPerTeam: 2,
         choosingTeams: ChoosingTeams.BY_ORDER,
       });
-      game = new GameManager('Futebol de quarta', rules);
+      game = new GestorJogo('Futebol de quarta', rules);
       players = game.setPlayers([
         'Paulo',
         'Marcos',
@@ -360,7 +360,7 @@ describe('Teste da classe Game', () => {
 
   describe('Quando remover um jogador da pelada', () => {
     it('deverá remover jogador sem time e decrementar playersWithoutTeam', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const ana = game.addPlayer('Ana');
       game.addPlayer('Bia');
       game.removePlayer(ana);
@@ -370,7 +370,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá tirar o jogador do time antes de remover da pelada', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       const ana = game.players.find((p) => p.name === 'Ana')!;
@@ -382,7 +382,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá lançar erro ao tentar remover jogador inexistente', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const fantasma = new Player({ name: 'Fantasma' });
       expect(() => game.removePlayer(fantasma)).toThrowError(
         'Jogador não está na pelada.',
@@ -392,14 +392,14 @@ describe('Teste da classe Game', () => {
 
   describe('Quando renomear um jogador da pelada', () => {
     it('deverá renomear o jogador via Player.rename', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const player = game.addPlayer('Antigo');
       game.renamePlayer(player, 'Novo');
       expect(player.name).toBe('Novo');
     });
 
     it('deverá lançar erro ao renomear jogador que não está na pelada', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const fantasma = new Player({ name: 'Fantasma' });
       expect(() => game.renamePlayer(fantasma, 'Algo')).toThrowError(
         'Jogador não está na pelada.',
@@ -407,7 +407,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá lançar erro ao renomear para nome já usado por outro jogador', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       const bia = game.addPlayer('Bia');
       expect(() => game.renamePlayer(bia, 'Ana')).toThrowError(
@@ -416,7 +416,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá tratar duplicata na renomeação ignorando caixa e espaços', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       const bia = game.addPlayer('Bia');
       expect(() => game.renamePlayer(bia, '  ana  ')).toThrowError(
@@ -425,7 +425,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá permitir renomear para o mesmo nome (no-op de duplicata)', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const ana = game.addPlayer('Ana');
       expect(() => game.renamePlayer(ana, 'Ana')).not.toThrow();
     });
@@ -433,27 +433,27 @@ describe('Teste da classe Game', () => {
 
   describe('Quando adicionar um jogador (addPlayer)', () => {
     it('deverá fazer trim do nome antes de criar', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const p = game.addPlayer('   Pedro   ');
       expect(p.name).toBe('Pedro');
     });
 
     it('deverá lançar erro quando o nome é vazio', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       expect(() => game.addPlayer('')).toThrowError(
         'Nome do jogador não pode ser vazio.',
       );
     });
 
     it('deverá lançar erro quando o nome só tem espaços', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       expect(() => game.addPlayer('    ')).toThrowError(
         'Nome do jogador não pode ser vazio.',
       );
     });
 
     it('deverá lançar erro ao adicionar jogador com nome já existente', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       expect(() => game.addPlayer('Ana')).toThrowError(
         'Já existe jogador chamado "Ana" na pelada.',
@@ -461,7 +461,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá considerar duplicata ignorando caixa e espaços', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       expect(() => game.addPlayer('  ANA  ')).toThrowError(
         'Já existe jogador chamado "ANA" na pelada.',
@@ -471,7 +471,7 @@ describe('Teste da classe Game', () => {
 
   describe('Quando adicionar vários jogadores em lote (addPlayers)', () => {
     it('deverá acrescentar todos os nomes válidos sem resetar a lista', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       const criados = game.addPlayers(['Bia', 'Caio', 'Davi']);
       expect(criados).toHaveLength(3);
@@ -485,7 +485,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá ignorar nomes vazios e duplicatas sem lançar erro', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       const criados = game.addPlayers([
         '',
@@ -500,7 +500,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá retornar lista vazia quando nada é criado', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.addPlayer('Ana');
       const criados = game.addPlayers(['', 'Ana', '   ']);
       expect(criados).toEqual([]);
@@ -509,8 +509,8 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando mover um time para o fim da fila', () => {
-    function peladaComTimes(): GameManager {
-      const game = new GameManager(
+    function peladaComTimes(): GestorJogo {
+      const game = new GestorJogo(
         'Pelada',
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
@@ -555,8 +555,8 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando esvaziar um time', () => {
-    function peladaComTimes(): GameManager {
-      const game = new GameManager(
+    function peladaComTimes(): GestorJogo {
+      const game = new GestorJogo(
         'Pelada',
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
@@ -622,7 +622,7 @@ describe('Teste da classe Game', () => {
 
   describe('Quando bloquear remoção em partida ativa', () => {
     it('deverá lançar erro ao remover jogador de time que está em partida', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
@@ -634,7 +634,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('deverá permitir remover jogador que NÃO está na partida atual', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi', 'Edu', 'Fê']);
       game.createTeams();
       game.setPlayingGame();
@@ -646,9 +646,9 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando resetar os times', () => {
-    let game: GameManager;
+    let game: GestorJogo;
     beforeEach(() => {
-      game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
     });
@@ -688,8 +688,8 @@ describe('Teste da classe Game', () => {
   });
 
   describe('Quando atualizar as regras da pelada', () => {
-    function pelada(): GameManager {
-      return new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+    function pelada(): GestorJogo {
+      return new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
     }
 
     it('deverá atualizar apenas os campos informados', () => {
@@ -746,7 +746,7 @@ describe('Teste da classe Game', () => {
   describe('Ciclo de vida da pelada', () => {
     it('nasce com status CREATED e createdAt populado', () => {
       const antes = Date.now();
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       const depois = Date.now();
       expect(game.status).toBe(PeladaStatus.CREATED);
       expect(game.createdAt).toBeGreaterThanOrEqual(antes);
@@ -756,7 +756,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('aceita timestamps no construtor (para reidratação)', () => {
-      const game = new GameManager('Pelada', new Rules(), {
+      const game = new GestorJogo('Pelada', new Rules(), {
         status: PeladaStatus.ATIVA,
         createdAt: 123,
         startedAt: 456,
@@ -767,20 +767,20 @@ describe('Teste da classe Game', () => {
     });
 
     it('iniciar() transiciona CREATED → ATIVA e marca startedAt', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.iniciar();
       expect(game.status).toBe(PeladaStatus.ATIVA);
       expect(game.startedAt).toBeDefined();
     });
 
     it('iniciar() falha quando já está ATIVA', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.iniciar();
       expect(() => game.iniciar()).toThrowError('Pelada já foi iniciada.');
     });
 
     it('finalizar() transiciona ATIVA → FINALIZADA e marca endedAt', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.iniciar();
       game.finalizar();
       expect(game.status).toBe(PeladaStatus.FINALIZADA);
@@ -788,7 +788,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('finalizar() falha se houver partida em andamento', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.iniciar();
@@ -799,7 +799,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('finalizar() é idempotência-protegido', () => {
-      const game = new GameManager('Pelada', new Rules());
+      const game = new GestorJogo('Pelada', new Rules());
       game.iniciar();
       game.finalizar();
       expect(() => game.finalizar()).toThrowError('Pelada já foi finalizada.');
@@ -808,7 +808,7 @@ describe('Teste da classe Game', () => {
 
   describe('Quando limpar jogadores e times', () => {
     it('esvazia jogadores, fila e jogadores-sem-time preservando regras e nome', () => {
-      const game = new GameManager('Sábado', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Sábado', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.limparJogadoresETimes();
@@ -821,7 +821,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('preserva o histórico de partidas', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();
@@ -834,7 +834,7 @@ describe('Teste da classe Game', () => {
     });
 
     it('bloqueia limpeza com partida em andamento', () => {
-      const game = new GameManager('Pelada', new Rules({ playersPerTeam: 2 }));
+      const game = new GestorJogo('Pelada', new Rules({ playersPerTeam: 2 }));
       game.setPlayers(['Ana', 'Bia', 'Caio', 'Davi']);
       game.createTeams();
       game.setPlayingGame();

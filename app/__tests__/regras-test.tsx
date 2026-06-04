@@ -1,6 +1,6 @@
 import { Pressable } from "react-native";
 
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 import { Timer, TimerStatus } from "@/src/domain/Timer";
 import {
@@ -31,7 +31,7 @@ function buildManager(opts?: {
   comPartida?: boolean;
   status?: TimerStatus;
 }) {
-  const m = new GameManager(
+  const m = new GestorJogo(
     "Pelada teste",
     new Rules({ playersPerTeam: 4, ...opts?.rules }),
   );
@@ -49,7 +49,7 @@ function buildManager(opts?: {
   return m;
 }
 
-function renderRegras(manager: GameManager | null) {
+function renderRegras(manager: GestorJogo | null) {
   return renderWithProviders(<RegrasScreen />, { soccer: { manager } });
 }
 
@@ -193,7 +193,7 @@ describe("Regras — preview", () => {
 
   it("mostra times completos e sobra quando aplicável", () => {
     // 9 jogadores, 4 por time → 2 times completos + 1 sobrando.
-    const m = new GameManager(
+    const m = new GestorJogo(
       "Pelada teste",
       new Rules({ playersPerTeam: 4 }),
     );

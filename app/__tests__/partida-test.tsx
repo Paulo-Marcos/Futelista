@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import { Timer, TimerStatus } from "@/src/domain/Timer";
 import {
@@ -26,7 +26,7 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 /**
- * Constrói um GameManager pronto para a tela de partida.
+ * Constrói um GestorJogo pronto para a tela de partida.
  *
  * - `withProximo`: cria 3 times (12 jogadores 4×4×4) — sobra 1 time em `next`
  *   após `setPlayingGame`, permitindo testar substituição.
@@ -36,8 +36,8 @@ beforeEach(() => {
 function buildPartidaManager(opts?: {
   semProximo?: boolean;
   status?: TimerStatus;
-}): GameManager {
-  const m = new GameManager("Pelada teste", new Rules({ playersPerTeam: 4 }));
+}): GestorJogo {
+  const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   const total = opts?.semProximo ? 8 : 12;
   m.addPlayers(
     Array.from({ length: total }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
@@ -51,7 +51,7 @@ function buildPartidaManager(opts?: {
       m.rules.numberTimes,
       m.rules.getDurationMatch(),
       () => {
-        /* sem notify aqui — o GameManager não tem listener mockado */
+        /* sem notify aqui — o GestorJogo não tem listener mockado */
       },
     );
     m.timer.status = opts.status;
@@ -59,7 +59,7 @@ function buildPartidaManager(opts?: {
   return m;
 }
 
-function renderPartida(manager: GameManager | null) {
+function renderPartida(manager: GestorJogo | null) {
   return renderWithProviders(<PartidaScreen />, {
     soccer: { manager },
   });
@@ -76,14 +76,14 @@ describe("Partida — guards", () => {
   });
 
   it("manager sem `playing`: mostra EmptyState 'Nenhuma partida em andamento'", () => {
-    const m = new GameManager("Pelada", new Rules({ playersPerTeam: 4 }));
+    const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
     renderPartida(m);
 
     expect(screen.getByText("Nenhuma partida em andamento")).toBeTruthy();
   });
 
   it("EmptyState: botão 'Voltar' chama router.back", () => {
-    const m = new GameManager("Pelada", new Rules({ playersPerTeam: 4 }));
+    const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
     renderPartida(m);
 
     fireEvent.press(screen.getByText("Voltar"));

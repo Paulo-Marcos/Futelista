@@ -131,13 +131,13 @@ Testar **comportamento observável** — texto renderizado, handler chamado em r
 
 ## Padrões já estabelecidos
 
-### `Match.spec.ts`, `Team.spec.ts`, `GameManager.spec.ts`
+### `Match.spec.ts`, `Team.spec.ts`, `GestorJogo.spec.ts`
 
 Mostram o padrão de **grafo natural**: testar com `Player`, `Team`, `Match` reais, sem mocks entre eles. Use como referência.
 
 ### `Game.spec.ts`
 
-Cobre cenários ponta a ponta do `GameManager`: criar pelada, adicionar jogadores, fazer times, jogar partida, ver fila atualizar. Se você for adicionar um caso novo de pós-partida (chain do `UpdateDraw`), ele provavelmente entra aqui também — não só em `UpdateDraw/*.spec.ts`.
+Cobre cenários ponta a ponta do `GestorJogo`: criar pelada, adicionar jogadores, fazer times, jogar partida, ver fila atualizar. Se você for adicionar um caso novo de pós-partida (chain do `FinalResult`), ele provavelmente entra aqui também — não só em `FinalResult/*.spec.ts`.
 
 ### Casing de imports em testes
 

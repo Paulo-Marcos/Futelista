@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ResultMatch } from "@/src/domain/Match";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -25,7 +25,7 @@ export default function ResultadoScreen() {
   return <ResultadoInner manager={manager} />;
 }
 
-function ResultadoInner({ manager }: { manager: GameManager }) {
+function ResultadoInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
 

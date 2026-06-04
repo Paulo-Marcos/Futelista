@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { NOME_AVULSA_DEFAULT } from "@/src/app-shell/constants";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { RepositorioPelada } from "@/src/domain/ports/RepositorioPelada";
 import { ChoosingTeams, RULES_DEFAULTS, Rules } from "@/src/domain/Rules";
@@ -173,7 +173,7 @@ async function cenarioTresPeladasMix(repo: RepositorioPelada): Promise<void> {
 async function cenarioAvulsaEmAndamento(
   repo: RepositorioPelada,
 ): Promise<void> {
-  const exec = new GameManager(
+  const exec = new GestorJogo(
     NOME_AVULSA_DEFAULT,
     new Rules({ playersPerTeam: 3, timeMatch: TIME_DEFAULT, goalLimit: 2 }),
   );
@@ -183,8 +183,8 @@ async function cenarioAvulsaEmAndamento(
   await definirAtiva(exec.id);
 }
 
-function execucaoBase(pelada: Pelada, createdAt: number): GameManager {
-  return new GameManager(
+function execucaoBase(pelada: Pelada, createdAt: number): GestorJogo {
+  return new GestorJogo(
     pelada.nome,
     new Rules(pelada.regras.toData()),
     { peladaId: pelada.id, createdAt },

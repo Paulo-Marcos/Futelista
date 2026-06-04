@@ -10,7 +10,7 @@
  * resto do app reflete automaticamente.
  */
 
-/** Debounce entre mudanças no GameManager e gravação no repositório. */
+/** Debounce entre mudanças no GestorJogo e gravação no repositório. */
 export const AUTOSAVE_DEBOUNCE_MS = 500;
 
 /** Nome aplicado a execuções "avulsas" sem tipo de Pelada associado. */

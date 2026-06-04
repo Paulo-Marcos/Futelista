@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { PeladaStatus } from "@/src/domain/GameManager";
+import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Match, ResultMatch } from "@/src/domain/Match";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoPeladaTipo } from "@/src/domain/ports/RepositorioPelada";

@@ -10,8 +10,8 @@ Detalhes da regra: [`.claude/rules/domain.md`](../../.claude/rules/domain.md).
 
 | Arquivo | Papel | Imutável? |
 |---|---|---|
-| [`GameManager.ts`](GameManager.ts) | **Aggregate Root** — orquestra a execução (sessão) inteira de uma pelada. Implementa `subscribe`/`version` para integração com `useSyncExternalStore`. | Não — único ponto autorizado de mutação |
-| [`Pelada.ts`](Pelada.ts) | **Tipo cadastrado** (nome + regras default). Não confundir com `GameManager` (execução). | Parcial |
+| [`GestorJogo.ts`](GestorJogo.ts) | **Aggregate Root** — orquestra a execução (sessão) inteira de uma pelada. Implementa `subscribe`/`version` para integração com `useSyncExternalStore`. | Não — único ponto autorizado de mutação |
+| [`Pelada.ts`](Pelada.ts) | **Tipo cadastrado** (nome + regras default). Não confundir com `GestorJogo` (execução). | Parcial |
 | [`Rules.ts`](Rules.ts) | Política da pelada (jogadores/time, tempo, modo de escolha). Defaults em `RULES_DEFAULTS`. | Sim, por convenção |
 | [`Player.ts`](Player.ts) | Jogador participante. Mantém histórico (times, partidas, gols). | Não |
 | [`Team.ts`](Team.ts) | Time de até `limit` jogadores. Mantém histórico de partidas, gols, trocas. | Não |
@@ -23,11 +23,11 @@ Detalhes da regra: [`.claude/rules/domain.md`](../../.claude/rules/domain.md).
 
 ## Padrões aplicados
 
-- **Aggregate Root**: `GameManager` é o único ponto de entrada para mudanças no estado da execução.
+- **Aggregate Root**: `GestorJogo` é o único ponto de entrada para mudanças no estado da execução.
 - **Factory + Strategy** ([`TeamBuilder/`](TeamBuilder)): `CreateTeamFactory.fabricate(enum)` resolve a estratégia concreta de montagem dos times.
 - **Chain of Responsibility** ([`FinalResult/`](FinalResult)): `FinalResultProcessor` encadeia handlers que decidem o que fazer após uma partida (vitória, empate com vantagem interna, empate com vantagem externa).
 - **Ports & Adapters**: [`ports/RepositorioPelada.ts`](ports/RepositorioPelada.ts) declara o contrato de persistência. Adapters concretos ficam em [`src/infrastructure/storage/`](../infrastructure/storage/).
-- **Observer + External Store**: `GameManager.subscribe(listener)` + `version` snapshot, consumido por `useGameSlice` (em [`src/app-shell/`](../app-shell/)) via `useSyncExternalStore`.
+- **Observer + External Store**: `GestorJogo.subscribe(listener)` + `version` snapshot, consumido por `useGameSlice` (em [`src/app-shell/`](../app-shell/)) via `useSyncExternalStore`.
 
 ## Enums de contrato
 

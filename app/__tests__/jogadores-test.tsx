@@ -1,6 +1,6 @@
 import { Alert, Pressable } from "react-native";
 
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import {
   act,
@@ -16,8 +16,8 @@ import JogadoresScreen from "../(pelada)/jogadores";
 // Helpers
 // ---------------------------------------------------------------------------
 
-function buildManager(nomes: string[] = []): GameManager {
-  const m = new GameManager("Pelada teste", new Rules());
+function buildManager(nomes: string[] = []): GestorJogo {
+  const m = new GestorJogo("Pelada teste", new Rules());
   if (nomes.length > 0) m.addPlayers(nomes);
   return m;
 }
@@ -49,7 +49,7 @@ function mockAlert(
   });
 }
 
-function renderJogadores(manager: GameManager) {
+function renderJogadores(manager: GestorJogo) {
   return renderWithProviders(<JogadoresScreen />, { soccer: { manager } });
 }
 

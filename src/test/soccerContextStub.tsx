@@ -1,7 +1,7 @@
 import React from "react";
 
 import { SoccerContext, SoccerContextValue } from "@/src/app-shell/soccerContext";
-import type { GameManager } from "@/src/domain/GameManager";
+import type { GestorJogo } from "@/src/domain/GestorJogo";
 
 /**
  * Factory de um SoccerContextValue completo, com todos os métodos
@@ -15,7 +15,7 @@ export function buildSoccerContextValue(
   const noop = jest.fn<Promise<any>, any[]>().mockResolvedValue(undefined);
 
   return {
-    manager: null as GameManager | null,
+    manager: null as GestorJogo | null,
     saving: false,
 
     criarPelada: jest.fn().mockResolvedValue({ id: "pelada-1", nome: "Stub" }),

@@ -17,7 +17,7 @@ flowchart TB
     S2[list.tsx]
     S3[Teams.tsx]
     S4[CurrentGame.tsx]
-    S5[GameManager.tsx]
+    S5[GestorJogo.tsx]
     S6[ResultGame.tsx]
   end
 
@@ -39,7 +39,7 @@ flowchart TB
   end
 
   subgraph Domain["src/domain/"]
-    GM[(GameManager)]
+    GM[(GestorJogo)]
   end
 
   L --> MP --> SP --> SC
@@ -65,7 +65,7 @@ flowchart TB
 | `components/__tests__/` | Snapshots de componentes simples (`react-test-renderer`).                  |
 | `components/navigation/` | Componentes específicos de navegação (`TabBarIcon`).                       |
 | `contexts/`        | Contexts React — hoje só `SoccerContext`.                                       |
-| `providers/`       | Provider que cria o `GameManager` e injeta no Context.                          |
+| `providers/`       | Provider que cria o `GestorJogo` e injeta no Context.                          |
 | `hooks/`           | Hooks: `useSoccer`, `useGameSlice`, `useColorScheme`, `useThemeColor`.          |
 | `constants/`       | Cores (light/dark) e outras constantes de estilo.                               |
 | `assets/`          | Fontes (`SpaceMono`), imagens, ícones do app.                                   |
@@ -85,7 +85,7 @@ app/
     ├── list.tsx         ← Lista de jogadores
     ├── Teams.tsx        ← Times montados
     ├── CurrentGame.tsx  ← Partida em andamento
-    ├── GameManager.tsx  ← Configuração da pelada (UI provisória)
+    ├── GestorJogo.tsx  ← Configuração da pelada (UI provisória)
     └── ResultGame.tsx   ← Resultado pós-partida
 ```
 
@@ -95,7 +95,7 @@ O `app/(tabs)/_layout.tsx` hoje mistura **Expo Router** (file-based) com **`crea
 
 Outros pontos da UI que ainda vão mudar:
 
-- Nomes de rota com typo ou em inglês: `index2`, `Geriamento`, `GameManager` → vão para `times`, `gerenciamento`, `partida-atual`, `placar`.
+- Nomes de rota com typo ou em inglês: `index2`, `Geriamento`, `GestorJogo` → vão para `times`, `gerenciamento`, `partida-atual`, `placar`.
 - Cores hard-coded para debug (`backgroundColor: "red"`, `"yellow"`, `"purple"`) no `(tabs)/_layout.tsx` — devem virar tokens em `constants/Colors.ts`.
 - 175 linhas comentadas no `(tabs)/_layout.tsx` aguardando limpeza.
 
@@ -109,10 +109,10 @@ Composição de providers. Hoje só envolve o `SoccerProvider`, mas o ponto úni
 
 ### 2. `SoccerProvider` ([providers/soccerProvider.tsx](../../providers/soccerProvider.tsx))
 
-Cria **uma única instância** do `GameManager` (via `useRef`) que vive o ciclo todo do app e a injeta no Context:
+Cria **uma única instância** do `GestorJogo` (via `useRef`) que vive o ciclo todo do app e a injeta no Context:
 
 ```tsx
-const manager = useRef(new GameManager("teste", new Rules())).current;
+const manager = useRef(new GestorJogo("teste", new Rules())).current;
 return (
   <SoccerContext.Provider value={{ manager }}>
     {children}
@@ -124,7 +124,7 @@ return (
 
 ### 3. `SoccerContext` ([contexts/soccerContext.ts](../../contexts/soccerContext.ts))
 
-Context React puro. Tipo: `{ manager: GameManager }`. Nada mais.
+Context React puro. Tipo: `{ manager: GestorJogo }`. Nada mais.
 
 ### 4. `useSoccer()` ([hooks/useSoccer.ts](../../hooks/useSoccer.ts))
 
@@ -132,16 +132,16 @@ Atalho para `useContext(SoccerContext)`. Devolve `{ manager }`. Componente que s
 
 ## Reatividade: `useGameSlice`
 
-O `GameManager` é mutável (entidades de domínio se referenciam, mudam in-place). React quer imutabilidade. A ponte é o contrato de _external store_:
+O `GestorJogo` é mutável (entidades de domínio se referenciam, mudam in-place). React quer imutabilidade. A ponte é o contrato de _external store_:
 
-- `GameManager` expõe `version` (número monotônico) e `subscribe(listener)`.
+- `GestorJogo` expõe `version` (número monotônico) e `subscribe(listener)`.
 - Cada método público que muta estado chama `notify()` → incrementa `version` → dispara listeners.
 - O `Timer` recebe um `onChange` no construtor, então **ticks de cronômetro também disparam** `notify`.
 
 O hook [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts) embrulha isso em `useSyncExternalStore`:
 
 ```ts
-export function useGameSlice<T>(selector: (game: GameManager) => T): T {
+export function useGameSlice<T>(selector: (game: GestorJogo) => T): T {
   const { manager } = useSoccer();
   const subscribe = useCallback(
     (listener: () => void) => manager.subscribe(listener),
@@ -211,7 +211,7 @@ Componentes **burros**: JSX + estilo, **sem** acesso ao domínio. Recebem dados 
 | `Icons`                 | Re-export de ícones usados.                                              |
 | `navigation/TabBarIcon` | Ícone padronizado das tabs.                                              |
 
-**Regra:** se um componente precisa do `GameManager`, ele **não** é burro — fica em `app/` ou vira hook em `hooks/`.
+**Regra:** se um componente precisa do `GestorJogo`, ele **não** é burro — fica em `app/` ou vira hook em `hooks/`.
 
 ## Tema (light/dark)
 

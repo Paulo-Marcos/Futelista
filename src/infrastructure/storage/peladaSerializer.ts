@@ -2,7 +2,7 @@ import { Pelada } from "@/src/domain/Pelada";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 
 /**
- * Serializador da Pelada (tipo) — bem mais simples que o de GameManager
+ * Serializador da Pelada (tipo) — bem mais simples que o de GestorJogo
  * porque Pelada é só nome + regras + timestamps, sem grafo cíclico.
  */
 const VERSION = 1;

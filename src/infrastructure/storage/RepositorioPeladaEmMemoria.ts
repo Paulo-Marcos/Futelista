@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
   RepositorioPelada,
@@ -13,15 +13,15 @@ import {
  * remounts do provider (util com fast refresh) dentro do mesmo runtime JS.
  * Nao sobrevive a recarga completa do app.
  */
-const execucoes = new Map<string, GameManager>();
+const execucoes = new Map<string, GestorJogo>();
 const peladas = new Map<string, Pelada>();
 
 export class RepositorioPeladaEmMemoria implements RepositorioPelada {
-  async carregar(execucaoId: string): Promise<GameManager | null> {
+  async carregar(execucaoId: string): Promise<GestorJogo | null> {
     return execucoes.get(execucaoId) ?? null;
   }
 
-  async salvar(jogo: GameManager): Promise<void> {
+  async salvar(jogo: GestorJogo): Promise<void> {
     execucoes.set(jogo.id, jogo);
   }
 
@@ -72,7 +72,7 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
   }
 }
 
-function toResumoExecucao(g: GameManager): ResumoExecucao {
+function toResumoExecucao(g: GestorJogo): ResumoExecucao {
   return {
     id: g.id,
     name: g.name,

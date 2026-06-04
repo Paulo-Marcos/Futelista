@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
 import { Team } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
@@ -26,7 +26,7 @@ export default function PartidaScreen() {
   return <PartidaInner manager={manager} />;
 }
 
-function PartidaInner({ manager }: { manager: GameManager }) {
+function PartidaInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();

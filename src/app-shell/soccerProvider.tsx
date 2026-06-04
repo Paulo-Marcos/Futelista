@@ -10,7 +10,7 @@ import {
   limparPeladaAtivaId,
 } from "@/src/app-shell/peladaAtiva";
 import { SoccerContext } from "@/src/app-shell/soccerContext";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
   RepositorioPelada,
@@ -32,7 +32,7 @@ import { AsyncStoragePeladaRepository } from "@/src/infrastructure/storage/Async
  *  isso forçava o usuário a ver uma pelada vazia que ele nunca pediu.
  *
  * Durante a vida do app:
- *  - Subscribe no GameManager (quando ativo) dispara salvamento debounced.
+ *  - Subscribe no GestorJogo (quando ativo) dispara salvamento debounced.
  *  - `saving` reflete em tempo real escritas pendentes.
  */
 export const SoccerProvider = ({
@@ -45,7 +45,7 @@ export const SoccerProvider = ({
   const repoRef = useRef<RepositorioPelada>(
     repositorio ?? new AsyncStoragePeladaRepository(),
   );
-  const [manager, setManager] = useState<GameManager | null>(null);
+  const [manager, setManager] = useState<GestorJogo | null>(null);
   const [bootConcluido, setBootConcluido] = useState(false);
   const [saving, setSaving] = useState(false);
   const escritasPendentesRef = useRef(0);
@@ -66,7 +66,7 @@ export const SoccerProvider = ({
 
   useEffect(() => {
     let cancelado = false;
-    async function carregar(): Promise<GameManager | null> {
+    async function carregar(): Promise<GestorJogo | null> {
       const id = await lerPeladaAtivaId();
       if (!id) return null;
       try {
@@ -113,7 +113,7 @@ export const SoccerProvider = ({
    * e marca-a como ativa no storage.
    */
   const trocarManager = useCallback(
-    async (proximo: GameManager): Promise<void> => {
+    async (proximo: GestorJogo): Promise<void> => {
       await marcarSalvamento(async () => {
         if (manager) {
           try {
@@ -186,7 +186,7 @@ export const SoccerProvider = ({
       const pelada = await repoRef.current.carregarPelada(peladaId);
       if (!pelada) throw Error("Pelada não encontrada.");
       const nome = opcoes?.nomeExecucao?.trim() || pelada.nome;
-      const nova = new GameManager(nome, new Rules(pelada.regras.toData()), {
+      const nova = new GestorJogo(nome, new Rules(pelada.regras.toData()), {
         peladaId,
       });
       if (opcoes?.herdarJogadores) {
@@ -205,7 +205,7 @@ export const SoccerProvider = ({
   const iniciarExecucaoAvulsa = useCallback(
     async (nome?: string, regras?: DataRules): Promise<void> => {
       const nomeFinal = nome?.trim() || NOME_AVULSA_DEFAULT;
-      const nova = new GameManager(nomeFinal, new Rules(regras));
+      const nova = new GestorJogo(nomeFinal, new Rules(regras));
       nova.iniciar();
       await trocarManager(nova);
     },

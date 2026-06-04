@@ -1,4 +1,4 @@
-import { GameManager } from '../GameManager';
+import { GestorJogo } from '../GestorJogo';
 import { Rules } from '../Rules';
 import {
   BaseFinalResultHandler,
@@ -17,7 +17,7 @@ describe('BaseFinalResultHandler', () => {
     baseHandler = new ConcreteFinalResultHandler();
     nextHandler = { handle: jest.fn() } as unknown as FinalResultHandler;
     input = {
-      game: new GameManager('teste', new Rules()),
+      game: new GestorJogo('teste', new Rules()),
     };
   });
 

@@ -11,7 +11,7 @@
 export const STORAGE_NAMESPACE = "futelista:" as const;
 
 export const STORAGE_KEYS = {
-  /** Prefixo das execuções (sessões jogadas, payload do GameManager). */
+  /** Prefixo das execuções (sessões jogadas, payload do GestorJogo). */
   EXEC: `${STORAGE_NAMESPACE}execucao:`,
   /** Prefixo herdado, anterior ao conceito de tipo de Pelada. Somente leitura. */
   EXEC_LEGACY: `${STORAGE_NAMESPACE}pelada:`,

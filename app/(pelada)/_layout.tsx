@@ -8,7 +8,7 @@ import { usePalette } from "@/src/shared/hooks/usePalette";
  * Tabs internas da pelada.
  *
  * Sem execução ativa (manager null), só a tab "Pelada" aparece — as
- * tabs Jogadores e Times não fazem sentido sem um GameManager carregado
+ * tabs Jogadores e Times não fazem sentido sem um GestorJogo carregado
  * e são escondidas via `href: null`.
  */
 export default function PeladaLayout() {

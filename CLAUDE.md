@@ -76,17 +76,17 @@ npm run lint             # ESLint (config expo + prettier)
 
 ```
 app/                    ← Rotas Expo Router (file-based routing)
-  (tabs)/               ← Tabs (index, list, Teams, GameManager, CurrentGame)
+  (tabs)/               ← Tabs (index, list, Teams, GestorJogo, CurrentGame)
   _layout.tsx           ← Layout raiz com ThemeProvider + MyProviders
 src/
   domain/               ← Domínio puro TS, sem React, sem I/O, sem persistência
     Player, Team, Match, Goal, Switch, ScreenTime, Timer, Rules
-    GameManager        ← Agregado raiz / orquestrador
+    GestorJogo        ← Agregado raiz / orquestrador
     TeamBuilder/       ← Factory + Strategy: criação de times
     FinalResult/       ← Chain of Responsibility: pós-partida
 components/             ← Componentes RN reutilizáveis (ThemedText, ParallaxScrollView…)
 contexts/               ← React Contexts (SoccerContext)
-providers/              ← Provider que injeta o GameManager via Context
+providers/              ← Provider que injeta o GestorJogo via Context
 hooks/                  ← Hooks (useSoccer, useColorScheme, useThemeColor)
 constants/              ← Cores e constantes
 assets/                 ← Fontes, imagens, ícones
@@ -99,7 +99,7 @@ app/ (rotas)  →  hooks/providers/contexts  →  src/domain/ (puro)
 ```
 
 - `src/domain/` é **puro**: sem React, sem Expo, sem AsyncStorage, sem HTTP.
-- Componentes em `app/` e `components/` consomem domínio **apenas via hooks/providers** — nunca instanciam `GameManager` direto.
+- Componentes em `app/` e `components/` consomem domínio **apenas via hooks/providers** — nunca instanciam `GestorJogo` direto.
 - Lógica de negócio mora no domínio. Componentes só renderizam e disparam ações.
 
 ## Conceitos do Domínio
@@ -107,7 +107,7 @@ app/ (rotas)  →  hooks/providers/contexts  →  src/domain/ (puro)
 - **Player** — jogador da pelada (id, nome, gols, times, partidas, situação).
 - **Team** — time formado por N jogadores (`playersPerTeam` da `Rules`). Gerencia trocas, gols recebidos/feitos, situação.
 - **Match** — partida entre dois times. Computa gols, vencedor, empate.
-- **GameManager** — agregado que orquestra a pelada inteira: lista de jogadores, fila de `next`, `playing` atual, histórico de partidas, `advantageToNext`, `Timer` ativo.
+- **GestorJogo** — agregado que orquestra a pelada inteira: lista de jogadores, fila de `next`, `playing` atual, histórico de partidas, `advantageToNext`, `Timer` ativo.
 - **Rules** — política da pelada (jogadores por time, tempo, número de tempos, gols-limite, modo de escolha de times).
 - **Timer** — cronômetro com `TimerStatus` (CREATED, STARTED, PAUSED, INTERVAL, ENDED).
 - **ScreenTime** — `(stroke, timeStroke)` representando o instante de um gol.
@@ -171,7 +171,7 @@ O hook `.githooks/commit-msg` e o workflow `.github/workflows/lock-check.yml` va
 python bin/check-lock.py list
 
 # Checar se um conjunto de arquivos está travado
-python bin/check-lock.py check src/domain/GameManager.ts
+python bin/check-lock.py check src/domain/GestorJogo.ts
 
 # Instalar o hook git (uma vez por clone)
 git config core.hooksPath .githooks
@@ -206,7 +206,7 @@ app/ (rotas Expo)  →  providers/contexts/hooks (cola React)  →  src/domain/ 
 ```
 
 - `src/domain/` é **puro**: sem `expo-*`, sem `react`, sem `react-native`, sem `AsyncStorage`, sem `fetch`.
-- Componentes em `app/` e `components/` **não instanciam** entidades de domínio diretamente — passam pelo `GameManager` via `useSoccer()`.
+- Componentes em `app/` e `components/` **não instanciam** entidades de domínio diretamente — passam pelo `GestorJogo` via `useSoccer()`.
 - Componente "burro" (JSX/estilo) separado de hook (lógica + leitura de estado).
 
 ### DDD pragmático
@@ -218,7 +218,7 @@ app/ (rotas Expo)  →  providers/contexts/hooks (cola React)  →  src/domain/ 
 ### React / React Native
 
 - Estado vive nos hooks/providers. Componentes lêem via `useSoccer()`.
-- Evite forçar re-render com `setState([])`. Quando precisar reagir a mudanças do `GameManager`, use um pattern reativo (observers tipados, store externo, ou estado derivado por seleção).
+- Evite forçar re-render com `setState([])`. Quando precisar reagir a mudanças do `GestorJogo`, use um pattern reativo (observers tipados, store externo, ou estado derivado por seleção).
 - Listas grandes: use `FlatList`/`SectionList`, não `Array.map` dentro de `ScrollView`.
 - Imports devem respeitar o casing exato do arquivo (ex.: `./Player`, não `./player`) — falha em CI Linux.
 

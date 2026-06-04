@@ -2,7 +2,7 @@
 
 Este documento mostra **o caminho completo**: do "abri o app" até "encerrei a noite".
 
-> Os nomes de tela aqui ainda refletem a UI provisória (`index`, `list`, `Teams`, `GameManager`, `CurrentGame`). Quando a UI for renomeada para PT (planejado em [COMMITS_PLAN.md](../../COMMITS_PLAN.md)), esta doc é atualizada junto.
+> Os nomes de tela aqui ainda refletem a UI provisória (`index`, `list`, `Teams`, `GestorJogo`, `CurrentGame`). Quando a UI for renomeada para PT (planejado em [COMMITS_PLAN.md](../../COMMITS_PLAN.md)), esta doc é atualizada junto.
 
 ---
 
@@ -11,7 +11,7 @@ Este documento mostra **o caminho completo**: do "abri o app" até "encerrei a n
 Tela inicial (`app/(tabs)/index.tsx`).
 
 - Você define o **nome** da pelada e as **regras** (ver [regras.md](regras.md)).
-- Internamente, isso cria um `GameManager` e um `Rules` no domínio.
+- Internamente, isso cria um `GestorJogo` e um `Rules` no domínio.
 - Estado inicial: zero jogadores, zero times, sem partida ativa.
 
 ## 2. Cadastrar jogadores
@@ -75,11 +75,11 @@ Você confirma o encerramento e o app:
 
 - Conta os gols (`Match.countGoals`).
 - Decide se foi `VICTORY` (vencedor + perdedor definidos) ou `DRAW`.
-- Salva no histórico (`matches` do `GameManager`).
+- Salva no histórico (`matches` do `GestorJogo`).
 
 ## 7. Atualizar os próximos
 
-Aqui mora a **lógica que evita discussão**. O app aplica uma **cadeia de regras** (Chain of Responsibility em [src/domain/UpdateDraw](../../src/domain/UpdateDraw)) e decide quem segue:
+Aqui mora a **lógica que evita discussão**. O app aplica uma **cadeia de regras** (Chain of Responsibility em [src/domain/FinalResult](../../src/domain/FinalResult)) e decide quem segue:
 
 ```mermaid
 flowchart TD
@@ -109,7 +109,7 @@ Durante uma partida você pode:
 - **Trocar jogador com a fila** (`switchPlayerLeft`): tira um do time que está jogando e bota um que estava esperando.
 - **Remover jogador da pelada** (`removeFromGame`): jogador sai da quadra de vez. O app **redimensiona os times** automaticamente puxando alguém da fila pra fechar o time.
 
-Tudo isso passa pelo `GameManager` — não fica espalhado pela UI.
+Tudo isso passa pelo `GestorJogo` — não fica espalhado pela UI.
 
 ## 9. Encerrar a noite
 

@@ -2,7 +2,7 @@
 
 Adapters que implementam [`RepositorioPelada`](../../domain/ports/RepositorioPelada.ts), a porta de persistência declarada pelo domínio.
 
-A camada **conhece** o domínio (importa `GameManager`, `Pelada`, etc.) — o domínio **não** conhece esta camada. Toda dependência cruza num único sentido.
+A camada **conhece** o domínio (importa `GestorJogo`, `Pelada`, etc.) — o domínio **não** conhece esta camada. Toda dependência cruza num único sentido.
 
 ## Adapters
 
@@ -15,7 +15,7 @@ A camada **conhece** o domínio (importa `GameManager`, `Pelada`, etc.) — o do
 
 | Arquivo | Responsabilidade |
 |---|---|
-| [`serializer.ts`](serializer.ts) | Converte `GameManager` → JSON e reidrata (grafo cíclico Player↔Team↔Match). |
+| [`serializer.ts`](serializer.ts) | Converte `GestorJogo` → JSON e reidrata (grafo cíclico Player↔Team↔Match). |
 | [`peladaSerializer.ts`](peladaSerializer.ts) | Converte `Pelada` (tipo cadastrado) → JSON. Simples — sem grafo. |
 
 A reidratação acontece em dois passes: (1) instanciar objetos vazios em `Map`s indexados por id; (2) religar referências usando os `Map`s como tabela de lookup. Para classes cujo construtor tem efeitos colaterais (`Match`, `Timer`), usamos `Object.create` para evitar disparar os efeitos novamente.
@@ -25,7 +25,7 @@ A reidratação acontece em dois passes: (1) instanciar objetos vazios em `Map`s
 Fonte única em [`storageKeys.ts`](storageKeys.ts):
 
 ```
-futelista:execucao:<id>       ← execução (GameManager) — escrita atual
+futelista:execucao:<id>       ← execução (GestorJogo) — escrita atual
 futelista:pelada:<id>         ← execução legada (somente leitura, migra na próxima escrita)
 futelista:peladaTipo:<id>     ← tipo de Pelada cadastrado
 futelista:pelada:ativa-id     ← slot do id da execução ativa (apenas leitor: src/app-shell/peladaAtiva.ts)

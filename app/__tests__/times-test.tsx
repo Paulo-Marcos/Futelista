@@ -1,6 +1,6 @@
 import { Alert, Pressable } from "react-native";
 
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import {
   fireEvent,
@@ -32,7 +32,7 @@ function buildManager(opts?: {
   /** Jogadores adicionados DEPOIS de createTeams — ficam sem time. */
   semTime?: number;
 }) {
-  const m = new GameManager("Pelada teste", new Rules({ playersPerTeam: 4 }));
+  const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   if (opts?.jogadores) {
     m.addPlayers(
       Array.from({ length: opts.jogadores }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
@@ -51,7 +51,7 @@ function buildManager(opts?: {
   return m;
 }
 
-function renderTimes(manager: GameManager | null) {
+function renderTimes(manager: GestorJogo | null) {
   return renderWithProviders(<TimesScreen />, { soccer: { manager } });
 }
 

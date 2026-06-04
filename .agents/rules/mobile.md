@@ -14,15 +14,15 @@ A UI fica em `app/` (rotas Expo Router), `components/`, `providers/`, `contexts/
 
 ## Acesso ao domínio
 
-- **Sempre** via `useSoccer()` (que entrega o `GameManager` do Context).
-- **Nunca** instanciar `GameManager`, `Player`, `Team`, `Match` em componente — deixe isso para o provider.
-- Componente consome estado, dispara métodos do `GameManager`, recebe novos valores via observers/seleção.
+- **Sempre** via `useSoccer()` (que entrega o `GestorJogo` do Context).
+- **Nunca** instanciar `GestorJogo`, `Player`, `Team`, `Match` em componente — deixe isso para o provider.
+- Componente consome estado, dispara métodos do `GestorJogo`, recebe novos valores via observers/seleção.
 
 ## Estado e re-render
 
 - **Não** force re-render com `setValorAtual([])`. Isso é cheiro de gambiarra.
 - Para reatividade real, prefira uma destas opções (a definir em refactor futuro):
-  - Observer tipado no `GameManager` + hook que faz `useSyncExternalStore`.
+  - Observer tipado no `GestorJogo` + hook que faz `useSyncExternalStore`.
   - Adapter externo (Zustand, Jotai) que escuta o agregado e expõe seletores.
 - Subscreva o **mínimo** que o componente precisa. Subscrever um array enorme só para ler `.length` causa re-render desnecessário (`@react-best-practices: rerender-derived-state`).
 
@@ -57,5 +57,5 @@ A UI fica em `app/` (rotas Expo Router), `components/`, `providers/`, `contexts/
 ## Antes de declarar pronto
 
 - Rode no Expo Go ou emulador. Type-check e lint não detectam regressão visual.
-- Verifique todas as telas afetadas (especialmente as que compartilham o `GameManager`).
+- Verifique todas as telas afetadas (especialmente as que compartilham o `GestorJogo`).
 - Se mexeu em texto/string, valide nas telas onde aparece.

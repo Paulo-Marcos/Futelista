@@ -51,12 +51,12 @@ import { Player } from './player';
 
 - **Factory + Strategy** para escolha de times: [TeamBuilder/CreateTeam.factory.ts](../../src/domain/TeamBuilder/CreateTeam.factory.ts).
 - **Chain of Responsibility** para pós-partida: [FinalResult/FinalResult.processor.ts](../../src/domain/FinalResult/FinalResult.processor.ts).
-- **Aggregate Root** = `GameManager`: tudo que muda fluxo da pelada passa por ele.
+- **Aggregate Root** = `GestorJogo`: tudo que muda fluxo da pelada passa por ele.
 
 ## Quando adicionar uma classe nova
 
 1. Tem invariante de domínio? Vira entidade ou Value Object.
 2. É só dados? Pode ser um `type`/`interface`.
 3. Tem variação de comportamento? Strategy + Factory (siga o padrão do TeamBuilder).
-4. Cadeia de decisões mutuamente excludentes? Chain of Responsibility (siga UpdateDraw).
+4. Cadeia de decisões mutuamente excludentes? Chain of Responsibility (siga FinalResult).
 5. Cria `*.spec.ts` antes ou junto da implementação.

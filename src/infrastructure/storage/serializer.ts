@@ -1,4 +1,4 @@
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { Goal } from "@/src/domain/Goal";
 import { Match, ResultMatch } from "@/src/domain/Match";
 import { Player, PlayerSituation } from "@/src/domain/Player";
@@ -9,7 +9,7 @@ import { Team, TeamSituation } from "@/src/domain/Team";
 import { Timer, TimerStatus } from "@/src/domain/Timer";
 
 /**
- * Serializador <-> reidratador do agregado GameManager.
+ * Serializador <-> reidratador do agregado GestorJogo.
  *
  * O grafo de domínio é cíclico (Player <-> Team <-> Match), então
  * persistimos por id e religamos as referências na reidratação,
@@ -105,18 +105,18 @@ export type Payload = {
   timer: TimerDTO | null;
 };
 
-export function serializeGameManager(game: GameManager): string {
+export function serializeGestorJogo(game: GestorJogo): string {
   return JSON.stringify(buildPayload(game));
 }
 
-export function deserializeGameManager(raw: string): GameManager {
+export function deserializeGestorJogo(raw: string): GestorJogo {
   const payload = JSON.parse(raw) as Payload;
   if (payload.version > PAYLOAD_VERSION) {
     throw Error(
       `Versão de payload incompatível: máxima suportada ${PAYLOAD_VERSION}, recebi ${payload.version}.`,
     );
   }
-  return buildGameManager(migrarPayload(payload));
+  return buildGestorJogo(migrarPayload(payload));
 }
 
 /**
@@ -143,7 +143,7 @@ function migrarPayload(payload: Payload): Payload {
 
 // ---------- Serialização ------------------------------------------------------
 
-function buildPayload(game: GameManager): Payload {
+function buildPayload(game: GestorJogo): Payload {
   // Inclui a partida em andamento na lista de matches do payload para que
   // o id em playingMatchId resolva no Map de reidratação. matchHistoryIds
   // continua apontando só para o histórico (game.matches).
@@ -184,7 +184,7 @@ function buildPayload(game: GameManager): Payload {
  *
  * Junta tudo num Set por id pra não duplicar.
  */
-function collectAllTeams(game: GameManager): Team[] {
+function collectAllTeams(game: GestorJogo): Team[] {
   const map = new Map<string, Team>();
   const add = (team?: Team) => {
     if (team) map.set(team.id, team);
@@ -262,9 +262,9 @@ function buildTimerDTO(timer: Timer): TimerDTO {
 
 // ---------- Reidratação -------------------------------------------------------
 
-function buildGameManager(payload: Payload): GameManager {
+function buildGestorJogo(payload: Payload): GestorJogo {
   const rules = new Rules(payload.rules);
-  const game = new GameManager(payload.pelada.name, rules, {
+  const game = new GestorJogo(payload.pelada.name, rules, {
     id: payload.pelada.id,
     status: payload.pelada.status,
     createdAt: payload.pelada.createdAt,

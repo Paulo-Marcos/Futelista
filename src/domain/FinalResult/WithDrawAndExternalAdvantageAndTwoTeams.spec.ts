@@ -1,4 +1,4 @@
-import { GameManager } from '../GameManager';
+import { GestorJogo } from '../GestorJogo';
 import { Match, ResultMatch } from '../Match';
 import { Player } from '../Player';
 import { ChoosingTeams, Rules } from '../Rules';
@@ -8,7 +8,7 @@ import { WithDrawAndExternalAdvantageAndTwoTeams } from './WithDrawAndExternalAd
 
 describe('WithDrawAndExternalAdvantageAndTwoTeams', () => {
   let withDraw: WithDrawAndExternalAdvantageAndTwoTeams;
-  let game: GameManager;
+  let game: GestorJogo;
   let players: Player[];
   let teams: Team[];
   let rules: Rules;
@@ -18,7 +18,7 @@ describe('WithDrawAndExternalAdvantageAndTwoTeams', () => {
       playersPerTeam: 2,
       choosingTeams: ChoosingTeams.BY_ORDER,
     });
-    game = new GameManager('Futebol de quarta', rules);
+    game = new GestorJogo('Futebol de quarta', rules);
     players = game.setPlayers([
       'Paulo',
       'Marcos',

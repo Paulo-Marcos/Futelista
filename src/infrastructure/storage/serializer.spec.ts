@@ -1,14 +1,14 @@
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { PlayerSituation } from "@/src/domain/Player";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 import { TeamSituation } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
 
-import { deserializeGameManager, serializeGameManager } from "./serializer";
+import { deserializeGestorJogo, serializeGestorJogo } from "./serializer";
 
-describe("serializer (round-trip GameManager)", () => {
-  function buildPeladaComJogadores(): GameManager {
-    const game = new GameManager(
+describe("serializer (round-trip GestorJogo)", () => {
+  function buildPeladaComJogadores(): GestorJogo {
+    const game = new GestorJogo(
       "Pelada do Sábado",
       new Rules({
         name: "Padrão",
@@ -26,7 +26,7 @@ describe("serializer (round-trip GameManager)", () => {
   it("preserva nome, regras e jogadores em uma pelada recém-criada", () => {
     const original = buildPeladaComJogadores();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.name).toBe("Pelada do Sábado");
     expect(recriada.rules.playersPerTeam).toBe(2);
@@ -46,7 +46,7 @@ describe("serializer (round-trip GameManager)", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.next).toHaveLength(original.next.length);
     recriada.next.forEach((team, index) => {
@@ -60,7 +60,7 @@ describe("serializer (round-trip GameManager)", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     const primeiroTime = recriada.next[0];
     primeiroTime.players.forEach((player) => {
@@ -80,7 +80,7 @@ describe("serializer (round-trip GameManager)", () => {
     original.addGoal(teamA, teamA.players[1]);
     original.addGoal(teamB, teamB.players[0]);
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.playing).toBeDefined();
     expect(recriada.playing!.countGoals()).toEqual({ teamA: 2, teamB: 1 });
@@ -97,7 +97,7 @@ describe("serializer (round-trip GameManager)", () => {
     original.pause();
     original.timer!.status = TimerStatus.STARTED; // simula estado salvo enquanto rodava
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.timer!.status).toBe(TimerStatus.PAUSED);
     expect(recriada.timer!.numberTimes).toBe(2);
@@ -113,7 +113,7 @@ describe("serializer (round-trip GameManager)", () => {
     original.setResult();
     original.setNextMatch();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     // O domínio substitui playing pela próxima partida com o vencedor;
     // o vencedor da partida anterior continua jogando agora.
@@ -127,7 +127,7 @@ describe("serializer (round-trip GameManager)", () => {
     original.iniciar();
     original.finalizar();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.status).toBe(PeladaStatus.FINALIZADA);
     expect(recriada.createdAt).toBe(original.createdAt);
@@ -137,7 +137,7 @@ describe("serializer (round-trip GameManager)", () => {
 
   it("migra payload v1 (sem status/timestamps) marcando como ATIVA", () => {
     const original = buildPeladaComJogadores();
-    const raw = serializeGameManager(original);
+    const raw = serializeGestorJogo(original);
     const payload = JSON.parse(raw);
     payload.version = 1;
     delete payload.pelada.status;
@@ -146,7 +146,7 @@ describe("serializer (round-trip GameManager)", () => {
     delete payload.pelada.endedAt;
     delete payload.pelada.peladaId;
 
-    const recriada = deserializeGameManager(JSON.stringify(payload));
+    const recriada = deserializeGestorJogo(JSON.stringify(payload));
 
     expect(recriada.status).toBe(PeladaStatus.ATIVA);
     expect(recriada.createdAt).toBe(0);
@@ -159,7 +159,7 @@ describe("serializer (round-trip GameManager)", () => {
     const original = buildPeladaComJogadores();
     original.peladaId = "pelada-tipo-123";
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
     expect(recriada.peladaId).toBe("pelada-tipo-123");
   });
@@ -167,29 +167,29 @@ describe("serializer (round-trip GameManager)", () => {
   it("migra payload v2 (com lifecycle, sem peladaId) preservando os campos", () => {
     const original = buildPeladaComJogadores();
     original.iniciar();
-    const raw = serializeGameManager(original);
+    const raw = serializeGestorJogo(original);
     const payload = JSON.parse(raw);
     payload.version = 2;
     delete payload.pelada.peladaId;
 
-    const recriada = deserializeGameManager(JSON.stringify(payload));
+    const recriada = deserializeGestorJogo(JSON.stringify(payload));
 
     expect(recriada.status).toBe(PeladaStatus.ATIVA);
     expect(recriada.startedAt).toBe(original.startedAt);
     expect(recriada.peladaId).toBeUndefined();
   });
 
-  it("dispara notify do GameManager reidratado quando o Timer ticka", () => {
+  it("dispara notify do GestorJogo reidratado quando o Timer ticka", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();
     original.setPlayingGame();
     original.start();
     original.pause();
 
-    const recriada = deserializeGameManager(serializeGameManager(original));
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
     const versionAntes = recriada.version;
     // O onChange é privado; chamamos via cast intencional para checar
-    // que o Timer reidratado está conectado ao notify do GameManager.
+    // que o Timer reidratado está conectado ao notify do GestorJogo.
     const onChange = (recriada.timer as unknown as { onChange?: () => void })
       .onChange;
     onChange?.();

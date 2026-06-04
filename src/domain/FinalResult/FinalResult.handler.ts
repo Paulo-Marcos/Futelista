@@ -1,4 +1,4 @@
-import { GameManager } from '../GameManager';
+import { GestorJogo } from '../GestorJogo';
 import { Team } from '../Team';
 
 /**
@@ -37,7 +37,7 @@ export abstract class BaseFinalResultHandler implements FinalResultHandler {
    * distinguir cenários "fila cheia" (≥ 2 times prontos) de "fila parcial"
    * em vários handlers de empate.
    */
-  protected filaTemDoisTimesCheios(game: GameManager): boolean {
+  protected filaTemDoisTimesCheios(game: GestorJogo): boolean {
     const segundo = game.getNthNext(2);
     return !!segundo && segundo.fullTeam;
   }
@@ -48,6 +48,6 @@ export abstract class BaseFinalResultHandler implements FinalResultHandler {
  * um time com "vantagem externa" (definida manualmente pelo usuário).
  */
 export type HandleInput = {
-  game: GameManager;
+  game: GestorJogo;
   externalAdvantage?: Team;
 };

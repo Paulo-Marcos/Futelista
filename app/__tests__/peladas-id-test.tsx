@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 
-import { PeladaStatus } from "@/src/domain/GameManager";
+import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
 import {

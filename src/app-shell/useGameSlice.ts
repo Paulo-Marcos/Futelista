@@ -1,12 +1,12 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 
 const noopUnsubscribe = () => {};
 
 /**
- * Lê um "slice" do GameManager e re-renderiza o componente quando
+ * Lê um "slice" do GestorJogo e re-renderiza o componente quando
  * qualquer parte do agregado muda (incluindo ticks do cronômetro).
  *
  * Quando `manager` no contexto é null (sem execução ativa), o seletor
@@ -15,7 +15,7 @@ const noopUnsubscribe = () => {};
  * execução devem usar `useGameSliceRequired`.
  */
 export function useGameSlice<T>(
-  selector: (game: GameManager) => T,
+  selector: (game: GestorJogo) => T,
 ): T | undefined {
   const manager = useSubscribeAoManager();
   return manager ? selector(manager) : undefined;
@@ -25,7 +25,7 @@ export function useGameSlice<T>(
  * Versão estrita — lança se chamado sem execução ativa. Reservar para
  * componentes garantidos por guard de rota.
  */
-export function useGameSliceRequired<T>(selector: (game: GameManager) => T): T {
+export function useGameSliceRequired<T>(selector: (game: GestorJogo) => T): T {
   const manager = useSubscribeAoManager();
   if (!manager) {
     throw Error(
@@ -39,7 +39,7 @@ export function useGameSliceRequired<T>(selector: (game: GameManager) => T): T {
  * Subscreve o componente ao `manager` corrente (ou roda no-op quando
  * null). Centraliza o `useSyncExternalStore` para os dois hooks acima.
  */
-function useSubscribeAoManager(): GameManager | null {
+function useSubscribeAoManager(): GestorJogo | null {
   const { manager } = useSoccer();
   const subscribe = useCallback(
     (listener: () => void) =>

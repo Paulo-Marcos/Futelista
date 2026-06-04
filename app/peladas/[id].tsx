@@ -12,7 +12,7 @@ import {
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { PeladaStatus } from "@/src/domain/GameManager";
+import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
 import { usePalette } from "@/src/shared/hooks/usePalette";

@@ -35,7 +35,7 @@ Numeração monotônica. Status: `proposto`, `aceito`, `substituído por NNNN`, 
 | #    | Título                                                | Status   |
 | ---- | ----------------------------------------------------- | -------- |
 | 0001 | [Expo Router file-based como roteador](0001-expo-router.md) | Aceito   |
-| 0002 | [Reatividade via External Store no GameManager](0002-reatividade-external-store.md) | Aceito   |
+| 0002 | [Reatividade via External Store no GestorJogo](0002-reatividade-external-store.md) | Aceito   |
 
 ## Template
 

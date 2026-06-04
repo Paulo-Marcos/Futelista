@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ResumoPeladaTipo } from "@/src/domain/ports/RepositorioPelada";
 import { Rules } from "@/src/domain/Rules";
 import {
@@ -123,7 +123,7 @@ describe("Peladas (lista) — render dos cards", () => {
       fakeResumo({ id: "p1", nome: "Ativa" }),
       fakeResumo({ id: "p2", nome: "Outra" }),
     ];
-    const m = new GameManager("Execução", new Rules({ playersPerTeam: 4 }), {
+    const m = new GestorJogo("Execução", new Rules({ playersPerTeam: 4 }), {
       peladaId: "p1",
     });
     renderWithProviders(<PeladasScreen />, {

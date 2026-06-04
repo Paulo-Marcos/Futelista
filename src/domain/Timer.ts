@@ -3,7 +3,7 @@ import { ScreenTime } from './ScreenTime';
 /**
  * Timer da partida.
  *
- * Aceita `onChange` opcional no construtor para que o GameManager seja
+ * Aceita `onChange` opcional no construtor para que o GestorJogo seja
  * notificado a cada tick e em mudancas de status. Sem o callback, o
  * comportamento e identico ao original (util para testes e uso puro).
  */

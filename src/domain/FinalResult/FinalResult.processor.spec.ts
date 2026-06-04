@@ -1,4 +1,4 @@
-import { GameManager } from '../GameManager';
+import { GestorJogo } from '../GestorJogo';
 import { Rules } from '../Rules';
 import {
   FinalResultHandler,
@@ -20,7 +20,7 @@ describe('FinalResultProcessor', () => {
   beforeEach(() => {
     finalResultProcessor = new FinalResultProcessor();
     input = {
-      game: new GameManager('teste', new Rules()),
+      game: new GestorJogo('teste', new Rules()),
     };
   });
 

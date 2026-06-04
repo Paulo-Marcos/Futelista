@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
   RepositorioPelada,
@@ -14,9 +14,9 @@ import {
   serializePelada,
 } from "./peladaSerializer";
 import {
-  deserializeGameManager,
+  deserializeGestorJogo,
   Payload,
-  serializeGameManager,
+  serializeGestorJogo,
 } from "./serializer";
 import {
   STORAGE_KEYS,
@@ -29,7 +29,7 @@ import {
  * Adapter de persistência sobre AsyncStorage.
  *
  * Chaves:
- *  - execução (GameManager): `futelista:execucao:<id>` (legado: `futelista:pelada:<id>`)
+ *  - execução (GestorJogo): `futelista:execucao:<id>` (legado: `futelista:pelada:<id>`)
  *  - pelada (tipo): `futelista:peladaTipo:<id>`
  *
  * O prefixo legado `futelista:pelada:` ainda é lido para não perder dados
@@ -42,16 +42,16 @@ import {
 export class AsyncStoragePeladaRepository implements RepositorioPelada {
   // ---- Execução -------------------------------------------------------
 
-  async carregar(execucaoId: string): Promise<GameManager | null> {
+  async carregar(execucaoId: string): Promise<GestorJogo | null> {
     const raw =
       (await AsyncStorage.getItem(execucaoKey(execucaoId))) ??
       (await AsyncStorage.getItem(execucaoKeyLegado(execucaoId)));
     if (!raw) return null;
-    return deserializeGameManager(raw);
+    return deserializeGestorJogo(raw);
   }
 
-  async salvar(jogo: GameManager): Promise<void> {
-    const raw = serializeGameManager(jogo);
+  async salvar(jogo: GestorJogo): Promise<void> {
+    const raw = serializeGestorJogo(jogo);
     await AsyncStorage.setItem(execucaoKey(jogo.id), raw);
     // Limpa cópia legada se existir (evita item-fantasma após upgrade).
     await AsyncStorage.removeItem(execucaoKeyLegado(jogo.id));

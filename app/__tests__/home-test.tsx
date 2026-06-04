@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import { ResumoPeladaTipo } from "@/src/domain/ports/RepositorioPelada";
 import {
@@ -54,14 +54,14 @@ function buildManager(opts?: {
   name?: string;
   peladaId?: string;
   status?: PeladaStatus;
-}): GameManager {
+}): GestorJogo {
   const rules = new Rules({
     playersPerTeam: 4,
     timeMatch: "00:10:00",
     numberTimes: 1,
     goalLimit: 2,
   });
-  return new GameManager(opts?.name ?? "Execução", rules, {
+  return new GestorJogo(opts?.name ?? "Execução", rules, {
     peladaId: opts?.peladaId,
     status: opts?.status,
   });
@@ -238,7 +238,7 @@ describe("Home — modo gestão (sem execução)", () => {
 });
 
 // ===========================================================================
-// MODO EXECUÇÃO (manager = GameManager real)
+// MODO EXECUÇÃO (manager = GestorJogo real)
 // ===========================================================================
 
 describe("Home — modo execução (com manager)", () => {

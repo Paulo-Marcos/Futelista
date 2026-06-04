@@ -81,7 +81,7 @@ python bin/check-lock.py list
 ```powershell
 python bin/check-lock.py lock domain-game-manager `
     --description "Agregado raiz da pelada" `
-    src/domain/GameManager.ts `
+    src/domain/GestorJogo.ts `
     src/domain/Game.spec.ts
 ```
 
@@ -102,7 +102,7 @@ locks:
     description: Agregado raiz da pelada
     locked_at: 2026-05-19
     files:
-      - src/domain/GameManager.ts
+      - src/domain/GestorJogo.ts
       - src/domain/Game.spec.ts
 ```
 
@@ -189,7 +189,7 @@ agrupar tudo que compõe a funcionalidade:
 
 - Entidade/agregado de domínio: `src/domain/<Entidade>.ts`
 - Especificação correspondente: `src/domain/<Entidade>.spec.ts`
-- Sub-pasta inteira de uma feature (TeamBuilder, UpdateDraw)
+- Sub-pasta inteira de uma feature (TeamBuilder, FinalResult)
 - Tela que consome (se a UI for parte do contrato)
 
 ### Nomes (id)
@@ -224,7 +224,7 @@ coisas**:
 - Opção B: aceite o unlock no PR maior, com motivo descritivo.
 
 ```
-refactor: extrai hook reativo para o GameManager
+refactor: extrai hook reativo para o GestorJogo
 
 [unlock:domain-game-manager] motivo: expor observer tipado
 ```
@@ -235,8 +235,8 @@ Tratado como edição. Use unlock temporário **e** atualize o registry:
 
 ```powershell
 # 1. Faça o git mv e commit com [unlock:...]
-git mv src/domain/GameManager.ts src/domain/Pelada.ts
-git commit -m "refactor: renomeia GameManager para Pelada
+git mv src/domain/GestorJogo.ts src/domain/Pelada.ts
+git commit -m "refactor: renomeia GestorJogo para Pelada
 
 [unlock:domain-game-manager] motivo: alinhar com vocabulario de dominio"
 
@@ -262,10 +262,10 @@ o novo arquivo:
 python bin/check-lock.py unlock domain-update-draw
 python bin/check-lock.py lock domain-update-draw `
     --description "Cadeia de pos-partida" `
-    src/domain/UpdateDraw/UpdateDray.processor.ts `
-    src/domain/UpdateDraw/UpdateDraw.handler.ts `
-    src/domain/UpdateDraw/WithVictory.ts `
-    src/domain/UpdateDraw/NewHandler.ts          # novo
+    src/domain/FinalResult/FinalResult.processor.ts `
+    src/domain/FinalResult/FinalResult.handler.ts `
+    src/domain/FinalResult/WithVictory.ts `
+    src/domain/FinalResult/NewHandler.ts          # novo
 ```
 
 ### Trava colidiu com algo que você esqueceu que existia

@@ -2,8 +2,8 @@
 // que possivel, para reduzir caminhos longos e tornar a fronteira do
 // dominio explicita.
 
-export { GameManager, PeladaStatus } from "./GameManager";
-export type { DadosExecucao } from "./GameManager";
+export { GestorJogo, PeladaStatus } from "./GestorJogo";
+export type { DadosExecucao } from "./GestorJogo";
 export { Pelada } from "./Pelada";
 export type { DadosPelada } from "./Pelada";
 export { Goal } from "./Goal";

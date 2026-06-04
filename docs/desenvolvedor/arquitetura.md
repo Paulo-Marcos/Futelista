@@ -15,7 +15,7 @@ flowchart TB
     R2[list.tsx]
     R3[Teams.tsx]
     R4[CurrentGame.tsx]
-    R5[GameManager.tsx]
+    R5[GestorJogo.tsx]
     R6[ResultGame.tsx]
   end
 
@@ -26,7 +26,7 @@ flowchart TB
   end
 
   subgraph Domain["src/domain/ (TypeScript puro)"]
-    GM[(GameManager — agregado)]
+    GM[(GestorJogo — agregado)]
     E1[Player]
     E2[Team]
     E3[Match]
@@ -36,7 +36,7 @@ flowchart TB
     E7[ScreenTime]
     E8[Rules]
     TB[TeamBuilder<br/>Factory + Strategy]
-    UD[UpdateDraw<br/>Chain of Responsibility]
+    UD[FinalResult<br/>Chain of Responsibility]
   end
 
   App --> H
@@ -77,14 +77,14 @@ app/
     ├── list.tsx         ← Lista de jogadores
     ├── Teams.tsx        ← Times montados
     ├── CurrentGame.tsx  ← Partida em andamento
-    ├── GameManager.tsx  ← Configuração da pelada (UI provisória)
+    ├── GestorJogo.tsx  ← Configuração da pelada (UI provisória)
     └── ResultGame.tsx   ← Resultado pós-partida
 ```
 
 **Componente em rota faz pouco:**
 
 - Lê estado via `useSoccer()`.
-- Dispara métodos do `GameManager` em resposta a eventos.
+- Dispara métodos do `GestorJogo` em resposta a eventos.
 - Renderiza JSX.
 
 Não instancia entidades de domínio. Não decide regras de negócio. Não persiste nada.
@@ -95,14 +95,14 @@ Convenções de UI completas em [.claude/rules/mobile.md](../../.claude/rules/mo
 
 Responsável por **levar** o domínio até a UI sem que a UI saiba como o domínio funciona.
 
-- **`SoccerProvider`** instancia o `GameManager` uma vez (raiz da árvore) e injeta via Context.
+- **`SoccerProvider`** instancia o `GestorJogo` uma vez (raiz da árvore) e injeta via Context.
 - **`SoccerContext`** é o Context React puro.
-- **`useSoccer()`** é o hook que componentes chamam. Devolve o `GameManager` e (futuramente) seletores.
+- **`useSoccer()`** é o hook que componentes chamam. Devolve o `GestorJogo` e (futuramente) seletores.
 
-**Reatividade.** O `GameManager` implementa o contrato de _external store_ do React (`subscribe()` + `version`):
+**Reatividade.** O `GestorJogo` implementa o contrato de _external store_ do React (`subscribe()` + `version`):
 
 ```ts
-// Trecho simplificado de GameManager.ts
+// Trecho simplificado de GestorJogo.ts
 get version(): number { return this._version; }
 subscribe(listener: () => void): () => void { ... }
 private notify(): void { this._version++; this.listeners.forEach(l => l()); }
@@ -137,14 +137,14 @@ Três motivos práticos, não dogmáticos:
 
 ### Aggregate Root (DDD)
 
-`GameManager` é o **agregado raiz** da pelada. Toda mudança que afeta múltiplas entidades passa por ele:
+`GestorJogo` é o **agregado raiz** da pelada. Toda mudança que afeta múltiplas entidades passa por ele:
 
 - Criar times → `createTeams()`
 - Iniciar partida → `setPlayingGame()`
 - Adicionar gol → `addGoal(team, player)`
 - Atualizar próximos → `setNextMatch(externalAdvantage?)`
 
-Componentes **nunca** instanciam `Player`/`Team`/`Match` diretamente; sempre vão pelo `GameManager`.
+Componentes **nunca** instanciam `Player`/`Team`/`Match` diretamente; sempre vão pelo `GestorJogo`.
 
 ### Factory + Strategy — modos de escolha de times
 
@@ -152,11 +152,11 @@ Em [src/domain/TeamBuilder/](../../src/domain/TeamBuilder/):
 
 - Cada `ChoosingTeams` é uma **strategy** com a mesma interface (`create(players, perTeam)`).
 - A **factory** (`CreateTeamFactory.fabricate(mode)`) devolve a strategy certa.
-- Adicionar um quarto modo = criar strategy + registrar no factory + escrever spec. Sem tocar `GameManager`.
+- Adicionar um quarto modo = criar strategy + registrar no factory + escrever spec. Sem tocar `GestorJogo`.
 
 ### Chain of Responsibility — pós-partida
 
-Em [src/domain/UpdateDraw/](../../src/domain/UpdateDraw/):
+Em [src/domain/FinalResult/](../../src/domain/FinalResult/):
 
 Quatro handlers em sequência decidem quem segue após a partida:
 

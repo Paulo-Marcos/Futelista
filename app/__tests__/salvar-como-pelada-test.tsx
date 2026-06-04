@@ -1,4 +1,4 @@
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import {
   fireEvent,
@@ -18,11 +18,11 @@ beforeEach(() => {
 });
 
 function buildAvulsa(nome = "Pelada avulsa") {
-  return new GameManager(nome, new Rules({ playersPerTeam: 4 }));
+  return new GestorJogo(nome, new Rules({ playersPerTeam: 4 }));
 }
 
 function buildVinculada() {
-  return new GameManager("Fute CEF", new Rules({ playersPerTeam: 4 }), {
+  return new GestorJogo("Fute CEF", new Rules({ playersPerTeam: 4 }), {
     peladaId: "p1",
   });
 }

@@ -6,7 +6,7 @@ import * as uuid from "uuid";
  * número de tempos, limite de gols e modo de escolha dos times.
  *
  * Imutável por convenção: para "mudar" regras, sempre construa uma nova
- * instância (ex.: `GameManager.atualizarRegras` e `Pelada.atualizarRegras`).
+ * instância (ex.: `GestorJogo.atualizarRegras` e `Pelada.atualizarRegras`).
  * Por valor — não há relação cíclica com outras entidades.
  *
  * Defaults em `RULES_DEFAULTS`. Validações por campo nos métodos `check*`.

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
-import { GameManager } from "@/src/domain/GameManager";
+import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
@@ -30,7 +30,7 @@ export default function TimesScreen() {
 
 type AcaoTime = "mover-fim" | "esvaziar" | "cancelar";
 
-function TimesInner({ manager }: { manager: GameManager }) {
+function TimesInner({ manager }: { manager: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();

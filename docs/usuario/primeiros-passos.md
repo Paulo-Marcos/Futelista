@@ -70,7 +70,7 @@ Antes de usar pra valer, saiba o que ainda não tem:
 - **Sem persistência.** Se o app fechar (ou recarregar), a pelada em andamento **se perde**.
 - **Sem histórico entre peladas.** Cada vez que abre, começa do zero.
 - **Sem login/cloud sync.** Cadastro de jogador não viaja entre dispositivos.
-- **UI em construção.** Algumas telas têm nome interno provisório (`GameManager`, `CurrentGame`) que vão virar nomes em português depois.
+- **UI em construção.** Algumas telas têm nome interno provisório (`GestorJogo`, `CurrentGame`) que vão virar nomes em português depois.
 
 Esses pontos estão no [roteiro de melhorias](../../COMMITS_PLAN.md).
 

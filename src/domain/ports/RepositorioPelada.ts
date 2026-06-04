@@ -1,4 +1,4 @@
-import { GameManager, PeladaStatus } from "@/src/domain/GameManager";
+import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 
 /**
@@ -10,14 +10,14 @@ import { Pelada } from "@/src/domain/Pelada";
  *
  * Cobre duas entidades:
  *  - `Pelada` (tipo cadastrado: nome + regras)
- *  - `GameManager` / Execução (sessão jogada, com estado, partidas etc.)
+ *  - `GestorJogo` / Execução (sessão jogada, com estado, partidas etc.)
  *
  * Assinatura assíncrona para suportar adapters de I/O sem quebra de contrato.
  */
 export interface RepositorioPelada {
-  // ---- Execução (GameManager) ----------------------------------------
-  carregar(execucaoId: string): Promise<GameManager | null>;
-  salvar(jogo: GameManager): Promise<void>;
+  // ---- Execução (GestorJogo) ----------------------------------------
+  carregar(execucaoId: string): Promise<GestorJogo | null>;
+  salvar(jogo: GestorJogo): Promise<void>;
   limpar(execucaoId: string): Promise<void>;
   /** Lista todas as execuções (todas as peladas jogadas, agregado). */
   listar(): Promise<ResumoExecucao[]>;
