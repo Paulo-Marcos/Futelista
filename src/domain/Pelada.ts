@@ -30,6 +30,13 @@ export class Pelada {
    * string vazia ou só espaços vira `undefined`.
    */
   observacoes?: string;
+  /**
+   * Timestamp em que a pelada foi arquivada (soft delete). Quando definido,
+   * a pelada **não** aparece nas listas padrão, mas o registro e seu
+   * histórico ficam preservados em disco. Para remover de vez, use
+   * `excluirPelada` no repositório.
+   */
+  arquivadaEm?: number;
 
   constructor(input: DadosPelada) {
     if (!input.nome || !input.nome.trim()) {
@@ -44,6 +51,7 @@ export class Pelada {
     this.hora = trimOrUndefined(input.hora);
     this.local = trimOrUndefined(input.local);
     this.observacoes = trimOrUndefined(input.observacoes);
+    this.arquivadaEm = input.arquivadaEm;
   }
 
   atualizarAgenda(patch: {
@@ -63,6 +71,26 @@ export class Pelada {
   atualizarObservacoes(texto: string | undefined): void {
     if (texto === undefined) return;
     this.observacoes = trimOrUndefined(texto);
+  }
+
+  /**
+   * Marca a pelada como arquivada (soft delete). Re-chamar é no-op:
+   * mantém o timestamp original para preservar quando o usuário arquivou
+   * pela primeira vez.
+   */
+  arquivar(quando: number = Date.now()): void {
+    if (this.arquivadaEm !== undefined) return;
+    this.arquivadaEm = quando;
+  }
+
+  /** Desarquiva a pelada — volta para as listas padrão. */
+  desarquivar(): void {
+    this.arquivadaEm = undefined;
+  }
+
+  /** `true` quando a pelada está arquivada. Atalho legível. */
+  get arquivada(): boolean {
+    return this.arquivadaEm !== undefined;
   }
 
   /**
@@ -93,6 +121,7 @@ export type DadosPelada = {
   hora?: string;
   local?: string;
   observacoes?: string;
+  arquivadaEm?: number;
 };
 
 function trimOrUndefined(value: string | undefined): string | undefined {

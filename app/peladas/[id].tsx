@@ -19,7 +19,7 @@ import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
 import { Palette, usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
-import { escolherOpcao } from "@/src/shared/ui/confirmAcao";
+import { confirmAcao, escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 /**
@@ -39,6 +39,8 @@ export default function ExecucoesDePeladaScreen() {
     listarExecucoesDe,
     iniciarExecucao,
     selecionarExecucao,
+    arquivarPelada,
+    excluirPelada,
   } = useSoccer();
   const execucaoAtivaId = useGameSlice((g) => g.id);
 
@@ -100,6 +102,58 @@ export default function ExecucoesDePeladaScreen() {
       .catch((e) => setErro(e instanceof Error ? e.message : String(e)));
   };
 
+  /**
+   * Menu de ações destrutivas (Arquivar / Excluir) no kebab do header.
+   *
+   * Cada ação tem uma confirmação dedicada com texto explicando o impacto.
+   * Após sucesso, voltamos para a lista — esta tela não faz mais sentido
+   * com a pelada arquivada/excluída no contexto atual.
+   */
+  const onAbrirMenu = useCallback(async () => {
+    if (!pelada) return;
+    type Acao = "arquivar" | "excluir" | "cancelar";
+    const escolha = await escolherOpcao<Acao>({
+      titulo: pelada.nome,
+      mensagem: "Escolha uma ação para esta pelada.",
+      opcoes: [
+        { label: "Arquivar pelada", valor: "arquivar" },
+        {
+          label: "Excluir definitivamente",
+          valor: "excluir",
+          estilo: "destructive",
+        },
+        { label: "Cancelar", valor: "cancelar", estilo: "cancel" },
+      ],
+    });
+    if (!escolha || escolha === "cancelar") return;
+
+    if (escolha === "arquivar") {
+      const ok = await confirmAcao({
+        titulo: "Arquivar pelada",
+        mensagem:
+          "A pelada some das suas listagens, mas o histórico fica preservado em disco.",
+        textoConfirmar: "Arquivar",
+      });
+      if (!ok) return;
+      arquivarPelada(pelada.id)
+        .then(() => router.back())
+        .catch((e) => setErro(e instanceof Error ? e.message : String(e)));
+      return;
+    }
+
+    const ok = await confirmAcao({
+      titulo: "Excluir esta pelada",
+      mensagem:
+        "Vai apagar o cadastro da pelada definitivamente. As execuções já jogadas ficam preservadas no histórico.",
+      textoConfirmar: "Excluir",
+      destrutivo: true,
+    });
+    if (!ok) return;
+    excluirPelada(pelada.id)
+      .then(() => router.back())
+      .catch((e) => setErro(e instanceof Error ? e.message : String(e)));
+  }, [pelada, arquivarPelada, excluirPelada, router]);
+
   return (
     <View style={[styles.screen, { backgroundColor: palette.background }]}>
       <View
@@ -130,29 +184,49 @@ export default function ExecucoesDePeladaScreen() {
           {pelada?.nome ?? "Pelada"}
         </Text>
         {pelada ? (
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/pelada-editar/[id]",
-                params: { id: pelada.id },
-              })
-            }
-            accessibilityRole="button"
-            accessibilityLabel="Editar pelada"
-            style={({ pressed }) => [
-              styles.iconButton,
-              {
-                backgroundColor: palette.surfaceContainerHigh,
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={18}
-              color={palette.onSurface}
-            />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/pelada-editar/[id]",
+                  params: { id: pelada.id },
+                })
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Editar pelada"
+              style={({ pressed }) => [
+                styles.iconButton,
+                {
+                  backgroundColor: palette.surfaceContainerHigh,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                size={18}
+                color={palette.onSurface}
+              />
+            </Pressable>
+            <Pressable
+              onPress={onAbrirMenu}
+              accessibilityRole="button"
+              accessibilityLabel="Ações da pelada"
+              style={({ pressed }) => [
+                styles.iconButton,
+                {
+                  backgroundColor: palette.surfaceContainerHigh,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="dots-vertical"
+                size={20}
+                color={palette.onSurface}
+              />
+            </Pressable>
+          </View>
         ) : (
           <View style={styles.iconButton} />
         )}
@@ -487,6 +561,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 20,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
   },
   headerTitle: { ...Typography.title, flex: 1, textAlign: "center" },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },

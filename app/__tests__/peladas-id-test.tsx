@@ -113,6 +113,99 @@ describe("PeladaDetalhe — loading e cabeçalho", () => {
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
+  it("kebab + Arquivar chama arquivarPelada e volta", async () => {
+    const arquivarPelada = jest.fn().mockResolvedValue(undefined);
+    const excluirPelada = jest.fn().mockResolvedValue(undefined);
+    renderWithProviders(<PeladaDetalheScreen />, {
+      soccer: {
+        carregarPelada: jest.fn().mockResolvedValue(fakePelada()),
+        listarExecucoesDe: jest.fn().mockResolvedValue([]),
+        arquivarPelada,
+        excluirPelada,
+      },
+    });
+
+    // 1º alert (escolherOpcao) → escolhe "Arquivar pelada"
+    // 2º alert (confirmAcao)   → confirma "Arquivar"
+    const alertSpy = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((titulo, _msg, buttons) => {
+        const escolhido = buttons?.find(
+          (b) =>
+            (titulo === "Fute CEF" && b.text === "Arquivar pelada") ||
+            (titulo === "Arquivar pelada" && b.text === "Arquivar"),
+        );
+        escolhido?.onPress?.();
+      });
+
+    fireEvent.press(
+      await screen.findByRole("button", { name: "Ações da pelada" }),
+    );
+
+    await waitFor(() => expect(arquivarPelada).toHaveBeenCalledWith("p1"));
+    expect(excluirPelada).not.toHaveBeenCalled();
+    await waitFor(() => expect(router.back).toHaveBeenCalledTimes(1));
+    alertSpy.mockRestore();
+  });
+
+  it("kebab + Excluir definitivamente chama excluirPelada e volta", async () => {
+    const arquivarPelada = jest.fn().mockResolvedValue(undefined);
+    const excluirPelada = jest.fn().mockResolvedValue(undefined);
+    renderWithProviders(<PeladaDetalheScreen />, {
+      soccer: {
+        carregarPelada: jest.fn().mockResolvedValue(fakePelada()),
+        listarExecucoesDe: jest.fn().mockResolvedValue([]),
+        arquivarPelada,
+        excluirPelada,
+      },
+    });
+
+    const alertSpy = jest
+      .spyOn(Alert, "alert")
+      .mockImplementation((titulo, _msg, buttons) => {
+        const escolhido = buttons?.find(
+          (b) =>
+            (titulo === "Fute CEF" && b.text === "Excluir definitivamente") ||
+            (titulo === "Excluir esta pelada" && b.text === "Excluir"),
+        );
+        escolhido?.onPress?.();
+      });
+
+    fireEvent.press(
+      await screen.findByRole("button", { name: "Ações da pelada" }),
+    );
+
+    await waitFor(() => expect(excluirPelada).toHaveBeenCalledWith("p1"));
+    expect(arquivarPelada).not.toHaveBeenCalled();
+    await waitFor(() => expect(router.back).toHaveBeenCalledTimes(1));
+    alertSpy.mockRestore();
+  });
+
+  it("kebab + Cancelar não toca em nada", async () => {
+    const arquivarPelada = jest.fn().mockResolvedValue(undefined);
+    const excluirPelada = jest.fn().mockResolvedValue(undefined);
+    renderWithProviders(<PeladaDetalheScreen />, {
+      soccer: {
+        carregarPelada: jest.fn().mockResolvedValue(fakePelada()),
+        listarExecucoesDe: jest.fn().mockResolvedValue([]),
+        arquivarPelada,
+        excluirPelada,
+      },
+    });
+
+    const alertSpy = mockAlert((b) => b.style === "cancel");
+
+    fireEvent.press(
+      await screen.findByRole("button", { name: "Ações da pelada" }),
+    );
+
+    await waitFor(() => expect(alertSpy).toHaveBeenCalledTimes(1));
+    expect(arquivarPelada).not.toHaveBeenCalled();
+    expect(excluirPelada).not.toHaveBeenCalled();
+    expect(router.back).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
   it("botão Editar do header navega para /pelada-editar/[id]", async () => {
     renderWithProviders(<PeladaDetalheScreen />, {
       soccer: {

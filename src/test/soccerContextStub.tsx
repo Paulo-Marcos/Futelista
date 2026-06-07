@@ -23,6 +23,8 @@ export function buildSoccerContextValue(
       .fn()
       .mockResolvedValue({ id: "pelada-1", nome: "Stub" }),
     excluirPelada: noop,
+    arquivarPelada: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
+    desarquivarPelada: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
     listarPeladas: jest.fn().mockResolvedValue([]),
     carregarPelada: jest.fn().mockResolvedValue(null),
 

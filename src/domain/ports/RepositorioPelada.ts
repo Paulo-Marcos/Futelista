@@ -28,7 +28,14 @@ export interface RepositorioPelada {
   carregarPelada(peladaId: string): Promise<Pelada | null>;
   salvarPelada(pelada: Pelada): Promise<void>;
   excluirPelada(peladaId: string): Promise<void>;
-  listarPeladas(): Promise<ResumoPeladaTipo[]>;
+  /**
+   * Lista peladas cadastradas. Por padrão omite as arquivadas (soft delete).
+   * Passe `{ incluirArquivadas: true }` para vir tudo, com o flag
+   * `arquivadaEm` populado nos resumos arquivados.
+   */
+  listarPeladas(opcoes?: {
+    incluirArquivadas?: boolean;
+  }): Promise<ResumoPeladaTipo[]>;
 }
 
 /**
@@ -69,4 +76,10 @@ export type ResumoPeladaTipo = {
   hora?: string;
   /** Local preferencial (ex.: "Quadra do CEF"). Opcional — decorativo. */
   local?: string;
+  /**
+   * Timestamp em que a pelada foi arquivada (soft delete). Quando definido,
+   * o adapter por default omite o registro de `listarPeladas()` — só vem
+   * quando o chamador passa `incluirArquivadas: true`.
+   */
+  arquivadaEm?: number;
 };

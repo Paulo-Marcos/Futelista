@@ -40,7 +40,17 @@ export type SoccerContextValue = {
     },
   ) => Promise<Pelada>;
   excluirPelada: (id: string) => Promise<void>;
-  listarPeladas: () => Promise<ResumoPeladaTipo[]>;
+  /**
+   * Soft delete — esconde a pelada das listagens padrão mas preserva o
+   * registro em disco. Idempotente: chamar duas vezes não muda o
+   * timestamp original. Para reverter, use `desarquivarPelada`.
+   */
+  arquivarPelada: (id: string) => Promise<void>;
+  /** Reverte um arquivamento. No-op se a pelada já estava ativa. */
+  desarquivarPelada: (id: string) => Promise<void>;
+  listarPeladas: (opcoes?: {
+    incluirArquivadas?: boolean;
+  }) => Promise<ResumoPeladaTipo[]>;
   carregarPelada: (id: string) => Promise<Pelada | null>;
 
   // ----- Execução (sessão jogada) ------------------------------------

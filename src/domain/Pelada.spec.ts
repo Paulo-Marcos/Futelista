@@ -88,6 +88,42 @@ describe("Pelada (tipo cadastrado)", () => {
     expect(pelada.observacoes).toBe("anterior");
   });
 
+  describe("arquivar / desarquivar", () => {
+    it("nasce não-arquivada", () => {
+      const pelada = new Pelada({ nome: "X" });
+      expect(pelada.arquivada).toBe(false);
+      expect(pelada.arquivadaEm).toBeUndefined();
+    });
+
+    it("arquivar define arquivadaEm e arquivada=true", () => {
+      const pelada = new Pelada({ nome: "X" });
+      pelada.arquivar(1700000000000);
+      expect(pelada.arquivada).toBe(true);
+      expect(pelada.arquivadaEm).toBe(1700000000000);
+    });
+
+    it("arquivar duas vezes preserva o timestamp original", () => {
+      const pelada = new Pelada({ nome: "X" });
+      pelada.arquivar(1700000000000);
+      pelada.arquivar(1700009999999);
+      expect(pelada.arquivadaEm).toBe(1700000000000);
+    });
+
+    it("desarquivar limpa o timestamp", () => {
+      const pelada = new Pelada({ nome: "X", arquivadaEm: 1700000000000 });
+      expect(pelada.arquivada).toBe(true);
+      pelada.desarquivar();
+      expect(pelada.arquivada).toBe(false);
+      expect(pelada.arquivadaEm).toBeUndefined();
+    });
+
+    it("reidrata arquivadaEm via construtor", () => {
+      const pelada = new Pelada({ nome: "X", arquivadaEm: 1700000000000 });
+      expect(pelada.arquivada).toBe(true);
+      expect(pelada.arquivadaEm).toBe(1700000000000);
+    });
+  });
+
   it("atualizarRegras preserva id das regras e aplica defaults parciais", () => {
     const pelada = new Pelada({
       nome: "X",

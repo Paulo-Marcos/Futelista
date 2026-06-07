@@ -111,7 +111,10 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
     await AsyncStorage.removeItem(peladaTipoKey(peladaId));
   }
 
-  async listarPeladas(): Promise<ResumoPeladaTipo[]> {
+  async listarPeladas(opcoes?: {
+    incluirArquivadas?: boolean;
+  }): Promise<ResumoPeladaTipo[]> {
+    const incluirArquivadas = opcoes?.incluirArquivadas ?? false;
     const keys = await AsyncStorage.getAllKeys();
     const peladaKeys = keys.filter((k) =>
       k.startsWith(STORAGE_KEYS.PELADA_TIPO),
@@ -125,6 +128,7 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
       if (!raw) continue;
       const base = parseResumoPelada(raw);
       if (!base) continue;
+      if (!incluirArquivadas && base.arquivadaEm !== undefined) continue;
       resumos.push({
         id: base.id,
         nome: base.nome,
@@ -139,6 +143,7 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
         dia: base.dia,
         hora: base.hora,
         local: base.local,
+        arquivadaEm: base.arquivadaEm,
       });
     }
     return resumos.sort((a, b) => b.createdAt - a.createdAt);

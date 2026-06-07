@@ -52,8 +52,12 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
     peladas.delete(peladaId);
   }
 
-  async listarPeladas(): Promise<ResumoPeladaTipo[]> {
+  async listarPeladas(opcoes?: {
+    incluirArquivadas?: boolean;
+  }): Promise<ResumoPeladaTipo[]> {
+    const incluirArquivadas = opcoes?.incluirArquivadas ?? false;
     return [...peladas.values()]
+      .filter((p) => incluirArquivadas || p.arquivadaEm === undefined)
       .map((p) => ({
         id: p.id,
         nome: p.nome,
@@ -70,6 +74,7 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
         dia: p.dia,
         hora: p.hora,
         local: p.local,
+        arquivadaEm: p.arquivadaEm,
       }))
       .sort((a, b) => b.createdAt - a.createdAt);
   }

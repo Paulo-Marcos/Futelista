@@ -184,8 +184,30 @@ export const SoccerProvider = ({
     [marcarSalvamento],
   );
 
+  const arquivarPelada = useCallback(
+    async (id: string): Promise<void> => {
+      const pelada = await repoRef.current.carregarPelada(id);
+      if (!pelada) throw Error("Pelada não encontrada.");
+      pelada.arquivar();
+      await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
+    },
+    [marcarSalvamento],
+  );
+
+  const desarquivarPelada = useCallback(
+    async (id: string): Promise<void> => {
+      const pelada = await repoRef.current.carregarPelada(id);
+      if (!pelada) throw Error("Pelada não encontrada.");
+      pelada.desarquivar();
+      await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
+    },
+    [marcarSalvamento],
+  );
+
   const listarPeladas = useCallback(
-    (): Promise<ResumoPeladaTipo[]> => repoRef.current.listarPeladas(),
+    (opcoes?: {
+      incluirArquivadas?: boolean;
+    }): Promise<ResumoPeladaTipo[]> => repoRef.current.listarPeladas(opcoes),
     [],
   );
 
@@ -298,6 +320,8 @@ export const SoccerProvider = ({
         criarPelada,
         atualizarPelada,
         excluirPelada,
+        arquivarPelada,
+        desarquivarPelada,
         listarPeladas,
         carregarPelada,
         iniciarExecucao,
