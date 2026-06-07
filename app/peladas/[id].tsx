@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -15,19 +16,18 @@ import { useSoccer } from "@/src/app-shell/useSoccer";
 import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
-import { usePalette } from "@/src/shared/hooks/usePalette";
+import { Palette, usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
-import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 /**
  * Tela de execuções de uma Pelada (tipo).
  *
- * Mostra a lista de vezes que a pelada foi executada — mais recente
- * primeiro — com data, status e totais. Botão grande "Iniciar nova
- * execução" cria nova execução vinculada à pelada e a torna ativa.
+ * Reskin do handoff: cabeçalho com escudo da pelada, status pills tematizados
+ * (goal/warning/surfaceContainerHigh), mantém fluxo "Iniciar nova execução"
+ * com escolha herdar/vazia.
  */
 export default function ExecucoesDePeladaScreen() {
   const palette = usePalette();
@@ -109,11 +109,17 @@ export default function ExecucoesDePeladaScreen() {
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Voltar"
-          style={styles.headerButton}
+          style={({ pressed }) => [
+            styles.iconButton,
+            {
+              backgroundColor: palette.surfaceContainerHigh,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={24}
+            size={20}
             color={palette.onSurface}
           />
         </Pressable>
@@ -123,7 +129,7 @@ export default function ExecucoesDePeladaScreen() {
         >
           {pelada?.nome ?? "Pelada"}
         </Text>
-        <View style={styles.headerButton} />
+        <View style={styles.iconButton} />
       </View>
 
       {pelada === null || execucoes === null ? (
@@ -155,12 +161,13 @@ export default function ExecucoesDePeladaScreen() {
                   · {pelada.regras.goalLimit} gols
                 </Text>
               </Card>
-              <PrimaryButton
+
+              <PrimaryCTAComGlow
                 label={iniciando ? "Iniciando…" : "Iniciar nova execução"}
-                icon="play-circle-outline"
-                onPress={() => onIniciar()}
+                icon="whistle"
+                onPress={onIniciar}
                 disabled={iniciando}
-                fullWidth
+                palette={palette}
               />
               <Text
                 style={[
@@ -209,6 +216,72 @@ export default function ExecucoesDePeladaScreen() {
   );
 }
 
+// CTA principal com glow vermelho. Mesma receita do hero/CTA de
+// app/(pelada)/index.tsx e pelada-nova.tsx:
+//   iOS:    shadowColor=primary (HEX opaco) + offset/opacity/radius no wrapper
+//   Android: halo (View vermelha translúcida) atrás
+//   Web:    boxShadow CSS direto (RN Web não traduz shadowColor pra cor)
+function PrimaryCTAComGlow({
+  label,
+  icon,
+  onPress,
+  disabled,
+  palette,
+}: {
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  onPress: () => void;
+  disabled?: boolean;
+  palette: Palette;
+}) {
+  const webGlow =
+    !disabled && Platform.OS === "web"
+      ? ({ boxShadow: `0 14px 40px -10px ${palette.glow}` } as object)
+      : null;
+  return (
+    <View
+      style={[
+        styles.ctaShadow,
+        { shadowColor: palette.primary },
+        disabled && styles.ctaShadowOff,
+        webGlow,
+      ]}
+    >
+      {!disabled && Platform.OS !== "web" ? (
+        <View
+          pointerEvents="none"
+          style={[styles.ctaHalo, { backgroundColor: palette.primary }]}
+        />
+      ) : null}
+      <Pressable
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled: !!disabled }}
+        style={({ pressed }) => [
+          styles.cta,
+          {
+            backgroundColor: disabled ? palette.primaryDim : palette.primary,
+            opacity: disabled ? 0.6 : 1,
+          },
+          pressed && !disabled && styles.ctaPressed,
+        ]}
+        android_ripple={{ color: palette.onPrimary + "22" }}
+      >
+        <MaterialCommunityIcons
+          name={icon}
+          size={22}
+          color={palette.onPrimary}
+        />
+        <Text style={[styles.ctaText, { color: palette.onPrimary }]}>
+          {label}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function ExecucaoCard({
   resumo,
   ativa,
@@ -220,59 +293,78 @@ function ExecucaoCard({
 }) {
   const palette = usePalette();
   const dataLabel = formatarData(resumo);
-  const status = statusLabel(resumo.status, ativa);
+  const status = statusInfo(resumo.status, ativa, palette);
   return (
-    <Card variant="surface" padding="md">
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`Abrir execução de ${dataLabel}`}
-        style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
-      >
-        <View style={styles.execHeader}>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={[styles.execDate, { color: palette.onSurface }]}
-              numberOfLines={1}
-            >
-              {dataLabel}
-            </Text>
-            <Text style={[styles.execSub, { color: palette.onSurfaceVariant }]}>
-              {resumo.totalJogadores}{" "}
-              {resumo.totalJogadores === 1 ? "jogador" : "jogadores"} ·{" "}
-              {resumo.totalPartidas}{" "}
-              {resumo.totalPartidas === 1 ? "partida" : "partidas"}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.statusPill,
-              { backgroundColor: status.bg, borderColor: status.fg },
-            ]}
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir execução de ${dataLabel}`}
+      style={({ pressed }) => [
+        styles.execCard,
+        {
+          backgroundColor: palette.surface,
+          borderColor: palette.outlineVariant,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <View style={styles.execHeader}>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={[styles.execDate, { color: palette.onSurface }]}
+            numberOfLines={1}
           >
-            <Text style={[styles.statusPillText, { color: status.fg }]}>
-              {status.label}
-            </Text>
-          </View>
+            {dataLabel}
+          </Text>
+          <Text style={[styles.execSub, { color: palette.onSurfaceVariant }]}>
+            {resumo.totalJogadores}{" "}
+            {resumo.totalJogadores === 1 ? "jogador" : "jogadores"} ·{" "}
+            {resumo.totalPartidas}{" "}
+            {resumo.totalPartidas === 1 ? "partida" : "partidas"}
+          </Text>
         </View>
-      </Pressable>
-    </Card>
+        <View
+          style={[
+            styles.statusPill,
+            { backgroundColor: status.bg, borderColor: status.fg },
+          ]}
+        >
+          <Text style={[styles.statusPillText, { color: status.fg }]}>
+            {status.label}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
-function statusLabel(
+function statusInfo(
   status: PeladaStatus,
   ativa: boolean,
+  palette: Palette,
 ): { label: string; bg: string; fg: string } {
-  // cores fixas suaves; tema é responsabilidade dos componentes maiores
-  if (ativa) return { label: "EM USO", bg: "#C8E6C9", fg: "#1B5E20" };
+  if (ativa) {
+    return { label: "EM USO", bg: palette.goal + "22", fg: palette.goal };
+  }
   switch (status) {
     case PeladaStatus.CREATED:
-      return { label: "RASCUNHO", bg: "#EEEEEE", fg: "#666" };
+      return {
+        label: "RASCUNHO",
+        bg: palette.surfaceContainerHigh,
+        fg: palette.onSurfaceVariant,
+      };
     case PeladaStatus.ATIVA:
-      return { label: "ATIVA", bg: "#FFE0B2", fg: "#E65100" };
+      return {
+        label: "ATIVA",
+        bg: palette.warning + "22",
+        fg: palette.warning,
+      };
     case PeladaStatus.FINALIZADA:
-      return { label: "FINALIZADA", bg: "#F5F5F5", fg: "#666" };
+      return {
+        label: "FINALIZADA",
+        bg: palette.surfaceContainerHigh,
+        fg: palette.onSurfaceVariant,
+      };
   }
 }
 
@@ -306,7 +398,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     gap: Spacing.md,
   },
-  headerButton: {
+  iconButton: {
     width: 40,
     height: 40,
     alignItems: "center",
@@ -330,13 +422,20 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginTop: Spacing.sm,
   },
+
+  execCard: {
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderCurve: "continuous",
+  },
   execHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
   },
-  execDate: { ...Typography.body, fontWeight: "600" },
-  execSub: { ...Typography.label, marginTop: 2 },
+  execDate: { ...Typography.body, fontWeight: "700", fontSize: 15 },
+  execSub: { ...Typography.label, fontSize: 11, marginTop: 2 },
   statusPill: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
@@ -344,6 +443,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusPillText: { ...Typography.label, fontSize: 10, letterSpacing: 0.5 },
+
   errorBanner: {
     margin: Spacing.lg,
     padding: Spacing.md,
@@ -351,4 +451,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   errorText: { ...Typography.label },
+
+  // ---- CTA "Iniciar nova execução" com glow vermelho ----
+  ctaShadow: {
+    borderRadius: Radius.md,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 22,
+    elevation: 10,
+  },
+  ctaShadowOff: { shadowOpacity: 0, elevation: 0 },
+  ctaHalo: {
+    position: "absolute",
+    left: 10,
+    right: 10,
+    top: 14,
+    bottom: -6,
+    borderRadius: Radius.md,
+    opacity: Platform.OS === "android" ? 0.4 : 0.55,
+  },
+  cta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+    minHeight: 54,
+    borderRadius: Radius.md,
+    overflow: "hidden",
+    borderCurve: "continuous",
+  },
+  ctaPressed: { opacity: 0.92, transform: [{ scale: 0.99 }] },
+  ctaText: { ...Typography.title, fontSize: 16, fontWeight: "800" },
 });
