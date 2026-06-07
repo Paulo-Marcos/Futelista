@@ -97,6 +97,15 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     outP: Player;
     side: "A" | "B";
   } | null>(null);
+  const [checkpointToast, setCheckpointToast] = useState<string | null>(null);
+  // Tracking de checkpoints (F-08). Um disparo por partida, reseta quando o
+  // `playing` (id da Match) muda. Ref em vez de state pra evitar re-render
+  // a cada decremento do cronômetro.
+  const checkpointRef = useRef<{
+    matchId: string | null;
+    doisMin: boolean;
+    trintaSeg: boolean;
+  }>({ matchId: null, doisMin: false, trintaSeg: false });
 
   const reservas = proximoTime?.players ?? [];
 
@@ -155,6 +164,44 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       // Ignorado — web e alguns devices não têm motor.
     }
   }, [status, prefs.apitoHaptico]);
+
+  // Checkpoints do cronômetro (F-08) — dispara 1× por partida em 2min e 30s
+  // restantes. Resetamos os flags quando muda o `playing.id` (nova partida)
+  // pra que a próxima Match comece "limpa".
+  useEffect(() => {
+    const matchId = playing?.id ?? null;
+    if (checkpointRef.current.matchId !== matchId) {
+      checkpointRef.current = {
+        matchId,
+        doisMin: false,
+        trintaSeg: false,
+      };
+    }
+    // Só interessa enquanto a partida está rodando — pausa/intervalo/ENDED
+    // não devem avançar checkpoints (o ENDED tem seu próprio apito).
+    if (status !== TimerStatus.STARTED) return;
+
+    if (!checkpointRef.current.doisMin && restTime > 0 && restTime <= 120) {
+      checkpointRef.current.doisMin = true;
+      dispararCheckpoint("Faltam 2 minutos");
+    }
+    if (!checkpointRef.current.trintaSeg && restTime > 0 && restTime <= 30) {
+      checkpointRef.current.trintaSeg = true;
+      dispararCheckpoint("Faltam 30 segundos");
+    }
+
+    function dispararCheckpoint(texto: string) {
+      setCheckpointToast(texto);
+      if (!prefs.apitoHaptico) return;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+  }, [restTime, status, playing?.id, prefs.apitoHaptico]);
+
+  useEffect(() => {
+    if (!checkpointToast) return;
+    const t = setTimeout(() => setCheckpointToast(null), 2400);
+    return () => clearTimeout(t);
+  }, [checkpointToast]);
 
   if (!playing) {
     return (
@@ -405,6 +452,9 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
       {celebration ? <GoalCelebration cel={celebration} /> : null}
       {subToast ? <SubstitutionToast t={subToast} /> : null}
+      {checkpointToast ? (
+        <CheckpointToast texto={checkpointToast} topOffset={insets.top} />
+      ) : null}
     </View>
   );
 }
@@ -1728,6 +1778,46 @@ function SubstitutionToast({
   );
 }
 
+/**
+ * Toast curto no topo da tela, anunciando que faltam 2 minutos ou 30
+ * segundos para o fim do tempo (F-08). Visual mais sóbrio que o
+ * `SubstitutionToast` — alerta, não evento de jogo.
+ */
+function CheckpointToast({
+  texto,
+  topOffset,
+}: {
+  texto: string;
+  topOffset: number;
+}) {
+  const palette = usePalette();
+  return (
+    <View
+      pointerEvents="none"
+      style={[
+        styles.checkpointToast,
+        {
+          top: topOffset + Spacing.sm,
+          backgroundColor: palette.surface,
+          borderColor: palette.outlineVariant,
+        },
+      ]}
+      accessibilityLiveRegion="polite"
+    >
+      <MaterialCommunityIcons
+        name="alarm"
+        size={16}
+        color={palette.warning}
+      />
+      <Text
+        style={[styles.checkpointToastText, { color: palette.onSurface }]}
+      >
+        {texto}
+      </Text>
+    </View>
+  );
+}
+
 // ====================================================================
 // Helpers + Styles
 // ====================================================================
@@ -2226,4 +2316,25 @@ const styles = StyleSheet.create({
   toastBold: { ...Typography.title, fontSize: 13 },
   toastLight: { ...Typography.body, fontSize: 12 },
   toastSide: { ...Typography.label, fontSize: 11 },
+
+  // ----- Checkpoint toast (F-08) — alerta no topo da tela -----
+  checkpointToast: {
+    position: "absolute",
+    left: Spacing.lg,
+    right: Spacing.lg,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
+    zIndex: 60,
+    borderCurve: "continuous",
+  },
+  checkpointToastText: { ...Typography.title, fontSize: 13 },
 });

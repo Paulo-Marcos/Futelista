@@ -28,6 +28,7 @@ beforeEach(() => {
 function buildPartidaManager(opts?: {
   semProximo?: boolean;
   status?: TimerStatus;
+  restTime?: number;
 }): GestorJogo {
   const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   const total = opts?.semProximo ? 8 : 12;
@@ -37,13 +38,14 @@ function buildPartidaManager(opts?: {
   m.createTeams();
   m.setPlayingGame();
 
-  if (opts?.status !== undefined) {
+  if (opts?.status !== undefined || opts?.restTime !== undefined) {
     m.timer = new Timer(
       m.rules.numberTimes,
       m.rules.getDurationMatch(),
       () => {},
     );
-    m.timer.status = opts.status;
+    if (opts?.status !== undefined) m.timer.status = opts.status;
+    if (opts?.restTime !== undefined) m.timer.restTime = opts.restTime;
   }
   return m;
 }
@@ -256,5 +258,51 @@ describe("Partida — apito háptico ao fim do tempo", () => {
     renderPartida(m);
 
     expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+  });
+});
+
+// ===========================================================================
+// CHECKPOINTS DE CRONÔMETRO (F-08)
+// ===========================================================================
+
+describe("Partida — checkpoints do cronômetro", () => {
+  const Haptics = require("expo-haptics");
+
+  beforeEach(() => {
+    (Haptics.impactAsync as jest.Mock).mockClear();
+  });
+
+  it("mostra 'Faltam 2 minutos' quando restTime cruza 120s rodando", () => {
+    const m = buildPartidaManager({
+      status: TimerStatus.STARTED,
+      restTime: 120,
+    });
+    renderPartida(m);
+
+    expect(screen.getByText("Faltam 2 minutos")).toBeTruthy();
+    expect(Haptics.impactAsync).toHaveBeenCalled();
+  });
+
+  it("mostra 'Faltam 30 segundos' quando restTime cruza 30s rodando", () => {
+    const m = buildPartidaManager({
+      status: TimerStatus.STARTED,
+      restTime: 30,
+    });
+    renderPartida(m);
+
+    // 30 também é ≤ 120 — ambos checkpoints disparam, mas o toast visível
+    // mostra o ÚLTIMO (mais urgente) porque setCheckpointToast é serial.
+    expect(screen.getByText("Faltam 30 segundos")).toBeTruthy();
+  });
+
+  it("não dispara nada em PAUSED, mesmo com tempo baixo", () => {
+    const m = buildPartidaManager({
+      status: TimerStatus.PAUSED,
+      restTime: 25,
+    });
+    renderPartida(m);
+
+    expect(screen.queryByText(/Faltam/)).toBeNull();
+    expect(Haptics.impactAsync).not.toHaveBeenCalled();
   });
 });
