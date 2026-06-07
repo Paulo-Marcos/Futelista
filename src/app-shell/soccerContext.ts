@@ -91,6 +91,14 @@ export type SoccerContextValue = {
   /** Troca a execução ativa para outra já salva. */
   selecionarExecucao: (id: string) => Promise<void>;
   listarExecucoesDe: (peladaId: string) => Promise<ResumoExecucao[]>;
+  /**
+   * Reidrata todas as execuções da Pelada — usado pelos agregados
+   * cross-execução (artilheiros, sequências). Custo é proporcional ao
+   * total de execuções da pelada.
+   */
+  carregarExecucoesDe: (
+    peladaId: string,
+  ) => Promise<import("@/src/domain/GestorJogo").GestorJogo[]>;
 
   /** Reexposto para uso avançado (telas de dev, debug). */
   repositorio: RepositorioPelada;

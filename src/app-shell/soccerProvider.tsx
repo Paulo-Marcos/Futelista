@@ -309,6 +309,12 @@ export const SoccerProvider = ({
     [],
   );
 
+  const carregarExecucoesDe = useCallback(
+    (peladaId: string): Promise<GestorJogo[]> =>
+      repoRef.current.carregarExecucoesDe(peladaId),
+    [],
+  );
+
   // Bloqueia render até terminar o boot (evita flicker estado-vazio).
   if (!bootConcluido) return null;
 
@@ -332,6 +338,7 @@ export const SoccerProvider = ({
         limparJogadoresETimes,
         selecionarExecucao,
         listarExecucoesDe,
+        carregarExecucoesDe,
         repositorio: repoRef.current,
       }}
     >

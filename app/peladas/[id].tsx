@@ -13,6 +13,12 @@ import {
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
+import {
+  Artilheiro,
+  consolidarArtilheiros,
+  consolidarSequenciasVitoria,
+  SequenciaVencedor,
+} from "@/src/domain/AgregadosPelada";
 import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
@@ -37,6 +43,7 @@ export default function ExecucoesDePeladaScreen() {
   const {
     carregarPelada,
     listarExecucoesDe,
+    carregarExecucoesDe,
     iniciarExecucao,
     selecionarExecucao,
     arquivarPelada,
@@ -48,6 +55,8 @@ export default function ExecucoesDePeladaScreen() {
   const [execucoes, setExecucoes] = useState<ResumoExecucao[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [iniciando, setIniciando] = useState(false);
+  const [artilheiros, setArtilheiros] = useState<Artilheiro[]>([]);
+  const [sequencias, setSequencias] = useState<SequenciaVencedor[]>([]);
 
   const recarregar = useCallback(() => {
     if (!peladaId) return;
@@ -58,7 +67,19 @@ export default function ExecucoesDePeladaScreen() {
         setErro(null);
       })
       .catch((e) => setErro(e instanceof Error ? e.message : String(e)));
-  }, [peladaId, carregarPelada, listarExecucoesDe]);
+
+    // Agregados cross-execução são calculados em paralelo: erro aqui
+    // não bloqueia a tela principal (cards só não aparecem).
+    carregarExecucoesDe(peladaId)
+      .then((execs) => {
+        setArtilheiros(consolidarArtilheiros(execs));
+        setSequencias(consolidarSequenciasVitoria(execs));
+      })
+      .catch(() => {
+        setArtilheiros([]);
+        setSequencias([]);
+      });
+  }, [peladaId, carregarPelada, listarExecucoesDe, carregarExecucoesDe]);
 
   useFocusEffect(
     useCallback(() => {
@@ -273,6 +294,14 @@ export default function ExecucoesDePeladaScreen() {
                 disabled={iniciando}
                 palette={palette}
               />
+
+              {artilheiros.length > 0 ? (
+                <ArtilheirosCard artilheiros={artilheiros} />
+              ) : null}
+              {sequencias.length > 0 ? (
+                <SequenciasCard sequencias={sequencias} />
+              ) : null}
+
               <Text
                 style={[
                   styles.sectionLabel,
@@ -439,6 +468,123 @@ function ObservacoesCard({ texto }: { texto: string }) {
   );
 }
 
+/**
+ * Card com os top 5 artilheiros consolidados entre execuções da pelada.
+ *
+ * Visível só quando há pelo menos um jogador com gol no histórico —
+ * decisão tomada na render do pai. Aqui o componente é puro de leitura.
+ */
+function ArtilheirosCard({ artilheiros }: { artilheiros: Artilheiro[] }) {
+  const palette = usePalette();
+  const top = artilheiros.slice(0, 5);
+  return (
+    <Card variant="outlined" padding="md">
+      <View style={styles.aggHeader}>
+        <MaterialCommunityIcons
+          name="trophy"
+          size={16}
+          color={palette.tertiary}
+        />
+        <Text style={[styles.aggTitle, { color: palette.onSurface }]}>
+          Artilheiros da pelada
+        </Text>
+      </View>
+      <View style={styles.aggList}>
+        {top.map((a, idx) => (
+          <View key={a.nome} style={styles.aggRow}>
+            <Text
+              style={[styles.aggPos, { color: palette.onSurfaceVariant }]}
+            >
+              {idx + 1}º
+            </Text>
+            <Text
+              style={[styles.aggName, { color: palette.onSurface }]}
+              numberOfLines={1}
+            >
+              {a.nome}
+            </Text>
+            <Text
+              style={[styles.aggMeta, { color: palette.onSurfaceVariant }]}
+            >
+              {a.execucoes} {a.execucoes === 1 ? "exec" : "execs"}
+            </Text>
+            <View
+              style={[
+                styles.aggBadge,
+                { backgroundColor: palette.goal + "2E" },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="soccer"
+                size={12}
+                color={palette.goal}
+              />
+              <Text style={[styles.aggBadgeText, { color: palette.goal }]}>
+                {a.gols}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
+/**
+ * Card com as 5 maiores sequências de vitória observadas entre execuções.
+ * Sequências quebram em empate ou derrota — interpretação estrita de
+ * "vitórias consecutivas".
+ */
+function SequenciasCard({
+  sequencias,
+}: {
+  sequencias: SequenciaVencedor[];
+}) {
+  const palette = usePalette();
+  const top = sequencias.slice(0, 5);
+  return (
+    <Card variant="outlined" padding="md">
+      <View style={styles.aggHeader}>
+        <MaterialCommunityIcons
+          name="fire"
+          size={16}
+          color={palette.primary}
+        />
+        <Text style={[styles.aggTitle, { color: palette.onSurface }]}>
+          Maiores sequências de vitória
+        </Text>
+      </View>
+      <View style={styles.aggList}>
+        {top.map((s, idx) => (
+          <View key={s.nome} style={styles.aggRow}>
+            <Text
+              style={[styles.aggPos, { color: palette.onSurfaceVariant }]}
+            >
+              {idx + 1}º
+            </Text>
+            <Text
+              style={[styles.aggName, { color: palette.onSurface }]}
+              numberOfLines={1}
+            >
+              {s.nome}
+            </Text>
+            <View
+              style={[
+                styles.aggBadge,
+                { backgroundColor: palette.primary + "1F" },
+              ]}
+            >
+              <Text style={[styles.aggBadgeText, { color: palette.primary }]}>
+                {s.maiorSequencia} {s.maiorSequencia === 1 ? "vit" : "vits"}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
 function ExecucaoCard({
   resumo,
   ativa,
@@ -584,6 +730,39 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginTop: Spacing.sm,
   },
+
+  // ---- Cards de agregados cross-execução (F-05) ----
+  aggHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  aggTitle: { ...Typography.title, fontSize: 14 },
+  aggList: { gap: Spacing.xs + 2 },
+  aggRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  aggPos: {
+    ...Typography.label,
+    fontSize: 11,
+    width: 22,
+  },
+  aggName: { ...Typography.body, fontSize: 14, fontWeight: "600", flex: 1 },
+  aggMeta: { ...Typography.label, fontSize: 10 },
+  aggBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    minWidth: 36,
+    justifyContent: "center",
+  },
+  aggBadgeText: { ...Typography.label, fontSize: 12, fontWeight: "700" },
 
   // ---- Card de observações recolhível ----
   obsCard: {

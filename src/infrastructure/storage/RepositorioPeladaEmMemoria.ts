@@ -40,6 +40,12 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
       .sort(porRecencia);
   }
 
+  async carregarExecucoesDe(peladaId: string): Promise<GestorJogo[]> {
+    return [...execucoes.values()]
+      .filter((g) => g.peladaId === peladaId)
+      .sort((a, b) => a.createdAt - b.createdAt);
+  }
+
   async carregarPelada(peladaId: string): Promise<Pelada | null> {
     return peladas.get(peladaId) ?? null;
   }

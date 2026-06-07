@@ -23,6 +23,14 @@ export interface RepositorioPelada {
   listar(): Promise<ResumoExecucao[]>;
   /** Lista execuções de uma Pelada (tipo) específica. */
   listarExecucoesDe(peladaId: string): Promise<ResumoExecucao[]>;
+  /**
+   * Reidrata **todas** as execuções da Pelada (tipo) — necessário para
+   * gerar agregados cross-execução (artilharia, sequências). Custo é
+   * proporcional ao número de execuções, normalmente OK para uma pelada
+   * pessoal (~dezenas). Execuções não encontradas no storage são
+   * ignoradas (lista parcial).
+   */
+  carregarExecucoesDe(peladaId: string): Promise<GestorJogo[]>;
 
   // ---- Pelada (tipo cadastrado) --------------------------------------
   carregarPelada(peladaId: string): Promise<Pelada | null>;

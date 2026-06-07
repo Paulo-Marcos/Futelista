@@ -74,6 +74,19 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
       .sort((a, b) => recencia(b) - recencia(a));
   }
 
+  async carregarExecucoesDe(peladaId: string): Promise<GestorJogo[]> {
+    const resumos = await this.lerTodasExecucoes();
+    const ids = resumos
+      .filter((r) => r.peladaId === peladaId)
+      .map((r) => r.id);
+    const carregadas: GestorJogo[] = [];
+    for (const id of ids) {
+      const exec = await this.carregar(id);
+      if (exec) carregadas.push(exec);
+    }
+    return carregadas.sort((a, b) => a.createdAt - b.createdAt);
+  }
+
   private async lerTodasExecucoes(): Promise<ResumoExecucao[]> {
     const keys = await AsyncStorage.getAllKeys();
     const execKeys = keys.filter(
