@@ -9,7 +9,7 @@ import {
   lerPeladaAtivaId,
   limparPeladaAtivaId,
 } from "@/src/app-shell/peladaAtiva";
-import { SoccerContext } from "@/src/app-shell/soccerContext";
+import { AgendaPelada, SoccerContext } from "@/src/app-shell/soccerContext";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
@@ -93,11 +93,9 @@ export const SoccerProvider = ({
     const salvarDebounced = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        marcarSalvamento(() => repoRef.current.salvar(gestor)).catch(
-          (erro) => {
-            console.warn("[SoccerProvider] Falha ao salvar execução:", erro);
-          },
-        );
+        marcarSalvamento(() => repoRef.current.salvar(gestor)).catch((erro) => {
+          console.warn("[SoccerProvider] Falha ao salvar execução:", erro);
+        });
       }, AUTOSAVE_DEBOUNCE_MS);
     };
 
@@ -136,8 +134,18 @@ export const SoccerProvider = ({
   // ----- Pelada (tipo cadastrado) ------------------------------------
 
   const criarPelada = useCallback(
-    async (nome: string, regras?: DataRules): Promise<Pelada> => {
-      const pelada = new Pelada({ nome, regras });
+    async (
+      nome: string,
+      regras?: DataRules,
+      agenda?: AgendaPelada,
+    ): Promise<Pelada> => {
+      const pelada = new Pelada({
+        nome,
+        regras,
+        dia: agenda?.dia,
+        hora: agenda?.hora,
+        local: agenda?.local,
+      });
       await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
       return pelada;
     },
@@ -147,12 +155,13 @@ export const SoccerProvider = ({
   const atualizarPelada = useCallback(
     async (
       id: string,
-      patch: { nome?: string; regras?: DataRules },
+      patch: { nome?: string; regras?: DataRules; agenda?: AgendaPelada },
     ): Promise<Pelada> => {
       const pelada = await repoRef.current.carregarPelada(id);
       if (!pelada) throw Error("Pelada não encontrada.");
       if (patch.nome !== undefined) pelada.renomear(patch.nome);
       if (patch.regras) pelada.atualizarRegras(patch.regras);
+      if (patch.agenda) pelada.atualizarAgenda(patch.agenda);
       await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
       return pelada;
     },

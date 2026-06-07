@@ -63,4 +63,10 @@ export type ResumoPeladaTipo = {
   };
   /** Quantas execuções já existem registradas para essa Pelada. */
   totalExecucoes: number;
+  /** Dia preferencial (ex.: "Quartas"). Opcional — decorativo. */
+  dia?: string;
+  /** Horário preferencial (ex.: "21:00"). Opcional — decorativo. */
+  hora?: string;
+  /** Local preferencial (ex.: "Quadra do CEF"). Opcional — decorativo. */
+  local?: string;
 };

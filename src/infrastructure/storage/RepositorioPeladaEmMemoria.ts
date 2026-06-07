@@ -67,6 +67,9 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
         totalExecucoes: [...execucoes.values()].filter(
           (g) => g.peladaId === p.id,
         ).length,
+        dia: p.dia,
+        hora: p.hora,
+        local: p.local,
       }))
       .sort((a, b) => b.createdAt - a.createdAt);
   }

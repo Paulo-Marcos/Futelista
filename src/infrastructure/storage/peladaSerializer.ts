@@ -21,6 +21,9 @@ type PeladaPayload = {
     goalLimit: number;
     choosingTeams: ChoosingTeams;
   };
+  dia?: string;
+  hora?: string;
+  local?: string;
 };
 
 export function serializePelada(pelada: Pelada): string {
@@ -38,6 +41,9 @@ export function serializePelada(pelada: Pelada): string {
       goalLimit: pelada.regras.goalLimit,
       choosingTeams: pelada.regras.choosingTeams,
     },
+    dia: pelada.dia,
+    hora: pelada.hora,
+    local: pelada.local,
   };
   return JSON.stringify(payload);
 }
@@ -54,6 +60,9 @@ export function deserializePelada(raw: string): Pelada {
     nome: payload.nome,
     createdAt: payload.createdAt,
     regras: new Rules(payload.regras),
+    dia: payload.dia,
+    hora: payload.hora,
+    local: payload.local,
   });
 }
 
@@ -65,6 +74,9 @@ export function parseResumoPelada(raw: string): {
   nome: string;
   createdAt: number;
   regras: PeladaPayload["regras"];
+  dia?: string;
+  hora?: string;
+  local?: string;
 } | null {
   try {
     const p = JSON.parse(raw) as PeladaPayload;
@@ -73,6 +85,9 @@ export function parseResumoPelada(raw: string): {
       nome: p.nome,
       createdAt: p.createdAt ?? 0,
       regras: p.regras,
+      dia: p.dia,
+      hora: p.hora,
+      local: p.local,
     };
   } catch {
     return null;

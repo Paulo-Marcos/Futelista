@@ -9,6 +9,12 @@ import {
 } from "@/src/domain/ports/RepositorioPelada";
 import { DataRules } from "@/src/domain/Rules";
 
+export type AgendaPelada = {
+  dia?: string;
+  hora?: string;
+  local?: string;
+};
+
 export type SoccerContextValue = {
   /**
    * Execução ativa, ou null quando nenhuma execução está aberta — o app
@@ -18,10 +24,14 @@ export type SoccerContextValue = {
   saving: boolean;
 
   // ----- Pelada (tipo cadastrado) ------------------------------------
-  criarPelada: (nome: string, regras?: DataRules) => Promise<Pelada>;
+  criarPelada: (
+    nome: string,
+    regras?: DataRules,
+    agenda?: AgendaPelada,
+  ) => Promise<Pelada>;
   atualizarPelada: (
     id: string,
-    patch: { nome?: string; regras?: DataRules },
+    patch: { nome?: string; regras?: DataRules; agenda?: AgendaPelada },
   ) => Promise<Pelada>;
   excluirPelada: (id: string) => Promise<void>;
   listarPeladas: () => Promise<ResumoPeladaTipo[]>;

@@ -136,6 +136,9 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
           goalLimit: base.regras.goalLimit,
         },
         totalExecucoes: contagem.get(base.id) ?? 0,
+        dia: base.dia,
+        hora: base.hora,
+        local: base.local,
       });
     }
     return resumos.sort((a, b) => b.createdAt - a.createdAt);

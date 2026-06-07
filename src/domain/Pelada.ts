@@ -18,6 +18,12 @@ export class Pelada {
   nome: string;
   regras: Rules;
   readonly createdAt: number;
+  /** Dia preferencial (ex.: "Quartas", "Sábados"). Decorativo no resumo da lista. */
+  dia?: string;
+  /** Horário preferencial (ex.: "21:00"). Decorativo no resumo da lista. */
+  hora?: string;
+  /** Local preferencial (ex.: "Quadra do CEF"). Decorativo no resumo da lista. */
+  local?: string;
 
   constructor(input: DadosPelada) {
     if (!input.nome || !input.nome.trim()) {
@@ -28,6 +34,19 @@ export class Pelada {
     this.regras =
       input.regras instanceof Rules ? input.regras : new Rules(input.regras);
     this.createdAt = input.createdAt ?? Date.now();
+    this.dia = trimOrUndefined(input.dia);
+    this.hora = trimOrUndefined(input.hora);
+    this.local = trimOrUndefined(input.local);
+  }
+
+  atualizarAgenda(patch: {
+    dia?: string;
+    hora?: string;
+    local?: string;
+  }): void {
+    if (patch.dia !== undefined) this.dia = trimOrUndefined(patch.dia);
+    if (patch.hora !== undefined) this.hora = trimOrUndefined(patch.hora);
+    if (patch.local !== undefined) this.local = trimOrUndefined(patch.local);
   }
 
   /**
@@ -54,4 +73,13 @@ export type DadosPelada = {
   nome: string;
   regras?: Rules | DataRules;
   createdAt?: number;
+  dia?: string;
+  hora?: string;
+  local?: string;
 };
+
+function trimOrUndefined(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const limpo = value.trim();
+  return limpo === "" ? undefined : limpo;
+}
