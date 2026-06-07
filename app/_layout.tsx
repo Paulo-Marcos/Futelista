@@ -49,10 +49,6 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(pelada)" />
           <Stack.Screen
-            name="partida"
-            options={{ headerShown: false, animation: "slide_from_right" }}
-          />
-          <Stack.Screen
             name="resultado"
             options={{
               presentation: "formSheet",
