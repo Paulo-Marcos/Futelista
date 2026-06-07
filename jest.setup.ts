@@ -95,10 +95,36 @@ jest.mock("@expo/vector-icons", () => {
   return new Proxy(
     { __esModule: true },
     {
-      get: (target: any, key) =>
-        key in target ? target[key] : Icon,
+      get: (target: any, key) => (key in target ? target[key] : Icon),
     },
   );
+});
+
+// ---------------------------------------------------------------------------
+// AsyncStorage — módulo nativo, precisa de mock global. Specs específicos
+// (ex.: AsyncStoragePeladaRepository.spec) podem re-mockar com store interno.
+// ---------------------------------------------------------------------------
+jest.mock("@react-native-async-storage/async-storage", () => {
+  const store = new Map<string, string>();
+  return {
+    __esModule: true,
+    default: {
+      getItem: jest.fn(async (k: string) => store.get(k) ?? null),
+      setItem: jest.fn(async (k: string, v: string) => {
+        store.set(k, v);
+      }),
+      removeItem: jest.fn(async (k: string) => {
+        store.delete(k);
+      }),
+      getAllKeys: jest.fn(async () => [...store.keys()]),
+      multiGet: jest.fn(async (keys: string[]) =>
+        keys.map((k) => [k, store.get(k) ?? null] as [string, string | null]),
+      ),
+      clear: jest.fn(async () => {
+        store.clear();
+      }),
+    },
+  };
 });
 
 // ---------------------------------------------------------------------------
