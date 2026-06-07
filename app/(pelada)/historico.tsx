@@ -1,10 +1,19 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
+import { gerarRelatorioExecucao } from "@/src/domain/RelatorioExecucao";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { MatchHistoryCard } from "@/src/shared/ui/MatchHistoryCard";
@@ -22,10 +31,24 @@ export default function HistoricoScreen() {
   const router = useRouter();
   const { gestor } = useSoccer();
   const matches = useGameSlice((g) => g.matches) ?? [];
+  const [compartilhando, setCompartilhando] = useState(false);
 
   if (!gestor) return <Redirect href="/" />;
 
   const ordenadas = [...matches].reverse();
+
+  const compartilhar = async () => {
+    if (compartilhando) return;
+    setCompartilhando(true);
+    try {
+      await Share.share({ message: gerarRelatorioExecucao(gestor) });
+    } catch {
+      // Usuário cancelou ou app indisponível — silencioso, o botão volta
+      // ao normal e não fica em loading-state preso.
+    } finally {
+      setCompartilhando(false);
+    }
+  };
 
   return (
     <View
@@ -56,7 +79,29 @@ export default function HistoricoScreen() {
         <Text style={[styles.title, { color: palette.onSurface }]}>
           Histórico
         </Text>
-        <View style={styles.iconBtn} />
+        {ordenadas.length > 0 ? (
+          <Pressable
+            onPress={compartilhar}
+            accessibilityRole="button"
+            accessibilityLabel="Compartilhar resumo da execução"
+            disabled={compartilhando}
+            style={({ pressed }) => [
+              styles.iconBtn,
+              {
+                backgroundColor: palette.surfaceContainerHigh,
+                opacity: pressed || compartilhando ? 0.7 : 1,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="share-variant"
+              size={20}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.iconBtn} />
+        )}
       </View>
 
       <FlatList
