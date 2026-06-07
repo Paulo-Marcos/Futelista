@@ -477,3 +477,56 @@ describe("Jogadores — adicionar vários (lote)", () => {
     ).toBe(true);
   });
 });
+
+// ===========================================================================
+// SHEET DE ESTATÍSTICAS (F-04)
+// ===========================================================================
+
+describe("Jogadores — sheet de estatísticas", () => {
+  it("toque em 'Ver estatísticas' mostra os zeros para jogador novo", () => {
+    renderJogadores(buildManager(["Ana"]));
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Ver estatísticas de Ana" }),
+    );
+
+    expect(screen.getByText("Estatísticas nesta execução")).toBeTruthy();
+    // Procura por todos os "0"s no grid de stats — o jogador novo tem 6
+    // tiles com 0 (gols, partidas, vitórias, empates, derrotas, presença "—").
+    // Asserção mínima: a label "Gols" aparece, indicando que o tile renderizou.
+    expect(screen.getByText("Gols")).toBeTruthy();
+    expect(screen.getByText("Partidas")).toBeTruthy();
+    expect(screen.getByText("Vitórias")).toBeTruthy();
+    expect(screen.getByText("Empates")).toBeTruthy();
+    expect(screen.getByText("Derrotas")).toBeTruthy();
+    expect(screen.getByText("Presença")).toBeTruthy();
+  });
+
+  it("Fechar dismissa o sheet", () => {
+    renderJogadores(buildManager(["Ana"]));
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Ver estatísticas de Ana" }),
+    );
+    expect(screen.getByText("Estatísticas nesta execução")).toBeTruthy();
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Fechar estatísticas" }),
+    );
+
+    // Modal fica visible=false; o conteúdo (subtitle) some.
+    expect(screen.queryByText("Estatísticas nesta execução")).toBeNull();
+  });
+
+  it("rodapé mostra contagem de partidas encerradas (0 quando nada terminou)", () => {
+    renderJogadores(buildManager(["Ana"]));
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Ver estatísticas de Ana" }),
+    );
+
+    expect(
+      screen.getByText("Nenhuma partida encerrada ainda nesta execução."),
+    ).toBeTruthy();
+  });
+});

@@ -20,6 +20,7 @@ import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
+import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PlayerRow } from "@/src/shared/ui/PlayerRow";
 import { TabHeader } from "@/src/shared/ui/TabHeader";
 import { confirmAcao } from "@/src/shared/ui/confirmAcao";
@@ -40,6 +41,11 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const players = useGameSliceRequired((g) => g.players);
   const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
   const temTimesFormados = useGameSliceRequired((g) => g.next.length > 0);
+  // Total de partidas com resultado definido — usado para calcular % de
+  // presença individual dos jogadores no sheet de estatísticas.
+  const totalPartidasEncerradas = useGameSliceRequired(
+    (g) => g.matches.filter((m) => m.result !== undefined).length,
+  );
 
   const [novoNome, setNovoNome] = useState("");
   const [busca, setBusca] = useState("");
@@ -47,6 +53,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingNome, setEditingNome] = useState("");
   const [loteAberto, setLoteAberto] = useState(false);
+  const [statsAberto, setStatsAberto] = useState<Player | null>(null);
 
   const listaRef = useRef<FlatList<Player>>(null);
 
@@ -314,6 +321,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
               mostrarSituacao={temTimesFormados}
               onEditar={() => iniciarEdicao(item)}
               onRemover={() => remover(item)}
+              onVerStats={() => setStatsAberto(item)}
             />
           )
         }
@@ -324,6 +332,12 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
         visivel={loteAberto}
         onFechar={() => setLoteAberto(false)}
         onConfirmar={adicionarLote}
+      />
+
+      <EstatisticasJogadorSheet
+        player={statsAberto}
+        totalPartidasEncerradas={totalPartidasEncerradas}
+        onFechar={() => setStatsAberto(null)}
       />
     </View>
   );
@@ -430,11 +444,13 @@ function LinhaJogador({
   mostrarSituacao,
   onEditar,
   onRemover,
+  onVerStats,
 }: {
   player: Player;
   mostrarSituacao: boolean;
   onEditar: () => void;
   onRemover: () => void;
+  onVerStats: () => void;
 }) {
   const palette = usePalette();
 
@@ -463,6 +479,19 @@ function LinhaJogador({
           </Text>
         </View>
       ) : null}
+      <Pressable
+        onPress={onVerStats}
+        accessibilityRole="button"
+        accessibilityLabel={`Ver estatísticas de ${player.name}`}
+        style={styles.iconAction}
+        android_ripple={{ color: palette.primary + "33" }}
+      >
+        <MaterialCommunityIcons
+          name="chart-bar"
+          size={20}
+          color={palette.onSurfaceVariant}
+        />
+      </Pressable>
       <Pressable
         onPress={onEditar}
         accessibilityRole="button"
@@ -738,6 +767,207 @@ function ModalAdicionarLote({
 }
 
 // ---------------------------------------------------------------------------
+// Sheet de estatísticas individuais do jogador (F-04)
+// ---------------------------------------------------------------------------
+
+/**
+ * Bottom sheet de leitura — não persiste nada, só agrega o que o domínio
+ * já expõe via `Player.stats()`. Aparece quando `player !== null`; o
+ * próprio componente lida com renderização condicional pra evitar
+ * destruir o Modal a cada open/close (mantém o RN feliz).
+ */
+function EstatisticasJogadorSheet({
+  player,
+  totalPartidasEncerradas,
+  onFechar,
+}: {
+  player: Player | null;
+  totalPartidasEncerradas: number;
+  onFechar: () => void;
+}) {
+  const palette = usePalette();
+  const stats = player?.stats();
+  const presencaPct =
+    stats && totalPartidasEncerradas > 0
+      ? Math.round(
+          // Conta como "partida disputada" só as que terminaram —
+          // partidas em andamento não entram no denominador.
+          (somaResultados(stats) / totalPartidasEncerradas) * 100,
+        )
+      : null;
+  return (
+    <Modal
+      visible={player !== null}
+      animationType="slide"
+      transparent
+      onRequestClose={onFechar}
+    >
+      <View style={[styles.modalBackdrop, { backgroundColor: palette.shadow }]}>
+        <View
+          style={[styles.sheetCard, { backgroundColor: palette.surface }]}
+        >
+          {player ? (
+            <>
+              <View style={styles.sheetHeader}>
+                <PlayerAvatar player={player} size={56} />
+                <View style={styles.sheetHeaderText}>
+                  <Text
+                    style={[styles.sheetName, { color: palette.onSurface }]}
+                    numberOfLines={1}
+                  >
+                    {player.name}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.sheetSubtitle,
+                      { color: palette.onSurfaceVariant },
+                    ]}
+                  >
+                    Estatísticas nesta execução
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={onFechar}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fechar estatísticas"
+                  style={({ pressed }) => [
+                    styles.sheetClose,
+                    {
+                      backgroundColor: palette.surfaceContainerHigh,
+                      opacity: pressed ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={18}
+                    color={palette.onSurface}
+                  />
+                </Pressable>
+              </View>
+
+              {stats ? (
+                <View style={styles.sheetStatsGrid}>
+                  <StatTile
+                    icon="soccer"
+                    label="Gols"
+                    value={stats.gols}
+                    accent="goal"
+                  />
+                  <StatTile
+                    icon="whistle"
+                    label="Partidas"
+                    value={stats.partidas}
+                  />
+                  <StatTile
+                    icon="trophy-outline"
+                    label="Vitórias"
+                    value={stats.vitorias}
+                    accent="tertiary"
+                  />
+                  <StatTile
+                    icon="equal"
+                    label="Empates"
+                    value={stats.empates}
+                  />
+                  <StatTile
+                    icon="close-octagon-outline"
+                    label="Derrotas"
+                    value={stats.derrotas}
+                  />
+                  {presencaPct !== null ? (
+                    <StatTile
+                      icon="account-check-outline"
+                      label="Presença"
+                      value={`${presencaPct}%`}
+                    />
+                  ) : (
+                    <StatTile
+                      icon="account-check-outline"
+                      label="Presença"
+                      value="—"
+                    />
+                  )}
+                </View>
+              ) : null}
+
+              <Text
+                style={[
+                  styles.sheetFootnote,
+                  { color: palette.onSurfaceVariant },
+                ]}
+              >
+                {totalPartidasEncerradas === 0
+                  ? "Nenhuma partida encerrada ainda nesta execução."
+                  : `${totalPartidasEncerradas} ${
+                      totalPartidasEncerradas === 1 ? "partida" : "partidas"
+                    } encerrada${totalPartidasEncerradas === 1 ? "" : "s"} na execução.`}
+              </Text>
+            </>
+          ) : null}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+/**
+ * Tile de uma estatística — ícone + valor grande + label.
+ *
+ * `accent` colore o ícone com um token específico da paleta — usado para
+ * dar destaque visual a "Gols" (goal/verde) e "Vitórias" (tertiary/dourado),
+ * mantendo o resto neutro.
+ */
+function StatTile({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  label: string;
+  value: number | string;
+  accent?: "goal" | "tertiary";
+}) {
+  const palette = usePalette();
+  const iconColor =
+    accent === "goal"
+      ? palette.goal
+      : accent === "tertiary"
+        ? palette.tertiary
+        : palette.onSurfaceVariant;
+  return (
+    <View
+      style={[
+        styles.sheetTile,
+        {
+          backgroundColor: palette.surfaceContainerHigh,
+          borderColor: palette.outlineVariant,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons name={icon} size={18} color={iconColor} />
+      <Text style={[styles.sheetTileValue, { color: palette.onSurface }]}>
+        {value}
+      </Text>
+      <Text
+        style={[styles.sheetTileLabel, { color: palette.onSurfaceVariant }]}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function somaResultados(stats: {
+  vitorias: number;
+  empates: number;
+  derrotas: number;
+}): number {
+  return stats.vitorias + stats.empates + stats.derrotas;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers de label
 // ---------------------------------------------------------------------------
 
@@ -951,5 +1181,68 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
+  },
+
+  // ----- Sheet de estatísticas (F-04) -----
+  sheetCard: {
+    padding: Spacing.lg,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
+    gap: Spacing.md,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  sheetHeaderText: { flex: 1 },
+  sheetName: { ...Typography.headline, fontSize: 20 },
+  sheetSubtitle: { ...Typography.label, fontSize: 11, marginTop: 2 },
+  sheetClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sheetStatsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  sheetTile: {
+    // 3 colunas no card largo, ~1 coluna num device estreito. Calculo flex
+    // base ~30% para garantir 3 por linha em qualquer largura comum.
+    flexBasis: "30%",
+    flexGrow: 1,
+    minHeight: 80,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+    borderCurve: "continuous",
+  },
+  // `Typography.number` é `as const` (readonly fontVariant) — copiamos os
+  // campos manualmente para satisfazer o tipo mutável esperado por `TextStyle`.
+  sheetTileValue: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    fontVariant: ["tabular-nums" as const],
+  },
+  sheetTileLabel: {
+    ...Typography.label,
+    fontSize: 10,
+    letterSpacing: 0.4,
+  },
+  sheetFootnote: {
+    ...Typography.label,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0,
+    textTransform: "none",
+    textAlign: "center",
   },
 });

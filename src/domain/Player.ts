@@ -2,7 +2,7 @@ import "react-native-get-random-values";
 import * as uuid from "uuid";
 import { Goal } from "./Goal";
 import { Team } from "./Team";
-import { Match } from "./Match";
+import { Match, ResultMatch } from "./Match";
 
 /**
  * Jogador participante de uma pelada.
@@ -66,7 +66,56 @@ export class Player {
   setSituation(situation: PlayerSituation): void {
     this.situation = situation;
   }
+
+  /**
+   * Estatísticas agregadas do jogador na pelada corrente.
+   *
+   * - `gols`: gols feitos.
+   * - `partidas`: partidas em que entrou (inclui partidas em andamento).
+   * - `vitorias` / `empates` / `derrotas`: contam apenas partidas com
+   *   `result` definido (encerradas).
+   *
+   * **Limitação conhecida**: para decidir se a partida foi vitória ou
+   * derrota, olhamos quem é o vencedor da Match e checamos se o jogador
+   * está no time corrente (`Team.hasPlayer`). Se o jogador trocou de
+   * time via switch depois da partida, o cálculo pode classificar
+   * incorretamente — o domínio não guarda histórico por-partida do
+   * vínculo jogador↔time. Para a maioria das peladas (sem rodízio
+   * agressivo durante a partida) essa aproximação acerta.
+   */
+  stats(): EstatisticasJogador {
+    let vitorias = 0;
+    let empates = 0;
+    let derrotas = 0;
+    for (const match of this.matches) {
+      if (match.result === undefined) continue;
+      if (match.result === ResultMatch.DRAW) {
+        empates += 1;
+        continue;
+      }
+      if (match.winner?.hasPlayer(this)) {
+        vitorias += 1;
+      } else if (match.loser?.hasPlayer(this)) {
+        derrotas += 1;
+      }
+    }
+    return {
+      gols: this.goals.length,
+      partidas: this.matches.length,
+      vitorias,
+      empates,
+      derrotas,
+    };
+  }
 }
+
+export type EstatisticasJogador = {
+  gols: number;
+  partidas: number;
+  vitorias: number;
+  empates: number;
+  derrotas: number;
+};
 
 /**
  * Estado momentâneo do jogador na pelada.
