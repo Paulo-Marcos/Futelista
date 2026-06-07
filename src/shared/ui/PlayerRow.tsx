@@ -3,12 +3,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Player, PlayerSituation } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import {
-  AvatarPalette,
-  Radius,
-  Spacing,
-  Typography,
-} from "@/src/shared/theme/Colors";
+import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
+import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 type PlayerRowProps = {
   player: Player;
@@ -37,10 +33,10 @@ export function PlayerRow({
   showGoals = false,
   compact = false,
   selected = false,
-}: PlayerRowProps) {
+  tone,
+  subtitle,
+}: PlayerRowProps & { tone?: "A" | "B"; subtitle?: string }) {
   const palette = usePalette();
-  const avatarColor = colorForId(player.id);
-  const inicial = player.name.charAt(0).toUpperCase();
   const interativo = !!(onPress || onLongPress);
 
   // Pressable funciona perfeitamente como container mesmo sem onPress; usar
@@ -61,9 +57,7 @@ export function PlayerRow({
       ]}
       android_ripple={interativo ? { color: palette.primary + "11" } : undefined}
     >
-      <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-        <Text style={[styles.avatarText, { color: "#FFFFFF" }]}>{inicial}</Text>
-      </View>
+      <PlayerAvatar player={player} size={40} tone={tone} />
       <View style={styles.center}>
         <Text
           style={[styles.name, { color: palette.onSurface }]}
@@ -72,6 +66,14 @@ export function PlayerRow({
         >
           {player.name}
         </Text>
+        {subtitle ? (
+          <Text
+            style={[styles.subtitle, { color: palette.onSurfaceVariant }]}
+            numberOfLines={1}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
         {showSituation ? (
           <View
             style={[
@@ -140,15 +142,6 @@ function corDeTextoSituacao(s: PlayerSituation, palette: Palette): string {
     case PlayerSituation.NO_TEAM:
       return palette.onSurfaceVariant;
   }
-}
-
-function colorForId(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  }
-  const index = Math.abs(hash) % AvatarPalette.length;
-  return AvatarPalette[index];
 }
 
 const styles = StyleSheet.create({

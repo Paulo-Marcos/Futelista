@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { Card } from "@/src/shared/ui/Card";
 import { PlayerRow } from "@/src/shared/ui/PlayerRow";
-import { Spacing, Typography } from "@/src/shared/theme/Colors";
+import { TeamCrest } from "@/src/shared/ui/TeamCrest";
+import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 export type TeamState = "playing" | "next" | "queue";
 
@@ -19,21 +19,19 @@ type TeamCardProps = {
   onPlayerPress?: (playerId: string) => void;
   onPlayerLongPress?: (playerId: string) => void;
   /**
-   * Quando definido, exibe um botão de menu (3-pontinhos) à direita do título
-   * e dispara essa callback no toque. A tela hospedeira decide o que abrir
-   * (geralmente um `escolherOpcao`).
+   * Borda do card. Tone "A" usa primary, tone "B" usa secondary —
+   * dá identidade visual aos times em campo na Home / tela Times.
    */
+  tone?: "A" | "B";
   onActionsPress?: () => void;
 };
 
 /**
- * Card de time. Mostra título, badge de estado, contador "X/Y jogadores",
- * lista de jogadores e (opcional) badge de "Vantagem" quando o time tem
- * prioridade na próxima partida.
+ * Card de time. Escudo procedural + título, badge de estado,
+ * contador X/Y, lista de jogadores com avatar e (opcional) badge "Vantagem".
  *
- * Quando `actions` é fornecido junto com `onActionsPress`, exibe um botão de
- * menu (3-pontinhos) à direita do título — a tela hospedeira é quem decide
- * o que fazer no toque (geralmente abrir um `escolherOpcao`).
+ * `tone="A"|"B"` aplica borda colorida (primary/secondary) e tinge os
+ * avatares dos jogadores; `state="playing"` mantém o fundo `primaryContainer`.
  */
 export function TeamCard({
   team,
@@ -43,12 +41,32 @@ export function TeamCard({
   selectedPlayerId,
   onPlayerPress,
   onPlayerLongPress,
+  tone,
   onActionsPress,
 }: TeamCardProps) {
   const palette = usePalette();
+  const borderColor =
+    tone === "A"
+      ? palette.primary
+      : tone === "B"
+        ? palette.secondary
+        : palette.outlineVariant;
+  const bg =
+    state === "playing" ? palette.primaryContainer : palette.surface;
+
   return (
-    <Card variant={state === "playing" ? "primary" : "surface"}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: bg,
+          borderColor,
+          borderWidth: tone ? 2 : 1,
+        },
+      ]}
+    >
       <View style={styles.header}>
+        <TeamCrest seed={team.id} size={28} style={{ flexShrink: 0 }} />
         <View style={styles.titleArea}>
           <Text style={[styles.title, { color: palette.onSurface }]}>
             {title}
@@ -65,20 +83,15 @@ export function TeamCard({
             <View
               style={[
                 styles.badge,
-                { backgroundColor: palette.secondaryContainer },
+                { backgroundColor: palette.tertiary + "22" },
               ]}
             >
               <MaterialCommunityIcons
                 name="star"
                 size={12}
-                color={palette.onSecondaryContainer}
+                color={palette.tertiary}
               />
-              <Text
-                style={[
-                  styles.badgeText,
-                  { color: palette.onSecondaryContainer },
-                ]}
-              >
+              <Text style={[styles.badgeText, { color: palette.tertiary }]}>
                 Vantagem
               </Text>
             </View>
@@ -112,6 +125,7 @@ export function TeamCard({
               key={player.id}
               player={player}
               compact
+              tone={tone}
               selected={selectedPlayerId === player.id}
               onPress={
                 onPlayerPress ? () => onPlayerPress(player.id) : undefined
@@ -125,7 +139,7 @@ export function TeamCard({
           ))
         )}
       </View>
-    </Card>
+    </View>
   );
 }
 
@@ -145,19 +159,23 @@ function StateBadge({ state }: { state: TeamState }) {
 }
 
 const styles = StyleSheet.create({
+  card: {
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    borderCurve: "continuous",
+  },
   header: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: Spacing.md,
+    alignItems: "center",
     gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   titleArea: {
     flex: 1,
   },
   title: {
     ...Typography.title,
-    fontSize: 20,
+    fontSize: 18,
   },
   subtitle: {
     ...Typography.label,
