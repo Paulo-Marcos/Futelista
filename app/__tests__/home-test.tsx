@@ -74,12 +74,10 @@ function buildManager(opts?: {
 function mockAlert(
   pick: (b: { text?: string; style?: string }) => boolean,
 ): jest.SpyInstance {
-  return jest
-    .spyOn(Alert, "alert")
-    .mockImplementation((_t, _m, buttons) => {
-      const escolhido = buttons?.find(pick);
-      escolhido?.onPress?.();
-    });
+  return jest.spyOn(Alert, "alert").mockImplementation((_t, _m, buttons) => {
+    const escolhido = buttons?.find(pick);
+    escolhido?.onPress?.();
+  });
 }
 
 // ===========================================================================
@@ -89,7 +87,8 @@ function mockAlert(
 describe("Home — modo gestão (sem execução)", () => {
   it("renderiza o título FuteLista e o subtítulo", async () => {
     renderWithProviders(<HomeScreen />);
-    expect(screen.getByText("FuteLista")).toBeTruthy();
+    expect(screen.getByText("Fute")).toBeTruthy();
+    expect(screen.getByText("Lista")).toBeTruthy();
     await waitFor(() =>
       expect(screen.getByText(/Nenhuma pelada cadastrada/)).toBeTruthy(),
     );
@@ -100,9 +99,7 @@ describe("Home — modo gestão (sem execução)", () => {
       soccer: { listarPeladas: jest.fn().mockResolvedValue([]) },
     });
 
-    expect(
-      await screen.findByText("Nenhuma pelada cadastrada"),
-    ).toBeTruthy();
+    expect(await screen.findByText("Nenhuma pelada cadastrada")).toBeTruthy();
   });
 
   it("renderiza a lista de peladas cadastradas", async () => {
@@ -116,7 +113,54 @@ describe("Home — modo gestão (sem execução)", () => {
 
     expect(await screen.findByText("Fute CEF")).toBeTruthy();
     expect(screen.getByText("Fute Domingo")).toBeTruthy();
-    expect(screen.getByText(/3 execuções/)).toBeTruthy();
+    expect(screen.getByText("3 jogos")).toBeTruthy();
+    expect(screen.getByText("0 jogos")).toBeTruthy();
+  });
+
+  it("mostra a tag RECENTE apenas no primeiro card", async () => {
+    const peladas = [
+      fakeResumo({ id: "p1", nome: "Fute CEF" }),
+      fakeResumo({ id: "p2", nome: "Fute Domingo" }),
+    ];
+    renderWithProviders(<HomeScreen />, {
+      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
+    });
+
+    expect(await screen.findByText("RECENTE")).toBeTruthy();
+    expect(screen.queryAllByText("RECENTE")).toHaveLength(1);
+  });
+
+  it("renderiza dia/hora e local quando presentes no resumo", async () => {
+    const peladas = [
+      fakeResumo({
+        id: "p1",
+        nome: "Fute CEF",
+        dia: "Quartas",
+        hora: "21:00",
+        local: "Quadra do CEF",
+      }),
+    ];
+    renderWithProviders(<HomeScreen />, {
+      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
+    });
+
+    expect(await screen.findByText("Quartas · 21:00")).toBeTruthy();
+    expect(screen.getByText("Quadra do CEF")).toBeTruthy();
+  });
+
+  it("renderiza o rodapé com contagem", async () => {
+    const peladas = [
+      fakeResumo({ id: "p1" }),
+      fakeResumo({ id: "p2" }),
+      fakeResumo({ id: "p3" }),
+    ];
+    renderWithProviders(<HomeScreen />, {
+      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
+    });
+
+    expect(
+      await screen.findByText(/3 peladas · organize sua resenha/),
+    ).toBeTruthy();
   });
 
   it("botão 'Iniciar pelada avulsa' chama iniciarExecucaoAvulsa", async () => {
@@ -133,13 +177,11 @@ describe("Home — modo gestão (sem execução)", () => {
     );
   });
 
-  it("botão 'Cadastrar nova pelada' navega para /pelada-nova", async () => {
+  it("botão 'Criar nova pelada' navega para /pelada-nova", async () => {
     renderWithProviders(<HomeScreen />);
     await act(async () => {});
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Cadastrar nova pelada" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Criar nova pelada" }));
 
     expect(router.push).toHaveBeenCalledWith("/pelada-nova");
   });
@@ -165,65 +207,6 @@ describe("Home — modo gestão (sem execução)", () => {
       pathname: "/peladas/[id]",
       params: { id: "p1" },
     });
-  });
-
-  it("'Iniciar nova execução' sem execuções anteriores não pergunta nada", async () => {
-    const peladas = [fakeResumo({ id: "p1", totalExecucoes: 0 })];
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
-    });
-
-    const alertSpy = mockAlert(() => true);
-
-    fireEvent.press(
-      await screen.findByRole("button", { name: "Iniciar nova execução" }),
-    );
-
-    await waitFor(() =>
-      expect(soccer.iniciarExecucao).toHaveBeenCalledWith("p1", {
-        herdarJogadores: false,
-      }),
-    );
-    expect(alertSpy).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
-  });
-
-  it("'Iniciar nova execução' com execuções anteriores → Herdar → herdarJogadores: true", async () => {
-    const peladas = [fakeResumo({ id: "p1", totalExecucoes: 5 })];
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
-    });
-
-    const alertSpy = mockAlert((b) => b.text === "Herdar");
-
-    fireEvent.press(
-      await screen.findByRole("button", { name: "Iniciar nova execução" }),
-    );
-
-    await waitFor(() =>
-      expect(soccer.iniciarExecucao).toHaveBeenCalledWith("p1", {
-        herdarJogadores: true,
-      }),
-    );
-    expect(alertSpy).toHaveBeenCalled();
-    alertSpy.mockRestore();
-  });
-
-  it("'Iniciar nova execução' → Cancelar não dispara iniciarExecucao", async () => {
-    const peladas = [fakeResumo({ id: "p1", totalExecucoes: 5 })];
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { listarPeladas: jest.fn().mockResolvedValue(peladas) },
-    });
-
-    const alertSpy = mockAlert((b) => b.style === "cancel");
-
-    fireEvent.press(
-      await screen.findByRole("button", { name: "Iniciar nova execução" }),
-    );
-
-    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
-    expect(soccer.iniciarExecucao).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
   });
 
   it("erro em listarPeladas vira ErrorBanner", async () => {
@@ -299,113 +282,19 @@ describe("Home — modo execução (com gestor)", () => {
     expect(router.push).toHaveBeenCalledWith("/times");
   });
 
-  it("botão regras (ícone) navega para /regras", () => {
+  it("botão de configurações (cog) navega para /regras", () => {
     const gestor = buildManager();
     renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
     fireEvent.press(
-      screen.getByRole("button", { name: "Editar regras da execução" }),
+      screen.getByRole("button", { name: "Configurações e regras" }),
     );
 
     expect(router.push).toHaveBeenCalledWith("/regras");
   });
 
-  it("'Voltar para minhas peladas' chama voltarParaGestao", async () => {
-    const gestor = buildManager();
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { gestor },
-    });
-
-    fireEvent.press(
-      screen.getByRole("button", { name: "Voltar para minhas peladas" }),
-    );
-
-    await waitFor(() =>
-      expect(soccer.voltarParaGestao).toHaveBeenCalledTimes(1),
-    );
-  });
-
-  it("'Finalizar esta execução' confirma e chama finalizarExecucao", async () => {
-    const gestor = buildManager();
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { gestor },
-    });
-    const alertSpy = mockAlert((b) => b.text === "Finalizar");
-
-    fireEvent.press(
-      screen.getByRole("button", { name: "Finalizar esta execução" }),
-    );
-
-    await waitFor(() =>
-      expect(soccer.finalizarExecucao).toHaveBeenCalledTimes(1),
-    );
-    alertSpy.mockRestore();
-  });
-
-  it("'Finalizar' cancelado não chama finalizarExecucao", async () => {
-    const gestor = buildManager();
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { gestor },
-    });
-    const alertSpy = mockAlert((b) => b.style === "cancel");
-
-    fireEvent.press(
-      screen.getByRole("button", { name: "Finalizar esta execução" }),
-    );
-
-    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
-    expect(soccer.finalizarExecucao).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
-  });
-
-  it("'Limpar jogadores e times' confirma e chama limparJogadoresETimes", async () => {
-    const gestor = buildManager();
-    const { soccer } = renderWithProviders(<HomeScreen />, {
-      soccer: { gestor },
-    });
-    const alertSpy = mockAlert((b) => b.text === "Limpar");
-
-    fireEvent.press(
-      screen.getByRole("button", { name: "Limpar jogadores e times" }),
-    );
-
-    await waitFor(() =>
-      expect(soccer.limparJogadoresETimes).toHaveBeenCalledTimes(1),
-    );
-    alertSpy.mockRestore();
-  });
-
-  it("'Salvar como pelada cadastrada' aparece e navega quando avulsa", () => {
-    const gestor = buildManager({ peladaId: undefined });
-    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
-
-    fireEvent.press(
-      screen.getByRole("button", { name: "Salvar como pelada cadastrada" }),
-    );
-
-    expect(router.push).toHaveBeenCalledWith("/salvar-como-pelada");
-  });
-
-  it("'Salvar como pelada cadastrada' NÃO aparece quando vinculada a uma Pelada", () => {
-    const gestor = buildManager({ peladaId: "p1" });
-    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
-
-    expect(
-      screen.queryByRole("button", {
-        name: "Salvar como pelada cadastrada",
-      }),
-    ).toBeNull();
-  });
-
-  it("execução finalizada: Finalizar e Limpar desaparecem", () => {
-    const gestor = buildManager({ status: PeladaStatus.FINALIZADA });
-    renderWithProviders(<HomeScreen />, { soccer: { gestor } });
-
-    expect(
-      screen.queryByRole("button", { name: "Finalizar esta execução" }),
-    ).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Limpar jogadores e times" }),
-    ).toBeNull();
-  });
+  // Bloco "Gerenciar" (Voltar/Salvar/Finalizar/Limpar) removido do
+  // ExecucaoHome para alinhar com o design Pelada.html. Os handlers seguem
+  // definidos no componente — quando forem religados a um menu (cog do
+  // header) ou a uma tela de configurações, os testes devem voltar lá.
 });

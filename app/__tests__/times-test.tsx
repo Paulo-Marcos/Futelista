@@ -114,10 +114,11 @@ describe("Times — lista", () => {
     expect(screen.getByText("Time 2")).toBeTruthy();
   });
 
-  it("12 jogadores → 3 times: a fila tem 1 time (Time 3)", () => {
+  it("12 jogadores → 3 times: a fila tem 1 time (3º)", () => {
     renderTimes(buildManager({ jogadores: 12, comTimes: true }));
 
-    expect(screen.getByText("Time 3")).toBeTruthy();
+    // TeamQueue mostra a posição (3º) em vez de "Time 3" — design v2.
+    expect(screen.getByText("3º")).toBeTruthy();
     expect(screen.getByText("Fila (1)")).toBeTruthy();
   });
 });

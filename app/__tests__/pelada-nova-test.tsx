@@ -22,49 +22,60 @@ beforeEach(() => {
 });
 
 describe("PeladaNovaScreen", () => {
-  it("renderiza o título e o botão de fechar", () => {
+  it("renderiza o título e o botão de voltar", () => {
     renderWithProviders(<PeladaNovaScreen />);
 
     expect(screen.getByText("Nova pelada")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Fechar" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Voltar" })).toBeTruthy();
   });
 
-  it("começa com Cadastrar desabilitado (nome vazio)", () => {
+  it("começa com o CTA desabilitado (nome vazio)", () => {
     renderWithProviders(<PeladaNovaScreen />);
 
-    const cadastrar = screen.getByRole("button", { name: "Cadastrar" });
+    const cadastrar = screen.getByRole("button", {
+      name: "Criar e entrar na pelada",
+    });
     expect(cadastrar.props.accessibilityState).toMatchObject({
       disabled: true,
     });
   });
 
-  it("habilita Cadastrar depois de digitar um nome", () => {
+  it("habilita o CTA depois de digitar um nome", () => {
     renderWithProviders(<PeladaNovaScreen />);
 
     fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
       "Fute CEF",
     );
 
-    const cadastrar = screen.getByRole("button", { name: "Cadastrar" });
+    const cadastrar = screen.getByRole("button", {
+      name: "Criar e entrar na pelada",
+    });
     expect(cadastrar.props.accessibilityState).toMatchObject({
       disabled: false,
     });
   });
 
-  it("ignora click em Cadastrar enquanto o nome estiver vazio", () => {
+  it("ignora click no CTA enquanto o nome estiver vazio", () => {
     const { soccer } = renderWithProviders(<PeladaNovaScreen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     expect(soccer.criarPelada).not.toHaveBeenCalled();
   });
 
-  it("ignora click em Cadastrar quando nome é só espaços", () => {
+  it("ignora click no CTA quando nome é só espaços", () => {
     const { soccer } = renderWithProviders(<PeladaNovaScreen />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Ex.: Fute CEF"), "   ");
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
+      "   ",
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     expect(soccer.criarPelada).not.toHaveBeenCalled();
   });
@@ -73,35 +84,43 @@ describe("PeladaNovaScreen", () => {
     const { soccer } = renderWithProviders(<PeladaNovaScreen />);
 
     fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
       "  Fute CEF  ",
     );
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     await waitFor(() => expect(soccer.criarPelada).toHaveBeenCalledTimes(1));
-    expect(soccer.criarPelada).toHaveBeenCalledWith("Fute CEF", {
-      playersPerTeam: 4,
-      timeMatch: "00:10:00",
-      numberTimes: 1,
-      goalLimit: 2,
-      choosingTeams: ChoosingTeams.BY_ORDER,
-    });
+    expect(soccer.criarPelada).toHaveBeenCalledWith(
+      "Fute CEF",
+      {
+        playersPerTeam: 4,
+        timeMatch: "00:10:00",
+        numberTimes: 1,
+        goalLimit: 2,
+        choosingTeams: ChoosingTeams.BY_ORDER,
+      },
+      expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
+    );
   });
 
   it("envia regras editadas via stepper para criarPelada", async () => {
     const { soccer } = renderWithProviders(<PeladaNovaScreen />);
 
     fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
       "Treino",
     );
 
     // 4 jogadores -> 5
     fireEvent.press(screen.getAllByTestId("icon-plus")[0]);
-    // 10 min -> 11
-    fireEvent.press(screen.getAllByTestId("icon-plus")[1]);
+    // 10 min -> 11 — design v2: MiniSteppers em ordem [players, limite gols, minutos]
+    fireEvent.press(screen.getAllByTestId("icon-plus")[2]);
 
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     await waitFor(() => expect(soccer.criarPelada).toHaveBeenCalledTimes(1));
     expect(soccer.criarPelada).toHaveBeenCalledWith(
@@ -110,33 +129,48 @@ describe("PeladaNovaScreen", () => {
         playersPerTeam: 5,
         timeMatch: "00:11:00",
       }),
+      expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
     );
   });
 
   it("permite trocar o modo de sorteio e envia o valor escolhido", async () => {
     const { soccer } = renderWithProviders(<PeladaNovaScreen />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Ex.: Fute CEF"), "X");
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
+      "X",
+    );
     fireEvent.press(screen.getByText("Embaralhar"));
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     await waitFor(() => expect(soccer.criarPelada).toHaveBeenCalledTimes(1));
     expect(soccer.criarPelada).toHaveBeenCalledWith(
       "X",
       expect.objectContaining({ choosingTeams: ChoosingTeams.BY_MIXING_TEAMS }),
+      expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
     );
   });
 
-  it("volta após salvar com sucesso", async () => {
+  it("entra na nova pelada após salvar com sucesso", async () => {
+    // soccerContextStub: criarPelada resolve com { id: "pelada-1", ... }
     renderWithProviders(<PeladaNovaScreen />);
 
     fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
       "Fute",
     );
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
-    await waitFor(() => expect(router.back).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(router.replace).toHaveBeenCalledWith({
+        pathname: "/peladas/[id]",
+        params: { id: "pelada-1" },
+      }),
+    );
   });
 
   it("mostra erro vindo do criarPelada e mantém a tela aberta", async () => {
@@ -146,28 +180,22 @@ describe("PeladaNovaScreen", () => {
     renderWithProviders(<PeladaNovaScreen />, { soccer: { criarPelada } });
 
     fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
       "Fute",
     );
-    fireEvent.press(screen.getByRole("button", { name: "Cadastrar" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
 
     await waitFor(() => expect(criarPelada).toHaveBeenCalledTimes(1));
     expect(await screen.findByText("Nome já cadastrado")).toBeTruthy();
-    expect(router.back).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
   });
 
-  it("Cancelar chama router.back", () => {
+  it("Voltar chama router.back", () => {
     renderWithProviders(<PeladaNovaScreen />);
 
-    fireEvent.press(screen.getByRole("button", { name: "Cancelar" }));
-
-    expect(router.back).toHaveBeenCalledTimes(1);
-  });
-
-  it("Fechar (X) chama router.back", () => {
-    renderWithProviders(<PeladaNovaScreen />);
-
-    fireEvent.press(screen.getByRole("button", { name: "Fechar" }));
+    fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
 
     expect(router.back).toHaveBeenCalledTimes(1);
   });
@@ -176,8 +204,6 @@ describe("PeladaNovaScreen", () => {
     renderWithProviders(<PeladaNovaScreen />);
 
     // Default: 4×4 · 10min · 1 tempo · limite 2 gols
-    expect(
-      screen.getByText(/4×4.*10min.*1 tempo.*limite 2 gols/),
-    ).toBeTruthy();
+    expect(screen.getByText(/4×4.*10min.*1 tempo.*limite 2 gols/)).toBeTruthy();
   });
 });
