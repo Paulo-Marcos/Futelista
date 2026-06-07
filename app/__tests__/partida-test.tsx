@@ -232,3 +232,29 @@ describe("Partida — encerrar e navegação", () => {
     expect(router.replace).toHaveBeenCalledWith("/resultado");
   });
 });
+
+// ===========================================================================
+// APITO HÁPTICO (F-07)
+// ===========================================================================
+
+describe("Partida — apito háptico ao fim do tempo", () => {
+  const Haptics = require("expo-haptics");
+
+  beforeEach(() => {
+    (Haptics.notificationAsync as jest.Mock).mockClear();
+  });
+
+  it("dispara notificationAsync ao montar com status ENDED", () => {
+    const m = buildPartidaManager({ status: TimerStatus.ENDED });
+    renderPartida(m);
+
+    expect(Haptics.notificationAsync).toHaveBeenCalled();
+  });
+
+  it("não dispara quando status não é ENDED", () => {
+    const m = buildPartidaManager({ status: TimerStatus.STARTED });
+    renderPartida(m);
+
+    expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+  });
+});

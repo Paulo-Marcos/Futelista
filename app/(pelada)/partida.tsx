@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -9,6 +10,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  Vibration,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +24,7 @@ import Svg, {
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import { usePrefs } from "@/src/shared/prefs/prefsContext";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Goal } from "@/src/domain/Goal";
 import { Player } from "@/src/domain/Player";
@@ -66,6 +69,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { prefs } = usePrefs();
 
   const playing = useGameSliceRequired((g) => g.playing);
   const status = useGameSliceRequired((g) => g.timer?.status);
@@ -133,6 +137,24 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     const t = setTimeout(() => setSubToast(null), 2400);
     return () => clearTimeout(t);
   }, [subToast]);
+
+  // Apito do fim do tempo (F-07). Dispara na transição para ENDED e
+  // **só** quando a preferência está ligada. Erros do nativo são
+  // silenciosos — o jogo não pode travar porque o sistema operacional
+  // bloqueou vibração / device sem motor.
+  useEffect(() => {
+    if (!prefs.apitoHaptico) return;
+    if (status !== TimerStatus.ENDED) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
+      () => {},
+    );
+    // Padrão de vibração curto-curto-longo (~apito de árbitro).
+    try {
+      Vibration.vibrate([0, 120, 80, 120, 80, 280]);
+    } catch {
+      // Ignorado — web e alguns devices não têm motor.
+    }
+  }, [status, prefs.apitoHaptico]);
 
   if (!playing) {
     return (

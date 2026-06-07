@@ -128,6 +128,29 @@ jest.mock("@react-native-async-storage/async-storage", () => {
 });
 
 // ---------------------------------------------------------------------------
+// expo-haptics — nativo, precisa de mock. Spec inspecionável via
+// require("expo-haptics").impactAsync.mock.calls.
+// ---------------------------------------------------------------------------
+jest.mock("expo-haptics", () => ({
+  __esModule: true,
+  impactAsync: jest.fn(async () => {}),
+  notificationAsync: jest.fn(async () => {}),
+  selectionAsync: jest.fn(async () => {}),
+  ImpactFeedbackStyle: {
+    Light: "light",
+    Medium: "medium",
+    Heavy: "heavy",
+    Soft: "soft",
+    Rigid: "rigid",
+  },
+  NotificationFeedbackType: {
+    Success: "success",
+    Warning: "warning",
+    Error: "error",
+  },
+}));
+
+// ---------------------------------------------------------------------------
 // Silenciar warnings ruidosos do RN em ambiente de teste.
 // ---------------------------------------------------------------------------
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");

@@ -68,8 +68,10 @@ describe("HistoricoScreen — compartilhar (F-06)", () => {
 
     await waitFor(() => expect(shareSpy).toHaveBeenCalledTimes(1));
     const [arg] = shareSpy.mock.calls[0];
-    expect(arg.message).toContain("🏆 Fute CEF");
-    expect(arg.message).toContain("— FuteLista");
+    // `ShareContent` é união de `{message}` ou `{url}` — narrowing via cast.
+    const conteudo = arg as { message: string };
+    expect(conteudo.message).toContain("🏆 Fute CEF");
+    expect(conteudo.message).toContain("— FuteLista");
 
     shareSpy.mockRestore();
   });

@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -15,6 +16,7 @@ import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { TimerStatus } from "@/src/domain/Timer";
+import { usePrefs } from "@/src/shared/prefs/prefsContext";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { RuleCard } from "@/src/shared/ui/RuleCard";
@@ -43,6 +45,7 @@ export default function RegrasScreen() {
 function RegrasInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const router = useRouter();
+  const { prefs, setPrefs } = usePrefs();
 
   const rules = useGameSliceRequired((g) => g.rules);
   const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
@@ -241,6 +244,28 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
             options={choosingOptions}
             onChange={(v) => setChoosingTeams(Number(v) as ChoosingTeams)}
             disabled={bloqueiaChoosingTeams}
+          />
+        }
+      />
+
+      <Text style={[styles.sectionLabel, { color: palette.onSurfaceVariant }]}>
+        Avisos
+      </Text>
+
+      <RuleCard
+        icon="vibrate"
+        title="Apito háptico ao fim do tempo"
+        sub="vibração curta quando o cronômetro zera (vale pra todas as peladas)"
+        control={
+          <Switch
+            value={prefs.apitoHaptico}
+            onValueChange={(v) => setPrefs({ apitoHaptico: v })}
+            accessibilityLabel="Ligar ou desligar apito háptico"
+            trackColor={{
+              false: palette.outlineVariant,
+              true: palette.primary,
+            }}
+            thumbColor={palette.surface}
           />
         }
       />

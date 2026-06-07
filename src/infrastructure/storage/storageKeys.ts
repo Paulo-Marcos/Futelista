@@ -21,6 +21,8 @@ export const STORAGE_KEYS = {
   ATIVA_ID: `${STORAGE_NAMESPACE}pelada:ativa-id`,
   /** Preferência de tema visual (id da paleta + modo). */
   THEME: `${STORAGE_NAMESPACE}theme`,
+  /** Preferências globais do app (avisos, hápticos, etc.). */
+  PREFS: `${STORAGE_NAMESPACE}prefs`,
 } as const;
 
 /** Compõe a chave de execução a partir do id. */
