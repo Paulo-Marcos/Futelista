@@ -214,6 +214,53 @@ describe("Partida — ações por jogador", () => {
 
     expect(screen.getByText("Sem reservas no banco agora.")).toBeTruthy();
   });
+
+  it("modo multi: aplica 2 trocas em sequência ao tocar 'Aplicar'", () => {
+    const m = buildPartidaManager();
+    const switchSpy = jest.spyOn(m, "switchPlayerLeft");
+    renderPartida(m);
+
+    fireEvent.press(screen.getByRole("button", { name: "Trocas" }));
+    fireEvent.press(
+      screen.getByRole("button", {
+        name: "Selecionar vários jogadores",
+      }),
+    );
+
+    // Par 1: J01 (em campo, Time 1) sai → J09 (banco) entra.
+    fireEvent.press(screen.getByLabelText("Selecionar J01 para sair"));
+    fireEvent.press(screen.getByLabelText("Trocar J09 para entrar"));
+    // Par 2: J02 (em campo, Time 1) sai → J10 (banco) entra.
+    fireEvent.press(screen.getByLabelText("Selecionar J02 para sair"));
+    fireEvent.press(screen.getByLabelText("Trocar J10 para entrar"));
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Aplicar 2 trocas" }),
+    );
+
+    expect(switchSpy).toHaveBeenCalledTimes(2);
+    expect(switchSpy.mock.calls[0][0].name).toBe("J09");
+    expect(switchSpy.mock.calls[0][1].name).toBe("J01");
+    expect(switchSpy.mock.calls[1][0].name).toBe("J10");
+    expect(switchSpy.mock.calls[1][1].name).toBe("J02");
+  });
+
+  it("modo multi: 'Aplicar' está desabilitado sem pares", () => {
+    const m = buildPartidaManager();
+    renderPartida(m);
+
+    fireEvent.press(screen.getByRole("button", { name: "Trocas" }));
+    fireEvent.press(
+      screen.getByRole("button", {
+        name: "Selecionar vários jogadores",
+      }),
+    );
+
+    const aplicar = screen.getByRole("button", {
+      name: "Aplicar trocas",
+    });
+    expect(aplicar.props.accessibilityState?.disabled).toBe(true);
+  });
 });
 
 // ===========================================================================

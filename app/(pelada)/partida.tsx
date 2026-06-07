@@ -96,6 +96,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     inP: Player;
     outP: Player;
     side: "A" | "B";
+    /** Trocas adicionais aplicadas junto (modo multi). 0 ou ausente = troca única. */
+    extras?: number;
   } | null>(null);
   const [checkpointToast, setCheckpointToast] = useState<string | null>(null);
   // Tracking de checkpoints (F-08). Um disparo por partida, reseta quando o
@@ -257,6 +259,29 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       const inPlayer = proximoTime.players[0];
       gestor.switchPlayerLeft(inPlayer, outPlayer);
       setSubToast({ inP: inPlayer, outP: outPlayer, side });
+      setSubOpen(false);
+    });
+  };
+
+  /**
+   * Aplica vários pares de troca em sequência. A última troca aparece no
+   * toast, com contador "+N" quando houve mais de uma. Erros do domínio
+   * (jogador que já saiu, time cheio) interrompem a sequência — o que
+   * já passou fica aplicado.
+   */
+  const onSubstituirMultiplos = (pares: ParTroca[]) => {
+    if (pares.length === 0) return;
+    safeAction(() => {
+      for (const par of pares) {
+        gestor.switchPlayerLeft(par.inP, par.outP);
+      }
+      const ultimo = pares[pares.length - 1];
+      setSubToast({
+        inP: ultimo.inP,
+        outP: ultimo.outP,
+        side: ultimo.side,
+        extras: pares.length - 1,
+      });
       setSubOpen(false);
     });
   };
@@ -448,6 +473,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         reservas={reservas}
         onClose={() => setSubOpen(false)}
         onSub={onSubstituir}
+        onSubMultiplos={onSubstituirMultiplos}
       />
 
       {celebration ? <GoalCelebration cel={celebration} /> : null}
@@ -1251,6 +1277,16 @@ function ScorerSheet({
   );
 }
 
+/**
+ * Par de troca: jogador `outP` (em campo, time `side`) sai pra `inP`
+ * entrar. Usado no modo multi-select da `SubstitutionSheet`.
+ */
+type ParTroca = {
+  outP: Player;
+  inP: Player;
+  side: "A" | "B";
+};
+
 function SubstitutionSheet({
   open,
   teamA,
@@ -1258,6 +1294,7 @@ function SubstitutionSheet({
   reservas,
   onClose,
   onSub,
+  onSubMultiplos,
 }: {
   open: boolean;
   teamA: Team;
@@ -1265,22 +1302,70 @@ function SubstitutionSheet({
   reservas: Player[];
   onClose: () => void;
   onSub: (side: "A" | "B", outPlayer: Player) => void;
+  /**
+   * Aplica vários pares de troca de uma vez. Quando ausente, o modo
+   * multi fica disponível visualmente mas o "Aplicar" cai em pares
+   * individuais via `onSub`. Em produção sempre vem preenchido.
+   */
+  onSubMultiplos?: (pares: ParTroca[]) => void;
 }) {
   const palette = usePalette();
   const [selected, setSelected] = useState<{
     side: "A" | "B";
     player: Player;
   } | null>(null);
+  const [multi, setMulti] = useState(false);
+  const [pares, setPares] = useState<ParTroca[]>([]);
 
   useEffect(() => {
-    if (!open) setSelected(null);
+    if (!open) {
+      setSelected(null);
+      setPares([]);
+      setMulti(false);
+    }
   }, [open]);
 
-  const onPickField = (side: "A" | "B", player: Player) =>
+  // Tabelas reversas pra checar "já está em algum par?" sem percorrer
+  // a lista N vezes.
+  const outIds = new Set(pares.map((p) => p.outP.id));
+  const inIds = new Set(pares.map((p) => p.inP.id));
+
+  const onPickField = (side: "A" | "B", player: Player) => {
+    if (!multi) {
+      setSelected({ side, player });
+      return;
+    }
+    if (outIds.has(player.id)) {
+      // Cancela o par já criado pra esse jogador.
+      setPares((prev) => prev.filter((p) => p.outP.id !== player.id));
+      return;
+    }
     setSelected({ side, player });
-  const onPickBench = () => {
+  };
+
+  const onPickBench = (player?: Player) => {
     if (!selected) return;
-    onSub(selected.side, selected.player);
+    if (!multi) {
+      onSub(selected.side, selected.player);
+      return;
+    }
+    if (!player) return;
+    if (inIds.has(player.id)) {
+      // Toque num jogador já pareado: cancela o par dele.
+      setPares((prev) => prev.filter((p) => p.inP.id !== player.id));
+      return;
+    }
+    setPares((prev) => [
+      ...prev,
+      { outP: selected.player, inP: player, side: selected.side },
+    ]);
+    setSelected(null);
+  };
+
+  const aplicarMultiplos = () => {
+    if (pares.length === 0) return;
+    if (onSubMultiplos) onSubMultiplos(pares);
+    else pares.forEach((p) => onSub(p.side, p.outP));
   };
 
   if (!open) return null;
@@ -1303,21 +1388,66 @@ function SubstitutionSheet({
                 Substituição
               </Text>
               <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-                Manter o time
+                {multi ? `Trocar vários (${pares.length})` : "Manter o time"}
               </Text>
             </View>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Fechar"
-              style={styles.iconBtn}
-            >
-              <MaterialCommunityIcons
-                name="close"
-                size={18}
-                color={palette.onSurface}
-              />
-            </Pressable>
+            <View style={styles.sheetHeadActions}>
+              <Pressable
+                onPress={() => {
+                  // Alterna modo; ao sair do multi, descarta pares pendentes.
+                  setMulti((v) => {
+                    if (v) setPares([]);
+                    setSelected(null);
+                    return !v;
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  multi
+                    ? "Voltar para troca única"
+                    : "Selecionar vários jogadores"
+                }
+                accessibilityState={{ selected: multi }}
+                style={({ pressed }) => [
+                  styles.multiToggle,
+                  {
+                    backgroundColor: multi
+                      ? palette.primary
+                      : palette.surfaceContainerHigh,
+                    borderColor: multi ? palette.primary : palette.outline,
+                    opacity: pressed ? 0.75 : 1,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="checkbox-multiple-outline"
+                  size={14}
+                  color={multi ? palette.onPrimary : palette.onSurface}
+                />
+                <Text
+                  style={[
+                    styles.multiToggleText,
+                    {
+                      color: multi ? palette.onPrimary : palette.onSurface,
+                    },
+                  ]}
+                >
+                  Vários
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar"
+                style={styles.iconBtn}
+              >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={18}
+                  color={palette.onSurface}
+                />
+              </Pressable>
+            </View>
           </View>
 
           <View
@@ -1339,7 +1469,11 @@ function SubstitutionSheet({
             <Text style={[styles.subHintText, { color: palette.onSurface }]}>
               {selected
                 ? `${selected.player.name} sai — toque em quem entra do banco`
-                : "1. Toque em quem sai (em campo)"}
+                : multi
+                  ? pares.length === 0
+                    ? "Selecione pares (em campo → banco). Toque em 'Aplicar' no fim."
+                    : `${pares.length} ${pares.length === 1 ? "troca pareada" : "trocas pareadas"} — selecione mais ou toque 'Aplicar'`
+                  : "1. Toque em quem sai (em campo)"}
             </Text>
           </View>
 
@@ -1372,7 +1506,9 @@ function SubstitutionSheet({
                     key={p.id}
                     player={p}
                     tone="A"
-                    selected={selected?.player.id === p.id}
+                    selected={
+                      selected?.player.id === p.id || outIds.has(p.id)
+                    }
                     onPress={() => onPickField("A", p)}
                   />
                 ))}
@@ -1393,7 +1529,9 @@ function SubstitutionSheet({
                     key={p.id}
                     player={p}
                     tone="B"
-                    selected={selected?.player.id === p.id}
+                    selected={
+                      selected?.player.id === p.id || outIds.has(p.id)
+                    }
                     onPress={() => onPickField("B", p)}
                   />
                 ))}
@@ -1422,49 +1560,100 @@ function SubstitutionSheet({
               </Text>
             ) : (
               <View style={styles.benchList}>
-                {reservas.map((p) => (
-                  <Pressable
-                    key={p.id}
-                    onPress={onPickBench}
-                    disabled={!selected}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Trocar ${p.name} para entrar`}
-                    style={({ pressed }) => [
-                      styles.benchItem,
-                      {
-                        backgroundColor: palette.surfaceContainerHigh,
-                        borderColor: palette.outlineVariant,
-                        opacity: selected ? (pressed ? 0.8 : 1) : 0.5,
-                      },
-                    ]}
-                  >
-                    <PlayerAvatar player={p} size={32} />
-                    <Text
-                      style={[
-                        styles.benchItemName,
-                        { color: palette.onSurface },
+                {reservas.map((p) => {
+                  const pareado = inIds.has(p.id);
+                  const habilitado = pareado || !!selected;
+                  return (
+                    <Pressable
+                      key={p.id}
+                      onPress={() => onPickBench(p)}
+                      disabled={!habilitado}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        pareado
+                          ? `Cancelar troca de ${p.name}`
+                          : `Trocar ${p.name} para entrar`
+                      }
+                      style={({ pressed }) => [
+                        styles.benchItem,
+                        {
+                          backgroundColor: pareado
+                            ? palette.goal + "22"
+                            : palette.surfaceContainerHigh,
+                          borderColor: pareado
+                            ? palette.goal
+                            : palette.outlineVariant,
+                          opacity: habilitado ? (pressed ? 0.8 : 1) : 0.5,
+                        },
                       ]}
-                      numberOfLines={1}
                     >
-                      {p.name}
-                    </Text>
-                    <View style={styles.benchItemRight}>
-                      <MaterialCommunityIcons
-                        name="arrow-down"
-                        size={12}
-                        color={palette.goal}
-                      />
+                      <PlayerAvatar player={p} size={32} />
                       <Text
-                        style={[styles.benchItemEnter, { color: palette.goal }]}
+                        style={[
+                          styles.benchItemName,
+                          { color: palette.onSurface },
+                        ]}
+                        numberOfLines={1}
                       >
-                        entra
+                        {p.name}
                       </Text>
-                    </View>
-                  </Pressable>
-                ))}
+                      <View style={styles.benchItemRight}>
+                        <MaterialCommunityIcons
+                          name={pareado ? "check-circle" : "arrow-down"}
+                          size={12}
+                          color={palette.goal}
+                        />
+                        <Text
+                          style={[
+                            styles.benchItemEnter,
+                            { color: palette.goal },
+                          ]}
+                        >
+                          {pareado ? "pareado" : "entra"}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           </ScrollView>
+
+          {multi ? (
+            <Pressable
+              onPress={aplicarMultiplos}
+              disabled={pares.length === 0}
+              accessibilityRole="button"
+              accessibilityLabel={
+                pares.length > 0
+                  ? `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`
+                  : "Aplicar trocas"
+              }
+              accessibilityState={{ disabled: pares.length === 0 }}
+              style={({ pressed }) => [
+                styles.aplicarBtn,
+                {
+                  backgroundColor:
+                    pares.length === 0
+                      ? palette.primaryDim
+                      : palette.primary,
+                  opacity:
+                    pares.length === 0 ? 0.6 : pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="check-all"
+                size={18}
+                color={palette.onPrimary}
+              />
+              <Text style={[styles.aplicarBtnText, { color: palette.onPrimary }]}>
+                {pares.length === 0
+                  ? "Aplicar trocas"
+                  : `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`}
+              </Text>
+            </Pressable>
+          ) : null}
         </Pressable>
       </Pressable>
     </Modal>
@@ -1722,7 +1911,7 @@ function ConfettiPiece({ index, color }: { index: number; color: string }) {
 function SubstitutionToast({
   t,
 }: {
-  t: { inP: Player; outP: Player; side: "A" | "B" };
+  t: { inP: Player; outP: Player; side: "A" | "B"; extras?: number };
 }) {
   const palette = usePalette();
   return (
@@ -1772,7 +1961,11 @@ function SubstitutionToast({
         </View>
       </View>
       <Text style={[styles.toastSide, { color: palette.onSurfaceVariant }]}>
-        {t.side === "A" ? "Time 1" : "Time 2"}
+        {t.extras && t.extras > 0
+          ? `+${t.extras} ${t.extras === 1 ? "troca" : "trocas"}`
+          : t.side === "A"
+            ? "Time 1"
+            : "Time 2"}
       </Text>
     </View>
   );
@@ -2316,6 +2509,34 @@ const styles = StyleSheet.create({
   toastBold: { ...Typography.title, fontSize: 13 },
   toastLight: { ...Typography.body, fontSize: 12 },
   toastSide: { ...Typography.label, fontSize: 11 },
+
+  // ----- Sheet: header com toggle + botão Aplicar (F-09) -----
+  sheetHeadActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  multiToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+  },
+  multiToggleText: { ...Typography.label, fontSize: 11 },
+  aplicarBtn: {
+    marginTop: Spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.md,
+    borderCurve: "continuous",
+  },
+  aplicarBtnText: { ...Typography.title, fontSize: 15 },
 
   // ----- Checkpoint toast (F-08) — alerta no topo da tela -----
   checkpointToast: {
