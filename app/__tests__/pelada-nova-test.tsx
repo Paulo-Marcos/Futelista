@@ -102,6 +102,7 @@ describe("PeladaNovaScreen", () => {
         choosingTeams: ChoosingTeams.BY_ORDER,
       },
       expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
+      undefined,
     );
   });
 
@@ -130,6 +131,7 @@ describe("PeladaNovaScreen", () => {
         timeMatch: "00:11:00",
       }),
       expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
+      undefined,
     );
   });
 
@@ -150,6 +152,31 @@ describe("PeladaNovaScreen", () => {
       "X",
       expect.objectContaining({ choosingTeams: ChoosingTeams.BY_MIXING_TEAMS }),
       expect.objectContaining({ dia: "Quartas", hora: "21:00" }),
+      undefined,
+    );
+  });
+
+  it("envia observações com trim para criarPelada quando preenchidas", async () => {
+    const { soccer } = renderWithProviders(<PeladaNovaScreen />);
+
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Nome da pelada (ex.: Fute de Quarta)"),
+      "Pelada Y",
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Ex.: levar coletes, PIX da quadra, etc."),
+      "  Levar coletes verdes  ",
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: "Criar e entrar na pelada" }),
+    );
+
+    await waitFor(() => expect(soccer.criarPelada).toHaveBeenCalledTimes(1));
+    expect(soccer.criarPelada).toHaveBeenCalledWith(
+      "Pelada Y",
+      expect.any(Object),
+      expect.any(Object),
+      "Levar coletes verdes",
     );
   });
 

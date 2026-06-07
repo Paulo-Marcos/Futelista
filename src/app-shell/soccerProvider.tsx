@@ -138,6 +138,7 @@ export const SoccerProvider = ({
       nome: string,
       regras?: DataRules,
       agenda?: AgendaPelada,
+      observacoes?: string,
     ): Promise<Pelada> => {
       const pelada = new Pelada({
         nome,
@@ -145,6 +146,7 @@ export const SoccerProvider = ({
         dia: agenda?.dia,
         hora: agenda?.hora,
         local: agenda?.local,
+        observacoes,
       });
       await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
       return pelada;
@@ -155,13 +157,20 @@ export const SoccerProvider = ({
   const atualizarPelada = useCallback(
     async (
       id: string,
-      patch: { nome?: string; regras?: DataRules; agenda?: AgendaPelada },
+      patch: {
+        nome?: string;
+        regras?: DataRules;
+        agenda?: AgendaPelada;
+        observacoes?: string;
+      },
     ): Promise<Pelada> => {
       const pelada = await repoRef.current.carregarPelada(id);
       if (!pelada) throw Error("Pelada não encontrada.");
       if (patch.nome !== undefined) pelada.renomear(patch.nome);
       if (patch.regras) pelada.atualizarRegras(patch.regras);
       if (patch.agenda) pelada.atualizarAgenda(patch.agenda);
+      if (patch.observacoes !== undefined)
+        pelada.atualizarObservacoes(patch.observacoes);
       await marcarSalvamento(() => repoRef.current.salvarPelada(pelada));
       return pelada;
     },

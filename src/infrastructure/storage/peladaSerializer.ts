@@ -24,6 +24,7 @@ type PeladaPayload = {
   dia?: string;
   hora?: string;
   local?: string;
+  observacoes?: string;
 };
 
 export function serializePelada(pelada: Pelada): string {
@@ -44,6 +45,7 @@ export function serializePelada(pelada: Pelada): string {
     dia: pelada.dia,
     hora: pelada.hora,
     local: pelada.local,
+    observacoes: pelada.observacoes,
   };
   return JSON.stringify(payload);
 }
@@ -63,6 +65,7 @@ export function deserializePelada(raw: string): Pelada {
     dia: payload.dia,
     hora: payload.hora,
     local: payload.local,
+    observacoes: payload.observacoes,
   });
 }
 

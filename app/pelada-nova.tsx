@@ -32,7 +32,6 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  * vermelho. Pós-criar usa `router.replace` para a home da pelada (`ADD_PELADA`
  * + enter do handoff).
  *
- * NOTA: `observacoes` segue decorativo — sem persistência (TODO: notas).
  */
 const DIAS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"] as const;
 
@@ -51,7 +50,7 @@ export default function PeladaNovaScreen() {
     ChoosingTeams.BY_ORDER,
   );
 
-  // Decorativos (UI sem persistência hoje)
+  // Agenda + observações (todos persistidos no domínio Pelada)
   const [local, setLocal] = useState("");
   const [dia, setDia] = useState<(typeof DIAS)[number]>("Qua");
   const [hora, setHora] = useState("21:00");
@@ -79,6 +78,7 @@ export default function PeladaNovaScreen() {
         hora: hora.trim() || undefined,
         local: local.trim() || undefined,
       },
+      obs.trim() || undefined,
     )
       .then((pelada) =>
         // "Criar e entrar" — substitui esta tela pela home da pelada

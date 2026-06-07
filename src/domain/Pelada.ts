@@ -24,6 +24,12 @@ export class Pelada {
   hora?: string;
   /** Local preferencial (ex.: "Quadra do CEF"). Decorativo no resumo da lista. */
   local?: string;
+  /**
+   * Observações livres da pelada (notas do organizador). Texto multilinha,
+   * preservado entre boots. Decorativo — não afeta nenhuma regra. Trim:
+   * string vazia ou só espaços vira `undefined`.
+   */
+  observacoes?: string;
 
   constructor(input: DadosPelada) {
     if (!input.nome || !input.nome.trim()) {
@@ -37,6 +43,7 @@ export class Pelada {
     this.dia = trimOrUndefined(input.dia);
     this.hora = trimOrUndefined(input.hora);
     this.local = trimOrUndefined(input.local);
+    this.observacoes = trimOrUndefined(input.observacoes);
   }
 
   atualizarAgenda(patch: {
@@ -47,6 +54,15 @@ export class Pelada {
     if (patch.dia !== undefined) this.dia = trimOrUndefined(patch.dia);
     if (patch.hora !== undefined) this.hora = trimOrUndefined(patch.hora);
     if (patch.local !== undefined) this.local = trimOrUndefined(patch.local);
+  }
+
+  /**
+   * Substitui as observações da pelada. Passar string vazia (ou só espaços)
+   * remove o campo. Passar `undefined` é no-op (mantém o valor atual).
+   */
+  atualizarObservacoes(texto: string | undefined): void {
+    if (texto === undefined) return;
+    this.observacoes = trimOrUndefined(texto);
   }
 
   /**
@@ -76,6 +92,7 @@ export type DadosPelada = {
   dia?: string;
   hora?: string;
   local?: string;
+  observacoes?: string;
 };
 
 function trimOrUndefined(value: string | undefined): string | undefined {

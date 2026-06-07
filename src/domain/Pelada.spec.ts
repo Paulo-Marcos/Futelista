@@ -64,6 +64,30 @@ describe("Pelada (tipo cadastrado)", () => {
     );
   });
 
+  it("aceita observacoes opcionais e faz trim", () => {
+    const pelada = new Pelada({ nome: "X", observacoes: "  vai chover  " });
+    expect(pelada.observacoes).toBe("vai chover");
+  });
+
+  it("trata observacoes em branco como ausente", () => {
+    const pelada = new Pelada({ nome: "X", observacoes: "   " });
+    expect(pelada.observacoes).toBeUndefined();
+  });
+
+  it("atualizarObservacoes troca o texto e remove quando vazio", () => {
+    const pelada = new Pelada({ nome: "X" });
+    pelada.atualizarObservacoes("Levar bola nova");
+    expect(pelada.observacoes).toBe("Levar bola nova");
+    pelada.atualizarObservacoes("   ");
+    expect(pelada.observacoes).toBeUndefined();
+  });
+
+  it("atualizarObservacoes com undefined é no-op", () => {
+    const pelada = new Pelada({ nome: "X", observacoes: "anterior" });
+    pelada.atualizarObservacoes(undefined);
+    expect(pelada.observacoes).toBe("anterior");
+  });
+
   it("atualizarRegras preserva id das regras e aplica defaults parciais", () => {
     const pelada = new Pelada({
       nome: "X",

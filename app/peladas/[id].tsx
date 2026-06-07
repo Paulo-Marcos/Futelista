@@ -162,6 +162,10 @@ export default function ExecucoesDePeladaScreen() {
                 </Text>
               </Card>
 
+              {pelada.observacoes ? (
+                <ObservacoesCard texto={pelada.observacoes} />
+              ) : null}
+
               <PrimaryCTAComGlow
                 label={iniciando ? "Iniciando…" : "Iniciar nova execução"}
                 icon="whistle"
@@ -279,6 +283,59 @@ function PrimaryCTAComGlow({
         </Text>
       </Pressable>
     </View>
+  );
+}
+
+/**
+ * Card recolhível com as observações da pelada. Cabeçalho sempre visível;
+ * corpo aparece ao tocar. Inicia recolhido pra não engolir o CTA principal
+ * em peladas com nota longa.
+ */
+function ObservacoesCard({ texto }: { texto: string }) {
+  const palette = usePalette();
+  const [aberto, setAberto] = useState(false);
+  return (
+    <Pressable
+      onPress={() => setAberto((v) => !v)}
+      accessibilityRole="button"
+      accessibilityLabel={
+        aberto ? "Recolher observações" : "Mostrar observações"
+      }
+      accessibilityState={{ expanded: aberto }}
+      style={({ pressed }) => [
+        styles.obsCard,
+        {
+          backgroundColor: palette.surface,
+          borderColor: palette.outlineVariant,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <View style={styles.obsHeader}>
+        <MaterialCommunityIcons
+          name="note-text-outline"
+          size={16}
+          color={palette.onSurfaceVariant}
+        />
+        <Text
+          style={[styles.obsLabel, { color: palette.onSurfaceVariant }]}
+          accessibilityRole="header"
+        >
+          Observações
+        </Text>
+        <View style={{ flex: 1 }} />
+        <MaterialCommunityIcons
+          name={aberto ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={palette.onSurfaceVariant}
+        />
+      </View>
+      {aberto ? (
+        <Text style={[styles.obsText, { color: palette.onSurface }]} selectable>
+          {texto}
+        </Text>
+      ) : null}
+    </Pressable>
   );
 }
 
@@ -422,6 +479,26 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginTop: Spacing.sm,
   },
+
+  // ---- Card de observações recolhível ----
+  obsCard: {
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderCurve: "continuous",
+    gap: Spacing.sm,
+  },
+  obsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  obsLabel: {
+    ...Typography.label,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  obsText: { ...Typography.body, fontSize: 14, lineHeight: 20 },
 
   execCard: {
     padding: Spacing.md,

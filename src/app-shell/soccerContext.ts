@@ -28,10 +28,16 @@ export type SoccerContextValue = {
     nome: string,
     regras?: DataRules,
     agenda?: AgendaPelada,
+    observacoes?: string,
   ) => Promise<Pelada>;
   atualizarPelada: (
     id: string,
-    patch: { nome?: string; regras?: DataRules; agenda?: AgendaPelada },
+    patch: {
+      nome?: string;
+      regras?: DataRules;
+      agenda?: AgendaPelada;
+      observacoes?: string;
+    },
   ) => Promise<Pelada>;
   excluirPelada: (id: string) => Promise<void>;
   listarPeladas: () => Promise<ResumoPeladaTipo[]>;
