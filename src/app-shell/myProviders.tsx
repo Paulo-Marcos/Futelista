@@ -3,12 +3,15 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { SoccerProvider } from "@/src/app-shell/soccerProvider";
+import { ThemeProvider } from "@/src/shared/theme/themeContext";
 
 export const MyProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <SoccerProvider>{children}</SoccerProvider>
+        <ThemeProvider>
+          <SoccerProvider>{children}</SoccerProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
