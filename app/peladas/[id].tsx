@@ -129,7 +129,33 @@ export default function ExecucoesDePeladaScreen() {
         >
           {pelada?.nome ?? "Pelada"}
         </Text>
-        <View style={styles.iconButton} />
+        {pelada ? (
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/pelada-editar/[id]",
+                params: { id: pelada.id },
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Editar pelada"
+            style={({ pressed }) => [
+              styles.iconButton,
+              {
+                backgroundColor: palette.surfaceContainerHigh,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={18}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.iconButton} />
+        )}
       </View>
 
       {pelada === null || execucoes === null ? (

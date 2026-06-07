@@ -81,6 +81,13 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="pelada-editar"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="salvar-como-pelada"
             options={{
               presentation: "formSheet",

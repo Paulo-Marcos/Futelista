@@ -112,6 +112,23 @@ describe("PeladaDetalhe — loading e cabeçalho", () => {
     fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
     expect(router.back).toHaveBeenCalledTimes(1);
   });
+
+  it("botão Editar do header navega para /pelada-editar/[id]", async () => {
+    renderWithProviders(<PeladaDetalheScreen />, {
+      soccer: {
+        carregarPelada: jest.fn().mockResolvedValue(fakePelada()),
+        listarExecucoesDe: jest.fn().mockResolvedValue([]),
+      },
+    });
+
+    // Aguarda a pelada carregar (botão só aparece com pelada definida).
+    const botao = await screen.findByRole("button", { name: "Editar pelada" });
+    fireEvent.press(botao);
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: "/pelada-editar/[id]",
+      params: { id: "p1" },
+    });
+  });
 });
 
 // ===========================================================================
