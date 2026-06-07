@@ -18,7 +18,6 @@ import {
   devLimparStorage,
 } from "@/src/app-shell/devSeed";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { Card } from "@/src/shared/ui/Card";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { Spacing, Typography } from "@/src/shared/theme/Colors";
 
@@ -108,6 +107,12 @@ export default function DevScreen() {
           fullWidth
           disabled={executando !== null}
         />
+        <SecondaryButton
+          label="Inspecionar splash (loop)"
+          icon="eye-outline"
+          onPress={() => router.push("/splash-preview")}
+          fullWidth
+        />
       </View>
 
       <View style={styles.block}>
@@ -117,29 +122,39 @@ export default function DevScreen() {
           Cenários
         </Text>
         {CENARIOS.map((c) => (
-          <Card key={c.id} variant="surface" padding="md">
-            <Pressable
-              onPress={() => aplicar(c.id, c.titulo)}
-              disabled={executando !== null}
-              accessibilityRole="button"
-              accessibilityLabel={`Aplicar cenário ${c.titulo}`}
-              style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+          <Pressable
+            key={c.id}
+            onPress={() => aplicar(c.id, c.titulo)}
+            disabled={executando !== null}
+            accessibilityRole="button"
+            accessibilityLabel={`Aplicar cenário ${c.titulo}`}
+            style={({ pressed }) => [
+              styles.cenarioCard,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.outlineVariant,
+                opacity:
+                  executando !== null && executando !== c.titulo
+                    ? 0.45
+                    : pressed
+                      ? 0.85
+                      : 1,
+              },
+            ]}
+            android_ripple={{ color: palette.primary + "22" }}
+          >
+            <Text style={[styles.cenarioTitulo, { color: palette.onSurface }]}>
+              {c.titulo}
+            </Text>
+            <Text
+              style={[
+                styles.cenarioDescricao,
+                { color: palette.onSurfaceVariant },
+              ]}
             >
-              <Text
-                style={[styles.cenarioTitulo, { color: palette.onSurface }]}
-              >
-                {c.titulo}
-              </Text>
-              <Text
-                style={[
-                  styles.cenarioDescricao,
-                  { color: palette.onSurfaceVariant },
-                ]}
-              >
-                {c.descricao}
-              </Text>
-            </Pressable>
-          </Card>
+              {c.descricao}
+            </Text>
+          </Pressable>
         ))}
       </View>
 
@@ -179,6 +194,14 @@ const styles = StyleSheet.create({
     ...Typography.label,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  // Card de cenário virou Pressable diretamente — antes o Pressable estava
+  // dentro de um Card (View), e clicks no padding do Card não disparavam.
+  cenarioCard: {
+    padding: Spacing.md,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderCurve: "continuous",
   },
   cenarioTitulo: { ...Typography.title, fontSize: 15 },
   cenarioDescricao: { ...Typography.body, fontSize: 13, marginTop: 2 },

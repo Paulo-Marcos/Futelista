@@ -16,12 +16,24 @@ import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { Card } from "@/src/shared/ui/Card";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
+import { RuleCard } from "@/src/shared/ui/RuleCard";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
+import {
+  SegmentedControl,
+  SegmentedOption,
+} from "@/src/shared/ui/SegmentedControl";
 import { Stepper } from "@/src/shared/ui/Stepper";
+import { TeamCrest } from "@/src/shared/ui/TeamCrest";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
+/**
+ * Regras (handoff v2, tela 07).
+ *
+ * Header simples · cfgPelada com escudo · sections "Partida"/"Times" ·
+ * RuleCard para cada regra · SegmentedControl para modo de sorteio ·
+ * Cancelar/Salvar.
+ */
 export default function RegrasScreen() {
   const { gestor } = useSoccer();
   if (!gestor) return <Redirect href="/" />;
@@ -37,6 +49,7 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
   const temTimes = useGameSliceRequired((g) => g.next.length > 0);
   const statusTimer = useGameSliceRequired((g) => g.timer?.status);
   const totalJogadores = useGameSliceRequired((g) => g.players.length);
+  const peladaId = useGameSliceRequired((g) => g.peladaId);
 
   const [nome, setNome] = useState(gestor.name);
   const [playersPerTeam, setPlayersPerTeam] = useState(rules.playersPerTeam);
@@ -46,9 +59,6 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
     rules.choosingTeams,
   );
   const [minutos, setMinutos] = useState(() => extrairMinutos(rules.timeMatch));
-  const [segundos, setSegundos] = useState(() =>
-    extrairSegundos(rules.timeMatch),
-  );
   const [erro, setErro] = useState<string | null>(null);
 
   const bloqueiaPlayersPerTeam = temPartida || temTimes;
@@ -67,7 +77,7 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
         numberTimes,
         goalLimit,
         choosingTeams,
-        timeMatch: formatarTempo(minutos, segundos),
+        timeMatch: formatarTempo(minutos),
       });
       router.back();
     } catch (e) {
@@ -79,160 +89,173 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
     playersPerTeam > 0 ? Math.floor(totalJogadores / playersPerTeam) : 0;
   const sobrando = totalJogadores - timesEstimados * playersPerTeam;
 
+  const choosingOptions: SegmentedOption<string>[] = [
+    { value: String(ChoosingTeams.BY_ORDER), label: "Ordem" },
+    {
+      value: String(ChoosingTeams.BY_ORDER_MIXING_TOP_TWO_TEAMS),
+      label: "Topo",
+    },
+    { value: String(ChoosingTeams.BY_MIXING_TEAMS), label: "Embaralhar" },
+  ];
+
   return (
     <ScrollView
       style={[styles.screen, { backgroundColor: palette.background }]}
       contentContainerStyle={styles.content}
     >
-      <View style={styles.titleRow}>
-        <Text style={[styles.title, { color: palette.onSurface }]}>Regras</Text>
+      <View style={styles.headerRow}>
+        <Text style={[styles.title, { color: palette.onSurface }]}>
+          Regras
+        </Text>
         <Pressable
           onPress={() => router.back()}
-          style={styles.closeButton}
-          android_ripple={{ color: palette.primary + "22", borderless: true }}
+          accessibilityRole="button"
+          accessibilityLabel="Fechar"
+          style={({ pressed }) => [
+            styles.iconBtn,
+            {
+              backgroundColor: palette.surfaceContainerHigh,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
         >
           <MaterialCommunityIcons
             name="close"
-            size={22}
+            size={20}
             color={palette.onSurface}
           />
         </Pressable>
       </View>
 
-      <Field label="Nome da pelada">
-        <TextInput
-          value={nome}
-          onChangeText={setNome}
-          placeholder="Pelada"
-          placeholderTextColor={palette.onSurfaceVariant}
+      <View
+        style={[
+          styles.cfgPelada,
+          {
+            backgroundColor: palette.surface,
+            borderColor: palette.primary + "4D",
+          },
+        ]}
+      >
+        <View
           style={[
-            styles.input,
-            {
-              borderColor: palette.outline,
-              backgroundColor: palette.surface,
-              color: palette.onSurface,
-            },
+            styles.cfgBadge,
+            { backgroundColor: palette.surfaceContainerHigh },
           ]}
-        />
-      </Field>
+        >
+          <TeamCrest seed={peladaId ?? gestor.id} size={36} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <TextInput
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Pelada"
+            placeholderTextColor={palette.onSurfaceVariant}
+            accessibilityLabel="Nome da pelada"
+            style={[
+              styles.cfgNomeInput,
+              { color: palette.onSurface, borderColor: "transparent" },
+            ]}
+          />
+        </View>
+      </View>
 
-      <Field
-        label="Jogadores por time"
+      <Text style={[styles.sectionLabel, { color: palette.onSurfaceVariant }]}>
+        Partida
+      </Text>
+
+      <RuleCard
+        icon="timer-outline"
+        title="Duração da partida"
+        sub="minutos por partida"
+        control={
+          <Stepper value={minutos} onChange={setMinutos} min={1} max={60} />
+        }
+      />
+
+      <RuleCard
+        icon="bullseye-arrow"
+        title="Limite de gols"
+        sub="encerra ao atingir"
+        control={
+          <Stepper
+            value={goalLimit}
+            onChange={setGoalLimit}
+            min={1}
+            max={20}
+          />
+        }
+      />
+
+      <RuleCard
+        icon="repeat"
+        title="Número de tempos"
+        sub="quantos tempos por partida"
+        hint={bloqueiaNumberTimes ? "Bloqueado: cronômetro em uso." : undefined}
+        control={
+          <Stepper
+            value={numberTimes}
+            onChange={setNumberTimes}
+            min={1}
+            max={4}
+            disabled={bloqueiaNumberTimes}
+          />
+        }
+      />
+
+      <Text style={[styles.sectionLabel, { color: palette.onSurfaceVariant }]}>
+        Times
+      </Text>
+
+      <RuleCard
+        icon="account-multiple"
+        title="Formato dos times"
+        sub="jogadores por time"
         hint={
           bloqueiaPlayersPerTeam
             ? "Bloqueado: há times montados ou partida em andamento."
             : undefined
         }
-      >
-        <Stepper
-          value={playersPerTeam}
-          onChange={setPlayersPerTeam}
-          min={1}
-          max={11}
-          disabled={bloqueiaPlayersPerTeam}
-        />
-      </Field>
+        control={
+          <Stepper
+            value={playersPerTeam}
+            onChange={setPlayersPerTeam}
+            min={1}
+            max={11}
+            disabled={bloqueiaPlayersPerTeam}
+          />
+        }
+      />
 
-      <Field label="Tempo de partida">
-        <View style={styles.timeRow}>
-          <View style={styles.flex}>
-            <Stepper value={minutos} onChange={setMinutos} min={0} max={60} />
-            <Text
-              style={[styles.timeLabel, { color: palette.onSurfaceVariant }]}
-            >
-              minutos
-            </Text>
-          </View>
-          <View style={styles.flex}>
-            <Stepper
-              value={segundos}
-              onChange={setSegundos}
-              min={0}
-              max={59}
-              step={5}
-            />
-            <Text
-              style={[styles.timeLabel, { color: palette.onSurfaceVariant }]}
-            >
-              segundos
-            </Text>
-          </View>
-        </View>
-      </Field>
-
-      <Field
-        label="Número de tempos"
-        hint={bloqueiaNumberTimes ? "Bloqueado: cronômetro em uso." : undefined}
-      >
-        <Stepper
-          value={numberTimes}
-          onChange={setNumberTimes}
-          min={1}
-          max={4}
-          disabled={bloqueiaNumberTimes}
-        />
-      </Field>
-
-      <Field label="Limite de gols">
-        <Stepper value={goalLimit} onChange={setGoalLimit} min={1} max={20} />
-      </Field>
-
-      <Field
-        label="Modo de sorteio"
+      <RuleCard
+        icon="dice-multiple"
+        title="Modo de sorteio"
+        sub="como os times são formados"
         hint={
           bloqueiaChoosingTeams
             ? "Para mudar, primeiro resete os times."
             : undefined
         }
-      >
-        <View style={styles.segmentRow}>
-          {(
-            [
-              { value: ChoosingTeams.BY_ORDER, label: "Ordem" },
-              {
-                value: ChoosingTeams.BY_ORDER_MIXING_TOP_TWO_TEAMS,
-                label: "Topo",
-              },
-              { value: ChoosingTeams.BY_MIXING_TEAMS, label: "Embaralhar" },
-            ] as const
-          ).map((opt) => {
-            const sel = choosingTeams === opt.value;
-            return (
-              <Pressable
-                key={opt.value}
-                disabled={bloqueiaChoosingTeams}
-                onPress={() => setChoosingTeams(opt.value)}
-                style={({ pressed }) => [
-                  styles.segment,
-                  {
-                    backgroundColor: sel ? palette.primary : palette.surface,
-                    borderColor: sel ? palette.primary : palette.outline,
-                    opacity: bloqueiaChoosingTeams ? 0.5 : pressed ? 0.7 : 1,
-                  },
-                ]}
-                android_ripple={{ color: palette.primary + "22" }}
-              >
-                <Text
-                  style={[
-                    styles.segmentLabel,
-                    {
-                      color: sel ? palette.onPrimary : palette.onSurface,
-                    },
-                  ]}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </Field>
+        seg={
+          <SegmentedControl
+            value={String(choosingTeams)}
+            options={choosingOptions}
+            onChange={(v) => setChoosingTeams(Number(v) as ChoosingTeams)}
+            disabled={bloqueiaChoosingTeams}
+          />
+        }
+      />
 
-      <Card variant="outlined" padding="md">
-        <Text
-          style={[styles.previewLabel, { color: palette.onSurfaceVariant }]}
-        >
-          Preview
+      <View
+        style={[
+          styles.preview,
+          {
+            backgroundColor: palette.surfaceContainerHigh,
+            borderColor: palette.outlineVariant,
+          },
+        ]}
+      >
+        <Text style={[styles.previewLabel, { color: palette.onSurfaceVariant }]}>
+          PREVIEW
         </Text>
         <Text style={[styles.previewText, { color: palette.onSurface }]}>
           {totalJogadores} jogadores → {timesEstimados}{" "}
@@ -240,7 +263,7 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
           {timesEstimados === 1 ? "" : "s"}
           {sobrando > 0 ? ` + ${sobrando} sobrando` : ""}
         </Text>
-      </Card>
+      </View>
 
       {erro ? (
         <View
@@ -279,131 +302,76 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
   );
 }
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  const palette = usePalette();
-  return (
-    <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { color: palette.onSurfaceVariant }]}>
-        {label}
-      </Text>
-      {children}
-      {hint ? (
-        <Text style={[styles.fieldHint, { color: palette.warning }]}>
-          {hint}
-        </Text>
-      ) : null}
-    </View>
-  );
-}
-
 function extrairMinutos(timeMatch: string): number {
   const parts = timeMatch.split(":");
   if (parts.length !== 3) return 10;
   return parseInt(parts[1], 10);
 }
 
-function extrairSegundos(timeMatch: string): number {
-  const parts = timeMatch.split(":");
-  if (parts.length !== 3) return 0;
-  return parseInt(parts[2], 10);
-}
-
-function formatarTempo(minutos: number, segundos: number): string {
+function formatarTempo(minutos: number): string {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `00:${pad(minutos)}:${pad(segundos)}`;
+  return `00:${pad(minutos)}:00`;
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
+  screen: { flex: 1 },
   content: {
     padding: Spacing.lg,
-    gap: Spacing.lg,
+    gap: Spacing.md,
   },
-  titleRow: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  title: {
-    ...Typography.headline,
-  },
-  closeButton: {
+  title: { ...Typography.headline, fontSize: 22, fontWeight: "800" },
+  iconBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  field: {
-    gap: Spacing.sm,
-  },
-  fieldLabel: {
-    ...Typography.label,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  fieldHint: {
-    ...Typography.label,
-  },
-  input: {
-    minHeight: 48,
-    paddingHorizontal: Spacing.md,
-    borderRadius: Radius.md,
+  cfgPelada: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
     borderWidth: 1,
-    ...Typography.body,
-    fontSize: 16,
     borderCurve: "continuous",
   },
-  timeRow: {
-    flexDirection: "row",
-    gap: Spacing.lg,
-  },
-  flex: {
-    flex: 1,
-  },
-  timeLabel: {
-    ...Typography.label,
-    marginTop: Spacing.xs,
-    textAlign: "center",
-  },
-  segmentRow: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  segment: {
-    flex: 1,
-    minHeight: 44,
+  cfgBadge: {
+    width: 52,
+    height: 52,
     borderRadius: Radius.md,
-    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: Spacing.sm,
     borderCurve: "continuous",
   },
-  segmentLabel: {
-    ...Typography.label,
-    fontSize: 13,
+  cfgNomeInput: {
+    ...Typography.title,
+    fontSize: 17,
+    fontWeight: "800",
+    borderWidth: 0,
+    paddingVertical: Spacing.xs,
   },
-  previewLabel: {
+  sectionLabel: {
     ...Typography.label,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4,
+    letterSpacing: 0.6,
+    fontSize: 11,
+    marginTop: Spacing.sm,
   },
-  previewText: {
-    ...Typography.body,
-    fontSize: 15,
+  preview: {
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderCurve: "continuous",
+    gap: 4,
   },
+  previewLabel: { ...Typography.label, fontSize: 10, letterSpacing: 0.8 },
+  previewText: { ...Typography.body, fontSize: 14, fontWeight: "600" },
   errorBanner: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -413,13 +381,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.sm,
   },
-  errorText: {
-    ...Typography.label,
-    flex: 1,
-  },
+  errorText: { ...Typography.label, flex: 1 },
   actions: {
     flexDirection: "row",
     gap: Spacing.md,
     marginTop: Spacing.md,
   },
+  flex: { flex: 1 },
 });
