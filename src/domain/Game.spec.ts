@@ -343,6 +343,26 @@ describe('Teste da classe Game', () => {
       expect(playerGoal.goals[0]).toEqual(team.goals[0]);
     });
 
+    it('undoLastGoal desfaz o gol mais recente e zera as estatísticas do autor', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      const playerGoal = team.players[0];
+      jogo.addGoal(team, playerGoal);
+      expect(jogo.playing!.goals.length).toBe(1);
+
+      const desfeito = jogo.undoLastGoal();
+
+      expect(desfeito).toBe(true);
+      expect(jogo.playing!.goals.length).toBe(0);
+      expect(team.goals.length).toBe(0);
+      expect(playerGoal.goals.length).toBe(0);
+    });
+
+    it('undoLastGoal retorna false quando não há gols para desfazer', () => {
+      jogo.start();
+      expect(jogo.undoLastGoal()).toBe(false);
+    });
+
     it('deve definir o resultado quando setResult() é chamado', (done) => {
       rules.timeMatch = '00:00:01';
       jogo.start();

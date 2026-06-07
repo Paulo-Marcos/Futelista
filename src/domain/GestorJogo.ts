@@ -441,6 +441,27 @@ export class GestorJogo {
     this.notify();
   }
 
+  /**
+   * Desfaz o gol mais recente da partida em andamento (UNDO_GOAL do
+   * protótipo). Atualiza estatísticas do time e do jogador autor.
+   *
+   * Retorna `true` se algo foi desfeito; `false` se não havia gols ou
+   * partida em curso.
+   */
+  undoLastGoal(): boolean {
+    const partida = this.playing;
+    if (!partida || partida.goals.length === 0) return false;
+    const lastGoal = partida.goals.pop()!;
+    const teamIdx = lastGoal.team.goals.indexOf(lastGoal);
+    if (teamIdx >= 0) lastGoal.team.goals.splice(teamIdx, 1);
+    if (!lastGoal.ownGoal) {
+      const playerIdx = lastGoal.player.goals.indexOf(lastGoal);
+      if (playerIdx >= 0) lastGoal.player.goals.splice(playerIdx, 1);
+    }
+    this.notify();
+    return true;
+  }
+
   setResult(): void {
     this.playing?.setResult();
     this.notify();
