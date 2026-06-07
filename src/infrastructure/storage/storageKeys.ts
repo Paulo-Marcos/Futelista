@@ -19,6 +19,8 @@ export const STORAGE_KEYS = {
   PELADA_TIPO: `${STORAGE_NAMESPACE}peladaTipo:`,
   /** Slot que guarda o id da execução ativa entre boots do app. */
   ATIVA_ID: `${STORAGE_NAMESPACE}pelada:ativa-id`,
+  /** Preferência de tema visual (id da paleta + modo). */
+  THEME: `${STORAGE_NAMESPACE}theme`,
 } as const;
 
 /** Compõe a chave de execução a partir do id. */
