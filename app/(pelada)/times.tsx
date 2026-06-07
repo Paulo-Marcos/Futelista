@@ -1,7 +1,14 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
 import { memo, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
@@ -11,11 +18,9 @@ import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
-import { Fab, FAB_SIZE } from "@/src/shared/ui/Fab";
-import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
-import { TabHeader } from "@/src/shared/ui/TabHeader";
-import { TeamCard } from "@/src/shared/ui/TeamCard";
+import { TeamMini } from "@/src/shared/ui/TeamMini";
+import { TeamQueue } from "@/src/shared/ui/TeamQueue";
 import { confirmAcao, escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
@@ -204,6 +209,13 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
     ? handlePlayerPress
     : undefined;
 
+  // Botão dice fica embutido no header do Times (handoff `Times.html` linha
+  // 63-71: `.tabheader` é row flex-end com title à esquerda + iconbtn 40×40
+  // à direita), substituindo o Fab antigo. O accessibilityLabel é o mesmo
+  // pelo qual a suíte filtra ("Sortear times novamente"), então a condição
+  // de render (com times montados e sem partida em andamento) é preservada.
+  const mostraDice = next.length > 0 && !temPartida;
+
   return (
     <View
       style={[
@@ -211,7 +223,40 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         { backgroundColor: palette.background, paddingTop: insets.top },
       ]}
     >
-      <TabHeader title="Times" />
+      <View style={styles.headerRow}>
+        <View style={styles.headerCol}>
+          <Text style={[styles.headerTitle, { color: palette.onSurface }]}>
+            Times
+          </Text>
+          <Text
+            style={[styles.headerSub, { color: palette.onSurfaceVariant }]}
+            numberOfLines={1}
+          >
+            Vencedor fica · perdedor sai
+          </Text>
+        </View>
+        {mostraDice ? (
+          <Pressable
+            onPress={sortearNovamente}
+            accessibilityRole="button"
+            accessibilityLabel="Sortear times novamente"
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              {
+                backgroundColor: palette.surfaceContainerHigh,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            android_ripple={{ color: palette.primary + "22" }}
+          >
+            <MaterialCommunityIcons
+              name="dice-multiple"
+              size={20}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        ) : null}
+      </View>
 
       <BannerErro erro={erro} onFechar={() => setErro(null)} />
 
@@ -242,9 +287,9 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
           keyExtractor={(team) => team.id}
           contentContainerStyle={[
             styles.scroll,
-            { paddingBottom: insets.bottom + Spacing.xxl + FAB_SIZE },
+            { paddingBottom: insets.bottom + Spacing.xxl },
           ]}
-          ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
+          ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
           ListHeaderComponent={
             <View style={{ gap: Spacing.md }}>
               {playersWithoutTeam > 0 ? (
@@ -265,72 +310,66 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
                 Próxima partida
               </Text>
               <View style={styles.nextRow}>
-                <View style={styles.flex}>
-                  {next[0] ? (
-                    <TeamCard
-                      team={next[0]}
-                      title="Time 1"
-                      state="next"
-                      showAdvantage={advantageId === next[0].id}
-                      selectedPlayerId={jogadorSelecionado ?? undefined}
-                      onPlayerPress={onPlayerPressTime}
-                      onActionsPress={
-                        !temPartida
-                          ? () =>
-                              handleActionsPress(
-                                next[0],
-                                "Time 1",
-                                next.length === 1,
-                              )
-                          : undefined
-                      }
-                    />
-                  ) : null}
-                </View>
-                <View style={styles.flex}>
-                  {next[1] ? (
-                    <TeamCard
-                      team={next[1]}
-                      title="Time 2"
-                      state="next"
-                      showAdvantage={advantageId === next[1].id}
-                      selectedPlayerId={jogadorSelecionado ?? undefined}
-                      onPlayerPress={onPlayerPressTime}
-                      onActionsPress={
-                        !temPartida
-                          ? () =>
-                              handleActionsPress(
-                                next[1],
-                                "Time 2",
-                                next.length === 2,
-                              )
-                          : undefined
-                      }
-                    />
-                  ) : (
-                    <PlaceholderTime
-                      faltam={playersPerTeam - (next[0]?.players.length ?? 0)}
-                    />
-                  )}
-                </View>
+                {next[0] ? (
+                  <TeamMini
+                    team={next[0]}
+                    idx={0}
+                    tone="A"
+                    selectedPlayerId={jogadorSelecionado ?? undefined}
+                    onPlayerPress={onPlayerPressTime}
+                    onActionsPress={
+                      !temPartida
+                        ? () =>
+                            handleActionsPress(
+                              next[0],
+                              "Time 1",
+                              next.length === 1,
+                            )
+                        : undefined
+                    }
+                  />
+                ) : null}
+                {next[1] ? (
+                  <TeamMini
+                    team={next[1]}
+                    idx={1}
+                    tone="B"
+                    selectedPlayerId={jogadorSelecionado ?? undefined}
+                    onPlayerPress={onPlayerPressTime}
+                    onActionsPress={
+                      !temPartida
+                        ? () =>
+                            handleActionsPress(
+                              next[1],
+                              "Time 2",
+                              next.length === 2,
+                            )
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <PlaceholderTime
+                    faltam={playersPerTeam - (next[0]?.players.length ?? 0)}
+                  />
+                )}
               </View>
 
               {temPartida ? (
-                <PrimaryButton
+                <PrimaryCTA
                   label="Voltar à partida"
                   icon="play-circle-outline"
                   onPress={() => router.push("/partida")}
-                  fullWidth
+                  palette={palette}
                   accessibilityLabel="Voltar para a partida em andamento"
                 />
               ) : (
                 <View>
-                  <PrimaryButton
+                  <PrimaryCTA
                     label="Iniciar partida"
                     icon="whistle"
                     onPress={iniciarPartida}
                     disabled={next.length < 2}
-                    fullWidth
+                    palette={palette}
                     accessibilityLabel="Iniciar a próxima partida"
                   />
                   {next.length < 2 ? (
@@ -365,13 +404,9 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
             const numeroDoTime = index + 3;
             const titulo = `Time ${numeroDoTime}`;
             return (
-              <TeamCard
+              <TeamQueue
                 team={item}
-                title={titulo}
-                state="queue"
-                showAdvantage={advantageId === item.id}
-                selectedPlayerId={jogadorSelecionado ?? undefined}
-                onPlayerPress={onPlayerPressTime}
+                idx={index + 2}
                 onActionsPress={
                   !temPartida
                     ? () => handleActionsPress(item, titulo, ehUltimoDaFila)
@@ -383,13 +418,6 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         />
       )}
 
-      {next.length > 0 && !temPartida ? (
-        <Fab
-          icon="dice-multiple"
-          onPress={sortearNovamente}
-          accessibilityLabel="Sortear times novamente"
-        />
-      ) : null}
     </View>
   );
 }
@@ -397,6 +425,82 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
 // ---------------------------------------------------------------------------
 // Subcomponentes
 // ---------------------------------------------------------------------------
+
+// CTA grande "Iniciar partida" / "Voltar à partida" com glow vermelho.
+// Receita do README_Times.md, mesma do PrimaryCTA da Nova pelada:
+//   iOS:     shadowColor=primary HEX opaco + offset/opacity/radius.
+//   Android: <GlowHalo/> (View vermelha translúcida atrás) — elevation só
+//            gera relevo cinza.
+//   Web:     `boxShadow` CSS via Platform.select — RN Web não traduz
+//            `shadowColor` para sombra colorida.
+// Desabilitado vira `primaryDim` (vermelho queimado) sem glow — mais
+// próximo do CSS do handoff (`background: var(--primary)` sempre) que do
+// `T.surface2` cinza do hand-off TSX. Pattern já usado em Nova pelada e
+// Jogadores nesta árvore.
+function PrimaryCTA({
+  label,
+  icon,
+  disabled,
+  onPress,
+  palette,
+  accessibilityLabel,
+}: {
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  disabled?: boolean;
+  onPress: () => void;
+  palette: ReturnType<typeof usePalette>;
+  accessibilityLabel: string;
+}) {
+  const webGlow =
+    !disabled && Platform.OS === "web"
+      ? ({
+          boxShadow: `0 12px 30px -8px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
+        } as object)
+      : null;
+  return (
+    <View
+      style={[
+        styles.ctaShadow,
+        { shadowColor: palette.primary },
+        disabled && styles.ctaShadowOff,
+        webGlow,
+      ]}
+    >
+      {!disabled && Platform.OS === "android" ? (
+        <View
+          pointerEvents="none"
+          style={[styles.glowHalo, { backgroundColor: palette.primary }]}
+        />
+      ) : null}
+      <Pressable
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled: !!disabled }}
+        style={({ pressed }) => [
+          styles.cta,
+          {
+            backgroundColor: disabled ? palette.primaryDim : palette.primary,
+            opacity: disabled ? 0.6 : 1,
+          },
+          pressed && !disabled && styles.pressedSoft,
+        ]}
+        android_ripple={{ color: palette.onPrimary + "22" }}
+      >
+        <MaterialCommunityIcons
+          name={icon}
+          size={22}
+          color={palette.onPrimary}
+        />
+        <Text style={[styles.ctaText, { color: palette.onPrimary }]}>
+          {label}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
 
 const BannerErro = memo(function BannerErro({
   erro,
@@ -633,9 +737,86 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  // Header inline (handoff `.tabheader`): row flex-end, paddingHorizontal=lg,
+  // paddingTop=md, paddingBottom=xs. Sem bg surface (no handoff o `.screen` é
+  // uniforme `--bg`); título 30/800/-0.6 + sub 13 dim — mesma escala do
+  // hand-off de Jogadores quando o subtitle entra.
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xs,
+  },
+  headerCol: { flex: 1, minWidth: 0 },
+  headerTitle: {
+    fontSize: 30,
+    fontWeight: "800",
+    letterSpacing: -0.6,
+  },
+  headerSub: {
+    fontSize: 13,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  // Botão dice no canto direito do header — 40×40, bg surface2.
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    borderCurve: "continuous",
+  },
+  // `.screen { padding: 2px 16px 18px; gap: 14px }` do Times.html — gap de 14
+  // (entre Spacing.md=12 e Spacing.lg=16) é específico desse handoff, então
+  // vai cru. A lista de fila herda o mesmo container.
   scroll: {
-    padding: Spacing.lg,
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
+    gap: 14,
+  },
+  pressedSoft: { opacity: 0.92, transform: [{ scale: 0.99 }] },
+  // CTA com glow vermelho — receita do `Times.html` linha 99:
+  //   box-shadow: 0 12px 30px -8px var(--glow), 0 2px 4px rgba(0,0,0,.4)
+  // shadowColor é injetado em runtime no PrimaryCTA (precisa de HEX opaco; o
+  // alpha vem do shadowOpacity). elevation é só reforço Android — o brilho
+  // colorido vem do <GlowHalo/>.
+  ctaShadow: {
+    borderRadius: Radius.md,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.45,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  ctaShadowOff: { shadowOpacity: 0, elevation: 0 },
+  glowHalo: {
+    position: "absolute",
+    left: 10,
+    right: 10,
+    top: 14,
+    bottom: -6,
+    borderRadius: Radius.md,
+    opacity: 0.4,
+  },
+  cta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    minHeight: 56,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: Radius.md,
+    alignSelf: "stretch",
+    overflow: "hidden",
+    borderCurve: "continuous",
+  },
+  ctaText: {
+    fontSize: 17,
+    fontWeight: "800",
+    letterSpacing: 0.1,
   },
   errorBanner: {
     marginHorizontal: Spacing.lg,
@@ -695,10 +876,12 @@ const styles = StyleSheet.create({
     ...Typography.label,
     marginTop: Spacing.xs,
   },
+  // Hand-off `.label`: 11/700, letter-spacing .06em, uppercase, dim.
   sectionTitle: {
-    ...Typography.label,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.6,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   nextRow: {
     flexDirection: "row",

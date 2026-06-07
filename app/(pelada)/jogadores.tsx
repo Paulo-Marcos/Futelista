@@ -142,8 +142,15 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
         { backgroundColor: palette.background, paddingTop: insets.top },
       ]}
     >
-      <TabHeader title="Jogadores" />
+      <TabHeader
+        title="Jogadores"
+        subtitle={labelContador(players.length, playersWithoutTeam)}
+      />
 
+      {/* Container interno com `gap: 12` entre as sections (linha 58 do
+          `Jogadores.html`: `.screen { padding: 2px 16px 18px; gap: 12px }`).
+          A FlatList sai com `flex:1` pra ocupar o resto da tela. */}
+      <View style={styles.body}>
       <View style={styles.addRow}>
         <TextInput
           value={novoNome}
@@ -162,28 +169,12 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
             },
           ]}
         />
-        <Pressable
+        <AddButton
+          enabled={!!novoNome.trim()}
           onPress={adicionar}
-          disabled={!novoNome.trim()}
-          accessibilityRole="button"
+          palette={palette}
           accessibilityLabel="Adicionar jogador"
-          style={({ pressed }) => [
-            styles.addButton,
-            {
-              backgroundColor: novoNome.trim()
-                ? palette.primary
-                : palette.outline,
-              opacity: pressed && novoNome.trim() ? 0.85 : 1,
-            },
-          ]}
-          android_ripple={{ color: palette.onPrimary + "33" }}
-        >
-          <MaterialCommunityIcons
-            name="plus"
-            size={24}
-            color={palette.onPrimary}
-          />
-        </Pressable>
+        />
         <Pressable
           onPress={() => setLoteAberto(true)}
           accessibilityRole="button"
@@ -206,22 +197,20 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
         </Pressable>
       </View>
 
-      <View style={styles.counterRow}>
-        <Text
-          style={[styles.counter, { color: palette.onSurfaceVariant }]}
-          selectable
-        >
-          {labelContador(players.length, playersWithoutTeam)}
-        </Text>
-      </View>
-
       {players.length >= 5 ? (
-        <View style={styles.buscaRow}>
+        <View
+          style={[
+            styles.buscaRow,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.outline,
+            },
+          ]}
+        >
           <MaterialCommunityIcons
             name="magnify"
             size={18}
             color={palette.onSurfaceVariant}
-            style={{ marginLeft: Spacing.sm }}
           />
           <TextInput
             value={busca}
@@ -250,11 +239,15 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
 
       {erro ? (
         <View
+          // Banner cor "warning" (laranja) — não "error" — seguindo o mapa
+          // ICONS do handoff RN. O laranja distingue o aviso recuperável da
+          // ação destrutiva real (que aparece em vermelho no swipe/lixeira
+          // do swipe nativo).
           style={[
             styles.errorBanner,
             {
-              backgroundColor: palette.errorContainer,
-              borderColor: palette.error,
+              backgroundColor: palette.warning + "24",
+              borderColor: palette.warning + "73",
             },
           ]}
           accessibilityLiveRegion="polite"
@@ -262,9 +255,9 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
           <MaterialCommunityIcons
             name="alert-circle"
             size={16}
-            color={palette.error}
+            color={palette.warning}
           />
-          <Text style={[styles.errorText, { color: palette.error }]} selectable>
+          <Text style={[styles.errorText, { color: palette.warning }]} selectable>
             {erro}
           </Text>
           <Pressable
@@ -272,12 +265,12 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
             accessibilityRole="button"
             accessibilityLabel="Fechar aviso"
             style={styles.iconAction}
-            android_ripple={{ color: palette.error + "33" }}
+            android_ripple={{ color: palette.warning + "33" }}
           >
             <MaterialCommunityIcons
               name="close"
               size={18}
-              color={palette.error}
+              color={palette.warning}
             />
           </Pressable>
         </View>
@@ -325,6 +318,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
           )
         }
       />
+      </View>
 
       <ModalAdicionarLote
         visivel={loteAberto}
@@ -339,6 +333,98 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
 // Subcomponentes
 // ---------------------------------------------------------------------------
 
+// Botão "+" primário com glow vermelho.
+//   - iOS:     shadowColor=primary (HEX opaco) + opacity/radius no wrapper.
+//   - Android: <GlowHalo/> (View vermelha translúcida atrás) — elevation só
+//              gera relevo cinza, nunca brilho colorido.
+//   - Web:     boxShadow CSS direto via Platform.select — RN Web não traduz
+//              shadowColor para sombra colorida.
+// Quando desabilitado, vira surface cinza sem glow. Mesma receita do
+// PeladaNovaScreen.PrimaryCTA, em escala menor.
+function AddButton({
+  enabled,
+  onPress,
+  palette,
+  accessibilityLabel,
+}: {
+  enabled: boolean;
+  onPress: () => void;
+  palette: ReturnType<typeof usePalette>;
+  accessibilityLabel: string;
+}) {
+  // Sombra colorida por plataforma — receita do `Jogadores.html` linha 79:
+  //   web   → `boxShadow` CSS (RN Web não traduz `shadowColor`).
+  //   iOS   → `shadowColor` + opacity/radius no wrapper (`glowShadow`).
+  //   Android → <GlowHalo/> (View vermelha translúcida atrás), porque
+  //             `elevation` só dá relevo cinza.
+  // IMPORTANTE: o halo é RENDERIZADO SÓ no Android. Em web/iOS ele vira uma
+  // mancha vermelha no DOM atrás do botão e parece "outro botão" — exatamente
+  // o bug que aparecia nesta tela.
+  const webGlow =
+    enabled && Platform.OS === "web"
+      ? ({
+          boxShadow: `0 6px 18px -4px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
+        } as object)
+      : null;
+  return (
+    <View
+      style={[
+        enabled && styles.glowShadow,
+        enabled && { shadowColor: palette.primary },
+        webGlow,
+      ]}
+    >
+      {enabled && Platform.OS === "android" ? (
+        <GlowHalo color={palette.primary} radius={Radius.md} />
+      ) : null}
+      <Pressable
+        onPress={onPress}
+        disabled={!enabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled: !enabled }}
+        style={({ pressed }) => [
+          styles.addButton,
+          {
+            // Sempre vermelho — quando desabilitado vai para `primaryDim`
+            // (vermelho queimado) em vez de cinza. Fidelidade ao
+            // `Jogadores.html` (`.addbtn { background: var(--primary) }`,
+            // sem estado disabled), e consistente com o `PrimaryCTA` da
+            // tela Nova pelada deste mesmo hand-off.
+            backgroundColor: enabled ? palette.primary : palette.primaryDim,
+            opacity: pressed && enabled ? 0.85 : enabled ? 1 : 0.6,
+          },
+        ]}
+        android_ripple={{ color: palette.onPrimary + "33" }}
+      >
+        <MaterialCommunityIcons
+          name="plus"
+          size={24}
+          color={palette.onPrimary}
+        />
+      </Pressable>
+    </View>
+  );
+}
+
+// View vermelha translúcida deslocada para baixo. Compensa a ausência de
+// elevation colorida no Android e adiciona uma camada extra no iOS/web.
+function GlowHalo({ color, radius }: { color: string; radius: number }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={[
+        styles.glowHalo,
+        {
+          backgroundColor: color,
+          borderRadius: radius,
+          opacity: Platform.OS === "android" ? 0.4 : 0.55,
+        },
+      ]}
+    />
+  );
+}
+
 function LinhaJogador({
   player,
   mostrarSituacao,
@@ -352,23 +438,30 @@ function LinhaJogador({
 }) {
   const palette = usePalette();
 
+  const totalGoals = player.goals.length;
+
+  // Lado direito da linha: badge de gols (verde, 18% bg) + pencil(primary) +
+  // delete(warning). Ordem importa — o handoff coloca pencil ANTES do delete.
+  // No web mantemos a lixeira visível (sem Swipeable para descobrir).
   const acoes = (
     <View style={styles.rightActions}>
-      {/* Em web o swipe não é descobrível — mantém lixeira visível. */}
-      {Platform.OS === "web" ? (
-        <Pressable
-          onPress={onRemover}
-          accessibilityRole="button"
-          accessibilityLabel={`Remover ${player.name}`}
-          style={styles.iconAction}
-          android_ripple={{ color: palette.error + "33" }}
+      {totalGoals > 0 ? (
+        <View
+          style={[
+            styles.goalBadge,
+            // Goal a ~18% — hex 8 dígitos "2E" ≈ 0.18 alpha.
+            { backgroundColor: palette.goal + "2E" },
+          ]}
         >
           <MaterialCommunityIcons
-            name="delete-outline"
-            size={22}
-            color={palette.error}
+            name="soccer"
+            size={13}
+            color={palette.goal}
           />
-        </Pressable>
+          <Text style={[styles.goalBadgeText, { color: palette.goal }]}>
+            {totalGoals}
+          </Text>
+        </View>
       ) : null}
       <Pressable
         onPress={onEditar}
@@ -383,15 +476,36 @@ function LinhaJogador({
           color={palette.primary}
         />
       </Pressable>
+      {Platform.OS === "web" ? (
+        <Pressable
+          onPress={onRemover}
+          accessibilityRole="button"
+          accessibilityLabel={`Remover ${player.name}`}
+          style={styles.iconAction}
+          android_ripple={{ color: palette.warning + "33" }}
+        >
+          <MaterialCommunityIcons
+            name="delete-outline"
+            size={22}
+            color={palette.warning}
+          />
+        </Pressable>
+      ) : null}
     </View>
   );
 
+  const sub =
+    totalGoals > 0
+      ? `${totalGoals} ${totalGoals === 1 ? "gol" : "gols"} na pelada`
+      : "sem gols ainda";
   const linha = (
     <PlayerRow
       player={player}
       showSituation={mostrarSituacao}
-      showGoals
+      // showGoals=false — o badge verde do handoff é montado aqui no slot
+      // `right`; deixar showGoals=true desenharia DOIS contadores.
       onLongPress={onEditar}
+      subtitle={sub}
       right={acoes}
     />
   );
@@ -464,22 +578,22 @@ function LinhaEdicao({
         accessibilityRole="button"
         accessibilityLabel="Confirmar edição"
         style={styles.iconAction}
-        android_ripple={{ color: palette.primary + "33" }}
+        android_ripple={{ color: palette.goal + "33" }}
       >
-        <MaterialCommunityIcons
-          name="check"
-          size={22}
-          color={palette.primary}
-        />
+        <MaterialCommunityIcons name="check" size={22} color={palette.goal} />
       </Pressable>
       <Pressable
         onPress={onCancelar}
         accessibilityRole="button"
         accessibilityLabel="Cancelar edição"
         style={styles.iconAction}
-        android_ripple={{ color: palette.error + "33" }}
+        android_ripple={{ color: palette.warning + "33" }}
       >
-        <MaterialCommunityIcons name="close" size={22} color={palette.error} />
+        <MaterialCommunityIcons
+          name="close"
+          size={22}
+          color={palette.warning}
+        />
       </Pressable>
     </View>
   );
@@ -578,24 +692,44 @@ function ModalAdicionarLote({
             >
               <Text style={{ color: palette.onSurface }}>Cancelar</Text>
             </Pressable>
-            <Pressable
-              onPress={() => onConfirmar(nomes)}
-              disabled={nomes.length === 0}
-              accessibilityRole="button"
-              accessibilityLabel="Confirmar adição em lote"
-              style={({ pressed }) => [
-                styles.modalPrimary,
-                {
-                  backgroundColor:
-                    nomes.length > 0 ? palette.primary : palette.outline,
-                  opacity: pressed && nomes.length > 0 ? 0.85 : 1,
-                },
+            <View
+              style={[
+                nomes.length > 0 && styles.glowShadow,
+                nomes.length > 0 && { shadowColor: palette.primary },
+                nomes.length > 0 && Platform.OS === "web"
+                  ? ({
+                      boxShadow: `0 6px 18px -4px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
+                    } as object)
+                  : null,
               ]}
             >
-              <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
-                Adicionar {nomes.length > 0 ? nomes.length : ""}
-              </Text>
-            </Pressable>
+              {nomes.length > 0 && Platform.OS === "android" ? (
+                <GlowHalo color={palette.primary} radius={Radius.md} />
+              ) : null}
+              <Pressable
+                onPress={() => onConfirmar(nomes)}
+                disabled={nomes.length === 0}
+                accessibilityRole="button"
+                accessibilityLabel="Confirmar adição em lote"
+                style={({ pressed }) => [
+                  styles.modalPrimary,
+                  {
+                    backgroundColor:
+                      nomes.length > 0 ? palette.primary : palette.primaryDim,
+                    opacity:
+                      pressed && nomes.length > 0
+                        ? 0.85
+                        : nomes.length > 0
+                          ? 1
+                          : 0.6,
+                  },
+                ]}
+              >
+                <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
+                  Adicionar {nomes.length > 0 ? nomes.length : ""}
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
@@ -622,12 +756,18 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  // Container interno com gap consistente entre sections — receita exata do
+  // `Jogadores.html` linha 58: `.screen { padding: 2px 16px 18px; gap: 12px }`.
+  body: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    gap: Spacing.md,
+  },
   addRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    gap: 10,
   },
   input: {
     flex: 1,
@@ -645,7 +785,26 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
     borderCurve: "continuous",
+  },
+  // Sombra colorida (vermelha) — receita do handoff RN. shadowColor é
+  // injetado em runtime pelo AddButton porque precisa ser HEX opaco (o alpha
+  // mora no shadowOpacity). elevation no Android só serve de reforço — o
+  // brilho colorido propriamente vem do <GlowHalo/>.
+  glowShadow: {
+    borderRadius: Radius.md,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  glowHalo: {
+    position: "absolute",
+    left: 4,
+    right: 4,
+    top: 8,
+    bottom: -4,
   },
   loteButton: {
     width: 48,
@@ -656,33 +815,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderCurve: "continuous",
   },
-  counterRow: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-  },
-  counter: {
-    ...Typography.label,
-  },
+  // Caixa de busca com a mesma identidade do input "Adicionar jogador":
+  // bg=surface, borda outline (hand-off `searchRow`: bg `T.surface`, border 1 `T.line`).
   buscaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.sm,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    height: 42,
     borderWidth: 1,
     borderRadius: Radius.md,
-    borderColor: "transparent",
+    borderCurve: "continuous",
   },
   buscaInput: {
     flex: 1,
-    minHeight: 40,
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: 0,
     ...Typography.body,
-    fontSize: 15,
+    fontSize: 14,
   },
   errorBanner: {
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
@@ -696,7 +847,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   list: {
-    paddingHorizontal: Spacing.lg,
     flexGrow: 1,
   },
   editRow: {
@@ -725,6 +875,23 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 2,
+  },
+  // Pill verde mostrando "⚽ N" quando o jogador tem gols. Fundo é o tom
+  // goal a ~18% (palette.goal + "2E"). Texto/ícone na cor cheia.
+  goalBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    marginRight: Spacing.xs,
+  },
+  goalBadgeText: {
+    fontWeight: "800",
+    fontSize: 12,
+    fontVariant: ["tabular-nums"],
   },
   swipeDeleteAction: {
     width: 96,
