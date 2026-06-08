@@ -105,20 +105,30 @@ export function MatchTimeline({
         {entries.map((e, i) => {
           const isMostRecent = i === 0;
           const tint = e.side === "A" ? palette.primary : palette.secondary;
-          // Quando `onLongPressGol` está plugado, o chip inteiro vira
-          // interativo. O Pressable não precisa de onPress pra long-press
-          // funcionar — só prop `onLongPress`. O ripple deixa o toque
-          // perceptível no Android.
-          const chipContent = (
-            <>
-              <MaterialCommunityIcons name="soccer" size={11} color={tint} />
-              <Text style={[styles.chipName, { color: tint }]}>{e.name}</Text>
-              <Text
-                style={[styles.chipMin, { color: palette.onSurfaceVariant }]}
-              >
-                {e.minute}'
-              </Text>
-              {isMostRecent && onUndo ? (
+          const baseStyle = [
+            styles.chip,
+            {
+              backgroundColor: tint + "22",
+              borderColor: tint + "55",
+            },
+          ];
+
+          // CHIP MAIS RECENTE: mantém o botão de undo interno (Pressable
+          // filho). Aqui NÃO podemos transformar o chip em outro Pressable
+          // — no web vira <button> dentro de <button>, que é DOM inválido
+          // (validateDOMNesting warning). Para corrigir o autor desse gol,
+          // o usuário desfaz e refaz; o long-press fica disponível para
+          // chips antigos.
+          if (isMostRecent && onUndo) {
+            return (
+              <View key={e.id} style={baseStyle}>
+                <MaterialCommunityIcons name="soccer" size={11} color={tint} />
+                <Text style={[styles.chipName, { color: tint }]}>{e.name}</Text>
+                <Text
+                  style={[styles.chipMin, { color: palette.onSurfaceVariant }]}
+                >
+                  {e.minute}'
+                </Text>
                 <Pressable
                   onPress={onUndo}
                   accessibilityRole="button"
@@ -137,23 +147,32 @@ export function MatchTimeline({
                     color={palette.onSurface}
                   />
                 </Pressable>
-              ) : null}
-            </>
-          );
-          const baseStyle = [
-            styles.chip,
-            {
-              backgroundColor: tint + "22",
-              borderColor: tint + "55",
-            },
-          ];
-          if (!onLongPressGol) {
-            return (
-              <View key={e.id} style={baseStyle}>
-                {chipContent}
               </View>
             );
           }
+
+          const chipBody = (
+            <>
+              <MaterialCommunityIcons name="soccer" size={11} color={tint} />
+              <Text style={[styles.chipName, { color: tint }]}>{e.name}</Text>
+              <Text
+                style={[styles.chipMin, { color: palette.onSurfaceVariant }]}
+              >
+                {e.minute}'
+              </Text>
+            </>
+          );
+
+          // Sem handler de long-press: chip estático.
+          if (!onLongPressGol) {
+            return (
+              <View key={e.id} style={baseStyle}>
+                {chipBody}
+              </View>
+            );
+          }
+
+          // Chip antigo + handler: vira Pressable com long-press.
           return (
             <Pressable
               key={e.id}
@@ -165,7 +184,7 @@ export function MatchTimeline({
               android_ripple={{ color: tint + "33" }}
               style={({ pressed }) => [baseStyle, pressed && { opacity: 0.8 }]}
             >
-              {chipContent}
+              {chipBody}
             </Pressable>
           );
         })}

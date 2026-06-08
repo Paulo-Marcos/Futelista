@@ -359,16 +359,20 @@ describe("Partida — checkpoints do cronômetro", () => {
 // ===========================================================================
 
 describe("Partida — long-press na timeline (F-11)", () => {
-  function buildComUmGol(): GestorJogo {
+  /**
+   * Constrói partida com 2 gols. O long-press só é plugado nos chips
+   * antigos (o mais recente mantém o botão de undo) — então pra exercitar
+   * o caminho do F-11 precisamos de ≥2 gols na timeline.
+   */
+  function buildComDoisGols(): GestorJogo {
     const m = buildPartidaManager({ status: TimerStatus.STARTED });
-    // Marca 1 gol pra ter algo na timeline. addGoal usa Timer pra
-    // capturar o instante — pelo setup, timer já existe.
-    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]);
+    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]); // gol antigo (J01)
+    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[1]); // gol recente (J02)
     return m;
   }
 
-  it("long-press num chip abre o sheet de ações do gol", () => {
-    const m = buildComUmGol();
+  it("long-press num chip antigo abre o sheet de ações do gol", () => {
+    const m = buildComDoisGols();
     renderPartida(m);
 
     const chip = screen.getByLabelText(/Ações do gol de J01/);
@@ -383,11 +387,11 @@ describe("Partida — long-press na timeline (F-11)", () => {
     ).toBeTruthy();
   });
 
-  it("'Corrigir autor' + escolher J02 chama corrigirAutorDoGol", () => {
-    const m = buildComUmGol();
+  it("'Corrigir autor' do gol antigo + escolher J03 chama corrigirAutorDoGol", () => {
+    const m = buildComDoisGols();
     // Guardamos a referência ANTES — após `corrigirAutorDoGol`, o gol
     // antigo é substituído por um novo objeto no array da partida.
-    const golOriginal = m.playing!.goals[0];
+    const golDeJ01 = m.playing!.goals[0];
     const spy = jest.spyOn(m, "corrigirAutorDoGol");
     renderPartida(m);
 
@@ -396,11 +400,23 @@ describe("Partida — long-press na timeline (F-11)", () => {
       screen.getByRole("button", { name: "Corrigir autor do gol" }),
     );
     fireEvent.press(
-      screen.getByRole("button", { name: "Trocar autor para J02" }),
+      screen.getByRole("button", { name: "Trocar autor para J03" }),
     );
 
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][0]).toBe(golOriginal);
-    expect(spy.mock.calls[0][1].name).toBe("J02");
+    expect(spy.mock.calls[0][0]).toBe(golDeJ01);
+    expect(spy.mock.calls[0][1].name).toBe("J03");
+  });
+
+  it("chip mais recente não vira Pressable interativo (evita nested button no web)", () => {
+    const m = buildComDoisGols();
+    renderPartida(m);
+
+    // O mais recente foi marcado por J02 — não deve ter label de ação.
+    expect(screen.queryByLabelText(/Ações do gol de J02/)).toBeNull();
+    // Ele mantém o botão dedicado de undo.
+    expect(
+      screen.getByRole("button", { name: "Desfazer gol mais recente" }),
+    ).toBeTruthy();
   });
 });
