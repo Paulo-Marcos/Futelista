@@ -10,6 +10,7 @@ import { Goal } from "@/src/domain/Goal";
 import { ResultMatch } from "@/src/domain/Match";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
+import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
@@ -271,13 +272,15 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
             Quem segue jogando?
           </Text>
           <View style={styles.pickRow}>
-            <PickButton
+            <PickTeamCard
               label="Time 1"
+              team={cenario.teamA}
               selected={escolhidoId === cenario.teamA.id}
               onPress={() => setEscolhidoId(cenario.teamA.id)}
             />
-            <PickButton
+            <PickTeamCard
               label="Time 2"
+              team={cenario.teamB}
               selected={escolhidoId === cenario.teamB.id}
               onPress={() => setEscolhidoId(cenario.teamB.id)}
             />
@@ -330,41 +333,90 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
   );
 }
 
-function PickButton({
+/**
+ * Card grande do empate manual (F-13): escudo + nome do time + lista
+ * compacta de jogadores. Tap seleciona; selecionado ganha borda primary
+ * mais grossa + tinte sutil no fundo, deixando óbvio qual decisão o
+ * usuário tomou antes de confirmar com "Próxima partida".
+ *
+ * `onTouchEnd` preserva os testes existentes que disparam o evento via
+ * fireEvent("touchEnd").
+ */
+function PickTeamCard({
   label,
+  team,
   selected,
   onPress,
 }: {
   label: string;
+  team: Team;
   selected: boolean;
   onPress: () => void;
 }) {
   const palette = usePalette();
+  const players = team.players;
+  const visiveis = players.slice(0, 5);
+  const extras = Math.max(0, players.length - visiveis.length);
   return (
     <Pressable
       onPress={onPress}
       onTouchEnd={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Escolher ${label}`}
+      accessibilityState={{ selected }}
       style={({ pressed }) => [
         styles.pick,
         {
           backgroundColor: selected
-            ? palette.primary + "2E"
+            ? palette.primary + "1F"
             : palette.surfaceContainerHigh,
           borderColor: selected ? palette.primary : palette.outlineVariant,
+          borderWidth: selected ? 2 : 1,
           opacity: pressed ? 0.85 : 1,
         },
       ]}
     >
-      <Text
-        style={[
-          styles.pickLabel,
-          { color: selected ? palette.primary : palette.onSurface },
-        ]}
-      >
-        {label}
-      </Text>
+      <View style={styles.pickHeader}>
+        <TeamCrest seed={team.id} size={36} />
+        <Text
+          style={[
+            styles.pickLabel,
+            { color: selected ? palette.primary : palette.onSurface },
+          ]}
+        >
+          {label}
+        </Text>
+        {selected ? (
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={18}
+            color={palette.primary}
+          />
+        ) : null}
+      </View>
+      <View
+        style={[styles.pickDivider, { backgroundColor: palette.outlineVariant }]}
+      />
+      <View style={styles.pickPlayers}>
+        {visiveis.map((p) => (
+          <View key={p.id} style={styles.pickPlayer}>
+            <PlayerAvatar player={p} size={20} />
+            <Text
+              style={[styles.pickPlayerName, { color: palette.onSurface }]}
+              numberOfLines={1}
+            >
+              {p.name}
+            </Text>
+          </View>
+        ))}
+        {extras > 0 ? (
+          <Text
+            style={[styles.pickPlayerMore, { color: palette.onSurfaceVariant }]}
+          >
+            +{extras} {extras === 1 ? "jogador" : "jogadores"}
+          </Text>
+        ) : null}
+      </View>
     </Pressable>
   );
 }
@@ -508,16 +560,46 @@ const styles = StyleSheet.create({
   },
   pick: {
     flex: 1,
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     borderRadius: Radius.md,
-    borderWidth: 1.5,
-    alignItems: "center",
+    alignItems: "stretch",
     borderCurve: "continuous",
+    gap: Spacing.sm,
+    minHeight: 160,
+  },
+  pickHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
   },
   pickLabel: {
     ...Typography.title,
     fontSize: 15,
     fontWeight: "700",
+    flex: 1,
+  },
+  pickDivider: {
+    height: 1,
+    opacity: 0.6,
+  },
+  pickPlayers: {
+    gap: 4,
+  },
+  pickPlayer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  pickPlayerName: {
+    ...Typography.body,
+    fontSize: 12,
+    flex: 1,
+  },
+  pickPlayerMore: {
+    ...Typography.label,
+    fontSize: 11,
+    marginTop: 2,
   },
   erro: { ...Typography.body, textAlign: "center" },
   actions: {

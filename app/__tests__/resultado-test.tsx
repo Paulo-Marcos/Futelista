@@ -204,8 +204,9 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
       .mockImplementation(() => {});
     renderResultado(m);
 
-    // OptionButton é uma View com onTouchEnd — fireEvent tem que disparar o evento certo.
-    fireEvent(screen.getByText("Time 1"), "touchEnd");
+    fireEvent.press(
+      screen.getByRole("button", { name: "Escolher Time 1" }),
+    );
     fireEvent.press(screen.getByRole("button", { name: "Próxima partida" }));
 
     expect(setNextSpy).toHaveBeenCalledTimes(1);
@@ -220,10 +221,29 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
       .mockImplementation(() => {});
     renderResultado(m);
 
-    fireEvent(screen.getByText("Time 2"), "touchEnd");
+    fireEvent.press(
+      screen.getByRole("button", { name: "Escolher Time 2" }),
+    );
     fireEvent.press(screen.getByRole("button", { name: "Próxima partida" }));
 
     expect(setNextSpy.mock.calls[0][0]).toBe(m.playing!.teamB);
+  });
+
+  it("card selecionado expõe accessibilityState.selected = true [F-13]", () => {
+    renderResultado(buildEmpateManual());
+
+    const cardTime1 = screen.getByRole("button", { name: "Escolher Time 1" });
+    expect(cardTime1.props.accessibilityState?.selected).toBe(false);
+
+    fireEvent.press(cardTime1);
+    expect(
+      screen.getByRole("button", { name: "Escolher Time 1" }).props
+        .accessibilityState?.selected,
+    ).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Escolher Time 2" }).props
+        .accessibilityState?.selected,
+    ).toBe(false);
   });
 });
 
