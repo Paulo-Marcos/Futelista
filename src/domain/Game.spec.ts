@@ -363,6 +363,29 @@ describe('Teste da classe Game', () => {
       expect(jogo.undoLastGoal()).toBe(false);
     });
 
+    it('encerra a partida automaticamente quando o time atinge o gol-limite', () => {
+      // Rules default: goalLimit=2.
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      jogo.addGoal(team, team.players[0]);
+      // Status ainda STARTED — 1 gol não atinge.
+      expect(jogo.timer!.status).toBe(TimerStatus.STARTED);
+
+      jogo.addGoal(team, team.players[1]);
+
+      expect(jogo.timer!.status).toBe(TimerStatus.ENDED);
+      expect(jogo.playing!.result).toBeDefined();
+      expect(jogo.playing!.winner).toBe(team);
+    });
+
+    it('não encerra antes de atingir o gol-limite', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      jogo.addGoal(team, team.players[0]);
+      expect(jogo.timer!.status).toBe(TimerStatus.STARTED);
+      expect(jogo.playing!.result).toBeUndefined();
+    });
+
     it('removerGol apaga gol arbitrário sem mexer nos outros', () => {
       jogo.start();
       const team = jogo.playing!.teamA;

@@ -439,7 +439,31 @@ export class GestorJogo {
 
   addGoal(team: Team, playerGoal: Player): void {
     this.playing?.addGoal(team, playerGoal, this.timer!.getTime());
+    this.encerrarSeAtingiuLimite();
     this.notify();
+  }
+
+  /**
+   * Encerramento automático por gol-limite (F-12).
+   *
+   * Só age quando o cronômetro está STARTED — se a partida já encerrou
+   * (ENDED) ou está pausada/em intervalo, não interfere. Quando dispara,
+   * marca o Timer como ENDED (sem reagendar próximo tempo: o limite
+   * encerra a partida inteira, não só o tempo atual) e chama
+   * `setResult` para decidir vencedor/empate.
+   */
+  private encerrarSeAtingiuLimite(): void {
+    const partida = this.playing;
+    if (!partida || !this.timer) return;
+    if (this.timer.status !== TimerStatus.STARTED) return;
+    const placar = partida.countGoals();
+    if (
+      placar.teamA >= this.rules.goalLimit ||
+      placar.teamB >= this.rules.goalLimit
+    ) {
+      this.timer.status = TimerStatus.ENDED;
+      partida.setResult();
+    }
   }
 
   /**

@@ -184,6 +184,20 @@ describe("Partida — ações por jogador", () => {
     expect(addGoalSpy.mock.calls[0][1].name).toBe("J01");
   });
 
+  it("ao atingir o gol-limite a partida encerra e navega para /resultado [F-12]", () => {
+    const m = buildPartidaManager({ status: TimerStatus.STARTED });
+    // Rules default: goalLimit=2 — marcar 1 gol antes deixa o time em 1.
+    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]);
+    renderPartida(m);
+
+    // Próximo gol do mesmo time dispara `encerrarSeAtingiuLimite`.
+    fireEvent.press(screen.getByLabelText("Gol de J02"));
+
+    expect(m.playing!.result).toBeDefined();
+    expect(m.timer!.status).toBe(TimerStatus.ENDED);
+    expect(router.replace).toHaveBeenCalledWith("/resultado");
+  });
+
   it("substituir via sheet Trocas COM próximo time chama switchPlayerLeft", () => {
     const m = buildPartidaManager(); // 3 times — sobra 1 em next
     const switchSpy = jest

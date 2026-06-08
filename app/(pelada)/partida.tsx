@@ -73,6 +73,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const { prefs } = usePrefs();
 
   const playing = useGameSliceRequired((g) => g.playing);
+  const partidaResult = useGameSliceRequired((g) => g.playing?.result);
   const status = useGameSliceRequired((g) => g.timer?.status);
   const restTime = useGameSliceRequired((g) => g.timer?.restTime ?? 0);
   const totalDuration = useGameSliceRequired((g) => g.rules.getDurationMatch());
@@ -172,6 +173,16 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       // Ignorado — web e alguns devices não têm motor.
     }
   }, [status, prefs.apitoHaptico]);
+
+  // Encerramento automático por gol-limite (F-12) — quando o domínio
+  // resolve `playing.result` sozinho (sem o usuário tocar Encerrar),
+  // redireciona pra tela de resultado. Replace evita voltar pra
+  // partida "encerrada" no histórico de navegação.
+  useEffect(() => {
+    if (partidaResult !== undefined) {
+      router.replace("/resultado");
+    }
+  }, [partidaResult, router]);
 
   // Checkpoints do cronômetro (F-08) — dispara 1× por partida em 2min e 30s
   // restantes. Resetamos os flags quando muda o `playing.id` (nova partida)
@@ -345,6 +356,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         scoreB={goals?.teamB ?? 0}
         status={status}
         goalLimit={goalLimit}
+        totalDuration={totalDuration}
         onOpenPicker={(side) => setScorerSide(side)}
       />
 
@@ -545,6 +557,7 @@ function MatchScoreboard({
   scoreB,
   status,
   goalLimit,
+  totalDuration,
   onOpenPicker,
 }: {
   teamA: Team;
@@ -553,6 +566,8 @@ function MatchScoreboard({
   scoreB: number;
   status?: TimerStatus;
   goalLimit: number;
+  /** Duração total da partida em segundos (do Rules.getDurationMatch). */
+  totalDuration: number;
   onOpenPicker: (side: "A" | "B") => void;
 }) {
   const palette = usePalette();
@@ -593,16 +608,50 @@ function MatchScoreboard({
             {statusLabel}
           </Text>
         </View>
-        <View style={styles.sbLimit}>
+        {/* Badge "M min · até N gols" — qualquer dos dois critérios
+            encerra a partida (limite atingido OU cronômetro zerou). */}
+        <View
+          style={[
+            styles.sbCriterioBadge,
+            {
+              backgroundColor: palette.surfaceContainerHigh,
+              borderColor: palette.outlineVariant,
+            },
+          ]}
+        >
           <MaterialCommunityIcons
-            name="bullseye-arrow"
-            size={12}
+            name="timer-outline"
+            size={11}
             color={palette.onSurfaceVariant}
           />
           <Text
-            style={[styles.sbLimitText, { color: palette.onSurfaceVariant }]}
+            style={[
+              styles.sbCriterioText,
+              { color: palette.onSurfaceVariant },
+            ]}
           >
-            limite {goalLimit} gols
+            {Math.max(1, Math.round(totalDuration / 60))} min
+          </Text>
+          <Text
+            style={[
+              styles.sbCriterioSep,
+              { color: palette.onSurfaceVariant },
+            ]}
+          >
+            ·
+          </Text>
+          <MaterialCommunityIcons
+            name="bullseye-arrow"
+            size={11}
+            color={palette.onSurfaceVariant}
+          />
+          <Text
+            style={[
+              styles.sbCriterioText,
+              { color: palette.onSurfaceVariant },
+            ]}
+          >
+            até {goalLimit} {goalLimit === 1 ? "gol" : "gols"}
           </Text>
         </View>
       </View>
@@ -2382,6 +2431,19 @@ const styles = StyleSheet.create({
   },
   sbLimit: { flexDirection: "row", alignItems: "center", gap: 4 },
   sbLimitText: { ...Typography.label, fontSize: 10 },
+  // Badge "M min · até N gols" — pílula contornada no canto direito do
+  // status row do scoreboard.
+  sbCriterioBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+  },
+  sbCriterioText: { ...Typography.label, fontSize: 10 },
+  sbCriterioSep: { ...Typography.label, fontSize: 10, opacity: 0.6 },
   sbMain: {
     flexDirection: "row",
     alignItems: "center",
