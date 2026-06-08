@@ -347,14 +347,15 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
 // Subcomponentes
 // ---------------------------------------------------------------------------
 
-// Botão "+" primário com glow vermelho.
-//   - iOS:     shadowColor=primary (HEX opaco) + opacity/radius no wrapper.
-//   - Android: <GlowHalo/> (View vermelha translúcida atrás) — elevation só
-//              gera relevo cinza, nunca brilho colorido.
-//   - Web:     boxShadow CSS direto via Platform.select — RN Web não traduz
-//              shadowColor para sombra colorida.
-// Quando desabilitado, vira surface cinza sem glow. Mesma receita do
-// PeladaNovaScreen.PrimaryCTA, em escala menor.
+/**
+ * Botão "+" para adicionar jogador.
+ *
+ * **Sem glow vermelho**: é uma ação corriqueira (qualquer linha de
+ * jogador adicionada usa esse botão) e tem 48×48 — competir
+ * visualmente com o CTA principal da pelada ("Iniciar partida") deixa
+ * a tela confusa. Estilo: fundo primary sólido + ripple, sem sombra
+ * colorida. Convenção do app: glow só em CTA principal da tela.
+ */
 function AddButton({
   enabled,
   onPress,
@@ -366,78 +367,31 @@ function AddButton({
   palette: ReturnType<typeof usePalette>;
   accessibilityLabel: string;
 }) {
-  // Sombra colorida por plataforma — receita do `Jogadores.html` linha 79:
-  //   web   → `boxShadow` CSS (RN Web não traduz `shadowColor`).
-  //   iOS   → `shadowColor` + opacity/radius no wrapper (`glowShadow`).
-  //   Android → <GlowHalo/> (View vermelha translúcida atrás), porque
-  //             `elevation` só dá relevo cinza.
-  // IMPORTANTE: o halo é RENDERIZADO SÓ no Android. Em web/iOS ele vira uma
-  // mancha vermelha no DOM atrás do botão e parece "outro botão" — exatamente
-  // o bug que aparecia nesta tela.
-  const webGlow =
-    enabled && Platform.OS === "web"
-      ? ({
-          boxShadow: `0 6px 18px -4px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
-        } as object)
-      : null;
   return (
-    <View
-      style={[
-        enabled && styles.glowShadow,
-        enabled && { shadowColor: palette.primary },
-        webGlow,
+    <Pressable
+      onPress={onPress}
+      disabled={!enabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: !enabled }}
+      style={({ pressed }) => [
+        styles.addButton,
+        {
+          backgroundColor: enabled ? palette.primary : palette.primaryDim,
+          opacity: pressed && enabled ? 0.85 : enabled ? 1 : 0.6,
+        },
       ]}
+      android_ripple={{ color: palette.onPrimary + "33" }}
     >
-      {enabled && Platform.OS === "android" ? (
-        <GlowHalo color={palette.primary} radius={Radius.md} />
-      ) : null}
-      <Pressable
-        onPress={onPress}
-        disabled={!enabled}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ disabled: !enabled }}
-        style={({ pressed }) => [
-          styles.addButton,
-          {
-            // Sempre vermelho — quando desabilitado vai para `primaryDim`
-            // (vermelho queimado) em vez de cinza. Fidelidade ao
-            // `Jogadores.html` (`.addbtn { background: var(--primary) }`,
-            // sem estado disabled), e consistente com o `PrimaryCTA` da
-            // tela Nova pelada deste mesmo hand-off.
-            backgroundColor: enabled ? palette.primary : palette.primaryDim,
-            opacity: pressed && enabled ? 0.85 : enabled ? 1 : 0.6,
-          },
-        ]}
-        android_ripple={{ color: palette.onPrimary + "33" }}
-      >
-        <MaterialCommunityIcons
-          name="plus"
-          size={24}
-          color={palette.onPrimary}
-        />
-      </Pressable>
-    </View>
+      <MaterialCommunityIcons
+        name="plus"
+        size={24}
+        color={palette.onPrimary}
+      />
+    </Pressable>
   );
 }
 
-// View vermelha translúcida deslocada para baixo. Compensa a ausência de
-// elevation colorida no Android e adiciona uma camada extra no iOS/web.
-function GlowHalo({ color, radius }: { color: string; radius: number }) {
-  return (
-    <View
-      pointerEvents="none"
-      style={[
-        styles.glowHalo,
-        {
-          backgroundColor: color,
-          borderRadius: radius,
-          opacity: Platform.OS === "android" ? 0.4 : 0.55,
-        },
-      ]}
-    />
-  );
-}
 
 function LinhaJogador({
   player,
@@ -721,44 +675,32 @@ function ModalAdicionarLote({
             >
               <Text style={{ color: palette.onSurface }}>Cancelar</Text>
             </Pressable>
-            <View
-              style={[
-                nomes.length > 0 && styles.glowShadow,
-                nomes.length > 0 && { shadowColor: palette.primary },
-                nomes.length > 0 && Platform.OS === "web"
-                  ? ({
-                      boxShadow: `0 6px 18px -4px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
-                    } as object)
-                  : null,
+            {/* Sem glow no botão de modal — convenção: glow só em CTA
+                principal da tela. Modal já está sobreposto ao fundo, não
+                precisa competir visualmente. */}
+            <Pressable
+              onPress={() => onConfirmar(nomes)}
+              disabled={nomes.length === 0}
+              accessibilityRole="button"
+              accessibilityLabel="Confirmar adição em lote"
+              style={({ pressed }) => [
+                styles.modalPrimary,
+                {
+                  backgroundColor:
+                    nomes.length > 0 ? palette.primary : palette.primaryDim,
+                  opacity:
+                    pressed && nomes.length > 0
+                      ? 0.85
+                      : nomes.length > 0
+                        ? 1
+                        : 0.6,
+                },
               ]}
             >
-              {nomes.length > 0 && Platform.OS === "android" ? (
-                <GlowHalo color={palette.primary} radius={Radius.md} />
-              ) : null}
-              <Pressable
-                onPress={() => onConfirmar(nomes)}
-                disabled={nomes.length === 0}
-                accessibilityRole="button"
-                accessibilityLabel="Confirmar adição em lote"
-                style={({ pressed }) => [
-                  styles.modalPrimary,
-                  {
-                    backgroundColor:
-                      nomes.length > 0 ? palette.primary : palette.primaryDim,
-                    opacity:
-                      pressed && nomes.length > 0
-                        ? 0.85
-                        : nomes.length > 0
-                          ? 1
-                          : 0.6,
-                  },
-                ]}
-              >
-                <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
-                  Adicionar {nomes.length > 0 ? nomes.length : ""}
-                </Text>
-              </Pressable>
-            </View>
+              <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
+                Adicionar {nomes.length > 0 ? nomes.length : ""}
+              </Text>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -1017,24 +959,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
     borderCurve: "continuous",
-  },
-  // Sombra colorida (vermelha) — receita do handoff RN. shadowColor é
-  // injetado em runtime pelo AddButton porque precisa ser HEX opaco (o alpha
-  // mora no shadowOpacity). elevation no Android só serve de reforço — o
-  // brilho colorido propriamente vem do <GlowHalo/>.
-  glowShadow: {
-    borderRadius: Radius.md,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  glowHalo: {
-    position: "absolute",
-    left: 4,
-    right: 4,
-    top: 8,
-    bottom: -4,
   },
   loteButton: {
     width: 48,

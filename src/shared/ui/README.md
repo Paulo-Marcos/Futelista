@@ -144,3 +144,30 @@ Ao criar componente novo:
 4. Cores via `usePalette()`; espaços via `Spacing`/`Radius`.
 5. JSDoc curto explicando "quando usar".
 6. Adicionar entrada neste catálogo.
+
+---
+
+## Quando usar **glow vermelho** (`palette.glow` / `shadowColor: palette.primary`)
+
+O glow vermelho é a assinatura visual do app — usar com parcimônia
+para que continue significando "ação principal aqui". Convenção:
+
+**✅ Usar glow em**:
+- CTA principal de uma tela inteira (largura cheia ou hero card):
+  "Iniciar partida", "Criar e entrar na pelada", "Salvar alterações",
+  "Iniciar nova execução".
+- Card hero da Home com call-to-action embutido: AvulsaCard.
+
+**❌ Não usar glow em**:
+- Botões pequenos de ícone (40–48×48), incluindo "+ adicionar jogador".
+- Botões dentro de modais / sheets — eles já estão sobrepostos ao fundo
+  e não precisam disputar atenção com o glow do CTA principal.
+- Botões secundários ou de navegação (chevron, voltar, share, kebab).
+- Toggles, chips, segmented controls.
+
+**Receita do glow** (qualquer CTA elegível): wrapper com
+`shadowColor: palette.primary` + `boxShadow: 0 14px 40px -10px ${palette.glow}`
+no web + `<GlowHalo backgroundColor={palette.primary} />` no Android
+(elevation só dá relevo cinza; halo translúcido vai por baixo). A receita
+canônica vive em `app/pelada-nova.tsx` (`PrimaryCTA`) e em
+`app/peladas/[id].tsx` (`PrimaryCTAComGlow`).
