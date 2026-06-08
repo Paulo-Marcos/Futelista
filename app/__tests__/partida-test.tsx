@@ -353,3 +353,54 @@ describe("Partida — checkpoints do cronômetro", () => {
     expect(Haptics.impactAsync).not.toHaveBeenCalled();
   });
 });
+
+// ===========================================================================
+// EDITAR / REMOVER GOL VIA LONG-PRESS NA TIMELINE (F-11)
+// ===========================================================================
+
+describe("Partida — long-press na timeline (F-11)", () => {
+  function buildComUmGol(): GestorJogo {
+    const m = buildPartidaManager({ status: TimerStatus.STARTED });
+    // Marca 1 gol pra ter algo na timeline. addGoal usa Timer pra
+    // capturar o instante — pelo setup, timer já existe.
+    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]);
+    return m;
+  }
+
+  it("long-press num chip abre o sheet de ações do gol", () => {
+    const m = buildComUmGol();
+    renderPartida(m);
+
+    const chip = screen.getByLabelText(/Ações do gol de J01/);
+    fireEvent(chip, "longPress");
+
+    expect(screen.getByText("Corrigir registro")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Corrigir autor do gol" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Remover este gol" }),
+    ).toBeTruthy();
+  });
+
+  it("'Corrigir autor' + escolher J02 chama corrigirAutorDoGol", () => {
+    const m = buildComUmGol();
+    // Guardamos a referência ANTES — após `corrigirAutorDoGol`, o gol
+    // antigo é substituído por um novo objeto no array da partida.
+    const golOriginal = m.playing!.goals[0];
+    const spy = jest.spyOn(m, "corrigirAutorDoGol");
+    renderPartida(m);
+
+    fireEvent(screen.getByLabelText(/Ações do gol de J01/), "longPress");
+    fireEvent.press(
+      screen.getByRole("button", { name: "Corrigir autor do gol" }),
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: "Trocar autor para J02" }),
+    );
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toBe(golOriginal);
+    expect(spy.mock.calls[0][1].name).toBe("J02");
+  });
+});

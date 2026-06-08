@@ -37,6 +37,7 @@ import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
+import { confirmAcao } from "@/src/shared/ui/confirmAcao";
 
 /**
  * Partida — a estrela do app.
@@ -100,6 +101,11 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     extras?: number;
   } | null>(null);
   const [checkpointToast, setCheckpointToast] = useState<string | null>(null);
+  // Edição arbitrária de gol via long-press na timeline (F-11).
+  // Quando definido: abre o sheet de ações do gol.
+  // `golEditarAutor`: subsheet com lista de jogadores do mesmo time.
+  const [golEmAcao, setGolEmAcao] = useState<Goal | null>(null);
+  const [golEditarAutor, setGolEditarAutor] = useState<Goal | null>(null);
   // Tracking de checkpoints (F-08). Um disparo por partida, reseta quando o
   // `playing` (id da Match) muda. Ref em vez de state pra evitar re-render
   // a cada decremento do cronômetro.
@@ -264,6 +270,33 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   };
 
   /**
+   * Remove um gol arbitrário escolhido pelo long-press na timeline (F-11).
+   * Pede confirmação destrutiva — o usuário acabou de tocar e segurar,
+   * não vamos remover por toque acidental.
+   */
+  const onRemoverGol = async (gol: Goal) => {
+    setGolEmAcao(null);
+    const ok = await confirmAcao({
+      titulo: "Remover este gol",
+      mensagem: `Apaga o gol de ${gol.player.name} aos ${minutoDoGol(gol)} min. Não dá pra desfazer.`,
+      textoConfirmar: "Remover",
+      destrutivo: true,
+    });
+    if (!ok) return;
+    safeAction(() => gestor.removerGol(gol));
+  };
+
+  /**
+   * Aplica a troca de autor de um gol — segundo sheet aberto a partir do
+   * sheet de ações. Resolve direto, sem confirmAcao (a ação não é
+   * destrutiva e o usuário acabou de tocar no novo autor).
+   */
+  const onTrocarAutor = (gol: Goal, novoAutor: Player) => {
+    setGolEditarAutor(null);
+    safeAction(() => gestor.corrigirAutorDoGol(gol, novoAutor));
+  };
+
+  /**
    * Aplica vários pares de troca em sequência. A última troca aparece no
    * toast, com contador "+N" quando houve mais de uma. Erros do domínio
    * (jogador que já saiu, time cheio) interrompem a sequência — o que
@@ -400,6 +433,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         teamA={teamA}
         teamB={teamB}
         onUndo={() => safeAction(() => gestor.undoLastGoal())}
+        onLongPressGol={(g) => setGolEmAcao(g)}
       />
 
       {erro ? (
@@ -481,6 +515,21 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       {checkpointToast ? (
         <CheckpointToast texto={checkpointToast} topOffset={insets.top} />
       ) : null}
+
+      <GolActionSheet
+        gol={golEmAcao}
+        onClose={() => setGolEmAcao(null)}
+        onCorrigirAutor={(g) => {
+          setGolEmAcao(null);
+          setGolEditarAutor(g);
+        }}
+        onRemover={onRemoverGol}
+      />
+      <ChangeAuthorSheet
+        gol={golEditarAutor}
+        onClose={() => setGolEditarAutor(null)}
+        onEscolher={onTrocarAutor}
+      />
     </View>
   );
 }
@@ -1972,6 +2021,287 @@ function SubstitutionToast({
 }
 
 /**
+ * Sheet de ações para um gol selecionado via long-press na timeline
+ * (F-11). 2 opções: corrigir autor (abre subsheet) e remover (passa
+ * pra confirmAcao do callsite).
+ */
+function GolActionSheet({
+  gol,
+  onClose,
+  onCorrigirAutor,
+  onRemover,
+}: {
+  gol: Goal | null;
+  onClose: () => void;
+  onCorrigirAutor: (g: Goal) => void;
+  onRemover: (g: Goal) => void;
+}) {
+  const palette = usePalette();
+  if (!gol) return null;
+  return (
+    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.sheetWrap} onPress={onClose}>
+        <Pressable
+          style={[styles.sheet, { backgroundColor: palette.surface }]}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View
+            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
+          />
+          <View style={styles.sheetHead}>
+            <View>
+              <Text
+                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
+              >
+                Gol — {gol.player.name} ({minutoDoGol(gol)}')
+              </Text>
+              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+                Corrigir registro
+              </Text>
+            </View>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar ações do gol"
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={palette.onSurface}
+              />
+            </Pressable>
+          </View>
+
+          <Pressable
+            onPress={() => onCorrigirAutor(gol)}
+            accessibilityRole="button"
+            accessibilityLabel="Corrigir autor do gol"
+            style={({ pressed }) => [
+              styles.golActionRow,
+              {
+                backgroundColor: palette.surfaceContainerHigh,
+                borderColor: palette.outlineVariant,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="account-edit-outline"
+              size={20}
+              color={palette.primary}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.golActionTitle, { color: palette.onSurface }]}>
+                Corrigir autor
+              </Text>
+              <Text
+                style={[
+                  styles.golActionSub,
+                  { color: palette.onSurfaceVariant },
+                ]}
+              >
+                Escolha o jogador certo entre os 2 times
+              </Text>
+            </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={18}
+              color={palette.onSurfaceVariant}
+            />
+          </Pressable>
+
+          <Pressable
+            onPress={() => onRemover(gol)}
+            accessibilityRole="button"
+            accessibilityLabel="Remover este gol"
+            style={({ pressed }) => [
+              styles.golActionRow,
+              {
+                backgroundColor: palette.errorContainer,
+                borderColor: palette.error,
+                opacity: pressed ? 0.85 : 1,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="delete-outline"
+              size={20}
+              color={palette.error}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.golActionTitle, { color: palette.error }]}>
+                Remover este gol
+              </Text>
+              <Text
+                style={[styles.golActionSub, { color: palette.error, opacity: 0.85 }]}
+              >
+                Apaga o registro definitivamente
+              </Text>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+/**
+ * Subsheet aberto a partir do `GolActionSheet`. Lista os jogadores dos
+ * 2 times (em campo, no momento) — o domínio decide se vira ownGoal
+ * quando o escolhido não pertence ao `gol.team`.
+ */
+function ChangeAuthorSheet({
+  gol,
+  onClose,
+  onEscolher,
+}: {
+  gol: Goal | null;
+  onClose: () => void;
+  onEscolher: (g: Goal, novoAutor: Player) => void;
+}) {
+  const palette = usePalette();
+  if (!gol) return null;
+  const teamA = gol.match.teamA;
+  const teamB = gol.match.teamB;
+  return (
+    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.sheetWrap} onPress={onClose}>
+        <Pressable
+          style={[styles.sheet, { backgroundColor: palette.surface }]}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View
+            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
+          />
+          <View style={styles.sheetHead}>
+            <View>
+              <Text
+                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
+              >
+                Corrigir autor — {minutoDoGol(gol)}'
+              </Text>
+              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+                Quem fez de verdade?
+              </Text>
+            </View>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={palette.onSurface}
+              />
+            </Pressable>
+          </View>
+
+          <ScrollView style={{ maxHeight: 380 }}>
+            <View style={styles.subColRow}>
+              <View style={styles.subCol}>
+                <View
+                  style={[
+                    styles.subTag,
+                    { backgroundColor: palette.primary + "22" },
+                  ]}
+                >
+                  <Text style={[styles.subTagText, { color: palette.primary }]}>
+                    Time 1
+                  </Text>
+                </View>
+                {teamA.players.map((p) => (
+                  <AutorOption
+                    key={p.id}
+                    player={p}
+                    tone="A"
+                    eAtual={p.id === gol.player.id}
+                    onPress={() => onEscolher(gol, p)}
+                  />
+                ))}
+              </View>
+              <View style={styles.subCol}>
+                <View
+                  style={[
+                    styles.subTag,
+                    { backgroundColor: palette.secondary + "22" },
+                  ]}
+                >
+                  <Text style={[styles.subTagText, { color: palette.secondary }]}>
+                    Time 2
+                  </Text>
+                </View>
+                {teamB.players.map((p) => (
+                  <AutorOption
+                    key={p.id}
+                    player={p}
+                    tone="B"
+                    eAtual={p.id === gol.player.id}
+                    onPress={() => onEscolher(gol, p)}
+                  />
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+/** Linha de jogador escolhível na lista de "corrigir autor". */
+function AutorOption({
+  player,
+  tone,
+  eAtual,
+  onPress,
+}: {
+  player: Player;
+  tone: "A" | "B";
+  eAtual: boolean;
+  onPress: () => void;
+}) {
+  const palette = usePalette();
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={eAtual}
+      accessibilityRole="button"
+      accessibilityLabel={
+        eAtual
+          ? `${player.name} (autor atual)`
+          : `Trocar autor para ${player.name}`
+      }
+      style={({ pressed }) => [
+        styles.fpi,
+        {
+          backgroundColor: palette.surfaceContainerHigh,
+          borderColor: tone === "A" ? palette.primary : palette.secondary,
+          opacity: eAtual ? 0.5 : pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <PlayerAvatar player={player} size={28} tone={tone} />
+      <Text
+        style={[styles.fpiName, { color: palette.onSurface }]}
+        numberOfLines={1}
+      >
+        {player.name}
+      </Text>
+      {eAtual ? (
+        <MaterialCommunityIcons
+          name="account-check"
+          size={14}
+          color={palette.onSurfaceVariant}
+        />
+      ) : null}
+    </Pressable>
+  );
+}
+
+/**
  * Toast curto no topo da tela, anunciando que faltam 2 minutos ou 30
  * segundos para o fim do tempo (F-08). Visual mais sóbrio que o
  * `SubstitutionToast` — alerta, não evento de jogo.
@@ -2014,6 +2344,11 @@ function CheckpointToast({
 // ====================================================================
 // Helpers + Styles
 // ====================================================================
+
+function minutoDoGol(gol: Goal): number {
+  // ScreenTime.timeStroke é decorrido em segundos no tempo atual.
+  return Math.max(0, Math.floor(gol.time.timeStroke / 60));
+}
 
 function formatSeconds(total: number): string {
   const safe = Math.max(0, Math.floor(total));
@@ -2509,6 +2844,21 @@ const styles = StyleSheet.create({
   toastBold: { ...Typography.title, fontSize: 13 },
   toastLight: { ...Typography.body, fontSize: 12 },
   toastSide: { ...Typography.label, fontSize: 11 },
+
+  // ----- Sheet de ações do gol (F-11) — corrigir / remover -----
+  golActionRow: {
+    marginTop: Spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderCurve: "continuous",
+  },
+  golActionTitle: { ...Typography.title, fontSize: 14 },
+  golActionSub: { ...Typography.label, fontSize: 11, marginTop: 2 },
 
   // ----- Sheet: header com toggle + botão Aplicar (F-09) -----
   sheetHeadActions: {

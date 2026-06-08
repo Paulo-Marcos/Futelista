@@ -25,6 +25,14 @@ type TimelineEntry = {
   side: "A" | "B";
   name: string;
   minute: number;
+  /**
+   * Goal original — passado de volta no `onLongPressGol` para que o
+   * caller possa identificar exatamente qual gol foi tocado (corrigir
+   * autor / remover). Mantemos a referência em vez de só o id porque o
+   * domínio expõe os Goals como referência única e `gestor.removerGol`
+   * usa `indexOf`.
+   */
+  goal: Goal;
 };
 
 export function MatchTimeline({
@@ -32,11 +40,18 @@ export function MatchTimeline({
   teamA,
   teamB,
   onUndo,
+  onLongPressGol,
 }: {
   goals: Goal[];
   teamA: Team;
   teamB: Team;
   onUndo?: () => void;
+  /**
+   * Long-press num chip da timeline. Quando fornecido, cada chip vira
+   * interativo e dispara este callback com o Goal correspondente.
+   * Usado para abrir o sheet de ações (corrigir autor / remover).
+   */
+  onLongPressGol?: (goal: Goal) => void;
 }) {
   const palette = usePalette();
   if (goals.length === 0) {
@@ -68,6 +83,7 @@ export function MatchTimeline({
       side: g.team.id === teamA.id ? ("A" as const) : ("B" as const),
       name: g.player.name,
       minute: minuteOf(g),
+      goal: g,
     }))
     .reverse();
 
@@ -89,17 +105,12 @@ export function MatchTimeline({
         {entries.map((e, i) => {
           const isMostRecent = i === 0;
           const tint = e.side === "A" ? palette.primary : palette.secondary;
-          return (
-            <View
-              key={e.id}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: tint + "22",
-                  borderColor: tint + "55",
-                },
-              ]}
-            >
+          // Quando `onLongPressGol` está plugado, o chip inteiro vira
+          // interativo. O Pressable não precisa de onPress pra long-press
+          // funcionar — só prop `onLongPress`. O ripple deixa o toque
+          // perceptível no Android.
+          const chipContent = (
+            <>
               <MaterialCommunityIcons name="soccer" size={11} color={tint} />
               <Text style={[styles.chipName, { color: tint }]}>{e.name}</Text>
               <Text
@@ -127,7 +138,35 @@ export function MatchTimeline({
                   />
                 </Pressable>
               ) : null}
-            </View>
+            </>
+          );
+          const baseStyle = [
+            styles.chip,
+            {
+              backgroundColor: tint + "22",
+              borderColor: tint + "55",
+            },
+          ];
+          if (!onLongPressGol) {
+            return (
+              <View key={e.id} style={baseStyle}>
+                {chipContent}
+              </View>
+            );
+          }
+          return (
+            <Pressable
+              key={e.id}
+              onLongPress={() => onLongPressGol(e.goal)}
+              delayLongPress={350}
+              accessibilityRole="button"
+              accessibilityLabel={`Ações do gol de ${e.name} aos ${e.minute} minutos`}
+              accessibilityHint="Toque e segure para corrigir ou remover"
+              android_ripple={{ color: tint + "33" }}
+              style={({ pressed }) => [baseStyle, pressed && { opacity: 0.8 }]}
+            >
+              {chipContent}
+            </Pressable>
           );
         })}
       </ScrollView>

@@ -1,5 +1,6 @@
 import "react-native-get-random-values";
 import * as uuid from "uuid";
+import { Goal } from "./Goal";
 import { Match } from "./Match";
 import { Player, PlayerSituation } from "./Player";
 import { DataRules, Rules } from "./Rules";
@@ -452,14 +453,77 @@ export class GestorJogo {
     const partida = this.playing;
     if (!partida || partida.goals.length === 0) return false;
     const lastGoal = partida.goals.pop()!;
-    const teamIdx = lastGoal.team.goals.indexOf(lastGoal);
-    if (teamIdx >= 0) lastGoal.team.goals.splice(teamIdx, 1);
-    if (!lastGoal.ownGoal) {
-      const playerIdx = lastGoal.player.goals.indexOf(lastGoal);
-      if (playerIdx >= 0) lastGoal.player.goals.splice(playerIdx, 1);
-    }
+    this.limparEstatisticasDoGol(lastGoal);
     this.notify();
     return true;
+  }
+
+  /**
+   * Remove um gol arbitrário da partida em andamento — versão do
+   * `undoLastGoal` que aceita corrigir um gol antigo sem precisar
+   * desfazer tudo dali em diante.
+   *
+   * Retorna `true` se o gol foi encontrado e removido; `false` se a
+   * partida não está em curso ou o gol não pertence a ela.
+   */
+  removerGol(goal: Goal): boolean {
+    const partida = this.playing;
+    if (!partida) return false;
+    const idx = partida.goals.indexOf(goal);
+    if (idx < 0) return false;
+    partida.goals.splice(idx, 1);
+    this.limparEstatisticasDoGol(goal);
+    this.notify();
+    return true;
+  }
+
+  /**
+   * Substitui o autor de um gol já registrado. Mantém o `team`, o `time`
+   * (instante) e a posição na cronologia — só troca quem foi creditado.
+   *
+   * Decide ownGoal pelo time atual do novo autor: se ele **não** está no
+   * time do gol, vira gol-contra. Caso comum: jogador da defesa fez
+   * gol-contra, foi marcado pelo atacante adversário por engano —
+   * corrigir para o defensor leva o `ownGoal` para `true`.
+   *
+   * No-op se o novo autor é o mesmo do gol. `false` quando não há
+   * partida ou o gol não pertence a ela.
+   */
+  corrigirAutorDoGol(goal: Goal, novoAutor: Player): boolean {
+    const partida = this.playing;
+    if (!partida) return false;
+    if (goal.player.id === novoAutor.id) return false;
+    const idx = partida.goals.indexOf(goal);
+    if (idx < 0) return false;
+    // Limpa estatísticas do autor antigo antes de reescrever.
+    this.limparEstatisticasDoGol(goal);
+    const novoOwnGoal = !goal.team.hasPlayer(novoAutor);
+    const novoGol = new Goal(
+      goal.match,
+      novoAutor,
+      goal.team,
+      goal.time,
+      novoOwnGoal,
+    );
+    partida.goals[idx] = novoGol;
+    goal.team.goals.push(novoGol);
+    if (!novoOwnGoal) novoAutor.goals.push(novoGol);
+    this.notify();
+    return true;
+  }
+
+  /**
+   * Remove o gol das listas de team e player. Mantém a partida intocada
+   * — quem chama é responsável por tirar o gol de `partida.goals`.
+   * Compartilhado por undoLastGoal, removerGol e corrigirAutorDoGol.
+   */
+  private limparEstatisticasDoGol(goal: Goal): void {
+    const teamIdx = goal.team.goals.indexOf(goal);
+    if (teamIdx >= 0) goal.team.goals.splice(teamIdx, 1);
+    if (!goal.ownGoal) {
+      const playerIdx = goal.player.goals.indexOf(goal);
+      if (playerIdx >= 0) goal.player.goals.splice(playerIdx, 1);
+    }
   }
 
   setResult(): void {

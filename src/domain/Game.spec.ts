@@ -363,6 +363,83 @@ describe('Teste da classe Game', () => {
       expect(jogo.undoLastGoal()).toBe(false);
     });
 
+    it('removerGol apaga gol arbitrário sem mexer nos outros', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      const p1 = team.players[0];
+      const p2 = team.players[1];
+      jogo.addGoal(team, p1);
+      jogo.addGoal(team, p2);
+      const golDoP1 = jogo.playing!.goals[0];
+      expect(jogo.playing!.goals.length).toBe(2);
+
+      const removeu = jogo.removerGol(golDoP1);
+
+      expect(removeu).toBe(true);
+      expect(jogo.playing!.goals.length).toBe(1);
+      expect(jogo.playing!.goals[0].player).toBe(p2);
+      expect(p1.goals.length).toBe(0);
+      expect(p2.goals.length).toBe(1);
+      expect(team.goals.length).toBe(1);
+    });
+
+    it('removerGol retorna false quando gol não pertence à partida', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      jogo.addGoal(team, team.players[0]);
+      const golValido = jogo.playing!.goals[0];
+      jogo.undoLastGoal(); // remove de partida.goals
+      expect(jogo.removerGol(golValido)).toBe(false);
+    });
+
+    it('corrigirAutorDoGol troca o creditado preservando time e instante', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      const errado = team.players[0];
+      const certo = team.players[1];
+      jogo.addGoal(team, errado);
+      const golOriginal = jogo.playing!.goals[0];
+
+      const ok = jogo.corrigirAutorDoGol(golOriginal, certo);
+
+      expect(ok).toBe(true);
+      expect(errado.goals.length).toBe(0);
+      expect(certo.goals.length).toBe(1);
+      const golCorrigido = jogo.playing!.goals[0];
+      expect(golCorrigido.player).toBe(certo);
+      expect(golCorrigido.team).toBe(team);
+      expect(golCorrigido.time).toBe(golOriginal.time);
+      expect(golCorrigido.ownGoal).toBe(false);
+    });
+
+    it('corrigirAutorDoGol vira ownGoal quando novo autor é do time adversário', () => {
+      jogo.start();
+      const teamA = jogo.playing!.teamA;
+      const teamB = jogo.playing!.teamB;
+      jogo.addGoal(teamA, teamA.players[0]);
+      const gol = jogo.playing!.goals[0];
+
+      const adversario = teamB.players[0];
+      jogo.corrigirAutorDoGol(gol, adversario);
+
+      const golCorrigido = jogo.playing!.goals[0];
+      expect(golCorrigido.team).toBe(teamA); // gol continua creditado ao A
+      expect(golCorrigido.player).toBe(adversario);
+      expect(golCorrigido.ownGoal).toBe(true);
+      // ownGoal não soma para o autor — preserva estatística individual.
+      expect(adversario.goals.length).toBe(0);
+    });
+
+    it('corrigirAutorDoGol no-op quando o autor é o mesmo', () => {
+      jogo.start();
+      const team = jogo.playing!.teamA;
+      jogo.addGoal(team, team.players[0]);
+      const gol = jogo.playing!.goals[0];
+
+      expect(jogo.corrigirAutorDoGol(gol, team.players[0])).toBe(false);
+      expect(team.players[0].goals.length).toBe(1);
+    });
+
     it('deve definir o resultado quando setResult() é chamado', (done) => {
       rules.timeMatch = '00:00:01';
       jogo.start();
