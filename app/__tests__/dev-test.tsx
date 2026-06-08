@@ -130,6 +130,38 @@ describe("Dev — aplicar cenário", () => {
 // EXECUÇÃO CONCORRENTE
 // ===========================================================================
 
+describe("Dev — exportar backup (F-14)", () => {
+  const { Share } = require("react-native") as { Share: typeof import("react-native").Share };
+
+  it("toque em 'Exportar backup' chama exportarBackup e Share.share com o JSON", async () => {
+    const exportarBackup = jest
+      .fn()
+      .mockResolvedValue(
+        '{"version":1,"app":"FuteLista","exportadoEm":0,"items":[]}',
+      );
+    const shareSpy = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: "sharedAction" } as any);
+
+    renderWithProviders(<DevScreen />, { soccer: { exportarBackup } });
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Exportar backup (JSON)" }),
+    );
+
+    await waitFor(() => expect(exportarBackup).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(shareSpy).toHaveBeenCalledTimes(1));
+    const arg = shareSpy.mock.calls[0][0] as { message: string; title: string };
+    expect(arg.title).toBe("Backup FuteLista");
+    // O conteúdo exato vem do mock; mas pra valer como "JSON sério" o
+    // payload tem que mencionar a app e a versão do formato.
+    expect(arg.message).toMatch(/FuteLista/);
+    expect(arg.message).toMatch(/"version"\s*:\s*1/);
+
+    shareSpy.mockRestore();
+  });
+});
+
 describe("Dev — proteção contra execução concorrente", () => {
   it("enquanto executa, segundo press não reentra na chamada", async () => {
     // Promessa que nunca resolve enquanto o teste corre — segura o estado

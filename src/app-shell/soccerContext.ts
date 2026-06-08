@@ -100,6 +100,12 @@ export type SoccerContextValue = {
     peladaId: string,
   ) => Promise<import("@/src/domain/GestorJogo").GestorJogo[]>;
 
+  /**
+   * Backup completo do estado persistido — JSON serializado, pronto
+   * pra `Share.share({ message: json })` ou gravar em arquivo.
+   */
+  exportarBackup: () => Promise<string>;
+
   /** Reexposto para uso avançado (telas de dev, debug). */
   repositorio: RepositorioPelada;
 };

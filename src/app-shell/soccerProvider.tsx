@@ -315,6 +315,11 @@ export const SoccerProvider = ({
     [],
   );
 
+  const exportarBackup = useCallback(
+    (): Promise<string> => repoRef.current.exportarBackup(),
+    [],
+  );
+
   // Bloqueia render até terminar o boot (evita flicker estado-vazio).
   if (!bootConcluido) return null;
 
@@ -339,6 +344,7 @@ export const SoccerProvider = ({
         selecionarExecucao,
         listarExecucoesDe,
         carregarExecucoesDe,
+        exportarBackup,
         repositorio: repoRef.current,
       }}
     >

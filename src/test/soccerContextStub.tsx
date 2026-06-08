@@ -39,6 +39,9 @@ export function buildSoccerContextValue(
     selecionarExecucao: noop,
     listarExecucoesDe: jest.fn().mockResolvedValue([]),
     carregarExecucoesDe: jest.fn().mockResolvedValue([]),
+    exportarBackup: jest
+      .fn()
+      .mockResolvedValue('{"version":1,"app":"FuteLista","exportadoEm":0,"items":[]}'),
 
     // Repositório bruto — só pra satisfazer o tipo. Sobrescreva nos testes
     // que dependem dele.

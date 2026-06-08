@@ -46,6 +46,18 @@ export class RepositorioPeladaEmMemoria implements RepositorioPelada {
       .sort((a, b) => a.createdAt - b.createdAt);
   }
 
+  async exportarBackup(): Promise<string> {
+    // Em memória não há "blob serializado" naturalmente — emitimos um
+    // payload v1 vazio só pra honrar o contrato. O caso real (Async-
+    // Storage) usa o helper `gerarBackupJSON`.
+    return JSON.stringify({
+      version: 1,
+      app: "FuteLista",
+      exportadoEm: 0,
+      items: [],
+    });
+  }
+
   async carregarPelada(peladaId: string): Promise<Pelada | null> {
     return peladas.get(peladaId) ?? null;
   }

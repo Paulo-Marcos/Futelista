@@ -8,6 +8,7 @@ import {
   ResumoPeladaTipo,
 } from "@/src/domain/ports/RepositorioPelada";
 
+import { gerarBackupJSON } from "./backup";
 import {
   deserializePelada,
   parseResumoPelada,
@@ -160,6 +161,10 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
       });
     }
     return resumos.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  exportarBackup(): Promise<string> {
+    return gerarBackupJSON(AsyncStorage);
   }
 }
 

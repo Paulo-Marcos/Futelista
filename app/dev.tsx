@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -31,7 +32,7 @@ import { Spacing, Typography } from "@/src/shared/theme/Colors";
 export default function DevScreen() {
   const palette = usePalette();
   const router = useRouter();
-  const { repositorio } = useSoccer();
+  const { repositorio, exportarBackup } = useSoccer();
   const [executando, setExecutando] = useState<string | null>(null);
   const [mensagem, setMensagem] = useState<string | null>(null);
 
@@ -63,6 +64,29 @@ export default function DevScreen() {
         setMensagem(`Erro: ${e instanceof Error ? e.message : String(e)}`);
         setExecutando(null);
       });
+  };
+
+  /**
+   * Backup JSON pra Share.share — o usuário escolhe destino (Drive,
+   * email, WhatsApp). Cancelar o share não é tratado como erro.
+   * Importar de volta fica como follow-up (F-14b).
+   */
+  const exportar = async () => {
+    if (executando) return;
+    setExecutando("Exportar backup");
+    setMensagem(null);
+    try {
+      const json = await exportarBackup();
+      await Share.share({
+        message: json,
+        title: "Backup FuteLista",
+      });
+      setMensagem("Backup exportado.");
+    } catch (e) {
+      setMensagem(`Erro: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setExecutando(null);
+    }
   };
 
   return (
@@ -99,6 +123,13 @@ export default function DevScreen() {
         >
           Ações
         </Text>
+        <SecondaryButton
+          label="Exportar backup (JSON)"
+          icon="share-variant"
+          onPress={exportar}
+          fullWidth
+          disabled={executando !== null}
+        />
         <SecondaryButton
           label="Limpar storage (zerar tudo)"
           icon="delete-sweep"

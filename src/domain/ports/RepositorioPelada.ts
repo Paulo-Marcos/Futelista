@@ -44,6 +44,13 @@ export interface RepositorioPelada {
   listarPeladas(opcoes?: {
     incluirArquivadas?: boolean;
   }): Promise<ResumoPeladaTipo[]>;
+  /**
+   * Backup completo do estado persistido — JSON pronto pra
+   * compartilhar (Drive, email, etc). Inclui peladas, execuções e
+   * preferências sob o namespace do app. Formato definido em
+   * `infrastructure/storage/backup.ts`.
+   */
+  exportarBackup(): Promise<string>;
 }
 
 /**
