@@ -48,6 +48,8 @@ type PlayerDTO = {
   currentTeamId: string | null;
   teamHistoryIds: string[];
   matchHistoryIds: string[];
+  /** Foto custom do jogador (F-19) — URI absoluta. */
+  fotoUri?: string;
 };
 
 type TeamDTO = {
@@ -214,6 +216,7 @@ function buildPlayerDTO(player: Player): PlayerDTO {
     currentTeamId: player.currentTeam?.id ?? null,
     teamHistoryIds: player.teams.map((t) => t.id),
     matchHistoryIds: player.matches.map((m) => m.id),
+    fotoUri: player.fotoUri,
   };
 }
 
@@ -308,6 +311,7 @@ function rehydratePlayers(dtos: PlayerDTO[]): Map<string, Player> {
   dtos.forEach((dto) => {
     const player = new Player({ name: dto.name, id: dto.id });
     player.situation = dto.situation;
+    if (dto.fotoUri) player.fotoUri = dto.fotoUri;
     map.set(dto.id, player);
   });
   return map;

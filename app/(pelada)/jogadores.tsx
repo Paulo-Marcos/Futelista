@@ -14,6 +14,10 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  escolherFotoDoJogador,
+  type OrigemFoto,
+} from "@/src/app-shell/fotoJogador";
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
@@ -23,7 +27,7 @@ import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PlayerRow } from "@/src/shared/ui/PlayerRow";
 import { TabHeader } from "@/src/shared/ui/TabHeader";
-import { confirmAcao } from "@/src/shared/ui/confirmAcao";
+import { confirmAcao, escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 const AUTO_DISMISS_ERRO_MS = 5000;
@@ -35,6 +39,7 @@ export default function JogadoresScreen() {
 }
 
 function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
+  const { setFotoDoJogador } = useSoccer();
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
@@ -119,6 +124,51 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const iniciarEdicao = (p: Player) => {
     setEditingId(p.id);
     setEditingNome(p.name);
+  };
+
+  /**
+   * Foto do jogador (F-19) — abre escolherOpcao com câmera/galeria/remover
+   * e dispara o helper que copia a foto para o sandbox do app.
+   */
+  const trocarFoto = async (p: Player) => {
+    type Acao = OrigemFoto | "remover" | "cancelar";
+    const opcoes: {
+      label: string;
+      valor: Acao;
+      estilo?: "destructive" | "cancel";
+    }[] = [
+      { label: "Tirar foto", valor: "camera" },
+      { label: "Escolher da galeria", valor: "galeria" },
+    ];
+    if (p.fotoUri) {
+      opcoes.push({
+        label: "Remover foto",
+        valor: "remover",
+        estilo: "destructive",
+      });
+    }
+    opcoes.push({ label: "Cancelar", valor: "cancelar", estilo: "cancel" });
+
+    const escolha = await escolherOpcao<Acao>({
+      titulo: `Foto de ${p.name}`,
+      mensagem: "Escolha como atualizar a foto do jogador.",
+      opcoes,
+    });
+    if (!escolha || escolha === "cancelar") return;
+    try {
+      if (escolha === "remover") {
+        await setFotoDoJogador(p.id, null);
+        setErro(null);
+        return;
+      }
+      const uri = await escolherFotoDoJogador(p.id, escolha);
+      if (uri) {
+        await setFotoDoJogador(p.id, uri);
+        setErro(null);
+      }
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : String(e));
+    }
   };
 
   const cancelarEdicao = () => {
@@ -322,6 +372,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
               onEditar={() => iniciarEdicao(item)}
               onRemover={() => remover(item)}
               onVerStats={() => setStatsAberto(item)}
+              onTrocarFoto={() => trocarFoto(item)}
             />
           )
         }
@@ -399,12 +450,14 @@ function LinhaJogador({
   onEditar,
   onRemover,
   onVerStats,
+  onTrocarFoto,
 }: {
   player: Player;
   mostrarSituacao: boolean;
   onEditar: () => void;
   onRemover: () => void;
   onVerStats: () => void;
+  onTrocarFoto: () => void;
 }) {
   const palette = usePalette();
 
@@ -433,6 +486,19 @@ function LinhaJogador({
           </Text>
         </View>
       ) : null}
+      <Pressable
+        onPress={onTrocarFoto}
+        accessibilityRole="button"
+        accessibilityLabel={`Trocar foto de ${player.name}`}
+        style={styles.iconAction}
+        android_ripple={{ color: palette.primary + "33" }}
+      >
+        <MaterialCommunityIcons
+          name={player.fotoUri ? "camera-flip-outline" : "camera-outline"}
+          size={20}
+          color={palette.onSurfaceVariant}
+        />
+      </Pressable>
       <Pressable
         onPress={onVerStats}
         accessibilityRole="button"

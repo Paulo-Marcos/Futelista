@@ -45,7 +45,7 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-type PlayerLite = Pick<Player, "id" | "name"> & { photoUri?: string };
+type PlayerLite = Pick<Player, "id" | "name"> & { fotoUri?: string };
 
 type PlayerAvatarProps = {
   player: PlayerLite;
@@ -86,9 +86,9 @@ export function PlayerAvatar({
         }
       : null;
 
-  const content = player.photoUri ? (
+  const content = player.fotoUri ? (
     <Image
-      source={{ uri: player.photoUri }}
+      source={{ uri: player.fotoUri }}
       style={[styles.image, { width: size, height: size }]}
     />
   ) : (
@@ -106,7 +106,7 @@ export function PlayerAvatar({
   const node = (
     <View style={innerStyle} aria-hidden>
       {content}
-      {!player.photoUri ? (
+      {!player.fotoUri ? (
         <View style={styles.initialsLayer} pointerEvents="none">
           <Text
             style={[

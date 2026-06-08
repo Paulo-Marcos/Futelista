@@ -530,3 +530,65 @@ describe("Jogadores — sheet de estatísticas", () => {
     ).toBeTruthy();
   });
 });
+
+// ===========================================================================
+// FOTO DO JOGADOR (F-19)
+// ===========================================================================
+
+describe("Jogadores — trocar foto", () => {
+  it("toque em 'Trocar foto' + 'Escolher da galeria' chama setFotoDoJogador", async () => {
+    const ImagePicker = require("expo-image-picker");
+    (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: "file:///source/sel.jpg" }],
+    });
+    const setFotoDoJogador = jest
+      .fn<Promise<void>, [string, string | null]>()
+      .mockResolvedValue(undefined);
+    const gestor = buildManager(["Ana"]);
+    renderWithProviders(<JogadoresScreen />, {
+      soccer: { gestor, setFotoDoJogador },
+    });
+
+    // Alert tem que estar mockado ANTES do press, senão o escolherOpcao
+    // espera por uma resposta que nunca chega.
+    const alertSpy = mockAlert((b) => b.text === "Escolher da galeria");
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Trocar foto de Ana" }),
+    );
+
+    await waitFor(() =>
+      expect(setFotoDoJogador).toHaveBeenCalledWith(
+        gestor.players[0].id,
+        expect.stringMatching(/^file:\/\/.*\.jpg$/),
+      ),
+    );
+    alertSpy.mockRestore();
+  });
+
+  it("'Remover foto' chama setFotoDoJogador(id, null) quando jogador tem foto", async () => {
+    const gestor = buildManager(["Ana"]);
+    gestor.players[0].definirFoto("file:///cached/ana.jpg");
+    const setFotoDoJogador = jest
+      .fn<Promise<void>, [string, string | null]>()
+      .mockResolvedValue(undefined);
+    renderWithProviders(<JogadoresScreen />, {
+      soccer: { gestor, setFotoDoJogador },
+    });
+
+    const alertSpy = mockAlert((b) => b.text === "Remover foto");
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Trocar foto de Ana" }),
+    );
+
+    await waitFor(() =>
+      expect(setFotoDoJogador).toHaveBeenCalledWith(
+        gestor.players[0].id,
+        null,
+      ),
+    );
+    alertSpy.mockRestore();
+  });
+});

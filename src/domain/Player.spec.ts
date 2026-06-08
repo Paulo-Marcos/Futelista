@@ -150,6 +150,51 @@ describe('Teste da classe Player', () => {
     });
   });
 
+  describe('Foto (F-19)', () => {
+    it('nasce sem fotoUri', () => {
+      const p = new Player({ name: 'A' });
+      expect(p.fotoUri).toBeUndefined();
+    });
+
+    it('definirFoto aceita URI file:// e faz trim', () => {
+      const p = new Player({ name: 'A' });
+      p.definirFoto('  file:///tmp/foto.jpg  ');
+      expect(p.fotoUri).toBe('file:///tmp/foto.jpg');
+    });
+
+    it('definirFoto aceita https:// e data: URIs', () => {
+      const p = new Player({ name: 'A' });
+      p.definirFoto('https://exemplo.com/p.png');
+      expect(p.fotoUri).toBe('https://exemplo.com/p.png');
+      p.definirFoto('data:image/png;base64,abc');
+      expect(p.fotoUri).toBe('data:image/png;base64,abc');
+    });
+
+    it('definirFoto rejeita formato inválido', () => {
+      const p = new Player({ name: 'A' });
+      expect(() => p.definirFoto('foto.jpg')).toThrowError(
+        /URI de foto inválida/,
+      );
+    });
+
+    it('definirFoto com undefined ou vazio remove a foto', () => {
+      const p = new Player({ name: 'A' });
+      p.definirFoto('file:///tmp/foto.jpg');
+      p.definirFoto('');
+      expect(p.fotoUri).toBeUndefined();
+      p.definirFoto('file:///tmp/foto.jpg');
+      p.definirFoto(undefined);
+      expect(p.fotoUri).toBeUndefined();
+    });
+
+    it('removerFoto limpa o campo', () => {
+      const p = new Player({ name: 'A' });
+      p.definirFoto('file:///foto.jpg');
+      p.removerFoto();
+      expect(p.fotoUri).toBeUndefined();
+    });
+  });
+
   describe('Quando renomear o jogador', () => {
     it('deverá atualizar o nome com a string informada', () => {
       const player = new Player({ name: 'Antigo' });

@@ -160,6 +160,18 @@ describe("serializer (round-trip GestorJogo)", () => {
     );
   });
 
+  it("[F-19] preserva fotoUri dos jogadores entre reloads", () => {
+    const original = buildPeladaComJogadores();
+    original.players[0].definirFoto("file:///tmp/ana.jpg");
+    original.players[1].definirFoto("https://exemplo.com/bia.png");
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    expect(recriada.players[0].fotoUri).toBe("file:///tmp/ana.jpg");
+    expect(recriada.players[1].fotoUri).toBe("https://exemplo.com/bia.png");
+    expect(recriada.players[2].fotoUri).toBeUndefined();
+  });
+
   it("[F-18] preserva nomeCustom e corCustom do time entre reloads", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();

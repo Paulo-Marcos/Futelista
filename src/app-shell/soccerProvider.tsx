@@ -9,6 +9,7 @@ import {
   lerPeladaAtivaId,
   limparPeladaAtivaId,
 } from "@/src/app-shell/peladaAtiva";
+import { apagarFotoDoJogador } from "@/src/app-shell/fotoJogador";
 import { AgendaPelada, SoccerContext } from "@/src/app-shell/soccerContext";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
@@ -320,6 +321,25 @@ export const SoccerProvider = ({
     [],
   );
 
+  const setFotoDoJogador = useCallback(
+    async (jogadorId: string, uri: string | null): Promise<void> => {
+      if (!gestor) return;
+      const jogador = gestor.players.find((p) => p.id === jogadorId);
+      if (!jogador) return;
+      const fotoAnterior = jogador.fotoUri;
+      jogador.definirFoto(uri ?? undefined);
+      // Limpa o arquivo antigo do sandbox quando foi substituído ou
+      // removido. Best-effort — falha aqui não bloqueia a UI.
+      if (fotoAnterior && fotoAnterior !== uri) {
+        apagarFotoDoJogador(fotoAnterior).catch(() => {});
+      }
+      // Reusa o trigger de notify+save da reatividade do GestorJogo.
+      gestor["notify"]?.();
+      await marcarSalvamento(() => repoRef.current.salvar(gestor));
+    },
+    [gestor, marcarSalvamento],
+  );
+
   // Bloqueia render até terminar o boot (evita flicker estado-vazio).
   if (!bootConcluido) return null;
 
@@ -345,6 +365,7 @@ export const SoccerProvider = ({
         listarExecucoesDe,
         carregarExecucoesDe,
         exportarBackup,
+        setFotoDoJogador,
         repositorio: repoRef.current,
       }}
     >

@@ -151,6 +151,28 @@ jest.mock("expo-haptics", () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// expo-image-picker + expo-file-system — usados pelo helper de foto do
+// jogador (F-19). Mocks neutros: cada teste que quiser exercitar o
+// caminho real sobrescreve a implementação específica.
+// ---------------------------------------------------------------------------
+jest.mock("expo-image-picker", () => ({
+  __esModule: true,
+  requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true })),
+  requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true })),
+  launchCameraAsync: jest.fn(async () => ({ canceled: true, assets: [] })),
+  launchImageLibraryAsync: jest.fn(async () => ({ canceled: true, assets: [] })),
+  MediaTypeOptions: { Images: "Images", Videos: "Videos", All: "All" },
+}));
+jest.mock("expo-file-system", () => ({
+  __esModule: true,
+  documentDirectory: "file:///mock-doc-dir/",
+  getInfoAsync: jest.fn(async () => ({ exists: true })),
+  makeDirectoryAsync: jest.fn(async () => {}),
+  copyAsync: jest.fn(async () => {}),
+  deleteAsync: jest.fn(async () => {}),
+}));
+
+// ---------------------------------------------------------------------------
 // Silenciar warnings ruidosos do RN em ambiente de teste.
 // ---------------------------------------------------------------------------
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");

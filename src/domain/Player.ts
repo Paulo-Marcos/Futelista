@@ -28,9 +28,41 @@ export class Player {
   currentTeam?: Team;
   situation = PlayerSituation.NO_TEAM;
   name: string;
+  /**
+   * URI local da foto do jogador (F-19). Apontamos para um arquivo já
+   * copiado pra `FileSystem.documentDirectory` para sobreviver a
+   * exclusões da galeria. `undefined` = avatar gradient + iniciais.
+   */
+  fotoUri?: string;
   constructor(input: PlayerInput) {
     this.name = input.name;
     if (input.id) this.id = input.id;
+  }
+
+  /**
+   * Aponta a foto do jogador para `uri`. Trim e validação mínima
+   * (precisa começar com `file://`, `http://`, `https://` ou `data:`).
+   * `undefined` é equivalente a `removerFoto()`.
+   */
+  definirFoto(uri: string | undefined): void {
+    if (uri === undefined) {
+      this.fotoUri = undefined;
+      return;
+    }
+    const limpo = uri.trim();
+    if (limpo.length === 0) {
+      this.fotoUri = undefined;
+      return;
+    }
+    if (!/^(file:|https?:|data:)/i.test(limpo)) {
+      throw Error(`URI de foto inválida: ${limpo}`);
+    }
+    this.fotoUri = limpo;
+  }
+
+  /** Atalho para limpar a foto custom. */
+  removerFoto(): void {
+    this.fotoUri = undefined;
   }
 
   /** Renomeia o jogador. Recusa nome vazio (whitespace só). */

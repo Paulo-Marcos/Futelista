@@ -106,6 +106,16 @@ export type SoccerContextValue = {
    */
   exportarBackup: () => Promise<string>;
 
+  /**
+   * Define a foto do jogador a partir de um URI já copiado pro sandbox
+   * (helper `escolherFotoDoJogador` em `src/app-shell/fotoJogador.ts`).
+   * Passar `null` remove a foto. Notifica o gestor e persiste.
+   */
+  setFotoDoJogador: (
+    jogadorId: string,
+    uri: string | null,
+  ) => Promise<void>;
+
   /** Reexposto para uso avançado (telas de dev, debug). */
   repositorio: RepositorioPelada;
 };
