@@ -103,6 +103,81 @@ describe("serializer (round-trip GestorJogo)", () => {
     expect(recriada.timer!.numberTimes).toBe(2);
   });
 
+  // ----- F-17: garantias adicionais de round-trip da partida em andamento -----
+
+  it("[F-17] preserva o restTime exato do cronômetro entre reloads", () => {
+    const original = buildPeladaComJogadores();
+    original.createTeams();
+    original.setPlayingGame();
+    original.start();
+    // Pausa e decrementa manualmente o restTime — simula app fechado
+    // com 37s restantes no meio do tempo.
+    original.pause();
+    original.timer!.restTime = 37;
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    expect(recriada.timer!.restTime).toBe(37);
+  });
+
+  it("[F-17] preserva currentNumberTime > 1 (partida no 2º tempo)", () => {
+    const original = buildPeladaComJogadores();
+    original.createTeams();
+    original.setPlayingGame();
+    original.start();
+    original.pause();
+    // Avança manualmente pro 2º tempo (numberTimes=2).
+    original.timer!.currentNumberTime = 2;
+    original.timer!.status = TimerStatus.INTERVAL;
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    expect(recriada.timer!.currentNumberTime).toBe(2);
+    expect(recriada.timer!.status).toBe(TimerStatus.INTERVAL);
+  });
+
+  it("[F-17] preserva substituições banco→campo no roster após reload", () => {
+    const original = buildPeladaComJogadores();
+    original.createTeams();
+    original.setPlayingGame();
+    original.start();
+    const teamA = original.playing!.teamA;
+    const reserva = original.next[0].players[0];
+    const saindo = teamA.players[0];
+    original.switchPlayerLeft(reserva, saindo);
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    // O importante para o "sobreviver a reload": o roster do time em campo
+    // reflete a troca aplicada. `team.switches[]` é uma estatística que só
+    // o caminho `trocarJogadoresDeTimes` popula hoje — `switchPlayerLeft`
+    // do banco mexe direto em players[] sem registrar o evento. Fora do
+    // escopo do F-17.
+    const teamARecriado = recriada.playing!.teamA;
+    expect(teamARecriado.players.map((p) => p.name)).toContain(reserva.name);
+    expect(teamARecriado.players.map((p) => p.name)).not.toContain(
+      saindo.name,
+    );
+  });
+
+  it("[F-17] preserva instante do gol (ScreenTime) entre reloads", () => {
+    const original = buildPeladaComJogadores();
+    original.createTeams();
+    original.setPlayingGame();
+    original.start();
+    // Simula que passaram 45s no cronômetro antes do gol.
+    original.timer!.restTime = original.timer!.timeMatch - 45;
+    const team = original.playing!.teamA;
+    original.addGoal(team, team.players[0]);
+    const golOriginal = original.playing!.goals[0];
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    const golRecriado = recriada.playing!.goals[0];
+    expect(golRecriado.time.stroke).toBe(golOriginal.time.stroke);
+    expect(golRecriado.time.timeStroke).toBe(golOriginal.time.timeStroke);
+  });
+
   it("após vitória, preserva o time com vantagem para a próxima partida", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();
