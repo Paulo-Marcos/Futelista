@@ -38,6 +38,18 @@ export class Team {
   fullTeam: boolean = false;
   situation = TeamSituation.CREATED;
   readonly limit: number;
+  /**
+   * Nome personalizado do time (ex.: "Vermelhos"). Quando ausente, a UI
+   * cai num rótulo posicional ("Time 1", "Time 2"...). Trim no setter:
+   * string vazia ou só espaços = remove o custom.
+   */
+  nomeCustom?: string;
+  /**
+   * Cor personalizada do time (hex, ex.: "#E11D2A"). Quando ausente, a
+   * UI deriva uma cor determinística do `id` (TeamCrest). Setter valida
+   * formato; vazio remove.
+   */
+  corCustom?: string;
 
   constructor(input: TeamInput) {
     this.limit = input.limit;
@@ -46,6 +58,36 @@ export class Team {
 
   setSituation(situation: TeamSituation): void {
     this.situation = situation;
+  }
+
+  /**
+   * Renomeia o time para um label custom — passar `undefined` ou string
+   * vazia restaura o rótulo posicional default. Limita a 30 chars pra
+   * evitar quebra de layout em tudo que renderiza nome de time.
+   */
+  renomear(novoNome?: string): void {
+    if (novoNome === undefined) {
+      this.nomeCustom = undefined;
+      return;
+    }
+    const limpo = novoNome.trim().slice(0, 30);
+    this.nomeCustom = limpo.length === 0 ? undefined : limpo;
+  }
+
+  /**
+   * Define a cor custom do time. Aceita hex de 6 ou 8 dígitos com `#`.
+   * Passar `undefined` ou string vazia remove o override.
+   */
+  mudarCor(cor?: string): void {
+    if (cor === undefined || cor.trim() === "") {
+      this.corCustom = undefined;
+      return;
+    }
+    const limpo = cor.trim();
+    if (!/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(limpo)) {
+      throw Error(`Cor inválida: ${limpo} (use formato hex #RRGGBB).`);
+    }
+    this.corCustom = limpo.toUpperCase();
   }
 
   updateSizeTeam(): void {

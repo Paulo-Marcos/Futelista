@@ -62,6 +62,9 @@ type TeamDTO = {
   fullTeam: boolean;
   situation: TeamSituation;
   switches: SwitchDTO[];
+  /** Personalização F-18 — opcionais, ausência cai no rótulo/cor default. */
+  nomeCustom?: string;
+  corCustom?: string;
 };
 
 type MatchDTO = {
@@ -230,6 +233,8 @@ function buildTeamDTO(team: Team): TeamDTO {
       playerEntersId: s.playerEnters.id,
       playerLeavesId: s.playerLeaves.id,
     })),
+    nomeCustom: team.nomeCustom,
+    corCustom: team.corCustom,
   };
 }
 
@@ -330,6 +335,8 @@ function rehydrateTeams(
           team,
         ),
     );
+    team.nomeCustom = dto.nomeCustom;
+    team.corCustom = dto.corCustom;
     map.set(dto.id, team);
   });
   return map;

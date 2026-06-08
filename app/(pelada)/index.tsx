@@ -40,6 +40,7 @@ import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { RuleChip } from "@/src/shared/ui/RuleChip";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
+import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Wordmark } from "@/src/shared/ui/Wordmark";
 import { confirmAcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
@@ -677,7 +678,18 @@ function ExecucaoHome() {
   const timesEmCampo = useGameSlice((g) => ({
     a: g.next[0]?.id,
     b: g.next[1]?.id,
-  })) ?? { a: undefined, b: undefined };
+    nomeA: g.next[0]?.nomeCustom,
+    nomeB: g.next[1]?.nomeCustom,
+    corA: g.next[0]?.corCustom,
+    corB: g.next[1]?.corCustom,
+  })) ?? {
+    a: undefined,
+    b: undefined,
+    nomeA: undefined,
+    nomeB: undefined,
+    corA: undefined,
+    corB: undefined,
+  };
   const ultimasPartidas =
     useGameSlice((g) => g.matches.slice(-3).reverse()) ?? [];
 
@@ -879,6 +891,10 @@ function ExecucaoHome() {
           totalTimes={totalTimesVisivel}
           timeAId={timesEmCampo.a}
           timeBId={timesEmCampo.b}
+          timeANome={timesEmCampo.nomeA}
+          timeBNome={timesEmCampo.nomeB}
+          timeACor={timesEmCampo.corA}
+          timeBCor={timesEmCampo.corB}
           showMatchup={!playing && timesNaFila >= 2}
           cta={!playing && cta ? cta : null}
           onCta={() => (cta ? router.push(cta.href as never) : undefined)}
@@ -958,6 +974,10 @@ function Hero({
   totalTimes,
   timeAId,
   timeBId,
+  timeANome,
+  timeBNome,
+  timeACor,
+  timeBCor,
   showMatchup,
   cta,
   onCta,
@@ -972,6 +992,14 @@ function Hero({
   totalTimes: number;
   timeAId?: string;
   timeBId?: string;
+  /** Nome custom do Time A (F-18). Cai em "Time 1" quando undefined. */
+  timeANome?: string;
+  /** Nome custom do Time B (F-18). Cai em "Time 2" quando undefined. */
+  timeBNome?: string;
+  /** Cor custom (hex) do Time A para o escudo. Opcional. */
+  timeACor?: string;
+  /** Cor custom (hex) do Time B para o escudo. Opcional. */
+  timeBCor?: string;
   showMatchup: boolean;
   cta: {
     label: string;
@@ -1073,12 +1101,16 @@ function Hero({
               </Text>
             </View>
             <View style={styles.heroPlacarRow}>
-              <TeamCrest seed={partida.teamA.id} size={26} />
+              <TeamCrest
+                seed={partida.teamA.id}
+                size={26}
+                corOverride={partida.teamA.corCustom}
+              />
               <Text
                 style={[styles.heroPlacarTeam, { color: palette.onSurface }]}
                 numberOfLines={1}
               >
-                Time 1
+                {nomeDoTime(partida.teamA, 0)}
               </Text>
               <Text
                 style={[styles.heroPlacarScore, { color: palette.onSurface }]}
@@ -1092,9 +1124,13 @@ function Hero({
                 ]}
                 numberOfLines={1}
               >
-                Time 2
+                {nomeDoTime(partida.teamB, 1)}
               </Text>
-              <TeamCrest seed={partida.teamB.id} size={26} />
+              <TeamCrest
+                seed={partida.teamB.id}
+                size={26}
+                corOverride={partida.teamB.corCustom}
+              />
             </View>
             <View style={styles.heroCtaWrap}>
               <HeroPrimaryCTA
@@ -1109,12 +1145,12 @@ function Hero({
           <>
             {showMatchup && timeAId && timeBId ? (
               <View style={styles.matchup}>
-                <TeamCrest seed={timeAId} size={30} />
+                <TeamCrest seed={timeAId} size={30} corOverride={timeACor} />
                 <Text
                   style={[styles.matchupTeam, { color: palette.onSurface }]}
                   numberOfLines={1}
                 >
-                  Time 1
+                  {timeANome ?? "Time 1"}
                 </Text>
                 <Text
                   style={[
@@ -1131,9 +1167,9 @@ function Hero({
                   ]}
                   numberOfLines={1}
                 >
-                  Time 2
+                  {timeBNome ?? "Time 2"}
                 </Text>
-                <TeamCrest seed={timeBId} size={30} />
+                <TeamCrest seed={timeBId} size={30} corOverride={timeBCor} />
               </View>
             ) : null}
 

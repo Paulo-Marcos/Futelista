@@ -14,6 +14,7 @@ import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
+import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 type Cenario =
@@ -247,7 +248,11 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
               color={palette.goal}
             />
             <Text style={[styles.winnerText, { color: palette.goal }]}>
-              {winnerSide === "A" ? "Time 1" : "Time 2"} continua jogando
+              {nomeDoTime(
+                cenario.kind === "victory" ? cenario.vencedor : playing.teamA,
+                winnerSide === "A" ? 0 : 1,
+              )}{" "}
+              continua jogando
             </Text>
           </View>
         </>
@@ -273,13 +278,13 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
           </Text>
           <View style={styles.pickRow}>
             <PickTeamCard
-              label="Time 1"
+              label={nomeDoTime(cenario.teamA, 0)}
               team={cenario.teamA}
               selected={escolhidoId === cenario.teamA.id}
               onPress={() => setEscolhidoId(cenario.teamA.id)}
             />
             <PickTeamCard
-              label="Time 2"
+              label={nomeDoTime(cenario.teamB, 1)}
               team={cenario.teamB}
               selected={escolhidoId === cenario.teamB.id}
               onPress={() => setEscolhidoId(cenario.teamB.id)}

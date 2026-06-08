@@ -6,6 +6,7 @@ import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
+import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 /**
@@ -23,6 +24,7 @@ export function TeamMini({
   selectedPlayerId,
   onPlayerPress,
   onActionsPress,
+  onLongPress,
 }: {
   team: Team;
   idx: number;
@@ -30,31 +32,42 @@ export function TeamMini({
   selectedPlayerId?: string;
   onPlayerPress?: (playerId: string) => void;
   onActionsPress?: () => void;
+  /**
+   * Long-press no card (não na lista de jogadores) abre o sheet de
+   * edição do time — nome custom e cor (F-18). O wrapper externo
+   * troca de View pra Pressable só quando esse handler está plugado;
+   * fora isso o comportamento original é preservado.
+   */
+  onLongPress?: () => void;
 }) {
   const palette = usePalette();
   const borderTopColor =
-    tone === "A" ? palette.primary : palette.secondary;
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: palette.surface,
-          borderColor: palette.outlineVariant,
-          borderTopColor,
-        },
-      ]}
-    >
+    team.corCustom ?? (tone === "A" ? palette.primary : palette.secondary);
+  const label = nomeDoTime(team, idx);
+  const cardStyle = [
+    styles.card,
+    {
+      backgroundColor: palette.surface,
+      borderColor: palette.outlineVariant,
+      borderTopColor,
+    },
+  ];
+  const conteudo = (
+    <>
       <View style={styles.header}>
-        <TeamCrest seed={team.id} size={26} />
+        <TeamCrest
+          seed={team.id}
+          size={26}
+          corOverride={team.corCustom}
+        />
         <Text style={[styles.title, { color: palette.onSurface }]}>
-          Time {idx + 1}
+          {label}
         </Text>
         {onActionsPress ? (
           <Pressable
             onPress={onActionsPress}
             accessibilityRole="button"
-            accessibilityLabel={`Ações do Time ${idx + 1}`}
+            accessibilityLabel={`Ações do ${label}`}
             style={styles.menuBtn}
             android_ripple={{ color: palette.primary + "22" }}
           >
@@ -83,8 +96,27 @@ export function TeamMini({
           ))
         )}
       </View>
-    </View>
+    </>
   );
+
+  // Long-press só no caminho que precisa. Sem `accessibilityRole="button"`
+  // no wrapper — Pressables aninhados com mesmo role confundem o testing-
+  // library na busca por nome (encontra ambos como "botão"). O long-press
+  // ainda funciona; o leitor de tela usa o accessibilityLabel direto.
+  if (onLongPress) {
+    return (
+      <Pressable
+        onLongPress={onLongPress}
+        delayLongPress={350}
+        accessibilityLabel={`Editar ${label}`}
+        accessibilityHint="Toque e segure para renomear ou trocar a cor"
+        style={cardStyle}
+      >
+        {conteudo}
+      </Pressable>
+    );
+  }
+  return <View style={cardStyle}>{conteudo}</View>;
 }
 
 function PlayerLine({

@@ -120,4 +120,53 @@ describe('Teste da classe Team', () => {
       );
     });
   });
+
+  describe('Personalização (F-18)', () => {
+    it('nasce sem nomeCustom nem corCustom', () => {
+      const team = new Team({ limit: 4 });
+      expect(team.nomeCustom).toBeUndefined();
+      expect(team.corCustom).toBeUndefined();
+    });
+
+    it('renomear com string aplica e faz trim', () => {
+      const team = new Team({ limit: 4 });
+      team.renomear('  Vermelhos  ');
+      expect(team.nomeCustom).toBe('Vermelhos');
+    });
+
+    it('renomear com vazio ou undefined remove o custom', () => {
+      const team = new Team({ limit: 4 });
+      team.renomear('Time A');
+      team.renomear('');
+      expect(team.nomeCustom).toBeUndefined();
+      team.renomear('Time A');
+      team.renomear(undefined);
+      expect(team.nomeCustom).toBeUndefined();
+    });
+
+    it('renomear limita a 30 caracteres', () => {
+      const team = new Team({ limit: 4 });
+      team.renomear('A'.repeat(50));
+      expect(team.nomeCustom?.length).toBe(30);
+    });
+
+    it('mudarCor aceita hex válido e normaliza para uppercase', () => {
+      const team = new Team({ limit: 4 });
+      team.mudarCor('#e11d2a');
+      expect(team.corCustom).toBe('#E11D2A');
+    });
+
+    it('mudarCor com vazio ou undefined remove o custom', () => {
+      const team = new Team({ limit: 4 });
+      team.mudarCor('#E11D2A');
+      team.mudarCor('');
+      expect(team.corCustom).toBeUndefined();
+    });
+
+    it('mudarCor rejeita formato inválido', () => {
+      const team = new Team({ limit: 4 });
+      expect(() => team.mudarCor('vermelho')).toThrowError(/Cor inválida/);
+      expect(() => team.mudarCor('#FFF')).toThrowError(/Cor inválida/);
+    });
+  });
 });

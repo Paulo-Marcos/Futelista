@@ -35,6 +35,7 @@ import { LivePulseDot } from "@/src/shared/ui/LivePulseDot";
 import { MatchTimeline } from "@/src/shared/ui/MatchTimeline";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
+import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { confirmAcao } from "@/src/shared/ui/confirmAcao";
@@ -522,8 +523,12 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         onSubMultiplos={onSubstituirMultiplos}
       />
 
-      {celebration ? <GoalCelebration cel={celebration} /> : null}
-      {subToast ? <SubstitutionToast t={subToast} /> : null}
+      {celebration ? (
+        <GoalCelebration cel={celebration} teamA={teamA} teamB={teamB} />
+      ) : null}
+      {subToast ? (
+        <SubstitutionToast t={subToast} teamA={teamA} teamB={teamB} />
+      ) : null}
       {checkpointToast ? (
         <CheckpointToast texto={checkpointToast} topOffset={insets.top} />
       ) : null}
@@ -666,9 +671,13 @@ function MatchScoreboard({
             { opacity: pressed ? 0.75 : 1, alignItems: "center" },
           ]}
         >
-          <TeamCrest seed={teamA.id} size={28} />
+          <TeamCrest
+            seed={teamA.id}
+            size={28}
+            corOverride={teamA.corCustom}
+          />
           <Text style={[styles.sbTeam, { color: palette.onSurface }]}>
-            Time 1
+            {nomeDoTime(teamA, 0)}
           </Text>
           <View
             style={[
@@ -718,9 +727,13 @@ function MatchScoreboard({
             { opacity: pressed ? 0.75 : 1, alignItems: "center" },
           ]}
         >
-          <TeamCrest seed={teamB.id} size={28} />
+          <TeamCrest
+            seed={teamB.id}
+            size={28}
+            corOverride={teamB.corCustom}
+          />
           <Text style={[styles.sbTeam, { color: palette.onSurface }]}>
-            Time 2
+            {nomeDoTime(teamB, 1)}
           </Text>
           <View
             style={[
@@ -1309,7 +1322,7 @@ function ScorerSheet({
               <Text
                 style={[styles.sheetTitle, { color: palette.onSurface }]}
               >
-                {side === "A" ? "Time 1" : "Time 2"}
+                {side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)}
               </Text>
             </View>
             <Pressable
@@ -1812,6 +1825,8 @@ function FieldPlayerItem({
 
 function GoalCelebration({
   cel,
+  teamA,
+  teamB,
 }: {
   cel: {
     player: Player;
@@ -1819,6 +1834,8 @@ function GoalCelebration({
     scoreA: number;
     scoreB: number;
   };
+  teamA: Team;
+  teamB: Team;
 }) {
   const palette = usePalette();
   const scale = useRef(new Animated.Value(0.3)).current;
@@ -1910,7 +1927,7 @@ function GoalCelebration({
               color={palette.onSurfaceVariant}
             />
             <Text style={[styles.celebSub, { color: palette.onSurfaceVariant }]}>
-              {cel.side === "A" ? "Time 1" : "Time 2"} marcou
+              {cel.side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)} marcou
             </Text>
           </View>
         </View>
@@ -2008,8 +2025,12 @@ function ConfettiPiece({ index, color }: { index: number; color: string }) {
 
 function SubstitutionToast({
   t,
+  teamA,
+  teamB,
 }: {
   t: { inP: Player; outP: Player; side: "A" | "B"; extras?: number };
+  teamA: Team;
+  teamB: Team;
 }) {
   const palette = usePalette();
   return (
@@ -2062,8 +2083,8 @@ function SubstitutionToast({
         {t.extras && t.extras > 0
           ? `+${t.extras} ${t.extras === 1 ? "troca" : "trocas"}`
           : t.side === "A"
-            ? "Time 1"
-            : "Time 2"}
+            ? nomeDoTime(teamA, 0)
+            : nomeDoTime(teamB, 1)}
       </Text>
     </View>
   );

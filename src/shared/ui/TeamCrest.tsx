@@ -68,10 +68,23 @@ type TeamCrestProps = {
   seed: string;
   size?: number;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Cor primária do escudo (F-18). Quando passada, sobrescreve `c1` do
+   * `crestFor(seed)` — usado para refletir a `corCustom` que o usuário
+   * escolheu no editor de time. `c2` (cor secundária) continua sendo
+   * derivada da seed para preservar o emblema.
+   */
+  corOverride?: string;
 };
 
-export function TeamCrest({ seed, size = 32, style }: TeamCrestProps) {
-  const { c1, c2, pattern, emblem } = crestFor(seed);
+export function TeamCrest({
+  seed,
+  size = 32,
+  style,
+  corOverride,
+}: TeamCrestProps) {
+  const { c1: c1Seed, c2, pattern, emblem } = crestFor(seed);
+  const c1 = corOverride ?? c1Seed;
   // ID único por instância. Não pode depender só de `seed`: o mesmo time
   // aparece em vários TeamCrest simultaneamente (placar + mini-placar + lista
   // de próximos), e <ClipPath id="cr…"> duplicado dentro do mesmo documento

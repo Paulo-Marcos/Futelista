@@ -160,6 +160,18 @@ describe("serializer (round-trip GestorJogo)", () => {
     );
   });
 
+  it("[F-18] preserva nomeCustom e corCustom do time entre reloads", () => {
+    const original = buildPeladaComJogadores();
+    original.createTeams();
+    original.next[0].renomear("Vermelhos");
+    original.next[0].mudarCor("#E11D2A");
+
+    const recriada = deserializeGestorJogo(serializeGestorJogo(original));
+
+    expect(recriada.next[0].nomeCustom).toBe("Vermelhos");
+    expect(recriada.next[0].corCustom).toBe("#E11D2A");
+  });
+
   it("[F-17] preserva instante do gol (ScreenTime) entre reloads", () => {
     const original = buildPeladaComJogadores();
     original.createTeams();

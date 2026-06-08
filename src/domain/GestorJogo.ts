@@ -203,6 +203,18 @@ export class GestorJogo {
     this.notify();
   }
 
+  /**
+   * Aplica personalização (nome custom e/ou cor) a um time da pelada
+   * (F-18). Passar `nome: ""` ou `cor: ""` no patch remove o custom
+   * correspondente; campos ausentes ficam intocados. Notifica
+   * listeners pra UI re-renderizar com o novo rótulo/cor.
+   */
+  editarTime(time: Team, patch: { nome?: string; cor?: string }): void {
+    if (patch.nome !== undefined) time.renomear(patch.nome);
+    if (patch.cor !== undefined) time.mudarCor(patch.cor);
+    this.notify();
+  }
+
   switchPlayerLeft(playerIn: Player, playerOut: Player): void {
     const teamToOut = playerIn.currentTeam!;
     teamToOut.removePlayer(playerIn);
