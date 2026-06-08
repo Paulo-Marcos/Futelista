@@ -6,6 +6,7 @@ import {
   FlatList,
   Platform,
   Pressable,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -19,6 +20,7 @@ import {
   consolidarSequenciasVitoria,
   SequenciaVencedor,
 } from "@/src/domain/AgregadosPelada";
+import { gerarConvitePelada } from "@/src/domain/ConvitePelada";
 import { PeladaStatus } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoExecucao } from "@/src/domain/ports/RepositorioPelada";
@@ -124,6 +126,23 @@ export default function ExecucoesDePeladaScreen() {
   };
 
   /**
+   * Compartilha o convite textual da pelada (F-20) via Share nativo.
+   * O texto vem do helper puro `gerarConvitePelada` — sem deep link
+   * por enquanto (depende de backend). Erros (cancelar, app
+   * indisponível) são silenciosos.
+   */
+  const compartilharConvite = async (peladaParaCompartilhar: Pelada) => {
+    try {
+      await Share.share({
+        message: gerarConvitePelada(peladaParaCompartilhar),
+        title: peladaParaCompartilhar.nome,
+      });
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  /**
    * Menu de ações destrutivas (Arquivar / Excluir) no kebab do header.
    *
    * Cada ação tem uma confirmação dedicada com texto explicando o impacto.
@@ -206,6 +225,24 @@ export default function ExecucoesDePeladaScreen() {
         </Text>
         {pelada ? (
           <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => compartilharConvite(pelada)}
+              accessibilityRole="button"
+              accessibilityLabel="Compartilhar pelada"
+              style={({ pressed }) => [
+                styles.iconButton,
+                {
+                  backgroundColor: palette.surfaceContainerHigh,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="share-variant"
+                size={18}
+                color={palette.onSurface}
+              />
+            </Pressable>
             <Pressable
               onPress={() =>
                 router.push({

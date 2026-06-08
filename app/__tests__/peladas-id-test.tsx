@@ -222,6 +222,34 @@ describe("PeladaDetalhe — loading e cabeçalho", () => {
       params: { id: "p1" },
     });
   });
+
+  it("botão Compartilhar chama Share.share com o convite gerado [F-20]", async () => {
+    const { Share } = require("react-native") as {
+      Share: typeof import("react-native").Share;
+    };
+    const shareSpy = jest
+      .spyOn(Share, "share")
+      .mockResolvedValue({ action: "sharedAction" } as any);
+
+    renderWithProviders(<PeladaDetalheScreen />, {
+      soccer: {
+        carregarPelada: jest.fn().mockResolvedValue(fakePelada()),
+        listarExecucoesDe: jest.fn().mockResolvedValue([]),
+      },
+    });
+
+    const botao = await screen.findByRole("button", {
+      name: "Compartilhar pelada",
+    });
+    fireEvent.press(botao);
+
+    await waitFor(() => expect(shareSpy).toHaveBeenCalledTimes(1));
+    const arg = shareSpy.mock.calls[0][0] as { message: string; title: string };
+    expect(arg.title).toBe("Fute CEF");
+    expect(arg.message).toContain("⚽ Fute CEF");
+    expect(arg.message).toContain("— FuteLista");
+    shareSpy.mockRestore();
+  });
 });
 
 // ===========================================================================
