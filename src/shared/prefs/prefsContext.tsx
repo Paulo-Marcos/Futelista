@@ -21,10 +21,16 @@ import { STORAGE_KEYS } from "@/src/infrastructure/storage/storageKeys";
 export type Prefs = {
   /** Dispara vibração háptica quando o cronômetro da partida chega a 0. */
   apitoHaptico: boolean;
+  /**
+   * `true` depois que o usuário viu (ou pulou) o onboarding inicial.
+   * Default `false` — primeira abertura cai na tela de tour antes da Home.
+   */
+  onboardingFeito: boolean;
 };
 
 const DEFAULT_PREFS: Prefs = {
   apitoHaptico: true,
+  onboardingFeito: false,
 };
 
 type PrefsContextValue = {
@@ -102,8 +108,13 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
 export function usePrefs(): PrefsContextValue {
   const ctx = useContext(PrefsContext);
   if (ctx === NO_PROVIDER) {
+    // Fallback usado por testes que não embrulham com PrefsProvider.
+    // `onboardingFeito: true` é o estado "neutro" — não dispara o gate
+    // de onboarding nem aciona toggles relacionados. Testes que querem
+    // verificar comportamento de primeira abertura embrulham com
+    // <PrefsProvider> de verdade.
     return {
-      prefs: DEFAULT_PREFS,
+      prefs: { ...DEFAULT_PREFS, onboardingFeito: true },
       setPrefs: () => {},
       hydrating: false,
     };

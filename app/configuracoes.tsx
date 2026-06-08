@@ -251,6 +251,39 @@ export default function ConfiguracoesScreen() {
         Sobre
       </Text>
 
+      <Pressable
+        onPress={() => router.push("/onboarding")}
+        accessibilityRole="button"
+        accessibilityLabel="Ver tour"
+        style={({ pressed }) => [
+          styles.actionRow,
+          {
+            backgroundColor: palette.surface,
+            borderColor: palette.outlineVariant,
+            opacity: pressed ? 0.85 : 1,
+          },
+        ]}
+      >
+        <MaterialCommunityIcons
+          name="map-outline"
+          size={20}
+          color={palette.primary}
+        />
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.cardLabel, { color: palette.onSurface }]}>
+            Ver tour
+          </Text>
+          <Text style={[styles.cardHint, { color: palette.onSurfaceVariant }]}>
+            Revê os 3 slides do onboarding inicial.
+          </Text>
+        </View>
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={18}
+          color={palette.onSurfaceVariant}
+        />
+      </Pressable>
+
       <View
         style={[
           styles.card,

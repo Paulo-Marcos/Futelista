@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,6 +29,7 @@ import { Match, ResultMatch } from "@/src/domain/Match";
 import { Pelada } from "@/src/domain/Pelada";
 import { ResumoPeladaTipo } from "@/src/domain/ports/RepositorioPelada";
 import { TimerStatus } from "@/src/domain/Timer";
+import { usePrefs } from "@/src/shared/prefs/prefsContext";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
@@ -51,6 +52,14 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  */
 export default function HomeScreen() {
   const { gestor } = useSoccer();
+  const { prefs, hydrating } = usePrefs();
+  // Gate de onboarding (F-16): na PRIMEIRA abertura, manda pro tour
+  // antes de mostrar a Home. Só age em modo Gestão (sem execução
+  // ativa) e depois da hidratação — assim sessões em andamento não
+  // perdem o lugar nem disparam loop antes do storage responder.
+  if (!hydrating && !prefs.onboardingFeito && !gestor) {
+    return <Redirect href="/onboarding" />;
+  }
   return gestor ? <ExecucaoHome /> : <GestaoHome />;
 }
 
