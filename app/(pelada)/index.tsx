@@ -129,6 +129,7 @@ function GestaoHome() {
             onPress={() => router.push("/configuracoes")}
             accessibilityRole="button"
             accessibilityLabel="Configurações"
+            hitSlop={8}
             style={({ pressed }) => [
               styles.iconBtnGhost,
               {
@@ -1637,6 +1638,8 @@ function ErrorBanner({ mensagem }: { mensagem: string }) {
           borderColor: palette.error,
         },
       ]}
+      accessibilityLiveRegion="polite"
+      accessibilityRole="alert"
     >
       <MaterialCommunityIcons
         name="alert-circle"

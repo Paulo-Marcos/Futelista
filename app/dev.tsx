@@ -103,6 +103,7 @@ export default function DevScreen() {
           style={styles.closeButton}
           accessibilityRole="button"
           accessibilityLabel="Fechar"
+          hitSlop={8}
         >
           <MaterialCommunityIcons
             name="close"

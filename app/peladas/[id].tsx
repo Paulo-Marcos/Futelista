@@ -376,6 +376,8 @@ export default function ExecucoesDePeladaScreen() {
               borderColor: palette.error,
             },
           ]}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
         >
           <Text style={[styles.errorText, { color: palette.error }]} selectable>
             {erro}

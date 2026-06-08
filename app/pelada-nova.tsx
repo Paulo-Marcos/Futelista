@@ -141,6 +141,7 @@ export default function PeladaNovaScreen() {
       <Field
         icon="shield-outline"
         placeholder="Nome da pelada (ex.: Fute de Quarta)"
+        accessibilityLabel="Nome da pelada"
         value={nome}
         onChangeText={setNome}
         autoFocus
@@ -151,6 +152,7 @@ export default function PeladaNovaScreen() {
       <Field
         icon="map-marker-outline"
         placeholder="Local (ex.: Quadra do CEF)"
+        accessibilityLabel="Local da pelada"
         value={local}
         onChangeText={setLocal}
       />
@@ -197,6 +199,7 @@ export default function PeladaNovaScreen() {
       <Field
         icon="clock-time-four-outline"
         placeholder="21:00"
+        accessibilityLabel="Horário da pelada"
         value={hora}
         onChangeText={setHora}
       />
@@ -310,6 +313,8 @@ export default function PeladaNovaScreen() {
               borderColor: palette.error,
             },
           ]}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
         >
           <MaterialCommunityIcons
             name="alert-circle"

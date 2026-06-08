@@ -458,6 +458,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
               borderColor: palette.error,
             },
           ]}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
         >
           <MaterialCommunityIcons
             name="alert-circle"

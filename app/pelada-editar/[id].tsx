@@ -226,6 +226,7 @@ export default function PeladaEditarScreen() {
       <Field
         icon="shield-outline"
         placeholder="Nome da pelada (ex.: Fute de Quarta)"
+        accessibilityLabel="Nome da pelada"
         value={nome}
         onChangeText={setNome}
         autoCapitalize="words"
@@ -235,6 +236,7 @@ export default function PeladaEditarScreen() {
       <Field
         icon="map-marker-outline"
         placeholder="Local (ex.: Quadra do CEF)"
+        accessibilityLabel="Local da pelada"
         value={local}
         onChangeText={setLocal}
       />
@@ -281,6 +283,7 @@ export default function PeladaEditarScreen() {
       <Field
         icon="clock-time-four-outline"
         placeholder="21:00"
+        accessibilityLabel="Horário da pelada"
         value={hora}
         onChangeText={setHora}
       />
@@ -373,6 +376,8 @@ export default function PeladaEditarScreen() {
               borderColor: palette.error,
             },
           ]}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
         >
           <MaterialCommunityIcons
             name="alert-circle"

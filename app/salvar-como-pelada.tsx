@@ -95,6 +95,7 @@ function SalvarComoPeladaInner({ gestor }: { gestor: GestorJogo }) {
           onChangeText={setNome}
           placeholder="Ex.: Fute CEF"
           placeholderTextColor={palette.onSurfaceVariant}
+          accessibilityLabel="Nome da pelada"
           autoFocus
           autoCapitalize="words"
           maxLength={40}
