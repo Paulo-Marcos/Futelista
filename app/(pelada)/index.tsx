@@ -104,25 +104,54 @@ function GestaoHome() {
       ]}
     >
       <View style={styles.gestaoHeader}>
-        <Wordmark size={22} />
-        {__DEV__ ? (
+        {/* Wordmark agora é o entry point das configurações globais. */}
+        <Pressable
+          onPress={() => router.push("/configuracoes")}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir configurações"
+          hitSlop={8}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <Wordmark size={22} />
+        </Pressable>
+        <View style={styles.gestaoHeaderRight}>
           <Pressable
-            onPress={() => router.push("/dev")}
+            onPress={() => router.push("/configuracoes")}
             accessibilityRole="button"
-            accessibilityLabel="Abrir dev tools"
+            accessibilityLabel="Configurações"
             style={({ pressed }) => [
-              styles.devButton,
+              styles.iconBtnGhost,
               {
-                borderColor: palette.outline,
+                backgroundColor: palette.surfaceContainerHigh,
                 opacity: pressed ? 0.7 : 1,
               },
             ]}
           >
-            <Text style={[styles.devButtonText, { color: palette.onSurface }]}>
-              🛠 dev
-            </Text>
+            <MaterialCommunityIcons
+              name="cog-outline"
+              size={18}
+              color={palette.onSurface}
+            />
           </Pressable>
-        ) : null}
+          {__DEV__ ? (
+            <Pressable
+              onPress={() => router.push("/dev")}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir dev tools"
+              style={({ pressed }) => [
+                styles.devButton,
+                {
+                  borderColor: palette.outline,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <Text style={[styles.devButtonText, { color: palette.onSurface }]}>
+                🛠 dev
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
       <FlatList
@@ -1713,6 +1742,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
+  },
+  gestaoHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  iconBtnGhost: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   devButton: {
     paddingHorizontal: Spacing.sm,

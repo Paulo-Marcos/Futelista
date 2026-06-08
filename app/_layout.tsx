@@ -91,6 +91,13 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="configuracoes"
+            options={{
+              presentation: "formSheet",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="dev"
             options={{
               presentation: "formSheet",
