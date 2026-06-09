@@ -151,6 +151,46 @@ jest.mock("expo-haptics", () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// @gorhom/bottom-sheet — biblioteca de bottom sheet nativa, usa
+// reanimated worklets que não rodam em jsdom. Mock substitui pelo
+// caminho visual mínimo: quando `index >= 0` renderiza o conteúdo num
+// View, senão null. Mantém os testes existentes encontrando o conteúdo
+// via getByText/getByRole.
+// ---------------------------------------------------------------------------
+jest.mock("@gorhom/bottom-sheet", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+  const BottomSheet = React.forwardRef(
+    (
+      { children, index }: { children: React.ReactNode; index?: number },
+      _ref: unknown,
+    ) => {
+      // Em props `index >= 0` significa "aberto" no contrato do gorhom.
+      if (index === undefined || index < 0) return null;
+      return React.createElement(View, null, children);
+    },
+  );
+  const BottomSheetView = ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) => React.createElement(View, null, children);
+  const BottomSheetBackdrop = () => null;
+  const BottomSheetModalProvider = ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) => React.createElement(View, null, children);
+  return {
+    __esModule: true,
+    default: BottomSheet,
+    BottomSheetView,
+    BottomSheetBackdrop,
+    BottomSheetModalProvider,
+  };
+});
+
+// ---------------------------------------------------------------------------
 // expo-image-picker + expo-file-system — usados pelo helper de foto do
 // jogador (F-19). Mocks neutros: cada teste que quiser exercitar o
 // caminho real sobrescreve a implementação específica.

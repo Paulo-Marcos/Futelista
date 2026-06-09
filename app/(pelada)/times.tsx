@@ -3,7 +3,6 @@ import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -19,6 +18,7 @@ import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
+import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
@@ -784,7 +784,7 @@ const PlaceholderTime = memo(function PlaceholderTime({
 // ---------------------------------------------------------------------------
 
 /** Paleta de cores predefinidas para o usuário escolher. Hex 6 dígitos. */
-const CORES_TIME: ReadonlyArray<{ hex: string; label: string }> = [
+const CORES_TIME: readonly { hex: string; label: string }[] = [
   { hex: "#E11D2A", label: "Vermelho" },
   { hex: "#2E6BE6", label: "Azul" },
   { hex: "#12A150", label: "Verde" },
@@ -819,162 +819,145 @@ function EditarTimeSheet({
   const placeholderNome = nomeDoTime(team, idx);
 
   return (
-    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.sheetWrap} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: palette.surface }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View
-            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
-          />
-          <View style={styles.sheetHead}>
-            <View>
-              <Text
-                style={[
-                  styles.sheetEyebrow,
-                  { color: palette.onSurfaceVariant },
-                ]}
-              >
-                Personalizar
-              </Text>
-              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-                Editar time
-              </Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Fechar editor de time"
-              style={styles.sheetCloseBtn}
-            >
-              <MaterialCommunityIcons
-                name="close"
-                size={18}
-                color={palette.onSurface}
-              />
-            </Pressable>
-          </View>
-
-          <ScrollView style={{ maxHeight: 420 }}>
+    <AppBottomSheet visible onClose={onClose} snapPoint="75%">
+      <View style={styles.sheet}>
+        <View style={styles.sheetHead}>
+          <View>
             <Text
-              style={[styles.sheetLabel, { color: palette.onSurfaceVariant }]}
+              style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
             >
-              Nome
+              Personalizar
             </Text>
-            <TextInput
-              value={nome}
-              onChangeText={setNome}
-              placeholder={placeholderNome}
-              placeholderTextColor={palette.onSurfaceVariant}
-              maxLength={30}
-              accessibilityLabel="Nome do time"
-              style={[
-                styles.sheetInput,
+            <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+              Editar time
+            </Text>
+          </View>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar editor de time"
+            style={styles.sheetCloseBtn}
+          >
+            <MaterialCommunityIcons
+              name="close"
+              size={18}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        </View>
+
+        <ScrollView style={{ maxHeight: 420 }}>
+          <Text
+            style={[styles.sheetLabel, { color: palette.onSurfaceVariant }]}
+          >
+            Nome
+          </Text>
+          <TextInput
+            value={nome}
+            onChangeText={setNome}
+            placeholder={placeholderNome}
+            placeholderTextColor={palette.onSurfaceVariant}
+            maxLength={30}
+            accessibilityLabel="Nome do time"
+            style={[
+              styles.sheetInput,
+              {
+                color: palette.onSurface,
+                borderColor: palette.outline,
+                backgroundColor: palette.background,
+              },
+            ]}
+          />
+
+          <Text
+            style={[
+              styles.sheetLabel,
+              { color: palette.onSurfaceVariant, marginTop: Spacing.md },
+            ]}
+          >
+            Cor
+          </Text>
+          <View style={styles.coresGrid}>
+            <Pressable
+              onPress={() => setCor(undefined)}
+              accessibilityRole="button"
+              accessibilityLabel="Cor padrão (do escudo)"
+              accessibilityState={{ selected: cor === undefined }}
+              style={({ pressed }) => [
+                styles.corChip,
                 {
-                  color: palette.onSurface,
-                  borderColor: palette.outline,
-                  backgroundColor: palette.background,
+                  backgroundColor: palette.surfaceContainerHigh,
+                  borderColor:
+                    cor === undefined ? palette.primary : palette.outline,
+                  borderWidth: cor === undefined ? 2 : 1,
+                  opacity: pressed ? 0.8 : 1,
                 },
               ]}
-            />
-
-            <Text
-              style={[
-                styles.sheetLabel,
-                { color: palette.onSurfaceVariant, marginTop: Spacing.md },
-              ]}
             >
-              Cor
-            </Text>
-            <View style={styles.coresGrid}>
+              <MaterialCommunityIcons
+                name="palette-swatch"
+                size={18}
+                color={palette.onSurfaceVariant}
+              />
+              <Text style={[styles.corLabel, { color: palette.onSurface }]}>
+                Padrão
+              </Text>
+            </Pressable>
+            {CORES_TIME.map((c) => (
               <Pressable
-                onPress={() => setCor(undefined)}
+                key={c.hex}
+                onPress={() => setCor(c.hex)}
                 accessibilityRole="button"
-                accessibilityLabel="Cor padrão (do escudo)"
-                accessibilityState={{ selected: cor === undefined }}
+                accessibilityLabel={`Cor ${c.label}`}
+                accessibilityState={{ selected: cor === c.hex }}
                 style={({ pressed }) => [
                   styles.corChip,
                   {
                     backgroundColor: palette.surfaceContainerHigh,
                     borderColor:
-                      cor === undefined ? palette.primary : palette.outline,
-                    borderWidth: cor === undefined ? 2 : 1,
+                      cor === c.hex ? palette.primary : palette.outline,
+                    borderWidth: cor === c.hex ? 2 : 1,
                     opacity: pressed ? 0.8 : 1,
                   },
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="palette-swatch"
-                  size={18}
-                  color={palette.onSurfaceVariant}
-                />
-                <Text
-                  style={[styles.corLabel, { color: palette.onSurface }]}
-                >
-                  Padrão
+                <View style={[styles.corDot, { backgroundColor: c.hex }]} />
+                <Text style={[styles.corLabel, { color: palette.onSurface }]}>
+                  {c.label}
                 </Text>
               </Pressable>
-              {CORES_TIME.map((c) => (
-                <Pressable
-                  key={c.hex}
-                  onPress={() => setCor(c.hex)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Cor ${c.label}`}
-                  accessibilityState={{ selected: cor === c.hex }}
-                  style={({ pressed }) => [
-                    styles.corChip,
-                    {
-                      backgroundColor: palette.surfaceContainerHigh,
-                      borderColor:
-                        cor === c.hex ? palette.primary : palette.outline,
-                      borderWidth: cor === c.hex ? 2 : 1,
-                      opacity: pressed ? 0.8 : 1,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[styles.corDot, { backgroundColor: c.hex }]}
-                  />
-                  <Text
-                    style={[styles.corLabel, { color: palette.onSurface }]}
-                  >
-                    {c.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
+            ))}
+          </View>
+        </ScrollView>
 
-          <Pressable
-            onPress={() =>
-              onSalvar(team, {
-                nome: nome.trim(),
-                cor: cor ?? "",
-              })
-            }
-            accessibilityRole="button"
-            accessibilityLabel="Salvar edição do time"
-            style={({ pressed }) => [
-              styles.sheetSalvar,
-              {
-                backgroundColor: palette.primary,
-                opacity: pressed ? 0.85 : 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="check"
-              size={18}
-              color={palette.onPrimary}
-            />
-            <Text style={[styles.sheetSalvarText, { color: palette.onPrimary }]}>
-              Salvar
-            </Text>
-          </Pressable>
+        <Pressable
+          onPress={() =>
+            onSalvar(team, {
+              nome: nome.trim(),
+              cor: cor ?? "",
+            })
+          }
+          accessibilityRole="button"
+          accessibilityLabel="Salvar edição do time"
+          style={({ pressed }) => [
+            styles.sheetSalvar,
+            {
+              backgroundColor: palette.primary,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="check"
+            size={18}
+            color={palette.onPrimary}
+          />
+          <Text style={[styles.sheetSalvarText, { color: palette.onPrimary }]}>
+            Salvar
+          </Text>
         </Pressable>
-      </Pressable>
-    </Modal>
+      </View>
+    </AppBottomSheet>
   );
 }
 

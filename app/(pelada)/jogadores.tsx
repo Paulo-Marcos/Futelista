@@ -3,7 +3,6 @@ import { Redirect } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -23,6 +22,7 @@ import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
 import { usePalette } from "@/src/shared/hooks/usePalette";
+import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PlayerRow } from "@/src/shared/ui/PlayerRow";
@@ -208,175 +208,178 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
           `Jogadores.html`: `.screen { padding: 2px 16px 18px; gap: 12px }`).
           A FlatList sai com `flex:1` pra ocupar o resto da tela. */}
       <View style={styles.body}>
-      <View style={styles.addRow}>
-        <TextInput
-          value={novoNome}
-          onChangeText={setNovoNome}
-          placeholder="Adicionar jogador"
-          placeholderTextColor={palette.onSurfaceVariant}
-          onSubmitEditing={adicionar}
-          returnKeyType="done"
-          accessibilityLabel="Nome do novo jogador"
-          style={[
-            styles.input,
-            {
-              borderColor: palette.outline,
-              backgroundColor: palette.surface,
-              color: palette.onSurface,
-            },
-          ]}
-        />
-        <AddButton
-          enabled={!!novoNome.trim()}
-          onPress={adicionar}
-          palette={palette}
-          accessibilityLabel="Adicionar jogador"
-        />
-        <Pressable
-          onPress={() => setLoteAberto(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Adicionar vários jogadores"
-          style={({ pressed }) => [
-            styles.loteButton,
-            {
-              borderColor: palette.outline,
-              backgroundColor: palette.surface,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}
-          android_ripple={{ color: palette.primary + "22" }}
-        >
-          <MaterialCommunityIcons
-            name="format-list-bulleted-square"
-            size={22}
-            color={palette.primary}
-          />
-        </Pressable>
-      </View>
-
-      {players.length >= 5 ? (
-        <View
-          style={[
-            styles.buscaRow,
-            {
-              backgroundColor: palette.surface,
-              borderColor: palette.outline,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="magnify"
-            size={18}
-            color={palette.onSurfaceVariant}
-          />
+        <View style={styles.addRow}>
           <TextInput
-            value={busca}
-            onChangeText={setBusca}
-            placeholder="Buscar por nome"
+            value={novoNome}
+            onChangeText={setNovoNome}
+            placeholder="Adicionar jogador"
             placeholderTextColor={palette.onSurfaceVariant}
-            accessibilityLabel="Buscar jogador por nome"
-            style={[styles.buscaInput, { color: palette.onSurface }]}
+            onSubmitEditing={adicionar}
+            returnKeyType="done"
+            accessibilityLabel="Nome do novo jogador"
+            style={[
+              styles.input,
+              {
+                borderColor: palette.outline,
+                backgroundColor: palette.surface,
+                color: palette.onSurface,
+              },
+            ]}
           />
-          {busca ? (
-            <Pressable
-              onPress={() => setBusca("")}
-              accessibilityRole="button"
-              accessibilityLabel="Limpar busca"
-              style={styles.iconAction}
-            >
-              <MaterialCommunityIcons
-                name="close-circle"
-                size={18}
-                color={palette.onSurfaceVariant}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-      ) : null}
-
-      {erro ? (
-        <View
-          // Banner cor "warning" (laranja) — não "error" — seguindo o mapa
-          // ICONS do handoff RN. O laranja distingue o aviso recuperável da
-          // ação destrutiva real (que aparece em vermelho no swipe/lixeira
-          // do swipe nativo).
-          style={[
-            styles.errorBanner,
-            {
-              backgroundColor: palette.warning + "24",
-              borderColor: palette.warning + "73",
-            },
-          ]}
-          accessibilityLiveRegion="polite"
-        >
-          <MaterialCommunityIcons
-            name="alert-circle"
-            size={16}
-            color={palette.warning}
+          <AddButton
+            enabled={!!novoNome.trim()}
+            onPress={adicionar}
+            palette={palette}
+            accessibilityLabel="Adicionar jogador"
           />
-          <Text style={[styles.errorText, { color: palette.warning }]} selectable>
-            {erro}
-          </Text>
           <Pressable
-            onPress={() => setErro(null)}
+            onPress={() => setLoteAberto(true)}
             accessibilityRole="button"
-            accessibilityLabel="Fechar aviso"
-            style={styles.iconAction}
-            android_ripple={{ color: palette.warning + "33" }}
+            accessibilityLabel="Adicionar vários jogadores"
+            style={({ pressed }) => [
+              styles.loteButton,
+              {
+                borderColor: palette.outline,
+                backgroundColor: palette.surface,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            android_ripple={{ color: palette.primary + "22" }}
           >
             <MaterialCommunityIcons
-              name="close"
-              size={18}
-              color={palette.warning}
+              name="format-list-bulleted-square"
+              size={22}
+              color={palette.primary}
             />
           </Pressable>
         </View>
-      ) : null}
 
-      <FlatList
-        ref={listaRef}
-        data={jogadoresFiltrados}
-        keyExtractor={(p) => p.id}
-        contentContainerStyle={[
-          styles.list,
-          { paddingBottom: insets.bottom + Spacing.xxl },
-        ]}
-        ItemSeparatorComponent={() => <View style={{ height: Spacing.xs }} />}
-        ListEmptyComponent={
-          buscaNormalizada ? (
-            <EmptyState
-              icon="magnify"
-              title="Nenhum jogador encontrado"
-              description={`Não há jogador com "${busca}" no nome.`}
+        {players.length >= 5 ? (
+          <View
+            style={[
+              styles.buscaRow,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.outline,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="magnify"
+              size={18}
+              color={palette.onSurfaceVariant}
             />
-          ) : (
-            <EmptyState
-              icon="account-multiple-outline"
-              title="Nenhum jogador cadastrado"
-              description="Adicione jogadores no campo acima para começar a montar a pelada."
+            <TextInput
+              value={busca}
+              onChangeText={setBusca}
+              placeholder="Buscar por nome"
+              placeholderTextColor={palette.onSurfaceVariant}
+              accessibilityLabel="Buscar jogador por nome"
+              style={[styles.buscaInput, { color: palette.onSurface }]}
             />
-          )
-        }
-        renderItem={({ item }) =>
-          editingId === item.id ? (
-            <LinhaEdicao
-              valor={editingNome}
-              onChange={setEditingNome}
-              onConfirmar={() => confirmarEdicao(item)}
-              onCancelar={cancelarEdicao}
+            {busca ? (
+              <Pressable
+                onPress={() => setBusca("")}
+                accessibilityRole="button"
+                accessibilityLabel="Limpar busca"
+                style={styles.iconAction}
+              >
+                <MaterialCommunityIcons
+                  name="close-circle"
+                  size={18}
+                  color={palette.onSurfaceVariant}
+                />
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+
+        {erro ? (
+          <View
+            // Banner cor "warning" (laranja) — não "error" — seguindo o mapa
+            // ICONS do handoff RN. O laranja distingue o aviso recuperável da
+            // ação destrutiva real (que aparece em vermelho no swipe/lixeira
+            // do swipe nativo).
+            style={[
+              styles.errorBanner,
+              {
+                backgroundColor: palette.warning + "24",
+                borderColor: palette.warning + "73",
+              },
+            ]}
+            accessibilityLiveRegion="polite"
+          >
+            <MaterialCommunityIcons
+              name="alert-circle"
+              size={16}
+              color={palette.warning}
             />
-          ) : (
-            <LinhaJogador
-              player={item}
-              mostrarSituacao={temTimesFormados}
-              onEditar={() => iniciarEdicao(item)}
-              onRemover={() => remover(item)}
-              onVerStats={() => setStatsAberto(item)}
-              onTrocarFoto={() => trocarFoto(item)}
-            />
-          )
-        }
-      />
+            <Text
+              style={[styles.errorText, { color: palette.warning }]}
+              selectable
+            >
+              {erro}
+            </Text>
+            <Pressable
+              onPress={() => setErro(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar aviso"
+              style={styles.iconAction}
+              android_ripple={{ color: palette.warning + "33" }}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={palette.warning}
+              />
+            </Pressable>
+          </View>
+        ) : null}
+
+        <FlatList
+          ref={listaRef}
+          data={jogadoresFiltrados}
+          keyExtractor={(p) => p.id}
+          contentContainerStyle={[
+            styles.list,
+            { paddingBottom: insets.bottom + Spacing.xxl },
+          ]}
+          ItemSeparatorComponent={() => <View style={{ height: Spacing.xs }} />}
+          ListEmptyComponent={
+            buscaNormalizada ? (
+              <EmptyState
+                icon="magnify"
+                title="Nenhum jogador encontrado"
+                description={`Não há jogador com "${busca}" no nome.`}
+              />
+            ) : (
+              <EmptyState
+                icon="account-multiple-outline"
+                title="Nenhum jogador cadastrado"
+                description="Adicione jogadores no campo acima para começar a montar a pelada."
+              />
+            )
+          }
+          renderItem={({ item }) =>
+            editingId === item.id ? (
+              <LinhaEdicao
+                valor={editingNome}
+                onChange={setEditingNome}
+                onConfirmar={() => confirmarEdicao(item)}
+                onCancelar={cancelarEdicao}
+              />
+            ) : (
+              <LinhaJogador
+                player={item}
+                mostrarSituacao={temTimesFormados}
+                onEditar={() => iniciarEdicao(item)}
+                onRemover={() => remover(item)}
+                onVerStats={() => setStatsAberto(item)}
+                onTrocarFoto={() => trocarFoto(item)}
+              />
+            )
+          }
+        />
       </View>
 
       <ModalAdicionarLote
@@ -434,15 +437,10 @@ function AddButton({
       ]}
       android_ripple={{ color: palette.onPrimary + "33" }}
     >
-      <MaterialCommunityIcons
-        name="plus"
-        size={24}
-        color={palette.onPrimary}
-      />
+      <MaterialCommunityIcons name="plus" size={24} color={palette.onPrimary} />
     </Pressable>
   );
 }
-
 
 function LinhaJogador({
   player,
@@ -568,10 +566,7 @@ function LinhaJogador({
           onPress={onRemover}
           accessibilityRole="button"
           accessibilityLabel={`Remover ${player.name}`}
-          style={[
-            styles.swipeDeleteAction,
-            { backgroundColor: palette.error },
-          ]}
+          style={[styles.swipeDeleteAction, { backgroundColor: palette.error }]}
         >
           <MaterialCommunityIcons
             name="delete-outline"
@@ -674,103 +669,81 @@ function ModalAdicionarLote({
   );
 
   return (
-    <Modal
-      visible={visivel}
-      animationType="slide"
-      transparent
-      onRequestClose={onFechar}
-    >
-      <View
-        style={[
-          styles.modalBackdrop,
-          { backgroundColor: palette.shadow },
-        ]}
-      >
-        <View
+    <AppBottomSheet visible={visivel} onClose={onFechar} snapPoint="55%">
+      <View style={styles.modalCard}>
+        <Text style={[styles.modalTitle, { color: palette.onSurface }]}>
+          Adicionar vários
+        </Text>
+        <Text style={[styles.modalHint, { color: palette.onSurfaceVariant }]}>
+          Cole ou digite um nome por linha (ou separados por vírgula). Vazios e
+          duplicados serão ignorados.
+        </Text>
+        <TextInput
+          value={texto}
+          onChangeText={setTexto}
+          multiline
+          autoFocus
+          placeholder={"Ex.:\nAna\nBia\nCaio"}
+          placeholderTextColor={palette.onSurfaceVariant}
+          accessibilityLabel="Lista de nomes para adicionar em lote"
           style={[
-            styles.modalCard,
-            { backgroundColor: palette.surface },
+            styles.modalInput,
+            {
+              color: palette.onSurface,
+              borderColor: palette.outline,
+              backgroundColor: palette.background,
+            },
           ]}
+        />
+        <Text
+          style={[styles.modalCounter, { color: palette.onSurfaceVariant }]}
         >
-          <Text style={[styles.modalTitle, { color: palette.onSurface }]}>
-            Adicionar vários
-          </Text>
-          <Text
-            style={[
-              styles.modalHint,
-              { color: palette.onSurfaceVariant },
-            ]}
-          >
-            Cole ou digite um nome por linha (ou separados por vírgula).
-            Vazios e duplicados serão ignorados.
-          </Text>
-          <TextInput
-            value={texto}
-            onChangeText={setTexto}
-            multiline
-            autoFocus
-            placeholder={"Ex.:\nAna\nBia\nCaio"}
-            placeholderTextColor={palette.onSurfaceVariant}
-            accessibilityLabel="Lista de nomes para adicionar em lote"
-            style={[
-              styles.modalInput,
+          {nomes.length} {nomes.length === 1 ? "nome" : "nomes"} reconhecidos
+        </Text>
+        <View style={styles.modalActions}>
+          <Pressable
+            onPress={onFechar}
+            accessibilityRole="button"
+            accessibilityLabel="Cancelar adição em lote"
+            style={({ pressed }) => [
+              styles.modalSecondary,
               {
-                color: palette.onSurface,
                 borderColor: palette.outline,
-                backgroundColor: palette.background,
+                opacity: pressed ? 0.7 : 1,
               },
             ]}
-          />
-          <Text
-            style={[styles.modalCounter, { color: palette.onSurfaceVariant }]}
           >
-            {nomes.length} {nomes.length === 1 ? "nome" : "nomes"} reconhecidos
-          </Text>
-          <View style={styles.modalActions}>
-            <Pressable
-              onPress={onFechar}
-              accessibilityRole="button"
-              accessibilityLabel="Cancelar adição em lote"
-              style={({ pressed }) => [
-                styles.modalSecondary,
-                {
-                  borderColor: palette.outline,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-              <Text style={{ color: palette.onSurface }}>Cancelar</Text>
-            </Pressable>
-            {/* Sem glow no botão de modal — convenção: glow só em CTA
+            <Text style={{ color: palette.onSurface }}>Cancelar</Text>
+          </Pressable>
+          {/* Sem glow no botão de modal — convenção: glow só em CTA
                 principal da tela. Modal já está sobreposto ao fundo, não
                 precisa competir visualmente. */}
-            <Pressable
-              onPress={() => onConfirmar(nomes)}
-              disabled={nomes.length === 0}
-              accessibilityRole="button"
-              accessibilityLabel="Confirmar adição em lote"
-              style={({ pressed }) => [
-                styles.modalPrimary,
-                {
-                  backgroundColor:
-                    nomes.length > 0 ? palette.primary : palette.primaryDim,
-                  opacity:
-                    pressed && nomes.length > 0
-                      ? 0.85
-                      : nomes.length > 0
-                        ? 1
-                        : 0.6,
-                },
-              ]}
-            >
-              <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
-                Adicionar {nomes.length > 0 ? nomes.length : ""}
-              </Text>
-            </Pressable>
-          </View>
+          <Pressable
+            onPress={() => onConfirmar(nomes)}
+            disabled={nomes.length === 0}
+            accessibilityRole="button"
+            accessibilityLabel="Confirmar adição em lote"
+            style={({ pressed }) => [
+              styles.modalPrimary,
+              {
+                backgroundColor:
+                  nomes.length > 0 ? palette.primary : palette.primaryDim,
+                opacity:
+                  pressed && nomes.length > 0
+                    ? 0.85
+                    : nomes.length > 0
+                      ? 1
+                      : 0.6,
+              },
+            ]}
+          >
+            <Text style={{ color: palette.onPrimary, fontWeight: "600" }}>
+              Adicionar {nomes.length > 0 ? nomes.length : ""}
+            </Text>
+          </Pressable>
         </View>
       </View>
-    </Modal>
+    </AppBottomSheet>
   );
 }
 
@@ -804,118 +777,109 @@ function EstatisticasJogadorSheet({
         )
       : null;
   return (
-    <Modal
+    <AppBottomSheet
       visible={player !== null}
-      animationType="slide"
-      transparent
-      onRequestClose={onFechar}
+      onClose={onFechar}
+      snapPoint="65%"
     >
-      <View style={[styles.modalBackdrop, { backgroundColor: palette.shadow }]}>
-        <View
-          style={[styles.sheetCard, { backgroundColor: palette.surface }]}
-        >
-          {player ? (
-            <>
-              <View style={styles.sheetHeader}>
-                <PlayerAvatar player={player} size={56} />
-                <View style={styles.sheetHeaderText}>
-                  <Text
-                    style={[styles.sheetName, { color: palette.onSurface }]}
-                    numberOfLines={1}
-                  >
-                    {player.name}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.sheetSubtitle,
-                      { color: palette.onSurfaceVariant },
-                    ]}
-                  >
-                    Estatísticas nesta execução
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={onFechar}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fechar estatísticas"
-                  style={({ pressed }) => [
-                    styles.sheetClose,
-                    {
-                      backgroundColor: palette.surfaceContainerHigh,
-                      opacity: pressed ? 0.7 : 1,
-                    },
+      <View style={styles.sheetCard}>
+        {player ? (
+          <>
+            <View style={styles.sheetHeader}>
+              <PlayerAvatar player={player} size={56} />
+              <View style={styles.sheetHeaderText}>
+                <Text
+                  style={[styles.sheetName, { color: palette.onSurface }]}
+                  numberOfLines={1}
+                >
+                  {player.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.sheetSubtitle,
+                    { color: palette.onSurfaceVariant },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="close"
-                    size={18}
-                    color={palette.onSurface}
-                  />
-                </Pressable>
+                  Estatísticas nesta execução
+                </Text>
               </View>
-
-              {stats ? (
-                <View style={styles.sheetStatsGrid}>
-                  <StatTile
-                    icon="soccer"
-                    label="Gols"
-                    value={stats.gols}
-                    accent="goal"
-                  />
-                  <StatTile
-                    icon="whistle"
-                    label="Partidas"
-                    value={stats.partidas}
-                  />
-                  <StatTile
-                    icon="trophy-outline"
-                    label="Vitórias"
-                    value={stats.vitorias}
-                    accent="tertiary"
-                  />
-                  <StatTile
-                    icon="equal"
-                    label="Empates"
-                    value={stats.empates}
-                  />
-                  <StatTile
-                    icon="close-octagon-outline"
-                    label="Derrotas"
-                    value={stats.derrotas}
-                  />
-                  {presencaPct !== null ? (
-                    <StatTile
-                      icon="account-check-outline"
-                      label="Presença"
-                      value={`${presencaPct}%`}
-                    />
-                  ) : (
-                    <StatTile
-                      icon="account-check-outline"
-                      label="Presença"
-                      value="—"
-                    />
-                  )}
-                </View>
-              ) : null}
-
-              <Text
-                style={[
-                  styles.sheetFootnote,
-                  { color: palette.onSurfaceVariant },
+              <Pressable
+                onPress={onFechar}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar estatísticas"
+                style={({ pressed }) => [
+                  styles.sheetClose,
+                  {
+                    backgroundColor: palette.surfaceContainerHigh,
+                    opacity: pressed ? 0.7 : 1,
+                  },
                 ]}
               >
-                {totalPartidasEncerradas === 0
-                  ? "Nenhuma partida encerrada ainda nesta execução."
-                  : `${totalPartidasEncerradas} ${
-                      totalPartidasEncerradas === 1 ? "partida" : "partidas"
-                    } encerrada${totalPartidasEncerradas === 1 ? "" : "s"} na execução.`}
-              </Text>
-            </>
-          ) : null}
-        </View>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={18}
+                  color={palette.onSurface}
+                />
+              </Pressable>
+            </View>
+
+            {stats ? (
+              <View style={styles.sheetStatsGrid}>
+                <StatTile
+                  icon="soccer"
+                  label="Gols"
+                  value={stats.gols}
+                  accent="goal"
+                />
+                <StatTile
+                  icon="whistle"
+                  label="Partidas"
+                  value={stats.partidas}
+                />
+                <StatTile
+                  icon="trophy-outline"
+                  label="Vitórias"
+                  value={stats.vitorias}
+                  accent="tertiary"
+                />
+                <StatTile icon="equal" label="Empates" value={stats.empates} />
+                <StatTile
+                  icon="close-octagon-outline"
+                  label="Derrotas"
+                  value={stats.derrotas}
+                />
+                {presencaPct !== null ? (
+                  <StatTile
+                    icon="account-check-outline"
+                    label="Presença"
+                    value={`${presencaPct}%`}
+                  />
+                ) : (
+                  <StatTile
+                    icon="account-check-outline"
+                    label="Presença"
+                    value="—"
+                  />
+                )}
+              </View>
+            ) : null}
+
+            <Text
+              style={[
+                styles.sheetFootnote,
+                { color: palette.onSurfaceVariant },
+              ]}
+            >
+              {totalPartidasEncerradas === 0
+                ? "Nenhuma partida encerrada ainda nesta execução."
+                : `${totalPartidasEncerradas} ${
+                    totalPartidasEncerradas === 1 ? "partida" : "partidas"
+                  } encerrada${totalPartidasEncerradas === 1 ? "" : "s"} na execução.`}
+            </Text>
+          </>
+        ) : null}
       </View>
-    </Modal>
+    </AppBottomSheet>
   );
 }
 

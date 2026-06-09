@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -31,6 +30,7 @@ import { Player } from "@/src/domain/Player";
 import { Team } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
+import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
 import { LivePulseDot } from "@/src/shared/ui/LivePulseDot";
 import { MatchTimeline } from "@/src/shared/ui/MatchTimeline";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
@@ -132,7 +132,9 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     if (status === TimerStatus.ENDED) return;
     safeAction(() => {
       const team =
-        side === "A" ? (playing as NonNullable<typeof playing>).teamA : (playing as NonNullable<typeof playing>).teamB;
+        side === "A"
+          ? (playing as NonNullable<typeof playing>).teamA
+          : (playing as NonNullable<typeof playing>).teamB;
       gestor.addGoal(team, player);
       const afterA = (goals?.teamA ?? 0) + (side === "A" ? 1 : 0);
       const afterB = (goals?.teamB ?? 0) + (side === "B" ? 1 : 0);
@@ -430,10 +432,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
               color={palette.onSurfaceVariant}
             />
             <Text
-              style={[
-                styles.kickHintText,
-                { color: palette.onSurfaceVariant },
-              ]}
+              style={[styles.kickHintText, { color: palette.onSurfaceVariant }]}
             >
               Toque no centro para apitar
             </Text>
@@ -632,18 +631,12 @@ function MatchScoreboard({
             color={palette.onSurfaceVariant}
           />
           <Text
-            style={[
-              styles.sbCriterioText,
-              { color: palette.onSurfaceVariant },
-            ]}
+            style={[styles.sbCriterioText, { color: palette.onSurfaceVariant }]}
           >
             {Math.max(1, Math.round(totalDuration / 60))} min
           </Text>
           <Text
-            style={[
-              styles.sbCriterioSep,
-              { color: palette.onSurfaceVariant },
-            ]}
+            style={[styles.sbCriterioSep, { color: palette.onSurfaceVariant }]}
           >
             ·
           </Text>
@@ -653,10 +646,7 @@ function MatchScoreboard({
             color={palette.onSurfaceVariant}
           />
           <Text
-            style={[
-              styles.sbCriterioText,
-              { color: palette.onSurfaceVariant },
-            ]}
+            style={[styles.sbCriterioText, { color: palette.onSurfaceVariant }]}
           >
             até {goalLimit} {goalLimit === 1 ? "gol" : "gols"}
           </Text>
@@ -673,19 +663,12 @@ function MatchScoreboard({
             { opacity: pressed ? 0.75 : 1, alignItems: "center" },
           ]}
         >
-          <TeamCrest
-            seed={teamA.id}
-            size={28}
-            corOverride={teamA.corCustom}
-          />
+          <TeamCrest seed={teamA.id} size={28} corOverride={teamA.corCustom} />
           <Text style={[styles.sbTeam, { color: palette.onSurface }]}>
             {nomeDoTime(teamA, 0)}
           </Text>
           <View
-            style={[
-              styles.sbGolButton,
-              { backgroundColor: palette.primary },
-            ]}
+            style={[styles.sbGolButton, { backgroundColor: palette.primary }]}
           >
             <MaterialCommunityIcons
               name="soccer"
@@ -729,19 +712,12 @@ function MatchScoreboard({
             { opacity: pressed ? 0.75 : 1, alignItems: "center" },
           ]}
         >
-          <TeamCrest
-            seed={teamB.id}
-            size={28}
-            corOverride={teamB.corCustom}
-          />
+          <TeamCrest seed={teamB.id} size={28} corOverride={teamB.corCustom} />
           <Text style={[styles.sbTeam, { color: palette.onSurface }]}>
             {nomeDoTime(teamB, 1)}
           </Text>
           <View
-            style={[
-              styles.sbGolButton,
-              { backgroundColor: palette.secondary },
-            ]}
+            style={[styles.sbGolButton, { backgroundColor: palette.secondary }]}
           >
             <MaterialCommunityIcons
               name="soccer"
@@ -973,12 +949,7 @@ function PlayerDot({
       >
         <PlayerAvatar player={player} size={42} tone={tone} />
         {goalsCount > 0 ? (
-          <View
-            style={[
-              styles.dotGoal,
-              { backgroundColor: palette.goal },
-            ]}
-          >
+          <View style={[styles.dotGoal, { backgroundColor: palette.goal }]}>
             <MaterialCommunityIcons
               name="soccer"
               size={9}
@@ -1111,9 +1082,7 @@ function CenterDisc({
       onPress={onToggle}
       accessibilityRole="button"
       accessibilityLabel={
-        paused
-          ? "Continuar (centro do campo)"
-          : "Pausar (centro do campo)"
+        paused ? "Continuar (centro do campo)" : "Pausar (centro do campo)"
       }
       style={({ pressed }) => [
         styles.centerDiscTimer,
@@ -1151,10 +1120,7 @@ function CenterDisc({
           {formatSeconds(remaining)}
         </Text>
         <Text
-          style={[
-            styles.centerDiscSub,
-            { color: palette.onSurfaceVariant },
-          ]}
+          style={[styles.centerDiscSub, { color: palette.onSurfaceVariant }]}
         >
           {paused ? "tocar p/ seguir" : running ? "tempo" : "tempo"}
         </Text>
@@ -1305,88 +1271,80 @@ function ScorerSheet({
   if (!side) return null;
   const players = side === "A" ? teamA.players : teamB.players;
   return (
-    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.sheetWrap} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: palette.surface }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View
-            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
-          />
-          <View style={styles.sheetHead}>
-            <View>
-              <Text
-                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
-              >
-                Quem marcou?
-              </Text>
-              <Text
-                style={[styles.sheetTitle, { color: palette.onSurface }]}
-              >
-                {side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)}
-              </Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Fechar"
-              style={styles.iconBtn}
+    <AppBottomSheet visible onClose={onClose} snapPoint="65%">
+      <View style={styles.sheet}>
+        <View style={styles.sheetHead}>
+          <View>
+            <Text
+              style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
             >
-              <MaterialCommunityIcons
-                name="close"
-                size={18}
-                color={palette.onSurface}
-              />
-            </Pressable>
+              Quem marcou?
+            </Text>
+            <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+              {side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)}
+            </Text>
           </View>
-          <View style={styles.sheetGrid}>
-            {players.map((p) => (
-              <Pressable
-                key={p.id}
-                onPress={() => onPick(side, p)}
-                accessibilityRole="button"
-                accessibilityLabel={`Marcar gol para ${p.name}`}
-                style={({ pressed }) => [
-                  styles.scorerCard,
-                  {
-                    backgroundColor: palette.surfaceContainerHigh,
-                    borderColor:
-                      side === "A" ? palette.primary : palette.secondary,
-                    opacity: pressed ? 0.85 : 1,
-                  },
-                ]}
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar"
+            style={styles.iconBtn}
+          >
+            <MaterialCommunityIcons
+              name="close"
+              size={18}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        </View>
+        <View style={styles.sheetGrid}>
+          {players.map((p) => (
+            <Pressable
+              key={p.id}
+              onPress={() => onPick(side, p)}
+              accessibilityRole="button"
+              accessibilityLabel={`Marcar gol para ${p.name}`}
+              style={({ pressed }) => [
+                styles.scorerCard,
+                {
+                  backgroundColor: palette.surfaceContainerHigh,
+                  borderColor:
+                    side === "A" ? palette.primary : palette.secondary,
+                  opacity: pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              <PlayerAvatar player={p} size={42} tone={side} />
+              <Text
+                style={[styles.scorerName, { color: palette.onSurface }]}
+                numberOfLines={1}
               >
-                <PlayerAvatar player={p} size={42} tone={side} />
-                <Text
-                  style={[styles.scorerName, { color: palette.onSurface }]}
-                  numberOfLines={1}
+                {p.name}
+              </Text>
+              {p.goals.length > 0 ? (
+                <View
+                  style={[
+                    styles.scorerGoals,
+                    { backgroundColor: palette.goal + "33" },
+                  ]}
                 >
-                  {p.name}
-                </Text>
-                {p.goals.length > 0 ? (
-                  <View
-                    style={[
-                      styles.scorerGoals,
-                      { backgroundColor: palette.goal + "33" },
-                    ]}
+                  <MaterialCommunityIcons
+                    name="soccer"
+                    size={10}
+                    color={palette.goal}
+                  />
+                  <Text
+                    style={[styles.scorerGoalsText, { color: palette.goal }]}
                   >
-                    <MaterialCommunityIcons
-                      name="soccer"
-                      size={10}
-                      color={palette.goal}
-                    />
-                    <Text style={[styles.scorerGoalsText, { color: palette.goal }]}>
-                      {p.goals.length}
-                    </Text>
-                  </View>
-                ) : null}
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+                    {p.goals.length}
+                  </Text>
+                </View>
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+      </View>
+    </AppBottomSheet>
   );
 }
 
@@ -1481,295 +1439,272 @@ function SubstitutionSheet({
     else pares.forEach((p) => onSub(p.side, p.outP));
   };
 
-  if (!open) return null;
-
   return (
-    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.sheetWrap} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: palette.surface }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View
-            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
-          />
-          <View style={styles.sheetHead}>
-            <View>
-              <Text
-                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
-              >
-                Substituição
-              </Text>
-              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-                {multi ? `Trocar vários (${pares.length})` : "Manter o time"}
-              </Text>
-            </View>
-            <View style={styles.sheetHeadActions}>
-              <Pressable
-                onPress={() => {
-                  // Alterna modo; ao sair do multi, descarta pares pendentes.
-                  setMulti((v) => {
-                    if (v) setPares([]);
-                    setSelected(null);
-                    return !v;
-                  });
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  multi
-                    ? "Voltar para troca única"
-                    : "Selecionar vários jogadores"
-                }
-                accessibilityState={{ selected: multi }}
-                style={({ pressed }) => [
-                  styles.multiToggle,
-                  {
-                    backgroundColor: multi
-                      ? palette.primary
-                      : palette.surfaceContainerHigh,
-                    borderColor: multi ? palette.primary : palette.outline,
-                    opacity: pressed ? 0.75 : 1,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="checkbox-multiple-outline"
-                  size={14}
-                  color={multi ? palette.onPrimary : palette.onSurface}
-                />
-                <Text
-                  style={[
-                    styles.multiToggleText,
-                    {
-                      color: multi ? palette.onPrimary : palette.onSurface,
-                    },
-                  ]}
-                >
-                  Vários
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={onClose}
-                accessibilityRole="button"
-                accessibilityLabel="Fechar"
-                style={styles.iconBtn}
-              >
-                <MaterialCommunityIcons
-                  name="close"
-                  size={18}
-                  color={palette.onSurface}
-                />
-              </Pressable>
-            </View>
-          </View>
-
-          <View
-            style={[
-              styles.subHint,
-              {
-                backgroundColor: selected
-                  ? palette.goal + "22"
-                  : palette.surfaceContainerHigh,
-                borderColor: selected ? palette.goal : palette.outlineVariant,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="account-switch"
-              size={14}
-              color={selected ? palette.goal : palette.onSurfaceVariant}
-            />
-            <Text style={[styles.subHintText, { color: palette.onSurface }]}>
-              {selected
-                ? `${selected.player.name} sai — toque em quem entra do banco`
-                : multi
-                  ? pares.length === 0
-                    ? "Selecione pares (em campo → banco). Toque em 'Aplicar' no fim."
-                    : `${pares.length} ${pares.length === 1 ? "troca pareada" : "trocas pareadas"} — selecione mais ou toque 'Aplicar'`
-                  : "1. Toque em quem sai (em campo)"}
+    <AppBottomSheet visible={open} onClose={onClose} snapPoint="75%">
+      <View style={styles.sheet}>
+        <View style={styles.sheetHead}>
+          <View>
+            <Text
+              style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
+            >
+              Substituição
+            </Text>
+            <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+              {multi ? `Trocar vários (${pares.length})` : "Manter o time"}
             </Text>
           </View>
-
-          <ScrollView style={{ maxHeight: 380 }}>
-            <Text
-              style={[
-                styles.sheetEyebrow,
-                {
-                  color: palette.onSurfaceVariant,
-                  marginTop: Spacing.sm,
-                },
-              ]}
-            >
-              Em campo
-            </Text>
-            <View style={styles.subColRow}>
-              <View style={styles.subCol}>
-                <View
-                  style={[
-                    styles.subTag,
-                    { backgroundColor: palette.primary + "22" },
-                  ]}
-                >
-                  <Text style={[styles.subTagText, { color: palette.primary }]}>
-                    Time 1
-                  </Text>
-                </View>
-                {teamA.players.map((p) => (
-                  <FieldPlayerItem
-                    key={p.id}
-                    player={p}
-                    tone="A"
-                    selected={
-                      selected?.player.id === p.id || outIds.has(p.id)
-                    }
-                    onPress={() => onPickField("A", p)}
-                  />
-                ))}
-              </View>
-              <View style={styles.subCol}>
-                <View
-                  style={[
-                    styles.subTag,
-                    { backgroundColor: palette.secondary + "22" },
-                  ]}
-                >
-                  <Text style={[styles.subTagText, { color: palette.secondary }]}>
-                    Time 2
-                  </Text>
-                </View>
-                {teamB.players.map((p) => (
-                  <FieldPlayerItem
-                    key={p.id}
-                    player={p}
-                    tone="B"
-                    selected={
-                      selected?.player.id === p.id || outIds.has(p.id)
-                    }
-                    onPress={() => onPickField("B", p)}
-                  />
-                ))}
-              </View>
-            </View>
-
-            <Text
-              style={[
-                styles.sheetEyebrow,
-                {
-                  color: palette.onSurfaceVariant,
-                  marginTop: Spacing.md,
-                },
-              ]}
-            >
-              Banco {reservas.length ? `(${reservas.length})` : ""}
-            </Text>
-            {reservas.length === 0 ? (
-              <Text
-                style={[
-                  styles.subEmpty,
-                  { color: palette.onSurfaceVariant },
-                ]}
-              >
-                Sem reservas no banco agora.
-              </Text>
-            ) : (
-              <View style={styles.benchList}>
-                {reservas.map((p) => {
-                  const pareado = inIds.has(p.id);
-                  const habilitado = pareado || !!selected;
-                  return (
-                    <Pressable
-                      key={p.id}
-                      onPress={() => onPickBench(p)}
-                      disabled={!habilitado}
-                      accessibilityRole="button"
-                      accessibilityLabel={
-                        pareado
-                          ? `Cancelar troca de ${p.name}`
-                          : `Trocar ${p.name} para entrar`
-                      }
-                      style={({ pressed }) => [
-                        styles.benchItem,
-                        {
-                          backgroundColor: pareado
-                            ? palette.goal + "22"
-                            : palette.surfaceContainerHigh,
-                          borderColor: pareado
-                            ? palette.goal
-                            : palette.outlineVariant,
-                          opacity: habilitado ? (pressed ? 0.8 : 1) : 0.5,
-                        },
-                      ]}
-                    >
-                      <PlayerAvatar player={p} size={32} />
-                      <Text
-                        style={[
-                          styles.benchItemName,
-                          { color: palette.onSurface },
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {p.name}
-                      </Text>
-                      <View style={styles.benchItemRight}>
-                        <MaterialCommunityIcons
-                          name={pareado ? "check-circle" : "arrow-down"}
-                          size={12}
-                          color={palette.goal}
-                        />
-                        <Text
-                          style={[
-                            styles.benchItemEnter,
-                            { color: palette.goal },
-                          ]}
-                        >
-                          {pareado ? "pareado" : "entra"}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-          </ScrollView>
-
-          {multi ? (
+          <View style={styles.sheetHeadActions}>
             <Pressable
-              onPress={aplicarMultiplos}
-              disabled={pares.length === 0}
+              onPress={() => {
+                // Alterna modo; ao sair do multi, descarta pares pendentes.
+                setMulti((v) => {
+                  if (v) setPares([]);
+                  setSelected(null);
+                  return !v;
+                });
+              }}
               accessibilityRole="button"
               accessibilityLabel={
-                pares.length > 0
-                  ? `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`
-                  : "Aplicar trocas"
+                multi
+                  ? "Voltar para troca única"
+                  : "Selecionar vários jogadores"
               }
-              accessibilityState={{ disabled: pares.length === 0 }}
+              accessibilityState={{ selected: multi }}
               style={({ pressed }) => [
-                styles.aplicarBtn,
+                styles.multiToggle,
                 {
-                  backgroundColor:
-                    pares.length === 0
-                      ? palette.primaryDim
-                      : palette.primary,
-                  opacity:
-                    pares.length === 0 ? 0.6 : pressed ? 0.85 : 1,
+                  backgroundColor: multi
+                    ? palette.primary
+                    : palette.surfaceContainerHigh,
+                  borderColor: multi ? palette.primary : palette.outline,
+                  opacity: pressed ? 0.75 : 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
-                name="check-all"
-                size={18}
-                color={palette.onPrimary}
+                name="checkbox-multiple-outline"
+                size={14}
+                color={multi ? palette.onPrimary : palette.onSurface}
               />
-              <Text style={[styles.aplicarBtnText, { color: palette.onPrimary }]}>
-                {pares.length === 0
-                  ? "Aplicar trocas"
-                  : `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`}
+              <Text
+                style={[
+                  styles.multiToggleText,
+                  {
+                    color: multi ? palette.onPrimary : palette.onSurface,
+                  },
+                ]}
+              >
+                Vários
               </Text>
             </Pressable>
-          ) : null}
-        </Pressable>
-      </Pressable>
-    </Modal>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar"
+              style={styles.iconBtn}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={palette.onSurface}
+              />
+            </Pressable>
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.subHint,
+            {
+              backgroundColor: selected
+                ? palette.goal + "22"
+                : palette.surfaceContainerHigh,
+              borderColor: selected ? palette.goal : palette.outlineVariant,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="account-switch"
+            size={14}
+            color={selected ? palette.goal : palette.onSurfaceVariant}
+          />
+          <Text style={[styles.subHintText, { color: palette.onSurface }]}>
+            {selected
+              ? `${selected.player.name} sai — toque em quem entra do banco`
+              : multi
+                ? pares.length === 0
+                  ? "Selecione pares (em campo → banco). Toque em 'Aplicar' no fim."
+                  : `${pares.length} ${pares.length === 1 ? "troca pareada" : "trocas pareadas"} — selecione mais ou toque 'Aplicar'`
+                : "1. Toque em quem sai (em campo)"}
+          </Text>
+        </View>
+
+        <ScrollView style={{ maxHeight: 380 }}>
+          <Text
+            style={[
+              styles.sheetEyebrow,
+              {
+                color: palette.onSurfaceVariant,
+                marginTop: Spacing.sm,
+              },
+            ]}
+          >
+            Em campo
+          </Text>
+          <View style={styles.subColRow}>
+            <View style={styles.subCol}>
+              <View
+                style={[
+                  styles.subTag,
+                  { backgroundColor: palette.primary + "22" },
+                ]}
+              >
+                <Text style={[styles.subTagText, { color: palette.primary }]}>
+                  Time 1
+                </Text>
+              </View>
+              {teamA.players.map((p) => (
+                <FieldPlayerItem
+                  key={p.id}
+                  player={p}
+                  tone="A"
+                  selected={selected?.player.id === p.id || outIds.has(p.id)}
+                  onPress={() => onPickField("A", p)}
+                />
+              ))}
+            </View>
+            <View style={styles.subCol}>
+              <View
+                style={[
+                  styles.subTag,
+                  { backgroundColor: palette.secondary + "22" },
+                ]}
+              >
+                <Text style={[styles.subTagText, { color: palette.secondary }]}>
+                  Time 2
+                </Text>
+              </View>
+              {teamB.players.map((p) => (
+                <FieldPlayerItem
+                  key={p.id}
+                  player={p}
+                  tone="B"
+                  selected={selected?.player.id === p.id || outIds.has(p.id)}
+                  onPress={() => onPickField("B", p)}
+                />
+              ))}
+            </View>
+          </View>
+
+          <Text
+            style={[
+              styles.sheetEyebrow,
+              {
+                color: palette.onSurfaceVariant,
+                marginTop: Spacing.md,
+              },
+            ]}
+          >
+            Banco {reservas.length ? `(${reservas.length})` : ""}
+          </Text>
+          {reservas.length === 0 ? (
+            <Text
+              style={[styles.subEmpty, { color: palette.onSurfaceVariant }]}
+            >
+              Sem reservas no banco agora.
+            </Text>
+          ) : (
+            <View style={styles.benchList}>
+              {reservas.map((p) => {
+                const pareado = inIds.has(p.id);
+                const habilitado = pareado || !!selected;
+                return (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => onPickBench(p)}
+                    disabled={!habilitado}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      pareado
+                        ? `Cancelar troca de ${p.name}`
+                        : `Trocar ${p.name} para entrar`
+                    }
+                    style={({ pressed }) => [
+                      styles.benchItem,
+                      {
+                        backgroundColor: pareado
+                          ? palette.goal + "22"
+                          : palette.surfaceContainerHigh,
+                        borderColor: pareado
+                          ? palette.goal
+                          : palette.outlineVariant,
+                        opacity: habilitado ? (pressed ? 0.8 : 1) : 0.5,
+                      },
+                    ]}
+                  >
+                    <PlayerAvatar player={p} size={32} />
+                    <Text
+                      style={[
+                        styles.benchItemName,
+                        { color: palette.onSurface },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {p.name}
+                    </Text>
+                    <View style={styles.benchItemRight}>
+                      <MaterialCommunityIcons
+                        name={pareado ? "check-circle" : "arrow-down"}
+                        size={12}
+                        color={palette.goal}
+                      />
+                      <Text
+                        style={[styles.benchItemEnter, { color: palette.goal }]}
+                      >
+                        {pareado ? "pareado" : "entra"}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </ScrollView>
+
+        {multi ? (
+          <Pressable
+            onPress={aplicarMultiplos}
+            disabled={pares.length === 0}
+            accessibilityRole="button"
+            accessibilityLabel={
+              pares.length > 0
+                ? `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`
+                : "Aplicar trocas"
+            }
+            accessibilityState={{ disabled: pares.length === 0 }}
+            style={({ pressed }) => [
+              styles.aplicarBtn,
+              {
+                backgroundColor:
+                  pares.length === 0 ? palette.primaryDim : palette.primary,
+                opacity: pares.length === 0 ? 0.6 : pressed ? 0.85 : 1,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="check-all"
+              size={18}
+              color={palette.onPrimary}
+            />
+            <Text style={[styles.aplicarBtnText, { color: palette.onPrimary }]}>
+              {pares.length === 0
+                ? "Aplicar trocas"
+                : `Aplicar ${pares.length} ${pares.length === 1 ? "troca" : "trocas"}`}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </AppBottomSheet>
   );
 }
 
@@ -1873,12 +1808,7 @@ function GoalCelebration({
   return (
     <View pointerEvents="none" style={styles.celebOverlay}>
       {/* Radial-ish gradient via duas camadas opacas (Svg na bg seria ideal) */}
-      <View
-        style={[
-          styles.celebBg,
-          { backgroundColor: sideColor + "55" },
-        ]}
-      />
+      <View style={[styles.celebBg, { backgroundColor: sideColor + "55" }]} />
       <View style={styles.celebBgDark} />
 
       <Confetti side={cel.side} palette={palette} />
@@ -1928,8 +1858,11 @@ function GoalCelebration({
               size={12}
               color={palette.onSurfaceVariant}
             />
-            <Text style={[styles.celebSub, { color: palette.onSurfaceVariant }]}>
-              {cel.side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)} marcou
+            <Text
+              style={[styles.celebSub, { color: palette.onSurfaceVariant }]}
+            >
+              {cel.side === "A" ? nomeDoTime(teamA, 0) : nomeDoTime(teamB, 1)}{" "}
+              marcou
             </Text>
           </View>
         </View>
@@ -1960,11 +1893,7 @@ function Confetti({
   return (
     <View pointerEvents="none" style={styles.confettiLayer}>
       {Array.from({ length: 14 }).map((_, i) => (
-        <ConfettiPiece
-          key={i}
-          index={i}
-          color={colors[i % colors.length]}
-        />
+        <ConfettiPiece key={i} index={i} color={colors[i % colors.length]} />
       ))}
     </View>
   );
@@ -2047,9 +1976,7 @@ function SubstitutionToast({
         },
       ]}
     >
-      <View
-        style={[styles.toastIcon, { backgroundColor: palette.primary }]}
-      >
+      <View style={[styles.toastIcon, { backgroundColor: palette.primary }]}>
         <MaterialCommunityIcons
           name="account-switch"
           size={18}
@@ -2066,7 +1993,9 @@ function SubstitutionToast({
           <Text style={[styles.toastBold, { color: palette.onSurface }]}>
             {t.inP.name}
           </Text>
-          <Text style={[styles.toastLight, { color: palette.onSurfaceVariant }]}>
+          <Text
+            style={[styles.toastLight, { color: palette.onSurfaceVariant }]}
+          >
             entrou
           </Text>
         </View>
@@ -2076,7 +2005,9 @@ function SubstitutionToast({
             size={12}
             color={palette.onSurfaceVariant}
           />
-          <Text style={[styles.toastLight, { color: palette.onSurfaceVariant }]}>
+          <Text
+            style={[styles.toastLight, { color: palette.onSurfaceVariant }]}
+          >
             {t.outP.name} saiu
           </Text>
         </View>
@@ -2109,112 +2040,115 @@ function GolActionSheet({
   onRemover: (g: Goal) => void;
 }) {
   const palette = usePalette();
-  if (!gol) return null;
   return (
-    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.sheetWrap} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: palette.surface }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View
-            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
-          />
-          <View style={styles.sheetHead}>
-            <View>
-              <Text
-                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
+    <AppBottomSheet visible={gol !== null} onClose={onClose} snapPoint="50%">
+      <View style={styles.sheet}>
+        {gol ? (
+          <>
+            <View style={styles.sheetHead}>
+              <View>
+                <Text
+                  style={[
+                    styles.sheetEyebrow,
+                    { color: palette.onSurfaceVariant },
+                  ]}
+                >
+                  Gol — {gol.player.name} ({minutoDoGol(gol)}')
+                </Text>
+                <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+                  Corrigir registro
+                </Text>
+              </View>
+              <Pressable
+                onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar ações do gol"
+                style={styles.iconBtn}
               >
-                Gol — {gol.player.name} ({minutoDoGol(gol)}')
-              </Text>
-              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-                Corrigir registro
-              </Text>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={18}
+                  color={palette.onSurface}
+                />
+              </Pressable>
             </View>
+
             <Pressable
-              onPress={onClose}
+              onPress={() => onCorrigirAutor(gol)}
               accessibilityRole="button"
-              accessibilityLabel="Fechar ações do gol"
-              style={styles.iconBtn}
+              accessibilityLabel="Corrigir autor do gol"
+              style={({ pressed }) => [
+                styles.golActionRow,
+                {
+                  backgroundColor: palette.surfaceContainerHigh,
+                  borderColor: palette.outlineVariant,
+                  opacity: pressed ? 0.8 : 1,
+                },
+              ]}
             >
               <MaterialCommunityIcons
-                name="close"
+                name="account-edit-outline"
+                size={20}
+                color={palette.primary}
+              />
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={[styles.golActionTitle, { color: palette.onSurface }]}
+                >
+                  Corrigir autor
+                </Text>
+                <Text
+                  style={[
+                    styles.golActionSub,
+                    { color: palette.onSurfaceVariant },
+                  ]}
+                >
+                  Escolha o jogador certo entre os 2 times
+                </Text>
+              </View>
+              <MaterialCommunityIcons
+                name="chevron-right"
                 size={18}
-                color={palette.onSurface}
+                color={palette.onSurfaceVariant}
               />
             </Pressable>
-          </View>
 
-          <Pressable
-            onPress={() => onCorrigirAutor(gol)}
-            accessibilityRole="button"
-            accessibilityLabel="Corrigir autor do gol"
-            style={({ pressed }) => [
-              styles.golActionRow,
-              {
-                backgroundColor: palette.surfaceContainerHigh,
-                borderColor: palette.outlineVariant,
-                opacity: pressed ? 0.8 : 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="account-edit-outline"
-              size={20}
-              color={palette.primary}
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.golActionTitle, { color: palette.onSurface }]}>
-                Corrigir autor
-              </Text>
-              <Text
-                style={[
-                  styles.golActionSub,
-                  { color: palette.onSurfaceVariant },
-                ]}
-              >
-                Escolha o jogador certo entre os 2 times
-              </Text>
-            </View>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={18}
-              color={palette.onSurfaceVariant}
-            />
-          </Pressable>
-
-          <Pressable
-            onPress={() => onRemover(gol)}
-            accessibilityRole="button"
-            accessibilityLabel="Remover este gol"
-            style={({ pressed }) => [
-              styles.golActionRow,
-              {
-                backgroundColor: palette.errorContainer,
-                borderColor: palette.error,
-                opacity: pressed ? 0.85 : 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="delete-outline"
-              size={20}
-              color={palette.error}
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.golActionTitle, { color: palette.error }]}>
-                Remover este gol
-              </Text>
-              <Text
-                style={[styles.golActionSub, { color: palette.error, opacity: 0.85 }]}
-              >
-                Apaga o registro definitivamente
-              </Text>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Pressable>
-    </Modal>
+            <Pressable
+              onPress={() => onRemover(gol)}
+              accessibilityRole="button"
+              accessibilityLabel="Remover este gol"
+              style={({ pressed }) => [
+                styles.golActionRow,
+                {
+                  backgroundColor: palette.errorContainer,
+                  borderColor: palette.error,
+                  opacity: pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="delete-outline"
+                size={20}
+                color={palette.error}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.golActionTitle, { color: palette.error }]}>
+                  Remover este gol
+                </Text>
+                <Text
+                  style={[
+                    styles.golActionSub,
+                    { color: palette.error, opacity: 0.85 },
+                  ]}
+                >
+                  Apaga o registro definitivamente
+                </Text>
+              </View>
+            </Pressable>
+          </>
+        ) : null}
+      </View>
+    </AppBottomSheet>
   );
 }
 
@@ -2233,93 +2167,91 @@ function ChangeAuthorSheet({
   onEscolher: (g: Goal, novoAutor: Player) => void;
 }) {
   const palette = usePalette();
-  if (!gol) return null;
+  if (!gol) {
+    return (
+      <AppBottomSheet visible={false} onClose={onClose} snapPoint="65%">
+        <View />
+      </AppBottomSheet>
+    );
+  }
   const teamA = gol.match.teamA;
   const teamB = gol.match.teamB;
   return (
-    <Modal transparent visible animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.sheetWrap} onPress={onClose}>
-        <Pressable
-          style={[styles.sheet, { backgroundColor: palette.surface }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View
-            style={[styles.sheetGrab, { backgroundColor: palette.outline }]}
-          />
-          <View style={styles.sheetHead}>
-            <View>
-              <Text
-                style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
-              >
-                Corrigir autor — {minutoDoGol(gol)}'
-              </Text>
-              <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-                Quem fez de verdade?
-              </Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Voltar"
-              style={styles.iconBtn}
+    <AppBottomSheet visible onClose={onClose} snapPoint="65%">
+      <View style={styles.sheet}>
+        <View style={styles.sheetHead}>
+          <View>
+            <Text
+              style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
             >
-              <MaterialCommunityIcons
-                name="close"
-                size={18}
-                color={palette.onSurface}
-              />
-            </Pressable>
+              Corrigir autor — {minutoDoGol(gol)}'
+            </Text>
+            <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
+              Quem fez de verdade?
+            </Text>
           </View>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+            style={styles.iconBtn}
+          >
+            <MaterialCommunityIcons
+              name="close"
+              size={18}
+              color={palette.onSurface}
+            />
+          </Pressable>
+        </View>
 
-          <ScrollView style={{ maxHeight: 380 }}>
-            <View style={styles.subColRow}>
-              <View style={styles.subCol}>
-                <View
-                  style={[
-                    styles.subTag,
-                    { backgroundColor: palette.primary + "22" },
-                  ]}
-                >
-                  <Text style={[styles.subTagText, { color: palette.primary }]}>
-                    Time 1
-                  </Text>
-                </View>
-                {teamA.players.map((p) => (
-                  <AutorOption
-                    key={p.id}
-                    player={p}
-                    tone="A"
-                    eAtual={p.id === gol.player.id}
-                    onPress={() => onEscolher(gol, p)}
-                  />
-                ))}
+        <ScrollView style={{ maxHeight: 380 }}>
+          <View style={styles.subColRow}>
+            <View style={styles.subCol}>
+              <View
+                style={[
+                  styles.subTag,
+                  { backgroundColor: palette.primary + "22" },
+                ]}
+              >
+                <Text style={[styles.subTagText, { color: palette.primary }]}>
+                  Time 1
+                </Text>
               </View>
-              <View style={styles.subCol}>
-                <View
-                  style={[
-                    styles.subTag,
-                    { backgroundColor: palette.secondary + "22" },
-                  ]}
-                >
-                  <Text style={[styles.subTagText, { color: palette.secondary }]}>
-                    Time 2
-                  </Text>
-                </View>
-                {teamB.players.map((p) => (
-                  <AutorOption
-                    key={p.id}
-                    player={p}
-                    tone="B"
-                    eAtual={p.id === gol.player.id}
-                    onPress={() => onEscolher(gol, p)}
-                  />
-                ))}
-              </View>
+              {teamA.players.map((p) => (
+                <AutorOption
+                  key={p.id}
+                  player={p}
+                  tone="A"
+                  eAtual={p.id === gol.player.id}
+                  onPress={() => onEscolher(gol, p)}
+                />
+              ))}
             </View>
-          </ScrollView>
-        </Pressable>
-      </Pressable>
-    </Modal>
+            <View style={styles.subCol}>
+              <View
+                style={[
+                  styles.subTag,
+                  { backgroundColor: palette.secondary + "22" },
+                ]}
+              >
+                <Text style={[styles.subTagText, { color: palette.secondary }]}>
+                  Time 2
+                </Text>
+              </View>
+              {teamB.players.map((p) => (
+                <AutorOption
+                  key={p.id}
+                  player={p}
+                  tone="B"
+                  eAtual={p.id === gol.player.id}
+                  onPress={() => onEscolher(gol, p)}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </AppBottomSheet>
   );
 }
 
@@ -2399,14 +2331,8 @@ function CheckpointToast({
       ]}
       accessibilityLiveRegion="polite"
     >
-      <MaterialCommunityIcons
-        name="alarm"
-        size={16}
-        color={palette.warning}
-      />
-      <Text
-        style={[styles.checkpointToastText, { color: palette.onSurface }]}
-      >
+      <MaterialCommunityIcons name="alarm" size={16} color={palette.warning} />
+      <Text style={[styles.checkpointToastText, { color: palette.onSurface }]}>
         {texto}
       </Text>
     </View>
@@ -2665,7 +2591,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 14,
     borderBottomLeftRadius: 14,
   },
-  benchRailHead: { alignItems: "center", gap: 8, height: 70, justifyContent: "center" },
+  benchRailHead: {
+    alignItems: "center",
+    gap: 8,
+    height: 70,
+    justifyContent: "center",
+  },
   benchRailLabelWrap: { alignItems: "center", justifyContent: "center" },
   benchRailLabel: {
     ...Typography.label,
@@ -2891,7 +2822,12 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   celebName: { ...Typography.headline, fontSize: 18 },
-  celebSubRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  celebSubRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
   celebSub: { ...Typography.label, fontSize: 11 },
   celebScore: {
     ...Typography.display,
