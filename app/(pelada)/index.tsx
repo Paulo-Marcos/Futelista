@@ -2065,6 +2065,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderCurve: "continuous",
     gap: Spacing.md,
+    // M-03: altura mínima estável evita layout-jump quando o hero alterna
+    // entre "PRÓXIMA PARTIDA" (matchup + status + CTA) e "PELADA ATIVA"
+    // (placar AO VIVO + cronômetro + CTA). Os dois modos têm conteúdo
+    // diferente em tamanho — sem minHeight a Home re-flow os StatCards
+    // logo abaixo, gerando o jump.
+    minHeight: 220,
   },
   heroCtaWrap: {
     marginTop: Spacing.xs,
