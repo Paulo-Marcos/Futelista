@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -31,6 +31,7 @@ import { Team } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
+import { gerarFormacao } from "@/src/shared/ui/formacao";
 import { LivePulseDot } from "@/src/shared/ui/LivePulseDot";
 import { MatchTimeline } from "@/src/shared/ui/MatchTimeline";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
@@ -58,14 +59,6 @@ export default function PartidaScreen() {
   return <PartidaInner gestor={gestor} />;
 }
 
-// Formação 1-2-2 (frações 0..1 dentro da metade do time).
-const FORMATION = [
-  { x: 0.5, y: 0.18 },
-  { x: 0.28, y: 0.45 },
-  { x: 0.72, y: 0.45 },
-  { x: 0.32, y: 0.78 },
-  { x: 0.68, y: 0.78 },
-] as const;
 
 function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
@@ -249,6 +242,16 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
   const teamA = playing.teamA;
   const teamB = playing.teamB;
+  // Formação adaptativa por time: gera coordenadas com base na quantidade
+  // de jogadores em campo, evitando sobreposição quando `playersPerTeam > 5`.
+  const formacaoA = useMemo(
+    () => gerarFormacao(teamA.players.length),
+    [teamA.players.length],
+  );
+  const formacaoB = useMemo(
+    () => gerarFormacao(teamB.players.length),
+    [teamB.players.length],
+  );
   const ready =
     status === undefined ||
     status === TimerStatus.CREATED ||
@@ -381,7 +384,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
         <View style={styles.halfTop}>
           {teamA.players.map((p, i) => {
-            const pos = FORMATION[i] ?? FORMATION[FORMATION.length - 1];
+            const pos = formacaoA[i] ?? formacaoA[formacaoA.length - 1];
             return (
               <PlayerDot
                 key={p.id}
@@ -398,7 +401,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
         <View style={styles.halfBottom}>
           {teamB.players.map((p, i) => {
-            const pos = FORMATION[i] ?? FORMATION[FORMATION.length - 1];
+            const pos = formacaoB[i] ?? formacaoB[formacaoB.length - 1];
             const mirrored = { x: pos.x, y: 1 - pos.y };
             return (
               <PlayerDot
