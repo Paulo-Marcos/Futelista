@@ -23,6 +23,14 @@ export default function PeladaLayout() {
   // disparam o indicador (o usuário já sabe que tá pausado dentro da tela).
   const partidaAoVivo =
     useGameSlice((g) => g.timer?.status === TimerStatus.STARTED) ?? false;
+  // Tab "Partida" só aparece quando faz sentido (M-01):
+  //  - há partida em andamento (`playing`), OU
+  //  - há ao menos 2 times prontos pra iniciar (`next.length >= 2`).
+  // Antes a aba ficava sempre visível e tocá-la sem matchup caía num
+  // EmptyState — barulho visual sem ação possível.
+  const matchupOuPartidaPronta =
+    useGameSlice((g) => g.playing !== undefined || g.next.length >= 2) ??
+    false;
 
   return (
     <Tabs
@@ -92,7 +100,8 @@ export default function PeladaLayout() {
         name="partida"
         options={{
           title: "Partida",
-          href: temExecucao ? "/partida" : null,
+          href:
+            temExecucao && matchupOuPartidaPronta ? "/partida" : null,
           tabBarIcon: ({ color, size }) => {
             const s = size ?? 24;
             // Container com tamanho explícito (= tamanho do ícone) e

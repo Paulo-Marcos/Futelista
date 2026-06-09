@@ -148,16 +148,14 @@ describe("serializer (round-trip GestorJogo)", () => {
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
-    // O importante para o "sobreviver a reload": o roster do time em campo
-    // reflete a troca aplicada. `team.switches[]` é uma estatística que só
-    // o caminho `trocarJogadoresDeTimes` popula hoje — `switchPlayerLeft`
-    // do banco mexe direto em players[] sem registrar o evento. Fora do
-    // escopo do F-17.
+    // Sobrevivência a reload: roster do time em campo reflete a troca, e o
+    // evento Switch registrado em team.switches volta após round-trip.
     const teamARecriado = recriada.playing!.teamA;
     expect(teamARecriado.players.map((p) => p.name)).toContain(reserva.name);
     expect(teamARecriado.players.map((p) => p.name)).not.toContain(
       saindo.name,
     );
+    expect(teamARecriado.switches.length).toBeGreaterThan(0);
   });
 
   it("[F-19] preserva fotoUri dos jogadores entre reloads", () => {

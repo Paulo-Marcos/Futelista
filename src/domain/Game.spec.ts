@@ -212,17 +212,17 @@ describe('Teste da classe Game', () => {
     it('switchPlayerLeft deve trocar jogadores entre times corretamente', () => {
       const teamA = players[1].currentTeam!;
       const teamB = players[4].currentTeam!;
+      const switchesAntes = teamA.switches.length;
 
       jest.spyOn(teamB, 'removePlayer');
-      jest.spyOn(teamA, 'removePlayer');
-      jest.spyOn(teamA, 'addPlayer');
+      jest.spyOn(teamA, 'switchPlayer');
       jest.spyOn(jogo, 'resizeTeams');
 
       jogo.switchPlayerLeft(players[4], players[1]);
 
       expect(teamB.removePlayer).toHaveBeenCalledWith(players[4]);
-      expect(teamA.removePlayer).toHaveBeenCalledWith(players[1]);
-      expect(teamA.addPlayer).toHaveBeenCalledWith(players[4]);
+      expect(teamA.switchPlayer).toHaveBeenCalledWith(players[4], players[1]);
+      expect(teamA.switches.length).toBe(switchesAntes + 1);
       expect(jogo.resizeTeams).toHaveBeenCalledWith(teamB);
     });
 
@@ -230,17 +230,17 @@ describe('Teste da classe Game', () => {
       jogo.setPlayingGame();
       const teamA = players[0].currentTeam!;
       const teamB = players[2].currentTeam!;
+      const switchesAntes = teamA.switches.length;
 
       jest.spyOn(teamB, 'removePlayer');
-      jest.spyOn(teamA, 'removePlayer');
-      jest.spyOn(teamA, 'addPlayer');
+      jest.spyOn(teamA, 'switchPlayer');
       jest.spyOn(jogo, 'updateTeams');
 
       jogo.switchPlayerLeft(players[2], players[0]);
 
       expect(teamB.removePlayer).toHaveBeenCalledWith(players[2]);
-      expect(teamA.removePlayer).toHaveBeenCalledWith(players[0]);
-      expect(teamA.addPlayer).toHaveBeenCalledWith(players[2]);
+      expect(teamA.switchPlayer).toHaveBeenCalledWith(players[2], players[0]);
+      expect(teamA.switches.length).toBe(switchesAntes + 1);
       expect(jogo.updateTeams).toHaveBeenCalledWith(teamB);
     });
 

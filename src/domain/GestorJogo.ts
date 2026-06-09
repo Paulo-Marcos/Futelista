@@ -219,8 +219,14 @@ export class GestorJogo {
     const teamToOut = playerIn.currentTeam!;
     teamToOut.removePlayer(playerIn);
     const teamToIn = playerOut.currentTeam!;
-    teamToIn.removePlayer(playerOut)!;
-    teamToIn.addPlayer(playerIn);
+    // Usa Team.switchPlayer para que a substituição banco→campo fique
+    // registrada em teamToIn.switches (estatística histórica). Esse caminho
+    // já chama playerIn.addTeam(teamToIn), devolvendo playerIn ao estado
+    // ACTIVE no novo time. Como switchPlayer não mexe na situação do
+    // playerLeaves, marcamos playerOut como STOPPED manualmente — ele saiu
+    // do jogo, não trocou de time.
+    teamToIn.switchPlayer(playerIn, playerOut);
+    playerOut.setSituation(PlayerSituation.STOPPED);
     this.updateTeams(teamToOut);
     this.notify();
   }
