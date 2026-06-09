@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Redirect, useRouter } from "expo-router";
-import { memo, useEffect, useMemo, useState } from "react";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Modal,
@@ -43,6 +43,10 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  // M-02: aceita ?scrollTo=fila vindo da Home (StatCard "na fila") para
+  // rolar até a section "Fila" automaticamente assim que a tela monta.
+  const { scrollTo } = useLocalSearchParams<{ scrollTo?: string }>();
+  const flatListRef = useRef<FlatList<Team> | null>(null);
 
   const next = useGameSliceRequired((g) => g.next);
   const advantageId = useGameSliceRequired((g) => g.advantageToNext?.id);
@@ -83,6 +87,31 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
     const id = setTimeout(() => setSucesso(null), AUTO_DISMISS_SUCESSO_MS);
     return () => clearTimeout(id);
   }, [sucesso]);
+
+  // M-02: ?scrollTo=fila rola a FlatList até o primeiro item da fila.
+  // Usamos `scrollToIndex` com viewPosition=0 (alinha topo). Quando a fila
+  // está vazia caímos num scrollToOffset grande pra empurrar a seção
+  // "Próxima partida" pra cima e mostrar pelo menos o título "Fila (0)".
+  useEffect(() => {
+    if (scrollTo !== "fila") return;
+    // Espera 1 frame pro layout da ListHeaderComponent estabilizar.
+    const id = setTimeout(() => {
+      if (!flatListRef.current) return;
+      if (fila.length > 0) {
+        flatListRef.current.scrollToIndex({
+          index: 0,
+          animated: true,
+          viewPosition: 0.1,
+        });
+      } else {
+        flatListRef.current.scrollToOffset({
+          offset: 9999,
+          animated: true,
+        });
+      }
+    }, 80);
+    return () => clearTimeout(id);
+  }, [scrollTo, fila.length]);
 
   const podeMontar = totalJogadores >= 2 * playersPerTeam;
   const faltamParaIniciar = Math.max(0, 2 * playersPerTeam - totalJogadores);
@@ -288,6 +317,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         />
       ) : (
         <FlatList
+          ref={flatListRef}
           data={fila}
           keyExtractor={(team) => team.id}
           contentContainerStyle={[

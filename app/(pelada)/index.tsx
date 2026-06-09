@@ -924,7 +924,15 @@ function ExecucaoHome() {
             icon="clock-outline"
             value={timesNaFila}
             label="na fila"
-            onPress={() => router.push("/times")}
+            // M-02: rola a tela /times até a section "Fila" automaticamente.
+            // Sem param o usuário caía no topo (Próxima partida) e tinha que
+            // rolar pra ver a fila — confunde a expectativa do "na fila".
+            onPress={() =>
+              router.push({
+                pathname: "/times",
+                params: { scrollTo: "fila" },
+              })
+            }
             accessibilityLabel={`${timesNaFila} times na fila. Toque para abrir lista.`}
           />
         </View>
