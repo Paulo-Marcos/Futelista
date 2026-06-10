@@ -21,6 +21,12 @@ import { Splash } from "@/src/shared/ui/Splash";
 
 SplashScreen.preventAutoHideAsync();
 
+// M-18: em DEV, hot-reload remonta o RootLayout. Já vimos a splash JS
+// uma vez na sessão → não vale a pena rever os 2.3s a cada reload.
+// Em produção, o módulo só carrega uma vez (boot), então `pulada` fica
+// `false` até o primeiro `setSplashDone(true)`.
+let pulada = false;
+
 export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -29,7 +35,7 @@ export default function RootLayout() {
     Archivo_700Bold,
     Archivo_800ExtraBold,
   });
-  const [splashDone, setSplashDone] = useState(false);
+  const [splashDone, setSplashDone] = useState(__DEV__ && pulada);
 
   useEffect(() => {
     if (loaded) {
@@ -114,7 +120,14 @@ export default function RootLayout() {
           />
           <Stack.Screen name="+not-found" />
         </Stack>
-        {!splashDone ? <Splash onDone={() => setSplashDone(true)} /> : null}
+        {!splashDone ? (
+          <Splash
+            onDone={() => {
+              pulada = true;
+              setSplashDone(true);
+            }}
+          />
+        ) : null}
       </NavigationThemeBridge>
     </MyProviders>
   );

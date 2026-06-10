@@ -60,6 +60,13 @@ export const Radius = {
  * Números (placar, cronômetro) usam tabular-nums para não "dançarem".
  * Handoff §2.
  */
+// `tabular-nums` precisa ficar fora do `as const` final pra continuar
+// sendo `string[]` (compatível com TextStyle.fontVariant) — `as const`
+// transformaria em `readonly ["tabular-nums"]` que o spread em styles
+// quebra. O literal solto resolve sem precisar tipar manualmente cada
+// entrada do Typography como TextStyle.
+const TAB_NUM = ["tabular-nums"] as ["tabular-nums"];
+
 export const Typography = {
   // M-15: `display` e `headline` carregam `tabular-nums` por padrão —
   // são as escalas usadas em placar, cronômetro e contadores grandes,
@@ -69,18 +76,18 @@ export const Typography = {
     fontSize: 36,
     fontWeight: "800",
     letterSpacing: -0.72,
-    fontVariant: ["tabular-nums"],
+    fontVariant: TAB_NUM,
   },
   headline: {
     fontSize: 24,
     fontWeight: "800",
     letterSpacing: -0.48,
-    fontVariant: ["tabular-nums"],
+    fontVariant: TAB_NUM,
   },
   title: { fontSize: 18, fontWeight: "700" },
   body: { fontSize: 14, fontWeight: "400" },
   label: { fontSize: 12, fontWeight: "700", letterSpacing: 0.48 },
-  number: { fontSize: 24, fontWeight: "800", fontVariant: ["tabular-nums"] },
+  number: { fontSize: 24, fontWeight: "800", fontVariant: TAB_NUM },
 } as const;
 
 /**
