@@ -321,6 +321,47 @@ export class GestorJogo {
   }
 
   /**
+   * Reordena a lista de jogadores (M-07). Só faz sentido em modos
+   * baseados em ordem (`BY_ORDER` / `BY_ORDER_MIXING_TOP_TWO_TEAMS`),
+   * mas o domínio aceita em qualquer modo — a UI é quem decide quando
+   * oferecer a ação.
+   *
+   * Bloqueios:
+   *  - times já formados (`next.length > 0`) → a ordem nova não teria
+   *    efeito sem refazer times.
+   *  - partida em andamento → composição congelada.
+   *
+   * Recebe a nova ordem como `string[]` de ids. O conjunto deve ser
+   * idêntico ao atual (mesma cardinalidade, mesmos ids) — uma omissão
+   * silenciosa seria um remove implícito.
+   */
+  reordenarJogadores(novaOrdem: string[]): void {
+    if (this.playing)
+      throw Error(
+        "Não é possível reordenar jogadores com partida em andamento.",
+      );
+    if (this.next.length > 0)
+      throw Error(
+        "Resete os times antes de reordenar jogadores.",
+      );
+    if (novaOrdem.length !== this.players.length)
+      throw Error(
+        `Reordenação precisa conter exatamente ${this.players.length} jogadores.`,
+      );
+    const porId = new Map(this.players.map((p) => [p.id, p]));
+    const nova: Player[] = [];
+    for (const id of novaOrdem) {
+      const p = porId.get(id);
+      if (!p) throw Error(`Jogador "${id}" não está na pelada.`);
+      if (nova.includes(p))
+        throw Error(`Jogador "${p.name}" aparece duplicado na nova ordem.`);
+      nova.push(p);
+    }
+    this.players = nova;
+    this.notify();
+  }
+
+  /**
    * Move um time da fila para o fim (operação manual de reordenação).
    * Diferente de `relocateTeam` — esse método não redistribui jogadores;
    * apenas reposiciona. Bloqueia se o time está em partida em andamento.

@@ -21,8 +21,13 @@ import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
+import { ChoosingTeams } from "@/src/domain/Rules";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
+import {
+  AppDraggableList,
+  type RenderItemParams,
+} from "@/src/shared/ui/AppDraggableList";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { PlayerRow } from "@/src/shared/ui/PlayerRow";
@@ -46,6 +51,10 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const players = useGameSliceRequired((g) => g.players);
   const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
   const temTimesFormados = useGameSliceRequired((g) => g.next.length > 0);
+  // M-07: drag-to-reorder só faz sentido em modos baseados em ordem,
+  // sem times formados nem partida em andamento (o domínio também bloqueia).
+  const choosingTeams = useGameSliceRequired((g) => g.rules.choosingTeams);
+  const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
   // Total de partidas com resultado definido — usado para calcular % de
   // presença individual dos jogadores no sheet de estatísticas.
   const totalPartidasEncerradas = useGameSliceRequired(
@@ -75,6 +84,16 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
       p.name.toLowerCase().includes(buscaNormalizada),
     );
   }, [players, buscaNormalizada]);
+
+  // M-07: ativa drag-to-reorder quando todas as pré-condições do domínio
+  // batem (sem times formados, sem partida) E a UI está num estado em
+  // que mover faz sentido (sem filtro de busca aplicado, modo BY_ORDER*).
+  const podeReordenar =
+    !buscaNormalizada &&
+    !temTimesFormados &&
+    !temPartida &&
+    (choosingTeams === ChoosingTeams.BY_ORDER ||
+      choosingTeams === ChoosingTeams.BY_ORDER_MIXING_TOP_TWO_TEAMS);
 
   const adicionar = () => {
     const nome = novoNome.trim();
@@ -186,6 +205,20 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
     try {
       gestor.renamePlayer(p, editingNome);
       cancelarEdicao();
+      setErro(null);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  /**
+   * M-07: callback do DraggableFlatList — `data` chega na ordem nova,
+   * traduzo pra ids e delego pro domínio. Erros (ex.: condição de
+   * corrida com partida que iniciou no meio do drag) viram banner.
+   */
+  const aplicarReordenacao = (novaOrdem: Player[]) => {
+    try {
+      gestor.reordenarJogadores(novaOrdem.map((p) => p.id));
       setErro(null);
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));
@@ -336,50 +369,93 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
           </View>
         ) : null}
 
-        <FlatList
-          ref={listaRef}
-          data={jogadoresFiltrados}
-          keyExtractor={(p) => p.id}
-          contentContainerStyle={[
-            styles.list,
-            { paddingBottom: insets.bottom + Spacing.xxl },
-          ]}
-          ItemSeparatorComponent={() => <View style={{ height: Spacing.xs }} />}
-          ListEmptyComponent={
-            buscaNormalizada ? (
-              <EmptyState
-                icon="magnify"
-                title="Nenhum jogador encontrado"
-                description={`Não há jogador com "${busca}" no nome.`}
-              />
-            ) : (
+        {podeReordenar ? (
+          <AppDraggableList<Player>
+            data={jogadoresFiltrados}
+            keyExtractor={(p) => p.id}
+            onDragEnd={({ data }) => aplicarReordenacao(data)}
+            contentContainerStyle={[
+              styles.list,
+              { paddingBottom: insets.bottom + Spacing.xxl },
+            ]}
+            ListEmptyComponent={
               <EmptyState
                 icon="account-multiple-outline"
                 title="Nenhum jogador cadastrado"
                 description="Adicione jogadores no campo acima para começar a montar a pelada."
               />
-            )
-          }
-          renderItem={({ item }) =>
-            editingId === item.id ? (
-              <LinhaEdicao
-                valor={editingNome}
-                onChange={setEditingNome}
-                onConfirmar={() => confirmarEdicao(item)}
-                onCancelar={cancelarEdicao}
-              />
-            ) : (
-              <LinhaJogador
-                player={item}
-                mostrarSituacao={temTimesFormados}
-                onEditar={() => iniciarEdicao(item)}
-                onRemover={() => remover(item)}
-                onVerStats={() => setStatsAberto(item)}
-                onTrocarFoto={() => trocarFoto(item)}
-              />
-            )
-          }
-        />
+            }
+            renderItem={({ item, drag, isActive }: RenderItemParams<Player>) =>
+              editingId === item.id ? (
+                <LinhaEdicao
+                  valor={editingNome}
+                  onChange={setEditingNome}
+                  onConfirmar={() => confirmarEdicao(item)}
+                  onCancelar={cancelarEdicao}
+                />
+              ) : (
+                <View style={{ opacity: isActive ? 0.85 : 1 }}>
+                  <LinhaJogador
+                    player={item}
+                    mostrarSituacao={temTimesFormados}
+                    onEditar={() => iniciarEdicao(item)}
+                    onRemover={() => remover(item)}
+                    onVerStats={() => setStatsAberto(item)}
+                    onTrocarFoto={() => trocarFoto(item)}
+                    onLongPress={drag}
+                  />
+                </View>
+              )
+            }
+          />
+        ) : (
+          <FlatList
+            ref={listaRef}
+            data={jogadoresFiltrados}
+            keyExtractor={(p) => p.id}
+            contentContainerStyle={[
+              styles.list,
+              { paddingBottom: insets.bottom + Spacing.xxl },
+            ]}
+            ItemSeparatorComponent={() => (
+              <View style={{ height: Spacing.xs }} />
+            )}
+            ListEmptyComponent={
+              buscaNormalizada ? (
+                <EmptyState
+                  icon="magnify"
+                  title="Nenhum jogador encontrado"
+                  description={`Não há jogador com "${busca}" no nome.`}
+                />
+              ) : (
+                <EmptyState
+                  icon="account-multiple-outline"
+                  title="Nenhum jogador cadastrado"
+                  description="Adicione jogadores no campo acima para começar a montar a pelada."
+                />
+              )
+            }
+            renderItem={({ item }) =>
+              editingId === item.id ? (
+                <LinhaEdicao
+                  valor={editingNome}
+                  onChange={setEditingNome}
+                  onConfirmar={() => confirmarEdicao(item)}
+                  onCancelar={cancelarEdicao}
+                />
+              ) : (
+                <LinhaJogador
+                  player={item}
+                  mostrarSituacao={temTimesFormados}
+                  onEditar={() => iniciarEdicao(item)}
+                  onRemover={() => remover(item)}
+                  onVerStats={() => setStatsAberto(item)}
+                  onTrocarFoto={() => trocarFoto(item)}
+                />
+              )
+            }
+          />
+        )}
       </View>
 
       <ModalAdicionarLote
@@ -449,6 +525,7 @@ function LinhaJogador({
   onRemover,
   onVerStats,
   onTrocarFoto,
+  onLongPress,
 }: {
   player: Player;
   mostrarSituacao: boolean;
@@ -456,6 +533,12 @@ function LinhaJogador({
   onRemover: () => void;
   onVerStats: () => void;
   onTrocarFoto: () => void;
+  /**
+   * Quando fornecido (M-07, modo reorder), substitui o long-press de
+   * edição. O `DraggableFlatList` passa seu `drag` aqui — segurar a
+   * linha começa o arrasto em vez de abrir o input de edição.
+   */
+  onLongPress?: () => void;
 }) {
   const palette = usePalette();
 
@@ -551,7 +634,7 @@ function LinhaJogador({
       showSituation={mostrarSituacao}
       // showGoals=false — o badge verde do handoff é montado aqui no slot
       // `right`; deixar showGoals=true desenharia DOIS contadores.
-      onLongPress={onEditar}
+      onLongPress={onLongPress ?? onEditar}
       subtitle={sub}
       right={acoes}
     />
