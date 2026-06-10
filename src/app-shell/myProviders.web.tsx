@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SoccerProvider } from "@/src/app-shell/soccerProvider";
 import { PrefsProvider } from "@/src/shared/prefs/prefsContext";
 import { ThemeProvider } from "@/src/shared/theme/themeContext";
+import { ConfirmAcaoHost } from "@/src/shared/ui/ConfirmAcaoHost";
 
 /**
  * Versão `.web.tsx`: omite o `BottomSheetModalProvider` do
@@ -19,6 +20,7 @@ export const MyProviders = ({ children }: { children: React.ReactNode }) => {
         <ThemeProvider>
           <PrefsProvider>
             <SoccerProvider>{children}</SoccerProvider>
+            <ConfirmAcaoHost />
           </PrefsProvider>
         </ThemeProvider>
       </SafeAreaProvider>

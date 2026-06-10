@@ -1,5 +1,10 @@
 import { Alert, Platform } from "react-native";
 
+import {
+  pedirConfirmacao,
+  temConfirmAcaoHost,
+} from "@/src/shared/ui/ConfirmAcaoHost";
+
 type Opcoes = {
   titulo: string;
   mensagem: string;
@@ -11,8 +16,10 @@ type Opcoes = {
 /**
  * Pede confirmação ao usuário e resolve `true` se ele confirmou.
  *
- * Web usa `window.confirm` (Alert.alert da RN praticamente não funciona em
- * navegador). iOS/Android usam o Alert nativo com botões adequados.
+ * Caminho preferido: `ConfirmAcaoHost` (Modal RN customizado) — dá
+ * controle visual real (botão destrutivo em vermelho, M-12). Quando
+ * o host não está montado, cai pro `Alert.alert` nativo (iOS/Android)
+ * ou `window.confirm` (web).
  */
 export function confirmAcao(opcoes: Opcoes): Promise<boolean> {
   const {
@@ -22,6 +29,16 @@ export function confirmAcao(opcoes: Opcoes): Promise<boolean> {
     textoCancelar = "Cancelar",
     destrutivo,
   } = opcoes;
+
+  if (temConfirmAcaoHost()) {
+    return pedirConfirmacao({
+      titulo,
+      mensagem,
+      textoConfirmar,
+      textoCancelar,
+      destrutivo,
+    });
+  }
 
   if (Platform.OS === "web") {
     if (typeof window !== "undefined" && typeof window.confirm === "function") {
