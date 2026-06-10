@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
+  BackHandler,
   FlatList,
   Platform,
   Pressable,
@@ -87,6 +88,18 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
     const id = setTimeout(() => setSucesso(null), AUTO_DISMISS_SUCESSO_MS);
     return () => clearTimeout(id);
   }, [sucesso]);
+
+  // M-08: o back físico do Android cancela a seleção antes de sair da
+  // tela. Sem isso o usuário precisa tocar no banner ou no mesmo
+  // jogador, o que vira pegadinha em listas longas.
+  useEffect(() => {
+    if (!jogadorSelecionado) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      setJogadorSelecionado(null);
+      return true;
+    });
+    return () => sub.remove();
+  }, [jogadorSelecionado]);
 
   // M-02: ?scrollTo=fila rola a FlatList até o primeiro item da fila.
   // Usamos `scrollToIndex` com viewPosition=0 (alinha topo). Quando a fila
@@ -468,6 +481,37 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
           setEditandoTime(null);
         }}
       />
+
+      {/* M-08: FAB "Cancelar" persistente quando há jogador selecionado.
+          O banner no topo ainda está lá com contexto (qual jogador), mas
+          em listas longas o usuário não vê o X do banner — esse FAB
+          fica sempre alcançável. */}
+      {jogadorSelecionado ? (
+        <Pressable
+          onPress={() => setJogadorSelecionado(null)}
+          accessibilityRole="button"
+          accessibilityLabel="Cancelar troca de jogadores"
+          style={({ pressed }) => [
+            styles.cancelFab,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.error,
+              shadowColor: palette.shadow,
+              bottom: insets.bottom + Spacing.lg,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="close"
+            size={18}
+            color={palette.error}
+          />
+          <Text style={[styles.cancelFabText, { color: palette.error }]}>
+            Cancelar
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -1090,6 +1134,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
+  },
+  // M-08: FAB de "Cancelar" do modo trocar jogadores. Pílula
+  // arredondada com sombra elevada — fica sobre o conteúdo sem
+  // depender do banner ainda estar visível.
+  cancelFab: {
+    position: "absolute",
+    right: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  cancelFabText: {
+    ...Typography.label,
+    fontWeight: "600",
   },
   selectionText: {
     ...Typography.label,
