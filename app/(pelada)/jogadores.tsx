@@ -381,6 +381,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
             ListEmptyComponent={
               <EmptyState
                 icon="account-multiple-outline"
+                illustration="lista"
                 title="Nenhum jogador cadastrado"
                 description="Adicione jogadores no campo acima para começar a montar a pelada."
               />

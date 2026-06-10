@@ -248,6 +248,7 @@ function GestaoHome() {
           peladas === null ? null : (
             <EmptyState
               icon="soccer"
+              illustration="campo"
               title="Nenhuma pelada cadastrada"
               description="Cadastre uma pelada (ex.: Fute CEF) para reusar nome e regras."
             />

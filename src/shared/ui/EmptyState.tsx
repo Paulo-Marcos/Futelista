@@ -2,6 +2,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 
 import { PrimaryButton } from "@/src/shared/ui/PrimaryButton";
+import {
+  EmptyIllustration,
+  type IlustracaoEmpty,
+} from "@/src/shared/ui/EmptyIllustration";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Spacing, Typography } from "@/src/shared/theme/Colors";
 
@@ -12,6 +16,12 @@ type EmptyStateProps = {
   actionLabel?: string;
   onAction?: () => void;
   actionDisabled?: boolean;
+  /**
+   * M-16: usa ilustração SVG em vez do ícone monocromático. Quando
+   * presente, eleva o tom "premium sério" do empty state. O `icon`
+   * continua sendo o fallback se nenhuma variante for passada.
+   */
+  illustration?: IlustracaoEmpty;
 };
 
 /**
@@ -25,15 +35,20 @@ export function EmptyState({
   actionLabel,
   onAction,
   actionDisabled,
+  illustration,
 }: EmptyStateProps) {
   const palette = usePalette();
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons
-        name={icon}
-        size={64}
-        color={palette.onSurfaceVariant}
-      />
+      {illustration ? (
+        <EmptyIllustration variante={illustration} size={120} />
+      ) : (
+        <MaterialCommunityIcons
+          name={icon}
+          size={64}
+          color={palette.onSurfaceVariant}
+        />
+      )}
       <Text
         style={[styles.title, { color: palette.onSurface }]}
         accessibilityRole="header"

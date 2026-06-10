@@ -125,6 +125,7 @@ export default function HistoricoScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="history"
+            illustration="tempo"
             title="Sem jogos ainda"
             description="Os resultados das partidas aparecem aqui."
           />
