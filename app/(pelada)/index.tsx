@@ -803,6 +803,7 @@ function ExecucaoHome() {
             <Text
               style={[styles.pheadName, { color: palette.onSurface }]}
               numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {tituloHero}
             </Text>
@@ -2012,16 +2013,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   pheadTitle: { flex: 1, minWidth: 0 },
+  // M-09: row do nome com `flex: 1, minWidth: 0` permite o `pheadName`
+  // encolher de fato quando o nome é longo, em vez de empurrar o tag
+  // AVULSA ou os botões de cog/dev pra fora.
   pheadNameRow: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
   },
+  // M-09: `flex: 1` (em vez de `flexShrink: 1`) força o nome a ocupar
+  // o espaço restante na row e truncar com ellipsis em vez de espremer
+  // o tag AVULSA. `ellipsizeMode="tail"` é explícito (mesmo sendo default)
+  // para deixar a intenção clara no JSX.
   pheadName: {
+    flex: 1,
     fontWeight: "800",
     fontSize: 22,
     letterSpacing: -0.2,
-    flexShrink: 1,
   },
   pheadAvulsaTag: {
     borderWidth: 1,
