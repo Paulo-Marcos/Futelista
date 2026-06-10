@@ -149,7 +149,13 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   useEffect(() => {
     if (!subToast) return;
     const t = setTimeout(() => setSubToast(null), 2400);
-    return () => clearTimeout(t);
+    // M-06: limpa o pulse do jogador entrante um pouco antes do toast
+    // sumir, pra os dois fades coincidirem.
+    const s = setTimeout(() => setSpotlight(null), 2200);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(s);
+    };
   }, [subToast]);
 
   // Apito do fim do tempo (F-07). Dispara na transição para ENDED e
@@ -282,6 +288,10 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       const inPlayer = proximoTime.players[0];
       gestor.switchPlayerLeft(inPlayer, outPlayer);
       setSubToast({ inP: inPlayer, outP: outPlayer, side });
+      // M-06: feedback visual da troca — destaca o jogador que acabou de
+      // entrar com o mesmo pulse usado em gol (`spotlight`). É limpo
+      // pelo useEffect do subToast logo abaixo.
+      setSpotlight(inPlayer.id);
       setSubOpen(false);
     });
   };
@@ -332,6 +342,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         side: ultimo.side,
         extras: pares.length - 1,
       });
+      // M-06: pulsa o último jogador entrante (o que aparece no toast).
+      setSpotlight(ultimo.inP.id);
       setSubOpen(false);
     });
   };
@@ -1967,8 +1979,29 @@ function SubstitutionToast({
   teamB: Team;
 }) {
   const palette = usePalette();
+  // M-06: entrada animada — slide-up de +28 → 0 + fade 0 → 1. A saída
+  // não anima (unmount em ~2.4s), mas a chegada com peso visual ajuda
+  // o usuário a "ver" a troca acontecendo no campo.
+  const fade = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(28)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 220,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.spring(slide, {
+        toValue: 0,
+        friction: 8,
+        tension: 65,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fade, slide]);
   return (
-    <View
+    <Animated.View
       pointerEvents="none"
       style={[
         styles.toast,
@@ -1976,6 +2009,8 @@ function SubstitutionToast({
           backgroundColor: palette.surface,
           borderColor: palette.outlineVariant,
           shadowColor: palette.glow,
+          opacity: fade,
+          transform: [{ translateY: slide }],
         },
       ]}
     >
@@ -2022,7 +2057,7 @@ function SubstitutionToast({
             ? nomeDoTime(teamA, 0)
             : nomeDoTime(teamB, 1)}
       </Text>
-    </View>
+    </Animated.View>
   );
 }
 
