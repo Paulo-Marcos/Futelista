@@ -22,6 +22,7 @@ import { usePalette } from "@/src/shared/hooks/usePalette";
 import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
+import { ErrorToast } from "@/src/shared/ui/ErrorToast";
 import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamMini } from "@/src/shared/ui/TeamMini";
 import { TeamQueue } from "@/src/shared/ui/TeamQueue";
@@ -305,8 +306,6 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         ) : null}
       </View>
 
-      <BannerErro erro={erro} onFechar={() => setErro(null)} />
-
       <BannerSucesso mensagem={sucesso} onFechar={() => setSucesso(null)} />
 
       <BannerSelecao
@@ -482,6 +481,15 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         }}
       />
 
+      {/* M-11: erro como toast flutuante no rodapé (sem empurrar conteúdo).
+          Offset = 60 pra ficar acima do FAB Cancelar quando os dois
+          aparecem juntos. */}
+      <ErrorToast
+        erro={erro}
+        onFechar={() => setErro(null)}
+        bottomOffset={jogadorSelecionado ? 60 : 0}
+      />
+
       {/* M-08: FAB "Cancelar" persistente quando há jogador selecionado.
           O banner no topo ainda está lá com contexto (qual jogador), mas
           em listas longas o usuário não vê o X do banner — esse FAB
@@ -595,48 +603,6 @@ function PrimaryCTA({
     </View>
   );
 }
-
-const BannerErro = memo(function BannerErro({
-  erro,
-  onFechar,
-}: {
-  erro: string | null;
-  onFechar: () => void;
-}) {
-  const palette = usePalette();
-  if (!erro) return null;
-  return (
-    <View
-      style={[
-        styles.errorBanner,
-        {
-          backgroundColor: palette.errorContainer,
-          borderColor: palette.error,
-        },
-      ]}
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite"
-    >
-      <MaterialCommunityIcons
-        name="alert-circle"
-        size={16}
-        color={palette.error}
-      />
-      <Text style={[styles.errorText, { color: palette.error }]} selectable>
-        {erro}
-      </Text>
-      <Pressable
-        onPress={onFechar}
-        accessibilityRole="button"
-        accessibilityLabel="Fechar aviso"
-        style={styles.iconAction}
-        android_ripple={{ color: palette.error + "33" }}
-      >
-        <MaterialCommunityIcons name="close" size={18} color={palette.error} />
-      </Pressable>
-    </View>
-  );
-});
 
 const BannerSucesso = memo(function BannerSucesso({
   mensagem,
@@ -1093,21 +1059,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "800",
     letterSpacing: 0.1,
-  },
-  errorBanner: {
-    marginHorizontal: Spacing.lg,
-    marginTop: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  errorText: {
-    ...Typography.label,
-    flex: 1,
   },
   successBanner: {
     marginHorizontal: Spacing.lg,
