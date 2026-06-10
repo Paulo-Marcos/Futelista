@@ -282,19 +282,21 @@ describe("Home — modo execução (com gestor)", () => {
     expect(router.push).toHaveBeenCalledWith("/times");
   });
 
-  it("botão de configurações (cog) navega para /regras", () => {
+  it("botão de gerenciamento (cog) abre menu (M-20)", () => {
     const gestor = buildManager();
     renderWithProviders(<HomeScreen />, { soccer: { gestor } });
 
+    // M-20: o cog passou a abrir `escolherOpcao` em vez de navegar
+    // direto. Verificamos a presença do botão pelo novo label e que
+    // o press não dispara router.push imediatamente (vai pro menu).
     fireEvent.press(
-      screen.getByRole("button", { name: "Configurações e regras" }),
+      screen.getByRole("button", { name: "Gerenciar pelada" }),
     );
 
-    expect(router.push).toHaveBeenCalledWith("/regras");
+    expect(router.push).not.toHaveBeenCalledWith("/regras");
   });
 
-  // Bloco "Gerenciar" (Voltar/Salvar/Finalizar/Limpar) removido do
-  // ExecucaoHome para alinhar com o design Pelada.html. Os handlers seguem
-  // definidos no componente — quando forem religados a um menu (cog do
-  // header) ou a uma tela de configurações, os testes devem voltar lá.
+  // Bloco "Gerenciar" (Voltar/Salvar/Finalizar/Limpar) — agora plugado
+  // no menu do cog (M-20). Para testar cada escolha individualmente
+  // seria preciso mockar `escolherOpcao`, fica como follow-up.
 });

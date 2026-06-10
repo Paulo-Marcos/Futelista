@@ -43,7 +43,7 @@ import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamCrest } from "@/src/shared/ui/TeamCrest";
 import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Wordmark } from "@/src/shared/ui/Wordmark";
-import { confirmAcao } from "@/src/shared/ui/confirmAcao";
+import { confirmAcao, escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 
 /**
@@ -769,6 +769,48 @@ function ExecucaoHome() {
     voltarParaGestao().catch(reportarErro);
   };
 
+  /**
+   * M-20: menu de gerenciamento aberto pelo cog do header. Plugando
+   * os 4 handlers que existiam mas estavam órfãos (onFinalizar,
+   * onLimpar, voltarParaGestao, salvar-como-pelada) + atalho para
+   * /regras (que era o destino direto antes).
+   */
+  type AcaoGestao =
+    | "regras"
+    | "voltar"
+    | "salvar-como"
+    | "limpar"
+    | "finalizar"
+    | "cancelar";
+  const abrirMenuGestao = async () => {
+    const escolha = await escolherOpcao<AcaoGestao>({
+      titulo: "Gerenciar pelada",
+      mensagem: "O que você quer fazer?",
+      opcoes: [
+        { label: "Regras desta pelada", valor: "regras" },
+        { label: "Voltar para gestão", valor: "voltar" },
+        { label: "Salvar como pelada", valor: "salvar-como" },
+        {
+          label: "Limpar jogadores e times",
+          valor: "limpar",
+          estilo: "destructive",
+        },
+        {
+          label: "Finalizar execução",
+          valor: "finalizar",
+          estilo: "destructive",
+        },
+        { label: "Cancelar", valor: "cancelar", estilo: "cancel" },
+      ],
+    });
+    if (!escolha || escolha === "cancelar") return;
+    if (escolha === "regras") router.push("/regras");
+    else if (escolha === "voltar") onVoltarGestao();
+    else if (escolha === "salvar-como") router.push("/salvar-como-pelada");
+    else if (escolha === "limpar") onLimpar();
+    else if (escolha === "finalizar") onFinalizar();
+  };
+
   return (
     <View
       style={[
@@ -861,9 +903,10 @@ function ExecucaoHome() {
           </Pressable>
         ) : null}
         <Pressable
-          onPress={() => router.push("/regras")}
+          onPress={abrirMenuGestao}
           accessibilityRole="button"
-          accessibilityLabel="Configurações e regras"
+          accessibilityLabel="Gerenciar pelada"
+          accessibilityHint="Abre menu com regras, voltar para gestão, salvar como pelada, limpar e finalizar"
           style={({ pressed }) => [
             styles.pheadIconBtn,
             {
