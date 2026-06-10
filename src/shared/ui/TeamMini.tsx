@@ -25,6 +25,7 @@ export function TeamMini({
   onPlayerPress,
   onActionsPress,
   onLongPress,
+  comVantagem,
 }: {
   team: Team;
   idx: number;
@@ -39,6 +40,11 @@ export function TeamMini({
    * fora isso o comportamento original é preservado.
    */
   onLongPress?: () => void;
+  /**
+   * M-13: time tem `advantageToNext` ativa — empate no próximo jogo
+   * dele faz vencer. Exibe badge "VANTAGEM" no header.
+   */
+  comVantagem?: boolean;
 }) {
   const palette = usePalette();
   const borderTopColor =
@@ -63,6 +69,28 @@ export function TeamMini({
         <Text style={[styles.title, { color: palette.onSurface }]}>
           {label}
         </Text>
+        {comVantagem ? (
+          <View
+            style={[
+              styles.vantagemBadge,
+              {
+                backgroundColor: palette.goal + "29",
+                borderColor: palette.goal,
+              },
+            ]}
+            accessibilityRole="text"
+            accessibilityLabel="Time com vantagem para o próximo jogo"
+          >
+            <MaterialCommunityIcons
+              name="star-four-points"
+              size={10}
+              color={palette.goal}
+            />
+            <Text style={[styles.vantagemText, { color: palette.goal }]}>
+              VANTAGEM
+            </Text>
+          </View>
+        ) : null}
         {onActionsPress ? (
           <Pressable
             onPress={onActionsPress}
@@ -200,6 +228,23 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+  },
+  // M-13: badge de VANTAGEM no header. Pílula compacta com ícone +
+  // texto, usando a cor `goal` (dourada) com leve transparência no
+  // bg pra não competir com o título.
+  vantagemBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+  },
+  vantagemText: {
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 0.6,
   },
   players: { gap: 6 },
   playerLine: {

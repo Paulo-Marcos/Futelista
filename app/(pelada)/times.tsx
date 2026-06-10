@@ -364,6 +364,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
                     tone="A"
                     selectedPlayerId={jogadorSelecionado ?? undefined}
                     onPlayerPress={onPlayerPressTime}
+                    comVantagem={next[0].id === advantageId}
                     onLongPress={
                       !temPartida ? () => setEditandoTime(next[0]) : undefined
                     }
@@ -386,6 +387,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
                     tone="B"
                     selectedPlayerId={jogadorSelecionado ?? undefined}
                     onPlayerPress={onPlayerPressTime}
+                    comVantagem={next[1].id === advantageId}
                     onLongPress={
                       !temPartida ? () => setEditandoTime(next[1]) : undefined
                     }
