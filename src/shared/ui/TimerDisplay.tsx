@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
   time: {
     ...Typography.display,
     fontSize: 56,
-    fontVariant: ["tabular-nums"],
     letterSpacing: 1,
   },
   half: {

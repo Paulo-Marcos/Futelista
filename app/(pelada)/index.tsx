@@ -2203,7 +2203,6 @@ const styles = StyleSheet.create({
   heroPlacarScore: {
     ...Typography.headline,
     fontSize: 22,
-    fontVariant: ["tabular-nums"],
     minWidth: 60,
     textAlign: "center",
   },
@@ -2228,7 +2227,6 @@ const styles = StyleSheet.create({
   statValue: {
     ...Typography.display,
     fontSize: 32,
-    fontVariant: ["tabular-nums"],
   },
   statLabel: { ...Typography.label },
 
@@ -2293,7 +2291,6 @@ const styles = StyleSheet.create({
   miniPlacarScore: {
     ...Typography.headline,
     fontSize: 22,
-    fontVariant: ["tabular-nums"],
     minWidth: 60,
     textAlign: "center",
   },

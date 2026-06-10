@@ -2460,7 +2460,6 @@ const styles = StyleSheet.create({
   sbNum: {
     ...Typography.display,
     fontSize: 46,
-    fontVariant: ["tabular-nums"],
     minWidth: 40,
     textAlign: "center",
   },
@@ -2586,7 +2585,6 @@ const styles = StyleSheet.create({
   centerDiscTime: {
     ...Typography.headline,
     fontSize: 22,
-    fontVariant: ["tabular-nums"],
   },
   centerDiscSub: { ...Typography.label, fontSize: 10, marginTop: 2 },
 
@@ -2870,7 +2868,6 @@ const styles = StyleSheet.create({
   celebScore: {
     ...Typography.display,
     fontSize: 28,
-    fontVariant: ["tabular-nums"],
   },
 
   toast: {

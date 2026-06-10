@@ -61,8 +61,22 @@ export const Radius = {
  * Handoff §2.
  */
 export const Typography = {
-  display: { fontSize: 36, fontWeight: "800", letterSpacing: -0.72 },
-  headline: { fontSize: 24, fontWeight: "800", letterSpacing: -0.48 },
+  // M-15: `display` e `headline` carregam `tabular-nums` por padrão —
+  // são as escalas usadas em placar, cronômetro e contadores grandes,
+  // onde dígitos de largura variável "dançam" entre frames. O variant
+  // não afeta letras, então usar em títulos com texto puro é seguro.
+  display: {
+    fontSize: 36,
+    fontWeight: "800",
+    letterSpacing: -0.72,
+    fontVariant: ["tabular-nums"],
+  },
+  headline: {
+    fontSize: 24,
+    fontWeight: "800",
+    letterSpacing: -0.48,
+    fontVariant: ["tabular-nums"],
+  },
   title: { fontSize: 18, fontWeight: "700" },
   body: { fontSize: 14, fontWeight: "400" },
   label: { fontSize: 12, fontWeight: "700", letterSpacing: 0.48 },

@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
   score: {
     ...Typography.display,
     fontSize: 48,
-    fontVariant: ["tabular-nums"],
   },
   dash: {
     ...Typography.display,
