@@ -33,6 +33,7 @@ import { usePrefs } from "@/src/shared/prefs/prefsContext";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
+import { TopSnackbar } from "@/src/shared/ui/TopSnackbar";
 import { LivePulseDot } from "@/src/shared/ui/LivePulseDot";
 import { PitchLines } from "@/src/shared/ui/PitchLines";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
@@ -956,18 +957,12 @@ function ExecucaoHome() {
           serem religados a um menu de configurações futuro (cog do header). */}
 
         {erro ? <ErrorBanner mensagem={erro} /> : null}
-
-        {saving ? (
-          <View style={styles.savingRow}>
-            <ActivityIndicator size="small" color={palette.onSurfaceVariant} />
-            <Text
-              style={[styles.savingText, { color: palette.onSurfaceVariant }]}
-            >
-              salvando…
-            </Text>
-          </View>
-        ) : null}
       </ScrollView>
+
+      {/* M-19: indicador "salvando…" como snackbar no topo seguro —
+          mais visível que o row inline no rodapé do Hero, que era
+          fácil de perder durante o scroll. */}
+      <TopSnackbar visible={saving} mensagem="salvando…" comSpinner />
     </View>
   );
 }
@@ -2253,14 +2248,6 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   errorText: { ...Typography.label, flex: 1 },
-  savingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    justifyContent: "center",
-    marginTop: Spacing.md,
-  },
-  savingText: { ...Typography.label },
 
   miniPlacarHeader: {
     flexDirection: "row",
