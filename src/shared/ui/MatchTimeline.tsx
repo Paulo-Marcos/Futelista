@@ -1,5 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRef, useState } from "react";
 import {
+  type LayoutChangeEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -87,6 +89,9 @@ export function MatchTimeline({
     }))
     .reverse();
 
+  // M-14: snap por chip — guardamos a posição esquerda de cada item via
+  // onLayout pra alimentar `snapToOffsets`. Com `decelerationRate="fast"`
+  // a inércia engata num gol específico em vez de parar entre eles.
   return (
     <View
       style={[
@@ -97,11 +102,7 @@ export function MatchTimeline({
         },
       ]}
     >
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.track}
-      >
+      <TimelineScroll entries={entries}>
         {entries.map((e, i) => {
           const isMostRecent = i === 0;
           const tint = e.side === "A" ? palette.primary : palette.secondary;
@@ -188,8 +189,54 @@ export function MatchTimeline({
             </Pressable>
           );
         })}
-      </ScrollView>
+      </TimelineScroll>
     </View>
+  );
+}
+
+/**
+ * Scroll horizontal com snap calculado dinamicamente: cada filho
+ * direto reporta sua posição via `onLayout` e o ScrollView usa esse
+ * array como `snapToOffsets`. Funciona mesmo com chips de larguras
+ * variáveis (nomes diferentes).
+ */
+function TimelineScroll({
+  entries,
+  children,
+}: {
+  entries: TimelineEntry[];
+  children: React.ReactNode;
+}) {
+  const [offsets, setOffsets] = useState<number[]>([]);
+  const offsetsRef = useRef<number[]>([]);
+
+  const handleChildLayout = (index: number) => (e: LayoutChangeEvent) => {
+    const x = e.nativeEvent.layout.x;
+    offsetsRef.current[index] = x;
+    // Só comita pro state quando temos posição de todos — evita re-render
+    // intermediário enquanto o layout estabiliza.
+    if (offsetsRef.current.filter((v) => v !== undefined).length === entries.length) {
+      setOffsets([...offsetsRef.current]);
+    }
+  };
+
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.track}
+      decelerationRate="fast"
+      snapToOffsets={offsets.length > 0 ? offsets : undefined}
+      snapToAlignment="start"
+    >
+      {Array.isArray(children)
+        ? children.map((child, i) => (
+            <View key={(child as React.ReactElement).key ?? i} onLayout={handleChildLayout(i)}>
+              {child}
+            </View>
+          ))
+        : children}
+    </ScrollView>
   );
 }
 
