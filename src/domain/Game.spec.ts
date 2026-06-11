@@ -1066,6 +1066,82 @@ describe('Teste da classe Game', () => {
     });
   });
 
+  // Bug: o histórico (`matches`) nunca era populado em runtime — a chain
+  // de FinalResult substituía `playing` sem arquivar a partida encerrada.
+  // "Últimos jogos" na Home, a tela de Histórico e o RelatorioExecucao
+  // ficavam permanentemente vazios.
+  describe('Arquivamento da partida encerrada (setNextMatch)', () => {
+    function novo(perTeam: number, nomes: string[]): GestorJogo {
+      const jogo = new GestorJogo(
+        'Arquivamento',
+        new Rules({
+          playersPerTeam: perTeam,
+          goalLimit: 2,
+          choosingTeams: ChoosingTeams.BY_ORDER,
+        }),
+      );
+      jogo.setPlayers(nomes);
+      return jogo;
+    }
+
+    it('vitória: arquiva a partida encerrada antes de montar a próxima', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      jogo.start();
+      const encerrada = jogo.playing!;
+      const vencedor = encerrada.teamA;
+      jogo.addGoal(vencedor, vencedor.players[0]);
+      jogo.setResult();
+
+      jogo.setNextMatch();
+
+      expect(jogo.matches.map((m) => m.id)).toEqual([encerrada.id]);
+      expect(jogo.playing!.id).not.toBe(encerrada.id);
+    });
+
+    it('empate: arquiva a partida empatada', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      const encerrada = jogo.playing!;
+      jogo.advantageToNext = encerrada.teamA;
+      jogo.setResult(); // 0 x 0 → empate
+
+      jogo.setNextMatch();
+
+      expect(jogo.matches.map((m) => m.id)).toEqual([encerrada.id]);
+    });
+
+    it('partida sem resultado não vai para o histórico', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+
+      jogo.setNextMatch(); // sem setResult — nada a arquivar
+
+      expect(jogo.matches).toHaveLength(0);
+    });
+
+    it('partidas consecutivas acumulam no histórico em ordem', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      jogo.start();
+      const primeira = jogo.playing!;
+      jogo.addGoal(primeira.teamA, primeira.teamA.players[0]);
+      jogo.setResult();
+      jogo.setNextMatch();
+      const segunda = jogo.playing!;
+      jogo.addGoal(segunda.teamA, segunda.teamA.players[0]);
+      jogo.setResult();
+
+      jogo.setNextMatch();
+
+      expect(jogo.matches.map((m) => m.id)).toEqual([primeira.id, segunda.id]);
+    });
+  });
+
   describe('Quando limpar jogadores e times', () => {
     it('esvazia jogadores, fila e jogadores-sem-time preservando regras e nome', () => {
       const jogo = new GestorJogo('Sábado', new Rules({ playersPerTeam: 2 }));

@@ -648,11 +648,26 @@ export class GestorJogo {
 
   // Atualiza os novos times, considerando o resultado do jogo.
   setNextMatch(teamWithExternalAdvantage?: Team): void {
+    this.arquivarPartidaEncerrada();
     this.updateResult.process({
       jogo: this,
       externalAdvantage: teamWithExternalAdvantage,
     });
     this.notify();
+  }
+
+  /**
+   * Move a partida encerrada (com resultado definido) para o histórico
+   * ANTES de a chain de FinalResult substituir `playing` pela próxima.
+   * Sem este passo, `matches` nunca era populado em runtime e tudo que
+   * lê o histórico (Últimos jogos, tela de Histórico, RelatorioExecucao)
+   * ficava permanentemente vazio.
+   */
+  private arquivarPartidaEncerrada(): void {
+    const partida = this.playing;
+    if (!partida || partida.result === undefined) return;
+    if (this.matches.some((m) => m.id === partida.id)) return;
+    this.matches.push(partida);
   }
 
   relocateTeam(team: Team): void {
