@@ -13,9 +13,11 @@
       "backgroundColor": "#0C0C0E"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.paulomarcos.futelista"
     },
     "android": {
+      "package": "com.paulomarcos.futelista",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
