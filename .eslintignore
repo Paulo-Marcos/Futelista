@@ -1,0 +1,6 @@
+# Artefatos de build / gerados — não são código-fonte
+dist/
+web-build/
+.expo/
+coverage/
+node_modules/

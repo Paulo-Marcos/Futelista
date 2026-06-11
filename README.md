@@ -1,5 +1,6 @@
 # FuteLista ⚽
 
+[![CI](https://github.com/Paulo-Marcos/Futelista/actions/workflows/ci.yml/badge.svg)](https://github.com/Paulo-Marcos/Futelista/actions/workflows/ci.yml)
 [![web ao vivo](https://img.shields.io/badge/web-ao%20vivo-brightgreen)](https://futelista.expo.app)
 [![licença MIT](https://img.shields.io/badge/licença-MIT-blue)](LICENSE)
 
