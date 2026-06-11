@@ -11,6 +11,7 @@ Como gerar binários instaláveis (iOS/Android) e publicar nas lojas usando o **
 | Etapa                | Ferramenta                  | Quando                                |
 | -------------------- | --------------------------- | ------------------------------------- |
 | Dev local            | `expo start`                | Dia a dia.                            |
+| Web público          | `eas deploy`                | Publicar a versão web (EAS Hosting). Menor atrito, R$0. |
 | Build de dev nativo  | `eas build --profile development` | Testar APIs nativas fora do Expo Go. |
 | Preview interno      | `eas build --profile preview` | Compartilhar com testers (TestFlight, APK). |
 | Build de produção    | `eas build --profile production` | Antes de subir para App Store / Play Store. |
@@ -65,6 +66,29 @@ Exemplo mínimo de `eas.json` (você adapta):
   }
 }
 ```
+
+## Web (EAS Hosting) — o jeito mais rápido de disponibilizar
+
+A versão web é a forma de **menor atrito** de colocar o FuteLista no ar: gera um site estático e hospeda na **EAS Hosting** (free tier). Qualquer pessoa abre pelo link, sem instalar nada e sem passar por loja. Não envolve Apple/Google nem as taxas delas.
+
+```bash
+# 1. (uma vez) logar na conta Expo
+eas login
+
+# 2. exportar a versão web -> gera a pasta dist/
+npm run export:web        # = expo export --platform web
+
+# 3. publicar
+eas deploy                # cria uma URL de PREVIEW (muda a cada deploy, boa p/ testar)
+eas deploy --prod         # promove para a URL de PRODUÇÃO estável (*.expo.app)
+```
+
+Atalho: `npm run deploy:web` faz o export + `eas deploy --prod` num passo só.
+
+- Na **primeira** vez, o `eas deploy` pede um **nome de subdomínio** (ex.: `futelista`) e vincula o projeto à sua conta, gravando `extra.eas.projectId` no `app.json`.
+- **Custo: R$0.** Os limites do free tier são folgados para um app deste porte.
+- **Limitação:** libs 100% nativas (haptics, câmera) podem não funcionar no navegador; o resto do app roda normal. A persistência usa `localStorage` no navegador, então a pelada **não** se perde ao recarregar.
+- A versão web compartilha o mesmo código das versões iOS/Android — é o "compile once, repackage many" na prática.
 
 ## Build de desenvolvimento (com módulos nativos)
 

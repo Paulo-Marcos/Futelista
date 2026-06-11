@@ -1,5 +1,8 @@
 # FuteLista ⚽
 
+[![web ao vivo](https://img.shields.io/badge/web-ao%20vivo-brightgreen)](https://futelista.expo.app)
+[![licença MIT](https://img.shields.io/badge/licença-MIT-blue)](LICENSE)
+
 App mobile para **organizar peladas de futebol**: cadastrar jogadores, montar times, gerenciar partidas, contar gols, controlar o cronômetro e atualizar a fila de "próximos" segundo o resultado (vitória, empate, vantagem).
 
 > Pessoal, aberto a evolução. iOS, Android e Web (mesmo código).
@@ -57,7 +60,8 @@ Detalhes em [docs/usuario/regras.md](docs/usuario/regras.md) e [docs/desenvolved
 - ✅ **Domínio** (`src/domain/`): completo, puro, com ~20 specs Jest.
 - 🚧 **UI** (`app/`, `components/`): em construção.
 - ❌ **Persistência**: ainda não existe. Recarregar o app perde a pelada em andamento.
-- ❌ **Lojas**: ainda não publicado.
+- ✅ **Web**: publicado em [futelista.expo.app](https://futelista.expo.app) via EAS Hosting.
+- ❌ **Lojas (iOS/Android)**: ainda não publicado.
 
 Roteiro de refatoração em [COMMITS_PLAN.md](COMMITS_PLAN.md).
 

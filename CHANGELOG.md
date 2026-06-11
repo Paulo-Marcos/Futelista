@@ -12,6 +12,7 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ### Adicionado
 
+- Versão **web** publicada em <https://futelista.expo.app> via EAS Hosting (deploy com `npm run deploy:web`). Scripts `export:web`/`deploy:web` no `package.json` e seção "Web (EAS Hosting)" em `docs/desenvolvedor/build-release.md`.
 - Documentação humana inicial em `docs/`: vitrine no `README.md`, índice, guias de usuário (primeiros passos, fluxo, regras) e de desenvolvedor (instalação, arquitetura, domínio, UI, testes, build/release).
 - Política de privacidade em `PRIVACY.md` (pré-requisito para publicação nas lojas).
 - Primeiros ADRs em `docs/adr/`: roteador (Expo Router file-based) e reatividade (External Store + `useGameSlice`).
