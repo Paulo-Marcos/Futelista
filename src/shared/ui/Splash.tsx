@@ -15,8 +15,9 @@
 // ============================================================================
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -41,6 +42,7 @@ import Svg, {
 } from "react-native-svg";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
+import { KickClashIcon } from "@/src/shared/ui/KickClashIcon";
 import { PitchLines } from "@/src/shared/ui/PitchLines";
 
 // Fonte display do protótipo é Archivo 800. Carregada em app/_layout.tsx
@@ -80,13 +82,25 @@ export function Splash({
   previewLoop?: boolean;
 }) {
   const palette = usePalette();
-  const { width: screenW, height: screenH } = useWindowDimensions();
+  const { width: janelaW, height: janelaH } = useWindowDimensions();
 
   // -------------------------------------------------------------------------
   // BG circular — `gradientUnits="userSpaceOnUse"` exige pixels reais.
   // Sem isso, % se referem à bbox do <Rect> (a tela em portrait), o que
   // gera elipse esticada na vertical.
+  //
+  // As dimensões vêm do CONTAINER (medido via onLayout), não da janela: na
+  // web a janela pode ser bem maior que a moldura/área visível, o que
+  // esticaria o gradiente numa elipse. A janela é só o palpite inicial.
   // -------------------------------------------------------------------------
+  const [screenW, setScreenW] = useState(janelaW);
+  const [screenH, setScreenH] = useState(janelaH);
+  const aoMedir = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (width > 0 && width !== screenW) setScreenW(width);
+    if (height > 0 && height !== screenH) setScreenH(height);
+  };
+
   const bgCx = screenW / 2;
   const bgCy = screenH * 0.3;
   const bgR = Math.max(screenW, screenH) * 0.75;
@@ -104,6 +118,10 @@ export function Splash({
   const name = useSharedValue(0);
   const tag = useSharedValue(0);
   const bar = useSharedValue(0);
+  // Proposta A "Impacto": no instante em que o badge aterrissa, ele treme
+  // (canelada) e dispara um anel de choque que expande e some.
+  const ring = useSharedValue(0);
+  const shake = useSharedValue(0);
 
   useEffect(() => {
     // splashglow .. ease-out cubic, 2.3s.  Em preview: loop infinito.
@@ -116,6 +134,18 @@ export function Splash({
       duration: 700,
       easing: Easing.bezier(0.2, 1.3, 0.4, 1),
     });
+
+    // IMPACTO (proposta A): o badge cai por ~360ms; aí treme + solta o anel.
+    const IMPACT = 380;
+    const ringRun = () =>
+      withDelay(
+        IMPACT,
+        withTiming(1, { duration: 720, easing: Easing.out(Easing.cubic) }),
+      );
+    ring.value = previewLoop ? withRepeat(ringRun(), -1, false) : ringRun();
+    const shakeRun = () =>
+      withDelay(IMPACT, withTiming(1, { duration: 440, easing: Easing.linear }));
+    shake.value = previewLoop ? withRepeat(shakeRun(), -1, false) : shakeRun();
 
     // splashup .6s — name (delay .2s) + tag (delay .35s). One-shot.
     name.value = withDelay(
@@ -140,6 +170,8 @@ export function Splash({
     return () => {
       cancelAnimation(glow);
       cancelAnimation(bar);
+      cancelAnimation(ring);
+      cancelAnimation(shake);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewLoop]);
@@ -152,13 +184,33 @@ export function Splash({
     opacity: interpolate(glow.value, [0, 0.4, 1], [0, 1, 0.4]),
     transform: [{ scale: interpolate(glow.value, [0, 1], [0.4, 1.2]) }],
   }));
-  const badgeStyle = useAnimatedStyle(() => ({
-    // splashpop: opacity .2→1; scale .4→1; rotate -12→0deg.
-    opacity: interpolate(badge.value, [0, 1], [0.2, 1]),
-    transform: [
-      { scale: interpolate(badge.value, [0, 1], [0.4, 1]) },
-      { rotate: `${interpolate(badge.value, [0, 1], [-12, 0])}deg` },
-    ],
+  const badgeStyle = useAnimatedStyle(() => {
+    // Tremor amortecido da canelada (zera no fim p/ loop limpo).
+    const sx = interpolate(
+      shake.value,
+      [0, 0.15, 0.35, 0.55, 0.78, 1],
+      [0, -4, 4, -2.5, 1.2, 0],
+    );
+    const sy = interpolate(
+      shake.value,
+      [0, 0.15, 0.35, 0.55, 0.78, 1],
+      [0, 3, -3, 2, -1, 0],
+    );
+    return {
+      // splashpop: opacity .2→1; scale .4→1; rotate -12→0deg.
+      opacity: interpolate(badge.value, [0, 1], [0.2, 1]),
+      transform: [
+        { translateX: sx },
+        { translateY: sy },
+        { scale: interpolate(badge.value, [0, 1], [0.4, 1]) },
+        { rotate: `${interpolate(badge.value, [0, 1], [-12, 0])}deg` },
+      ],
+    };
+  });
+  // Anel de choque: aparece rápido e expande sumindo.
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(ring.value, [0, 0.08, 1], [0, 0.7, 0]),
+    transform: [{ scale: interpolate(ring.value, [0, 1], [0.7, 2.3]) }],
   }));
   const nameStyle = useAnimatedStyle(() => ({
     opacity: interpolate(name.value, [0, 1], [0.2, 1]),
@@ -187,6 +239,7 @@ export function Splash({
       // Em preview, tap NÃO dismissa (evita 404 acidental quando o
       // back-stack está vazio). Para sair, usar o X no canto superior.
       onPress={previewLoop ? undefined : onDone}
+      onLayout={aoMedir}
       accessibilityRole={previewLoop ? undefined : "button"}
       accessibilityLabel={previewLoop ? undefined : "Pular splash"}
       style={[styles.root, { backgroundColor: palette.background }]}
@@ -220,9 +273,12 @@ export function Splash({
         <Rect x={0} y={0} width={screenW} height={screenH} fill="url(#bg)" />
       </Svg>
 
-      {/* ----------- .fl-splash__pitch (linhas de campo) ----------- */}
+      {/* ----------- .fl-splash__pitch (linhas de campo) -----------
+          Campo EM PÉ (orientation="portrait") + fit="meet" para caber
+          inteiro na tela retrato. Antes era deitado e saía cortado pela
+          metade nas laterais. */}
       <View style={styles.pitch} pointerEvents="none">
-        <PitchLines opacity={0.5} />
+        <PitchLines opacity={0.5} orientation="portrait" fit="meet" />
       </View>
 
       {/* ----------- .fl-splash__glow -----------
@@ -262,16 +318,27 @@ export function Splash({
 
       {/* ----------- .fl-splash__center (badge + nome + tag) ----------- */}
       <View style={styles.center}>
-        {/* .fl-splash__badge: linear-gradient(140deg, primary, primaryDim)
+        {/* Palco do badge: segura o anel de choque (atrás) + o badge. */}
+        <View style={styles.badgeStage}>
+          {/* Anel de choque (proposta A — Impacto). */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.shockRing,
+              { borderColor: palette.tertiary },
+              ringStyle,
+            ]}
+          />
+          {/* .fl-splash__badge: linear-gradient(140deg, primary, primaryDim)
             via react-native-svg <LinearGradient> (evita dependência do
             expo-linear-gradient e o problema de cache do Metro). */}
-        <Animated.View
-          style={[
-            styles.badgeWrap,
-            { shadowColor: palette.glow },
-            badgeStyle,
-          ]}
-        >
+          <Animated.View
+            style={[
+              styles.badgeWrap,
+              { shadowColor: palette.glow },
+              badgeStyle,
+            ]}
+          >
           <View style={styles.badge}>
             <Svg
               width="100%"
@@ -298,13 +365,15 @@ export function Splash({
                 fill="url(#badge-bg)"
               />
             </Svg>
-            <MaterialCommunityIcons
-              name="soccer"
-              size={46}
-              color={palette.onPrimary}
+            <KickClashIcon
+              size={78}
+              sock={palette.onPrimary}
+              ink={palette.background}
+              burst={palette.tertiary}
             />
           </View>
-        </Animated.View>
+          </Animated.View>
+        </View>
 
         {/* .fl-splash__name */}
         <Animated.Text
@@ -389,6 +458,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   center: { alignItems: "center", zIndex: 2 },
+  badgeStage: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shockRing: {
+    position: "absolute",
+    width: 96,
+    height: 96,
+    borderRadius: 30,
+    borderWidth: 3,
+  },
   badgeWrap: {
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.55,

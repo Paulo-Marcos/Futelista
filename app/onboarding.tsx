@@ -1,7 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  LayoutChangeEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -65,9 +66,29 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { setPrefs } = usePrefs();
-  const { width } = useWindowDimensions();
+  const { width: larguraJanela } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
   const [pagina, setPagina] = useState(0);
+
+  // A largura do slide vem do container (medido via onLayout), não da janela.
+  // Na web a janela pode ser muito maior que a moldura/área visível; usar a
+  // janela faria cada slide estourar a largura e o swipe paginar errado.
+  const [largura, setLargura] = useState(larguraJanela);
+  const paginaRef = useRef(pagina);
+  useEffect(() => {
+    paginaRef.current = pagina;
+  }, [pagina]);
+
+  // Ao mudar a largura (ex.: redimensionar a moldura na web), re-alinha o
+  // scroll com o slide atual para não ficar "entre" páginas.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ x: paginaRef.current * largura, animated: false });
+  }, [largura]);
+
+  const aoMedir = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w > 0 && w !== largura) setLargura(w);
+  };
 
   const eUltima = pagina === SLIDES.length - 1;
 
@@ -82,18 +103,19 @@ export default function OnboardingScreen() {
       return;
     }
     const proxima = pagina + 1;
-    scrollRef.current?.scrollTo({ x: proxima * width, animated: true });
+    scrollRef.current?.scrollTo({ x: proxima * largura, animated: true });
     setPagina(proxima);
   };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
-    const indice = Math.round(x / Math.max(width, 1));
+    const indice = Math.round(x / Math.max(largura, 1));
     if (indice !== pagina) setPagina(indice);
   };
 
   return (
     <View
+      onLayout={aoMedir}
       style={[
         styles.screen,
         {
@@ -128,7 +150,7 @@ export default function OnboardingScreen() {
         style={{ flex: 1 }}
       >
         {SLIDES.map((s) => (
-          <SlideCard key={s.id} slide={s} width={width} palette={palette} />
+          <SlideCard key={s.id} slide={s} width={largura} palette={palette} />
         ))}
       </ScrollView>
 
