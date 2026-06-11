@@ -164,6 +164,13 @@ export class GestorJogo {
   setPlayingGame(): void {
     if (this.playing !== undefined)
       throw Error("Já existe uma partida acontecendo.");
+    // Precisa de 2 times na fila. Sem o guard, o segundo `tirarDaFila()`
+    // devolveria undefined e o construtor de Match estouraria em
+    // `teamB.addMatch` — erro opaco em vez de mensagem de domínio.
+    if (this.next.length < 2)
+      throw Error(
+        "É preciso ter ao menos 2 times na fila para iniciar uma partida.",
+      );
     this.playing = new Match(this.tirarDaFila(), this.tirarDaFila());
     this.notify();
   }
@@ -216,9 +223,16 @@ export class GestorJogo {
   }
 
   switchPlayerLeft(playerIn: Player, playerOut: Player): void {
-    const teamToOut = playerIn.currentTeam!;
+    const teamToOut = playerIn.currentTeam;
+    const teamToIn = playerOut.currentTeam;
+    // Ambos precisam estar num time: o reserva (playerIn) no banco e o que
+    // sai (playerOut) em campo. Sem o guard, um `currentTeam` indefinido
+    // (jogador parado/removido) estouraria em `.removePlayer`/`.switchPlayer`.
+    if (!teamToOut || !teamToIn)
+      throw Error(
+        "Só dá pra trocar jogadores que estão em um time.",
+      );
     teamToOut.removePlayer(playerIn);
-    const teamToIn = playerOut.currentTeam!;
     // Usa Team.switchPlayer para que a substituição banco→campo fique
     // registrada em teamToIn.switches (estatística histórica). Esse caminho
     // já chama playerIn.addTeam(teamToIn), devolvendo playerIn ao estado
@@ -233,6 +247,10 @@ export class GestorJogo {
 
   resizeTeams(beginTeam?: Team): void {
     const begin = beginTeam ? this.next.indexOf(beginTeam) : 0;
+    // `beginTeam` fora da fila (indexOf === -1) significa que o time já saiu
+    // de `next` — não há o que redimensionar. Sem este guard, o loop leria
+    // `this.next[-1].fullTeam` e estouraria.
+    if (begin < 0) return;
     for (let i = begin; i <= this.next.length - 2; i++) {
       if (this.next[i].fullTeam) continue;
       this.relocatePlayers(this.next[i + 1], this.next[i]);
@@ -246,7 +264,13 @@ export class GestorJogo {
   }
 
   resizePlayingGame(team: Team): void {
-    const playerEnters = this.next[0].removeNewestPlayer();
+    // Reposição vem do primeiro time da fila. Se a fila está vazia (ou o
+    // time da frente já está sem jogadores), não há reserva pra puxar — o
+    // time em campo segue desfalcado. Tentar puxar "ninguém" colocaria um
+    // undefined no roster e corromperia o agregado (quebra ao salvar).
+    const proximoNaFila = this.next[0];
+    if (!proximoNaFila || proximoNaFila.players.length === 0) return;
+    const playerEnters = proximoNaFila.removeNewestPlayer();
     team.addPlayer(playerEnters);
     this.resizeTeams();
   }
@@ -268,8 +292,12 @@ export class GestorJogo {
 
   // Trocar jogador entre Times
   switchPlayerFromTeam(player1: Player, player2: Player): void {
-    const team1 = player1.currentTeam!;
-    const team2 = player2.currentTeam!;
+    const team1 = player1.currentTeam;
+    const team2 = player2.currentTeam;
+    // Ambos precisam estar em um time. Sem o guard, um `currentTeam`
+    // indefinido estouraria em `team.switchPlayer`.
+    if (!team1 || !team2)
+      throw Error("Só dá pra trocar jogadores que estão em um time.");
     team1.switchPlayer(player2, player1);
     team2.switchPlayer(player1, player2);
     this.notify();
@@ -497,7 +525,11 @@ export class GestorJogo {
   }
 
   addGoal(team: Team, playerGoal: Player): void {
-    this.playing?.addGoal(team, playerGoal, this.timer!.getTime());
+    // Sem partida ou sem cronômetro iniciado não há instante (ScreenTime) pra
+    // carimbar o gol — vira no-op. O `this.timer!` original estourava quando
+    // havia partida aberta mas o tempo ainda não tinha sido iniciado.
+    if (!this.playing || !this.timer) return;
+    this.playing.addGoal(team, playerGoal, this.timer.getTime());
     this.encerrarSeAtingiuLimite();
     this.notify();
   }
@@ -625,8 +657,11 @@ export class GestorJogo {
 
   relocateTeam(team: Team): void {
     const lastTeam = this.next.pop();
-    if (!lastTeam?.fullTeam) this.relocatePlayers(team, lastTeam!);
-    lastTeam && this.next.push(lastTeam);
+    // Fila vazia (caso comum com só 2 times): não há time no fim pra absorver
+    // jogadores incompletos — apenas recoloca `team`. Antes, `relocatePlayers`
+    // recebia `lastTeam` undefined e estourava em `teamTo.fullTeam`.
+    if (lastTeam && !lastTeam.fullTeam) this.relocatePlayers(team, lastTeam);
+    if (lastTeam) this.next.push(lastTeam);
     this.next.push(team);
   }
 

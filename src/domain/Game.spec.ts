@@ -286,6 +286,146 @@ describe('Teste da classe Game', () => {
     });
   });
 
+  // Regressão (bug "Cannot read properties of undefined (reading 'id')" ao
+  // voltar da Home): remover/trocar jogador de um time EM CAMPO quando a fila
+  // está vazia não pode tentar puxar reserva inexistente. Antes, o
+  // resizePlayingGame fazia next[0].removeNewestPlayer() (=undefined) e o
+  // Team.addPlayer empurrava esse undefined no roster — corrompendo o
+  // agregado e quebrando a serialização (salvar) na ação seguinte.
+  describe('Remoção em partida com fila vazia (não corromper roster)', () => {
+    let jogo: GestorJogo;
+    beforeEach(() => {
+      const rules = new Rules({
+        playersPerTeam: 2,
+        choosingTeams: ChoosingTeams.BY_ORDER,
+      });
+      jogo = new GestorJogo('Futebol de quarta', rules);
+      jogo.setPlayers(['Paulo', 'Marcos', 'Rodrigues', 'Oliveira']);
+      jogo.createTeams(); // 2 times de 2
+      jogo.setPlayingGame(); // ambos entram em campo → fila vazia
+    });
+
+    it('removeFromGame com fila vazia deixa o time desfalcado, sem undefined', () => {
+      const team = jogo.playing!.teamA;
+      const alvo = team.players[0];
+
+      expect(() => jogo.removeFromGame(alvo)).not.toThrow();
+
+      expect(team.players).toHaveLength(1);
+      expect(team.players.every((p) => p !== undefined)).toBe(true);
+      expect(team.hasPlayer(alvo)).toBe(false);
+    });
+
+    it('resizePlayingGame é no-op quando não há reserva na fila', () => {
+      const team = jogo.playing!.teamA;
+      team.removeNewestPlayer(); // simula a saída de um jogador
+      jest.spyOn(jogo, 'resizeTeams');
+
+      expect(() => jogo.resizePlayingGame(team)).not.toThrow();
+
+      expect(team.players.every((p) => p !== undefined)).toBe(true);
+      expect(jogo.resizeTeams).not.toHaveBeenCalled();
+    });
+  });
+
+  // Hardening da mesma família de crashes por underflow de fila / refs nulas:
+  // métodos que usavam `!` (non-null assertion) e estouravam com TypeError
+  // opaco ("reading 'addMatch' | 'fullTeam' | 'switchPlayer' | 'getTime'")
+  // passam a falhar com mensagem de domínio ou a operar com segurança.
+  describe('Robustez de fila e trocas (mensagem de domínio em vez de TypeError)', () => {
+    function novo(perTeam: number, nomes: string[]): GestorJogo {
+      const jogo = new GestorJogo(
+        'Robustez',
+        new Rules({
+          playersPerTeam: perTeam,
+          goalLimit: 2,
+          choosingTeams: ChoosingTeams.BY_ORDER,
+        }),
+      );
+      jogo.setPlayers(nomes);
+      return jogo;
+    }
+
+    it('setPlayingGame com menos de 2 times lança erro de domínio', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      // Monta apenas 1 time na fila (createTeams exige 2×perTeam jogadores).
+      jogo.addToNewTeam(jogo.players[0]);
+      expect(jogo.next.length).toBe(1);
+      expect(() => jogo.setPlayingGame()).toThrowError(
+        'É preciso ter ao menos 2 times na fila para iniciar uma partida.',
+      );
+    });
+
+    it('vitória com só 2 times: setNextMatch recoloca o confronto sem estourar', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']); // 2 times
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      jogo.start();
+      const vencedor = jogo.playing!.teamA;
+      const perdedor = jogo.playing!.teamB;
+      jogo.addGoal(vencedor, vencedor.players[0]);
+      jogo.setResult();
+
+      expect(() => jogo.setNextMatch()).not.toThrow();
+
+      expect(jogo.playing).toBeDefined();
+      expect(jogo.playing!.teamA.id).toBe(vencedor.id);
+      expect(jogo.playing!.teamB.id).toBe(perdedor.id);
+      // Sem refs penduradas — o agregado continua íntegro.
+      expect(jogo.next.every((t) => t !== undefined)).toBe(true);
+    });
+
+    it('empate com vantagem e só 2 times: setNextMatch mantém o vantajoso em campo', () => {
+      // Outro handler que toca relocateTeam com fila vazia
+      // (WithDrawAndAdvantageAndNotTwoTeams): antes do guard, também estourava.
+      const jogo = novo(2, ['A', 'B', 'C', 'D']); // 2 times
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      const comVantagem = jogo.playing!.teamA;
+      const outro = jogo.playing!.teamB;
+      jogo.advantageToNext = comVantagem;
+      jogo.setResult(); // 0 x 0 → empate
+
+      expect(() => jogo.setNextMatch()).not.toThrow();
+
+      expect(jogo.playing).toBeDefined();
+      expect(jogo.playing!.teams.has(comVantagem)).toBe(true);
+      expect(jogo.playing!.teams.has(outro)).toBe(true);
+      expect(jogo.next.length).toBe(0);
+    });
+
+    it('switchPlayerFromTeam exige que ambos estejam em um time', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      const players = jogo.players;
+      jogo.createTeams();
+      const semTime = new Player({ name: 'Solto' });
+      expect(() =>
+        jogo.switchPlayerFromTeam(players[0], semTime),
+      ).toThrowError('Só dá pra trocar jogadores que estão em um time.');
+    });
+
+    it('switchPlayerLeft exige reserva e jogador a sair em times válidos', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      const players = jogo.players;
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      const semTime = new Player({ name: 'Solto' });
+      expect(() =>
+        jogo.switchPlayerLeft(semTime, players[0]),
+      ).toThrowError('Só dá pra trocar jogadores que estão em um time.');
+    });
+
+    it('addGoal sem cronômetro iniciado é no-op, não estoura', () => {
+      const jogo = novo(2, ['A', 'B', 'C', 'D']);
+      jogo.createTeams();
+      jogo.setPlayingGame(); // partida existe, mas start() não foi chamado
+      const team = jogo.playing!.teamA;
+
+      expect(() => jogo.addGoal(team, team.players[0])).not.toThrow();
+      expect(jogo.playing!.countGoals()).toEqual({ teamA: 0, teamB: 0 });
+    });
+  });
+
   describe('Quando for controlar a partida atual', () => {
     let jogo: GestorJogo;
     let players: Player[];

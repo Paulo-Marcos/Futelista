@@ -25,6 +25,17 @@ describe('Teste da classe Team', () => {
         'Não é possível adicionar novo jogador. Limite alcançado.',
       );
     });
+    // Regressão: addPlayer empurrava o jogador no array ANTES de chamar
+    // player.addTeam(). Recebendo undefined (fila vazia → removeNewestPlayer
+    // devolvia undefined), o push deixava lixo no roster mesmo com o addTeam
+    // estourando — e a serialização seguinte quebrava em `players.map(p=>p.id)`.
+    it('Deverá rejeitar jogador indefinido sem sujar o roster', () => {
+      const teamA = new Team({ limit: 5 });
+      expect(() =>
+        teamA.addPlayer(undefined as unknown as Player),
+      ).toThrowError('Não é possível adicionar um jogador indefinido ao time.');
+      expect(teamA.players.length).toBe(0);
+    });
   });
   describe('Teste de substituir jogador', () => {
     it('Deverá substituir jogador', () => {
@@ -36,6 +47,17 @@ describe('Teste da classe Team', () => {
       expect(teamA.hasPlayer(playerEnters)).toBe(true);
       expect(teamA.players?.length).toBe(1);
       expect(playerEnters.teams[0].id).toBe(teamA.id);
+    });
+    // Regressão: switchPlayer também empurra o entrante antes do addTeam.
+    it('Deverá rejeitar entrante indefinido sem sujar o roster', () => {
+      const teamA = new Team({ limit: 5 });
+      const player = new Player({ name: 'Teste' });
+      teamA.addPlayer(player);
+      expect(() =>
+        teamA.switchPlayer(undefined as unknown as Player, player),
+      ).toThrowError('Não é possível incluir um jogador indefinido na troca.');
+      expect(teamA.players.length).toBe(1);
+      expect(teamA.hasPlayer(player)).toBe(true);
     });
     it('Deverá adicionar na lista de substituições do time', () => {
       const teamA = new Team({ limit: 5 });

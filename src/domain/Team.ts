@@ -95,6 +95,12 @@ export class Team {
   }
 
   addPlayer(player: Player): void {
+    // Invariante: o roster nunca contém posições indefinidas. Validamos
+    // ANTES de mutar — um push de `undefined` (vindo de fila vazia via
+    // removeNewestPlayer/shift) deixaria lixo no array mesmo com o
+    // `addTeam` subsequente estourando, corrompendo a serialização.
+    if (!player)
+      throw Error("Não é possível adicionar um jogador indefinido ao time.");
     if (this.fullTeam)
       throw Error("Não é possível adicionar novo jogador. Limite alcançado.");
     this.players.push(player);
@@ -122,6 +128,10 @@ export class Team {
   }
 
   switchPlayer(playerEnters: Player, playerLeaves: Player): void {
+    // Mesma invariante de addPlayer: rejeita entrante indefinido antes de
+    // empurrar no roster (o push acontece antes do addTeam que dereferencia).
+    if (!playerEnters)
+      throw Error("Não é possível incluir um jogador indefinido na troca.");
     const index = this.players.indexOf(playerLeaves);
     // splice(index, 1) remove APENAS o jogador alvo. Sem o segundo argumento,
     // splice(index) remove do índice até o fim — bug histórico que esvaziava
