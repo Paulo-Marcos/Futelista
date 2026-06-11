@@ -1,5 +1,5 @@
 import { GestorJogo, PeladaStatus } from "@/src/domain/GestorJogo";
-import { PlayerSituation } from "@/src/domain/Player";
+import { Player, PlayerSituation } from "@/src/domain/Player";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 import { TeamSituation } from "@/src/domain/Team";
 import { TimerStatus } from "@/src/domain/Timer";
@@ -217,6 +217,140 @@ describe("serializer (round-trip GestorJogo)", () => {
     expect(recriada.advantageToNext?.id).toBe(teamVencedor.id);
     expect(recriada.playing).toBeDefined();
     expect(recriada.playing!.teamA.id).toBe(teamVencedor.id);
+  });
+
+  // Regressão do bug "Cannot read properties of undefined (reading 'id')"
+  // que estourava ao voltar da Home (voltarParaGestao → salvar → serializar).
+  // Remover um jogador de um time em campo com a fila vazia deixava um
+  // undefined no roster; `team.players.map(p => p.id)` quebrava no save.
+  it("serializa após remover jogador de time em campo com fila vazia", () => {
+    const jogo = new GestorJogo(
+      "Fila vazia",
+      new Rules({
+        playersPerTeam: 2,
+        timeMatch: "00:01:00",
+        choosingTeams: ChoosingTeams.BY_ORDER,
+      }),
+    );
+    jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
+    jogo.createTeams(); // 2 times de 2
+    jogo.setPlayingGame(); // ambos em campo → fila vazia
+    jogo.start();
+
+    // Tira um jogador do time em campo sem reserva pra puxar.
+    jogo.removeFromGame(jogo.playing!.teamA.players[0]);
+
+    expect(() => serializeGestorJogo(jogo)).not.toThrow();
+    const recriada = deserializeGestorJogo(serializeGestorJogo(jogo));
+    expect(recriada.playing!.teamA.players).toHaveLength(1);
+    expect(recriada.playing!.teamA.players.every((p) => p !== undefined)).toBe(
+      true,
+    );
+  });
+
+  // Regressão do crash "Cannot read properties of undefined (reading 'id')"
+  // ao salvar DEPOIS de um reload (ex.: botão voltar da Home →
+  // voltarParaGestao → salvar). O payload não fechava sobre o grafo
+  // alcançável: partida encerrada (referenciada só por team.matches /
+  // player.matches) e jogador removido da pelada (referenciado por gols e
+  // escalações antigas) ficavam fora de `matches`/`players`. Na
+  // reidratação essas referências viravam `undefined` e o save seguinte
+  // estourava no `.id`.
+  describe("fechamento do grafo alcançável", () => {
+    function buildPeladaComPartidaEncerrada(): {
+      jogo: GestorJogo;
+      artilheiroDoPerdedor: Player;
+    } {
+      const jogo = buildPeladaComJogadores(); // 6 jogadores, 2 por time
+      jogo.createTeams(); // 3 times (BY_ORDER)
+      jogo.setPlayingGame(); // A x B em campo; fila: [C]
+      jogo.start();
+      const teamA = jogo.playing!.teamA;
+      const teamB = jogo.playing!.teamB;
+      const artilheiroDoPerdedor = teamB.players[0];
+      jogo.addGoal(teamA, teamA.players[0]);
+      jogo.addGoal(teamA, teamA.players[1]);
+      jogo.addGoal(teamB, artilheiroDoPerdedor);
+      jogo.setResult(); // A vence 2x1
+      jogo.setNextMatch(); // B vai pra fila; A x C em campo
+      return { jogo, artilheiroDoPerdedor };
+    }
+
+    it("salva de novo após reload com partida encerrada no histórico dos times", () => {
+      const { jogo } = buildPeladaComPartidaEncerrada();
+
+      const reidratada = deserializeGestorJogo(serializeGestorJogo(jogo));
+
+      expect(() => serializeGestorJogo(reidratada)).not.toThrow();
+    });
+
+    it("preserva no round-trip a partida encerrada referenciada pelos times", () => {
+      const { jogo } = buildPeladaComPartidaEncerrada();
+
+      const reidratada = deserializeGestorJogo(serializeGestorJogo(jogo));
+
+      // Vencedor (em campo) tem 2 partidas no histórico: encerrada + atual.
+      const vencedor = reidratada.playing!.teamA;
+      expect(vencedor.matches).toHaveLength(2);
+      expect(vencedor.matches[0].countGoals()).toEqual({ teamA: 2, teamB: 1 });
+    });
+
+    it("salva de novo após reload com jogador removido que tinha gol marcado", () => {
+      const { jogo, artilheiroDoPerdedor } = buildPeladaComPartidaEncerrada();
+      jogo.removePlayer(artilheiroDoPerdedor);
+
+      const reidratada = deserializeGestorJogo(serializeGestorJogo(jogo));
+
+      expect(() => serializeGestorJogo(reidratada)).not.toThrow();
+      // Removido não ressuscita no elenco…
+      expect(reidratada.players.map((p) => p.name)).not.toContain(
+        artilheiroDoPerdedor.name,
+      );
+      // …mas o placar da partida encerrada permanece íntegro.
+      const encerrada = reidratada.playing!.teamA.matches[0];
+      expect(encerrada.countGoals()).toEqual({ teamA: 2, teamB: 1 });
+    });
+
+    it("cura save antigo (v3) sem a partida encerrada na lista de matches", () => {
+      const { jogo } = buildPeladaComPartidaEncerrada();
+      const payload = JSON.parse(serializeGestorJogo(jogo));
+      // Simula o save antigo: só a partida em andamento era serializada.
+      payload.version = 3;
+      delete payload.rosterPlayerIds;
+      payload.matches = payload.matches.filter(
+        (m: { id: string }) => m.id === payload.pelada.playingMatchId,
+      );
+
+      const reidratada = deserializeGestorJogo(JSON.stringify(payload));
+
+      // Histórico daquela partida se perdeu, mas o save volta a funcionar.
+      expect(() => serializeGestorJogo(reidratada)).not.toThrow();
+      expect(reidratada.playing).toBeDefined();
+    });
+
+    it("cura save antigo (v3) com gol de jogador que não está no payload", () => {
+      const { jogo, artilheiroDoPerdedor } = buildPeladaComPartidaEncerrada();
+      const payload = JSON.parse(serializeGestorJogo(jogo));
+      // Simula o save antigo pós-remoção: jogador fora de players e dos
+      // rosters, mas o gol dele segue na partida encerrada.
+      payload.version = 3;
+      delete payload.rosterPlayerIds;
+      payload.players = payload.players.filter(
+        (p: { id: string }) => p.id !== artilheiroDoPerdedor.id,
+      );
+      payload.teams.forEach((t: { playerIds: string[] }) => {
+        t.playerIds = t.playerIds.filter(
+          (id) => id !== artilheiroDoPerdedor.id,
+        );
+      });
+
+      const reidratada = deserializeGestorJogo(JSON.stringify(payload));
+
+      expect(() => serializeGestorJogo(reidratada)).not.toThrow();
+      // Placeholder preserva o placar mesmo sem o nome original.
+      const encerrada = reidratada.playing!.teamA.matches[0];
+      expect(encerrada.countGoals()).toEqual({ teamA: 2, teamB: 1 });
+    });
   });
 
   it("preserva status e timestamps de ciclo de vida da pelada", () => {

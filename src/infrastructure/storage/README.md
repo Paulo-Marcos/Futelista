@@ -35,12 +35,13 @@ Mudar o namespace (`futelista:`) ou qualquer prefixo é uma edição em **um ún
 
 ## Versionamento de payload
 
-`serializer.ts` carrega o constante `PAYLOAD_VERSION` (atual: **3**). Toda escrita usa essa versão. Na leitura, `migrarPayload` preenche defaults conservadores para payloads anteriores; payloads de versão **maior** que `PAYLOAD_VERSION` são rejeitados com erro.
+`serializer.ts` carrega o constante `PAYLOAD_VERSION` (atual: **4**). Toda escrita usa essa versão. Na leitura, `migrarPayload` preenche defaults conservadores para payloads anteriores; payloads de versão **maior** que `PAYLOAD_VERSION` são rejeitados com erro.
 
 Histórico:
 - **v1**: payload inicial (pré-conceito de tipo de Pelada).
 - **v2**: ganha `status`/`createdAt`/`startedAt`/`endedAt` no nível da Pelada (lifecycle).
 - **v3**: ganha `peladaId` (relação execução → tipo cadastrado).
+- **v4**: `players`/`teams`/`matches` viram o **fecho do grafo alcançável** (incluem partidas encerradas e jogadores removidos referenciados por histórico); o elenco corrente passa a ser `rosterPlayerIds`. Corrige o crash `Cannot read properties of undefined (reading 'id')` no save após reload. Saves ≤ v3 com ids pendurados são curados na leitura (placeholder de jogador / descarte de histórico perdido).
 
 Quando adicionar um campo novo:
 1. Subir `PAYLOAD_VERSION`.

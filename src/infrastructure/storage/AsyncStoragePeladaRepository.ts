@@ -178,7 +178,10 @@ function parseResumoExecucao(raw: string): ResumoExecucao | null {
       createdAt: payload.pelada.createdAt ?? 0,
       startedAt: payload.pelada.startedAt ?? undefined,
       endedAt: payload.pelada.endedAt ?? undefined,
-      totalJogadores: payload.players?.length ?? 0,
+      // v4+: `players` é o grafo completo (inclui removidos); o elenco
+      // real está em rosterPlayerIds. Saves antigos só têm `players`.
+      totalJogadores:
+        payload.rosterPlayerIds?.length ?? payload.players?.length ?? 0,
       totalPartidas: payload.matchHistoryIds?.length ?? 0,
       peladaId: payload.pelada.peladaId ?? undefined,
     };

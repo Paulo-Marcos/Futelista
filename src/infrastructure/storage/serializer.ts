@@ -27,7 +27,7 @@ import { Timer, TimerStatus } from "@/src/domain/Timer";
  * é "estava rodando, foi pausado".
  */
 
-const PAYLOAD_VERSION = 3;
+const PAYLOAD_VERSION = 4;
 
 type GoalDTO = {
   playerId: string;
@@ -102,7 +102,14 @@ export type Payload = {
     peladaId: string | null;
   };
   rules: RulesData;
+  /**
+   * Grafo completo de jogadores alcançáveis (v4+): inclui removidos da
+   * pelada que ainda aparecem em gols, trocas e escalações antigas.
+   * Quem está NO elenco é decidido por `rosterPlayerIds`.
+   */
   players: PlayerDTO[];
+  /** Ids dos jogadores atualmente na pelada, na ordem da lista (v4+). */
+  rosterPlayerIds: string[];
   teams: TeamDTO[];
   matches: MatchDTO[];
   nextTeamIds: string[];
@@ -126,15 +133,18 @@ export function deserializeGestorJogo(raw: string): GestorJogo {
 
 /**
  * Preenche campos novos com defaults conservadores quando lemos um
- * payload mais antigo. Hoje só sobe de v1 para v2 (lifecycle de pelada).
- * Payloads salvos antes do conceito de status são tratados como ATIVA
- * (a única possibilidade prática naquele momento).
+ * payload mais antigo. v1→v2: lifecycle de pelada (payloads salvos antes
+ * do conceito de status são tratados como ATIVA). v3→v4: `players` virou
+ * grafo completo com `rosterPlayerIds` separado — em saves antigos a
+ * lista era exatamente o elenco.
  */
 function migrarPayload(payload: Payload): Payload {
   if (payload.version === PAYLOAD_VERSION) return payload;
   return {
     ...payload,
     version: PAYLOAD_VERSION,
+    rosterPlayerIds:
+      payload.rosterPlayerIds ?? payload.players.map((p) => p.id),
     pelada: {
       ...payload.pelada,
       status: payload.pelada.status ?? PeladaStatus.ATIVA,
@@ -149,13 +159,7 @@ function migrarPayload(payload: Payload): Payload {
 // ---------- Serialização ------------------------------------------------------
 
 function buildPayload(jogo: GestorJogo): Payload {
-  // Inclui a partida em andamento na lista de matches do payload para que
-  // o id em playingMatchId resolva no Map de reidratação. matchHistoryIds
-  // continua apontando só para o histórico (jogo.matches).
-  const allMatches: Match[] = [...jogo.matches];
-  if (jogo.playing && !allMatches.some((m) => m.id === jogo.playing!.id)) {
-    allMatches.push(jogo.playing);
-  }
+  const grafo = coletarGrafoAlcancavel(jogo);
   return {
     version: PAYLOAD_VERSION,
     pelada: {
@@ -171,9 +175,10 @@ function buildPayload(jogo: GestorJogo): Payload {
       peladaId: jogo.peladaId ?? null,
     },
     rules: { id: jogo.rules.id, ...jogo.rules.toData() },
-    players: jogo.players.map(buildPlayerDTO),
-    teams: collectAllTeams(jogo).map(buildTeamDTO),
-    matches: allMatches.map(buildMatchDTO),
+    players: grafo.players.map(buildPlayerDTO),
+    rosterPlayerIds: jogo.players.map((p) => p.id),
+    teams: grafo.teams.map(buildTeamDTO),
+    matches: grafo.matches.map(buildMatchDTO),
     nextTeamIds: jogo.next.map((t) => t.id),
     matchHistoryIds: jogo.matches.map((m) => m.id),
     timer: jogo.timer ? buildTimerDTO(jogo.timer) : null,
@@ -181,31 +186,72 @@ function buildPayload(jogo: GestorJogo): Payload {
 }
 
 /**
- * Times referenciados em qualquer lugar do agregado:
- * - next (fila)
- * - matches (histórico)
- * - players.teams (histórico individual)
- * - playing.teams
+ * Fecho transitivo de Players, Teams e Matches alcançáveis pelo agregado.
  *
- * Junta tudo num Set por id pra não duplicar.
+ * Serializar só `jogo.players` e `jogo.matches`+`playing` deixava
+ * referências penduradas: partida encerrada continua no histórico de
+ * times/jogadores mesmo fora de `jogo.matches`, e jogador removido da
+ * pelada continua em gols, trocas e escalações de partidas antigas. Na
+ * reidratação essas referências viravam `undefined` e o save SEGUINTE
+ * estourava em `.id`. O fecho garante que todo id persistido resolva;
+ * quem está no elenco é decidido por `rosterPlayerIds`.
  */
-function collectAllTeams(jogo: GestorJogo): Team[] {
-  const map = new Map<string, Team>();
-  const add = (team?: Team) => {
-    if (team) map.set(team.id, team);
+function coletarGrafoAlcancavel(jogo: GestorJogo): {
+  players: Player[];
+  teams: Team[];
+  matches: Match[];
+} {
+  const players = new Map<string, Player>();
+  const teams = new Map<string, Team>();
+  const matches = new Map<string, Match>();
+  const addPlayer = (p?: Player) => {
+    if (p) players.set(p.id, p);
   };
-  jogo.next.forEach(add);
-  jogo.matches.forEach((m) => {
-    add(m.teamA);
-    add(m.teamB);
-  });
-  jogo.players.forEach((p) => p.teams.forEach(add));
-  if (jogo.playing) {
-    add(jogo.playing.teamA);
-    add(jogo.playing.teamB);
+  const addTeam = (t?: Team) => {
+    if (t) teams.set(t.id, t);
+  };
+  const addMatch = (m?: Match) => {
+    if (m) matches.set(m.id, m);
+  };
+
+  jogo.players.forEach(addPlayer);
+  jogo.next.forEach(addTeam);
+  jogo.matches.forEach(addMatch);
+  addMatch(jogo.playing);
+  addTeam(jogo.advantageToNext);
+
+  // Player ↔ Team ↔ Match se referenciam mutuamente — expande até estabilizar.
+  let total = -1;
+  while (total !== players.size + teams.size + matches.size) {
+    total = players.size + teams.size + matches.size;
+    for (const match of [...matches.values()]) {
+      addTeam(match.teamA);
+      addTeam(match.teamB);
+      match.goals.forEach((g) => {
+        addPlayer(g.player);
+        addTeam(g.team);
+      });
+    }
+    for (const team of [...teams.values()]) {
+      team.players.forEach(addPlayer);
+      team.matches.forEach(addMatch);
+      team.goals.forEach((g) => addPlayer(g.player));
+      team.switches.forEach((s) => {
+        addPlayer(s.playerEnters);
+        addPlayer(s.playerLeaves);
+      });
+    }
+    for (const player of [...players.values()]) {
+      player.teams.forEach(addTeam);
+      player.matches.forEach(addMatch);
+    }
   }
-  add(jogo.advantageToNext);
-  return [...map.values()];
+
+  return {
+    players: [...players.values()],
+    teams: [...teams.values()],
+    matches: [...matches.values()],
+  };
 }
 
 function buildPlayerDTO(player: Player): PlayerDTO {
@@ -283,15 +329,20 @@ function buildGestorJogo(payload: Payload): GestorJogo {
   jogo.playersWithoutTeam = payload.pelada.playersWithoutTeam;
 
   const playersById = rehydratePlayers(payload.players);
+  criarPlaceholdersParaIdsPendurados(payload, playersById);
   const teamsById = rehydrateTeams(payload.teams, playersById);
   const matchesById = rehydrateMatches(payload.matches, teamsById, playersById);
 
   relinkPlayerHistories(payload.players, playersById, teamsById, matchesById);
   relinkTeamHistories(payload.teams, teamsById, matchesById);
 
-  jogo.players = payload.players.map((p) => playersById.get(p.id)!);
+  jogo.players = payload.rosterPlayerIds.map((id) => playersById.get(id)!);
   jogo.next = payload.nextTeamIds.map((id) => teamsById.get(id)!);
-  jogo.matches = payload.matchHistoryIds.map((id) => matchesById.get(id)!);
+  // Mesmo racional dos filtros em relink*Histories: id de partida sem
+  // entrada em `matches` (payload antigo/corrompido) é histórico perdido.
+  jogo.matches = payload.matchHistoryIds
+    .map((id) => matchesById.get(id))
+    .filter((m): m is Match => m !== undefined);
   jogo.playing = payload.pelada.playingMatchId
     ? matchesById.get(payload.pelada.playingMatchId)
     : undefined;
@@ -304,6 +355,32 @@ function buildGestorJogo(payload: Payload): GestorJogo {
   }
 
   return jogo;
+}
+
+/**
+ * Saves v3 e anteriores podiam conter ids de jogadores sem entrada em
+ * `players` (jogador removido da pelada, mas presente em gols, trocas e
+ * escalações de partidas antigas). Cria um placeholder por id pendurado —
+ * preserva placar e histórico; o nome real se perdeu no save antigo.
+ */
+function criarPlaceholdersParaIdsPendurados(
+  payload: Payload,
+  playersById: Map<string, Player>,
+): void {
+  const garantir = (id: string) => {
+    if (playersById.has(id)) return;
+    const placeholder = new Player({ name: "(jogador removido)", id });
+    placeholder.situation = PlayerSituation.STOPPED;
+    playersById.set(id, placeholder);
+  };
+  payload.teams.forEach((t) => {
+    t.playerIds.forEach(garantir);
+    t.switches.forEach((s) => {
+      garantir(s.playerEntersId);
+      garantir(s.playerLeavesId);
+    });
+  });
+  payload.matches.forEach((m) => m.goals.forEach((g) => garantir(g.playerId)));
 }
 
 function rehydratePlayers(dtos: PlayerDTO[]): Map<string, Player> {
@@ -396,8 +473,16 @@ function relinkPlayerHistories(
 ): void {
   dtos.forEach((dto) => {
     const player = playersById.get(dto.id)!;
-    player.teams = dto.teamHistoryIds.map((tid) => teamsById.get(tid)!);
-    player.matches = dto.matchHistoryIds.map((mid) => matchesById.get(mid)!);
+    // Os filtros cobrem saves v3 e anteriores, em que partidas encerradas
+    // (e os times só alcançáveis por elas) podiam ficar fora do payload.
+    // Essas entradas de histórico se perderam — descartar é melhor do que
+    // reidratar um buraco que quebra o próximo save.
+    player.teams = dto.teamHistoryIds
+      .map((tid) => teamsById.get(tid))
+      .filter((t): t is Team => t !== undefined);
+    player.matches = dto.matchHistoryIds
+      .map((mid) => matchesById.get(mid))
+      .filter((m): m is Match => m !== undefined);
     player.currentTeam = dto.currentTeamId
       ? teamsById.get(dto.currentTeamId)
       : undefined;
@@ -411,7 +496,11 @@ function relinkTeamHistories(
 ): void {
   dtos.forEach((dto) => {
     const team = teamsById.get(dto.id)!;
-    team.matches = dto.matchHistoryIds.map((mid) => matchesById.get(mid)!);
+    // Mesmo racional do filtro em relinkPlayerHistories: id de partida
+    // que não veio no payload (saves v3-) é histórico perdido.
+    team.matches = dto.matchHistoryIds
+      .map((mid) => matchesById.get(mid))
+      .filter((m): m is Match => m !== undefined);
   });
 }
 
