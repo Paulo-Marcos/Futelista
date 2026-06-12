@@ -338,7 +338,7 @@ export function Splash({
           />
           {/* .fl-splash__badge: ícone-marca oficial (arte do hand-off),
             full-bleed dentro do tile arredondado (badge tem overflow:hidden
-            + borderRadius). Substitui o gradiente + KickClashIcon desenhado. */}
+            + borderRadius). */}
           <Animated.View
             style={[
               styles.badgeWrap,
