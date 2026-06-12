@@ -17,6 +17,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
+  Image,
   LayoutChangeEvent,
   Pressable,
   StyleSheet,
@@ -35,14 +36,12 @@ import Animated, {
 import Svg, {
   Circle,
   Defs,
-  LinearGradient as SvgLinearGradient,
   RadialGradient,
   Rect,
   Stop,
 } from "react-native-svg";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { KickClashIcon } from "@/src/shared/ui/KickClashIcon";
 import { PitchLines } from "@/src/shared/ui/PitchLines";
 
 // Fonte display do protótipo é Archivo 800. Carregada em app/_layout.tsx
@@ -53,6 +52,14 @@ const TAG_FONT = "Archivo_600SemiBold";
 // Duração base — igual ao protótipo (`splashglow 2.3s ease-out` e
 // `setTimeout(onDone, 2300)`).
 const DURATION = 2300;
+
+// O lockup (badge + nome + tag) é centralizado na tela; como o nome e a tag
+// ficam ABAIXO do badge, o ícone nasce ~44px acima do centro vertical. O
+// círculo central do campo (centro do PitchLines) cai no centro da tela, então
+// sobe-se o campo nesse mesmo tanto para que o círculo central fique EXATAMENTE
+// sob o ícone — "o centro do campo é o ícone". Valor fixo: o lockup tem altura
+// fixa em px, logo o offset não depende do tamanho da tela.
+const PITCH_LIFT = 44;
 
 // ----------------------------------------------------------------------------
 // interpolate worklet-safe (referência atualizada)
@@ -329,9 +336,9 @@ export function Splash({
               ringStyle,
             ]}
           />
-          {/* .fl-splash__badge: linear-gradient(140deg, primary, primaryDim)
-            via react-native-svg <LinearGradient> (evita dependência do
-            expo-linear-gradient e o problema de cache do Metro). */}
+          {/* .fl-splash__badge: ícone-marca oficial (arte do hand-off),
+            full-bleed dentro do tile arredondado (badge tem overflow:hidden
+            + borderRadius). Substitui o gradiente + KickClashIcon desenhado. */}
           <Animated.View
             style={[
               styles.badgeWrap,
@@ -339,39 +346,14 @@ export function Splash({
               badgeStyle,
             ]}
           >
-          <View style={styles.badge}>
-            <Svg
-              width="100%"
-              height="100%"
-              style={StyleSheet.absoluteFillObject}
-            >
-              <Defs>
-                <SvgLinearGradient
-                  id="badge-bg"
-                  x1="0.18"
-                  y1="0"
-                  x2="0.82"
-                  y2="1"
-                >
-                  <Stop offset="0" stopColor={palette.primary} />
-                  <Stop offset="1" stopColor={palette.primaryDim} />
-                </SvgLinearGradient>
-              </Defs>
-              <Rect
-                width="100%"
-                height="100%"
-                rx="30"
-                ry="30"
-                fill="url(#badge-bg)"
+            <View style={styles.badge}>
+              <Image
+                source={require("../../../assets/images/icon.png")}
+                style={styles.badgeImg}
+                resizeMode="cover"
+                accessibilityIgnoresInvertColors
               />
-            </Svg>
-            <KickClashIcon
-              size={78}
-              sock={palette.onPrimary}
-              ink={palette.background}
-              burst={palette.tertiary}
-            />
-          </View>
+            </View>
           </Animated.View>
         </View>
 
@@ -449,6 +431,7 @@ const styles = StyleSheet.create({
     left: "8%",
     right: "8%",
     bottom: "8%",
+    transform: [{ translateY: -PITCH_LIFT }],
   },
   glow: {
     position: "absolute",
@@ -483,6 +466,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+  },
+  badgeImg: {
+    width: "100%",
+    height: "100%",
   },
   name: {
     marginTop: 20,
