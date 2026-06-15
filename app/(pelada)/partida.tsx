@@ -59,7 +59,6 @@ export default function PartidaScreen() {
   return <PartidaInner gestor={gestor} />;
 }
 
-
 function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
@@ -224,6 +223,18 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     return () => clearTimeout(t);
   }, [checkpointToast]);
 
+  // Formação adaptativa por time: coordenadas conforme a quantidade de
+  // jogadores em campo (evita sobreposição quando playersPerTeam > 5).
+  // Calculado ANTES do early-return abaixo para respeitar as regras de hooks.
+  const formacaoA = useMemo(
+    () => gerarFormacao(playing?.teamA.players.length ?? 0),
+    [playing?.teamA.players.length],
+  );
+  const formacaoB = useMemo(
+    () => gerarFormacao(playing?.teamB.players.length ?? 0),
+    [playing?.teamB.players.length],
+  );
+
   if (!playing) {
     return (
       <View
@@ -248,16 +259,6 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
   const teamA = playing.teamA;
   const teamB = playing.teamB;
-  // Formação adaptativa por time: gera coordenadas com base na quantidade
-  // de jogadores em campo, evitando sobreposição quando `playersPerTeam > 5`.
-  const formacaoA = useMemo(
-    () => gerarFormacao(teamA.players.length),
-    [teamA.players.length],
-  );
-  const formacaoB = useMemo(
-    () => gerarFormacao(teamB.players.length),
-    [teamB.players.length],
-  );
   const ready =
     status === undefined ||
     status === TimerStatus.CREATED ||
