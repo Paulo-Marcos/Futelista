@@ -26,9 +26,8 @@ jobs:
       - name: Type-check (tsc)
         run: npm run typecheck
 
-      # O passo de lint (eslint + prettier) entra no gate APÓS uma passada
-      # dedicada de formatacao (`npx prettier --write`). Hoje ha ~980 ajustes
-      # de formatacao pendentes que deixariam o CI vermelho sem motivo de bug.
-      # Enquanto isso, rode localmente quando quiser: `npm run lint:ci`.
+      - name: Lint (eslint + prettier)
+        run: npm run lint:ci
+
       - name: Testes (jest)
         run: npm run test:ci
