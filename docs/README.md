@@ -22,6 +22,7 @@ Doc técnica. Assume conhecimento de TypeScript, React Native e Expo.
 - [ui.md](desenvolvedor/ui.md) — rotas, provider, contexto, `useGameSlice` e fluxo de re-render.
 - [testes.md](desenvolvedor/testes.md) — como rodar, como escrever, convenções.
 - [build-release.md](desenvolvedor/build-release.md) — EAS Build, OTA, publicação.
+- [fluxo-de-trabalho.md](desenvolvedor/fluxo-de-trabalho.md) — o dia a dia: quando commitar, pushar, re-deployar a web, gerar APK e cortar release.
 
 ## Decisões de arquitetura (ADRs)
 
