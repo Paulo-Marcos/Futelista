@@ -51,8 +51,7 @@ export function TeamCard({
       : tone === "B"
         ? palette.secondary
         : palette.outlineVariant;
-  const bg =
-    state === "playing" ? palette.primaryContainer : palette.surface;
+  const bg = state === "playing" ? palette.primaryContainer : palette.surface;
 
   return (
     <View

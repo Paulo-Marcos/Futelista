@@ -206,9 +206,8 @@ export const SoccerProvider = ({
   );
 
   const listarPeladas = useCallback(
-    (opcoes?: {
-      incluirArquivadas?: boolean;
-    }): Promise<ResumoPeladaTipo[]> => repoRef.current.listarPeladas(opcoes),
+    (opcoes?: { incluirArquivadas?: boolean }): Promise<ResumoPeladaTipo[]> =>
+      repoRef.current.listarPeladas(opcoes),
     [],
   );
 

@@ -36,9 +36,7 @@ function buildManager(opts?: {
     new Rules({ playersPerTeam: 4, ...opts?.rules }),
   );
   if (opts?.comTimes || opts?.comPartida) {
-    m.addPlayers(
-      Array.from({ length: 8 }, (_, i) => `J${i + 1}`),
-    );
+    m.addPlayers(Array.from({ length: 8 }, (_, i) => `J${i + 1}`));
     m.createTeams();
     if (opts?.comPartida) m.setPlayingGame();
   }
@@ -54,9 +52,9 @@ function renderRegras(gestor: GestorJogo | null) {
 }
 
 function getPressableByLabel(label: string) {
-  return screen.UNSAFE_getAllByType(Pressable).find(
-    (p) => p.props.accessibilityLabel === label,
-  );
+  return screen
+    .UNSAFE_getAllByType(Pressable)
+    .find((p) => p.props.accessibilityLabel === label);
 }
 
 // ===========================================================================
@@ -156,7 +154,9 @@ describe("Regras — bloqueios por estado da pelada", () => {
   });
 
   it("com cronômetro ativo (STARTED): número de tempos fica bloqueado", () => {
-    renderRegras(buildManager({ comPartida: true, status: TimerStatus.STARTED }));
+    renderRegras(
+      buildManager({ comPartida: true, status: TimerStatus.STARTED }),
+    );
 
     expect(screen.getByText("Bloqueado: cronômetro em uso.")).toBeTruthy();
   });
@@ -186,17 +186,12 @@ describe("Regras — bloqueios por estado da pelada", () => {
 describe("Regras — preview", () => {
   it("mostra '0 jogadores → 0 times completos' sem jogadores", () => {
     renderRegras(buildManager());
-    expect(
-      screen.getByText("0 jogadores → 0 times completos"),
-    ).toBeTruthy();
+    expect(screen.getByText("0 jogadores → 0 times completos")).toBeTruthy();
   });
 
   it("mostra times completos e sobra quando aplicável", () => {
     // 9 jogadores, 4 por time → 2 times completos + 1 sobrando.
-    const m = new GestorJogo(
-      "Pelada teste",
-      new Rules({ playersPerTeam: 4 }),
-    );
+    const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
     m.addPlayers(Array.from({ length: 9 }, (_, i) => `J${i + 1}`));
     renderRegras(m);
 

@@ -68,8 +68,7 @@ export class Player {
   /** Renomeia o jogador. Recusa nome vazio (whitespace só). */
   rename(novoNome: string): void {
     const limpo = novoNome.trim();
-    if (limpo.length === 0)
-      throw Error("Nome do jogador não pode ser vazio.");
+    if (limpo.length === 0) throw Error("Nome do jogador não pode ser vazio.");
     this.name = limpo;
   }
 

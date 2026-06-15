@@ -15,9 +15,7 @@ describe("SecondaryButton", () => {
 
   it("dispara onPress quando ativo", () => {
     const onPress = jest.fn();
-    renderWithProviders(
-      <SecondaryButton label="Voltar" onPress={onPress} />,
-    );
+    renderWithProviders(<SecondaryButton label="Voltar" onPress={onPress} />);
 
     fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
 

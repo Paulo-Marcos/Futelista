@@ -1,5 +1,5 @@
-import { Match, ResultMatch } from '../Match';
-import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
+import { Match, ResultMatch } from "../Match";
+import { BaseFinalResultHandler, HandleInput } from "./FinalResult.handler";
 
 /**
  * Cenário pós-partida: EMPATE com **vantagem externa** (definida manualmente)
@@ -14,7 +14,9 @@ export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseFinalResultH
       input.jogo.playing?.result === ResultMatch.DRAW &&
       this.isDrawWithExternalAdvantageAndNotTwoTeams(input)
     ) {
-      input.jogo.relocateTeam(input.jogo.getOtherPlayingTeam(input.externalAdvantage!));
+      input.jogo.relocateTeam(
+        input.jogo.getOtherPlayingTeam(input.externalAdvantage!),
+      );
       input.jogo.playing = new Match(
         input.externalAdvantage!,
         input.jogo.tirarDaFila(),

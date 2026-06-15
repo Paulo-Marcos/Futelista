@@ -1,10 +1,4 @@
-import Svg, {
-  Circle,
-  Ellipse,
-  G,
-  Line,
-  Rect,
-} from "react-native-svg";
+import Svg, { Circle, Ellipse, G, Line, Rect } from "react-native-svg";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
 
@@ -59,9 +53,30 @@ export function EmptyIllustration({
           stroke={outline}
           strokeWidth={1.5}
         />
-        <Line x1="42" y1="42" x2="78" y2="42" stroke={outline} strokeWidth={1.5} />
-        <Line x1="42" y1="56" x2="72" y2="56" stroke={outline} strokeWidth={1.5} />
-        <Line x1="42" y1="70" x2="66" y2="70" stroke={outline} strokeWidth={1.5} />
+        <Line
+          x1="42"
+          y1="42"
+          x2="78"
+          y2="42"
+          stroke={outline}
+          strokeWidth={1.5}
+        />
+        <Line
+          x1="42"
+          y1="56"
+          x2="72"
+          y2="56"
+          stroke={outline}
+          strokeWidth={1.5}
+        />
+        <Line
+          x1="42"
+          y1="70"
+          x2="66"
+          y2="70"
+          stroke={outline}
+          strokeWidth={1.5}
+        />
       </Svg>
     );
   }
@@ -119,7 +134,14 @@ export function EmptyIllustration({
         stroke={outline}
         strokeWidth={1.5}
       />
-      <Line x1="60" y1="34" x2="60" y2="94" stroke={outline} strokeWidth={1.5} />
+      <Line
+        x1="60"
+        y1="34"
+        x2="60"
+        y2="94"
+        stroke={outline}
+        strokeWidth={1.5}
+      />
       <Circle
         cx="60"
         cy="64"
@@ -148,15 +170,15 @@ export function EmptyIllustration({
       />
       {/* Bola */}
       <G>
-        <Ellipse
+        <Ellipse cx="84" cy="92" rx="6" ry="1.6" fill={ink} opacity={0.25} />
+        <Circle
           cx="84"
-          cy="92"
-          rx="6"
-          ry="1.6"
-          fill={ink}
-          opacity={0.25}
+          cy="86"
+          r="6"
+          fill={surface}
+          stroke={ink}
+          strokeWidth={1.5}
         />
-        <Circle cx="84" cy="86" r="6" fill={surface} stroke={ink} strokeWidth={1.5} />
         <Line x1="80" y1="84" x2="88" y2="88" stroke={ink} strokeWidth={1} />
         <Line x1="80" y1="88" x2="88" y2="84" stroke={ink} strokeWidth={1} />
       </G>

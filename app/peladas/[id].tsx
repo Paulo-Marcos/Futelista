@@ -531,9 +531,7 @@ function ArtilheirosCard({ artilheiros }: { artilheiros: Artilheiro[] }) {
       <View style={styles.aggList}>
         {top.map((a, idx) => (
           <View key={a.nome} style={styles.aggRow}>
-            <Text
-              style={[styles.aggPos, { color: palette.onSurfaceVariant }]}
-            >
+            <Text style={[styles.aggPos, { color: palette.onSurfaceVariant }]}>
               {idx + 1}º
             </Text>
             <Text
@@ -542,9 +540,7 @@ function ArtilheirosCard({ artilheiros }: { artilheiros: Artilheiro[] }) {
             >
               {a.nome}
             </Text>
-            <Text
-              style={[styles.aggMeta, { color: palette.onSurfaceVariant }]}
-            >
+            <Text style={[styles.aggMeta, { color: palette.onSurfaceVariant }]}>
               {a.execucoes} {a.execucoes === 1 ? "exec" : "execs"}
             </Text>
             <View
@@ -574,21 +570,13 @@ function ArtilheirosCard({ artilheiros }: { artilheiros: Artilheiro[] }) {
  * Sequências quebram em empate ou derrota — interpretação estrita de
  * "vitórias consecutivas".
  */
-function SequenciasCard({
-  sequencias,
-}: {
-  sequencias: SequenciaVencedor[];
-}) {
+function SequenciasCard({ sequencias }: { sequencias: SequenciaVencedor[] }) {
   const palette = usePalette();
   const top = sequencias.slice(0, 5);
   return (
     <Card variant="outlined" padding="md">
       <View style={styles.aggHeader}>
-        <MaterialCommunityIcons
-          name="fire"
-          size={16}
-          color={palette.primary}
-        />
+        <MaterialCommunityIcons name="fire" size={16} color={palette.primary} />
         <Text style={[styles.aggTitle, { color: palette.onSurface }]}>
           Maiores sequências de vitória
         </Text>
@@ -596,9 +584,7 @@ function SequenciasCard({
       <View style={styles.aggList}>
         {top.map((s, idx) => (
           <View key={s.nome} style={styles.aggRow}>
-            <Text
-              style={[styles.aggPos, { color: palette.onSurfaceVariant }]}
-            >
+            <Text style={[styles.aggPos, { color: palette.onSurfaceVariant }]}>
               {idx + 1}º
             </Text>
             <Text

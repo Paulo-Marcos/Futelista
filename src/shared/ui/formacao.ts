@@ -53,7 +53,8 @@ function escolherNumeroLinhas(restantes: number): number {
 function distribuirPorLinha(total: number, linhas: number): number[] {
   const base = Math.floor(total / linhas);
   const sobra = total % linhas;
-  return Array.from({ length: linhas }, (_, i) =>
-    base + (i >= linhas - sobra ? 1 : 0),
+  return Array.from(
+    { length: linhas },
+    (_, i) => base + (i >= linhas - sobra ? 1 : 0),
   );
 }

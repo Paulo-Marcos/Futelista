@@ -48,14 +48,18 @@ export function PlayerRow({
       style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: selected ? palette.primaryContainer : palette.surface,
+          backgroundColor: selected
+            ? palette.primaryContainer
+            : palette.surface,
           borderColor: selected ? palette.primary : palette.outlineVariant,
           borderWidth: selected ? 2 : 1,
           paddingVertical: compact ? Spacing.sm : Spacing.md,
           opacity: interativo && pressed ? 0.7 : 1,
         },
       ]}
-      android_ripple={interativo ? { color: palette.primary + "11" } : undefined}
+      android_ripple={
+        interativo ? { color: palette.primary + "11" } : undefined
+      }
     >
       <PlayerAvatar player={player} size={40} tone={tone} />
       <View style={styles.center}>
@@ -78,7 +82,9 @@ export function PlayerRow({
           <View
             style={[
               styles.situationChip,
-              { backgroundColor: corDeFundoSituacao(player.situation, palette) },
+              {
+                backgroundColor: corDeFundoSituacao(player.situation, palette),
+              },
             ]}
           >
             <Text

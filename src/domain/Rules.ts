@@ -23,7 +23,8 @@ export class Rules {
   constructor(input?: DataRules) {
     this.id = input?.id ?? uuid.v4();
     this.name = input?.name ?? RULES_DEFAULTS.name;
-    this.playersPerTeam = input?.playersPerTeam ?? RULES_DEFAULTS.playersPerTeam;
+    this.playersPerTeam =
+      input?.playersPerTeam ?? RULES_DEFAULTS.playersPerTeam;
     this.timeMatch = input?.timeMatch ?? RULES_DEFAULTS.timeMatch;
     this.numberTimes = input?.numberTimes ?? RULES_DEFAULTS.numberTimes;
     this.goalLimit = input?.goalLimit ?? RULES_DEFAULTS.goalLimit;

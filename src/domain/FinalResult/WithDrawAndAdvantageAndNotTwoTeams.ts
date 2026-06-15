@@ -1,5 +1,5 @@
-import { Match, ResultMatch } from '../Match';
-import { BaseFinalResultHandler, HandleInput } from './FinalResult.handler';
+import { Match, ResultMatch } from "../Match";
+import { BaseFinalResultHandler, HandleInput } from "./FinalResult.handler";
 
 /**
  * Cenário pós-partida: EMPATE com `advantageToNext` setada e fila parcial

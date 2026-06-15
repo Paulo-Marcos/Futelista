@@ -27,17 +27,19 @@ afterEach(() => {
   expoRouter.__setSearchParams({});
 });
 
-function fakePelada(overrides: Partial<{
-  nome: string;
-  playersPerTeam: number;
-  goalLimit: number;
-  timeMatch: string;
-  choosingTeams: ChoosingTeams;
-  dia: string;
-  hora: string;
-  local: string;
-  observacoes: string;
-}> = {}): Pelada {
+function fakePelada(
+  overrides: Partial<{
+    nome: string;
+    playersPerTeam: number;
+    goalLimit: number;
+    timeMatch: string;
+    choosingTeams: ChoosingTeams;
+    dia: string;
+    hora: string;
+    local: string;
+    observacoes: string;
+  }> = {},
+): Pelada {
   return new Pelada({
     id: "p1",
     nome: overrides.nome ?? "Fute CEF",
@@ -117,9 +119,7 @@ describe("PeladaEditarScreen", () => {
       screen.getByDisplayValue("Fute CEF"),
       "Fute CEF Atualizada",
     );
-    fireEvent.press(
-      screen.getByRole("button", { name: "Salvar alterações" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(() =>
       expect(soccer.atualizarPelada).toHaveBeenCalledTimes(1),
@@ -146,9 +146,7 @@ describe("PeladaEditarScreen", () => {
 
     // Aguarda a tela sair do loading antes de tentar o press.
     await screen.findByDisplayValue("Fute CEF", undefined, { timeout: 5000 });
-    fireEvent.press(
-      screen.getByRole("button", { name: "Salvar alterações" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(
       () => expect(soccer.atualizarPelada).toHaveBeenCalledTimes(1),

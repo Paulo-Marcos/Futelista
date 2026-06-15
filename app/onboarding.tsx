@@ -82,7 +82,10 @@ export default function OnboardingScreen() {
   // Ao mudar a largura (ex.: redimensionar a moldura na web), re-alinha o
   // scroll com o slide atual para não ficar "entre" páginas.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ x: paginaRef.current * largura, animated: false });
+    scrollRef.current?.scrollTo({
+      x: paginaRef.current * largura,
+      animated: false,
+    });
   }, [largura]);
 
   const aoMedir = (e: LayoutChangeEvent) => {

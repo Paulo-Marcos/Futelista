@@ -58,7 +58,8 @@ export async function gerarBackup(
   const doFuteLista = chaves
     .filter((k) => k.startsWith(STORAGE_NAMESPACE))
     .sort(); // sort estável → diffs entre backups ficam previsíveis
-  const entries = doFuteLista.length === 0 ? [] : await storage.multiGet(doFuteLista);
+  const entries =
+    doFuteLista.length === 0 ? [] : await storage.multiGet(doFuteLista);
   const items: { key: string; value: string }[] = [];
   for (const [key, value] of entries) {
     if (value === null) continue;

@@ -215,7 +215,10 @@ function TimelineScroll({
     offsetsRef.current[index] = x;
     // Só comita pro state quando temos posição de todos — evita re-render
     // intermediário enquanto o layout estabiliza.
-    if (offsetsRef.current.filter((v) => v !== undefined).length === entries.length) {
+    if (
+      offsetsRef.current.filter((v) => v !== undefined).length ===
+      entries.length
+    ) {
       setOffsets([...offsetsRef.current]);
     }
   };
@@ -231,7 +234,10 @@ function TimelineScroll({
     >
       {Array.isArray(children)
         ? children.map((child, i) => (
-            <View key={(child as React.ReactElement).key ?? i} onLayout={handleChildLayout(i)}>
+            <View
+              key={(child as React.ReactElement).key ?? i}
+              onLayout={handleChildLayout(i)}
+            >
               {child}
             </View>
           ))

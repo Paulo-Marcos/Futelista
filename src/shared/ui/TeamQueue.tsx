@@ -34,19 +34,19 @@ export function TeamQueue({
         },
       ]}
     >
-      <Text style={[styles.pos, { color: palette.primary }]}>
-        {idx + 1}º
-      </Text>
+      <Text style={[styles.pos, { color: palette.primary }]}>{idx + 1}º</Text>
       <TeamCrest seed={team.id} size={26} />
       <View style={styles.avs}>
         {team.players.map((p, i) => (
           <View
             key={p.id}
             style={[
-              i === 0
-                ? null
-                : { marginLeft: -8 },
-              { borderRadius: 999, borderWidth: 2, borderColor: palette.surface },
+              i === 0 ? null : { marginLeft: -8 },
+              {
+                borderRadius: 999,
+                borderWidth: 2,
+                borderColor: palette.surface,
+              },
             ]}
           >
             <PlayerAvatar player={p} size={30} />

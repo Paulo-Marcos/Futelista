@@ -1,6 +1,9 @@
 import React from "react";
 
-import { SoccerContext, SoccerContextValue } from "@/src/app-shell/soccerContext";
+import {
+  SoccerContext,
+  SoccerContextValue,
+} from "@/src/app-shell/soccerContext";
 import type { GestorJogo } from "@/src/domain/GestorJogo";
 
 /**
@@ -23,8 +26,12 @@ export function buildSoccerContextValue(
       .fn()
       .mockResolvedValue({ id: "pelada-1", nome: "Stub" }),
     excluirPelada: noop,
-    arquivarPelada: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
-    desarquivarPelada: jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined),
+    arquivarPelada: jest
+      .fn<Promise<void>, [string]>()
+      .mockResolvedValue(undefined),
+    desarquivarPelada: jest
+      .fn<Promise<void>, [string]>()
+      .mockResolvedValue(undefined),
     listarPeladas: jest.fn().mockResolvedValue([]),
     carregarPelada: jest.fn().mockResolvedValue(null),
 
@@ -41,7 +48,9 @@ export function buildSoccerContextValue(
     carregarExecucoesDe: jest.fn().mockResolvedValue([]),
     exportarBackup: jest
       .fn()
-      .mockResolvedValue('{"version":1,"app":"FuteLista","exportadoEm":0,"items":[]}'),
+      .mockResolvedValue(
+        '{"version":1,"app":"FuteLista","exportadoEm":0,"items":[]}',
+      ),
     setFotoDoJogador: noop,
 
     // Repositório bruto — só pra satisfazer o tipo. Sobrescreva nos testes

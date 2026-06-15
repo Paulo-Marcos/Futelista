@@ -1,9 +1,9 @@
-import { HandleInput, FinalResultHandler } from './FinalResult.handler';
-import { WithDrawAndAdvantageAndNotTwoTeams } from './WithDrawAndAdvantageAndNotTwoTeams';
-import { WithDrawAndAdvantageAndTwoTeams } from './WithDrawAndAdvantageAndTwoTeams';
-import { WithDrawAndExternalAdvantageAndNotTwoTeams } from './WithDrawAndExternalAdvantageAndNotTwoTeams';
-import { WithDrawAndExternalAdvantageAndTwoTeams } from './WithDrawAndExternalAdvantageAndTwoTeams';
-import { WithVictory } from './WithVictory';
+import { HandleInput, FinalResultHandler } from "./FinalResult.handler";
+import { WithDrawAndAdvantageAndNotTwoTeams } from "./WithDrawAndAdvantageAndNotTwoTeams";
+import { WithDrawAndAdvantageAndTwoTeams } from "./WithDrawAndAdvantageAndTwoTeams";
+import { WithDrawAndExternalAdvantageAndNotTwoTeams } from "./WithDrawAndExternalAdvantageAndNotTwoTeams";
+import { WithDrawAndExternalAdvantageAndTwoTeams } from "./WithDrawAndExternalAdvantageAndTwoTeams";
+import { WithVictory } from "./WithVictory";
 
 /**
  * Encadeia os handlers pós-partida (Chain of Responsibility).
@@ -17,7 +17,8 @@ export class FinalResultProcessor {
 
   constructor() {
     const withVictory = new WithVictory();
-    const withAdvantageAndNotTwoTeams = new WithDrawAndAdvantageAndNotTwoTeams();
+    const withAdvantageAndNotTwoTeams =
+      new WithDrawAndAdvantageAndNotTwoTeams();
     const withAdvantageAndTwoTeams = new WithDrawAndAdvantageAndTwoTeams();
     const withExternalAdvantageAndNotTwoTeams =
       new WithDrawAndExternalAdvantageAndNotTwoTeams();

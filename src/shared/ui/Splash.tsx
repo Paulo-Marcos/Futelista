@@ -151,7 +151,10 @@ export function Splash({
       );
     ring.value = previewLoop ? withRepeat(ringRun(), -1, false) : ringRun();
     const shakeRun = () =>
-      withDelay(IMPACT, withTiming(1, { duration: 440, easing: Easing.linear }));
+      withDelay(
+        IMPACT,
+        withTiming(1, { duration: 440, easing: Easing.linear }),
+      );
     shake.value = previewLoop ? withRepeat(shakeRun(), -1, false) : shakeRun();
 
     // splashup .6s — name (delay .2s) + tag (delay .35s). One-shot.
@@ -272,7 +275,11 @@ export function Splash({
             gradientUnits="userSpaceOnUse"
           >
             <Stop offset="0" stopColor={palette.primary} stopOpacity={0.22} />
-            <Stop offset="0.35" stopColor={palette.primary} stopOpacity={0.12} />
+            <Stop
+              offset="0.35"
+              stopColor={palette.primary}
+              stopOpacity={0.12}
+            />
             <Stop offset="0.7" stopColor={palette.primary} stopOpacity={0.02} />
             <Stop offset="1" stopColor={palette.primary} stopOpacity={0} />
           </RadialGradient>
@@ -298,22 +305,54 @@ export function Splash({
           <Defs>
             <RadialGradient id="g-core" cx="50" cy="50" r="40" fx="50" fy="50">
               <Stop offset="0" stopColor={palette.primary} stopOpacity={0.55} />
-              <Stop offset="0.2" stopColor={palette.primary} stopOpacity={0.42} />
-              <Stop offset="0.4" stopColor={palette.primary} stopOpacity={0.22} />
-              <Stop offset="0.65" stopColor={palette.primary} stopOpacity={0.06} />
+              <Stop
+                offset="0.2"
+                stopColor={palette.primary}
+                stopOpacity={0.42}
+              />
+              <Stop
+                offset="0.4"
+                stopColor={palette.primary}
+                stopOpacity={0.22}
+              />
+              <Stop
+                offset="0.65"
+                stopColor={palette.primary}
+                stopOpacity={0.06}
+              />
               <Stop offset="1" stopColor={palette.primary} stopOpacity={0} />
             </RadialGradient>
             <RadialGradient id="g-halo" cx="50" cy="50" r="50" fx="50" fy="50">
               <Stop offset="0" stopColor={palette.primary} stopOpacity={0.32} />
-              <Stop offset="0.25" stopColor={palette.primary} stopOpacity={0.22} />
-              <Stop offset="0.5" stopColor={palette.primary} stopOpacity={0.1} />
-              <Stop offset="0.8" stopColor={palette.primary} stopOpacity={0.02} />
+              <Stop
+                offset="0.25"
+                stopColor={palette.primary}
+                stopOpacity={0.22}
+              />
+              <Stop
+                offset="0.5"
+                stopColor={palette.primary}
+                stopOpacity={0.1}
+              />
+              <Stop
+                offset="0.8"
+                stopColor={palette.primary}
+                stopOpacity={0.02}
+              />
               <Stop offset="1" stopColor={palette.primary} stopOpacity={0} />
             </RadialGradient>
             <RadialGradient id="g-skin" cx="50" cy="50" r="50" fx="50" fy="50">
               <Stop offset="0" stopColor={palette.primary} stopOpacity={0.16} />
-              <Stop offset="0.4" stopColor={palette.primary} stopOpacity={0.09} />
-              <Stop offset="0.7" stopColor={palette.primary} stopOpacity={0.025} />
+              <Stop
+                offset="0.4"
+                stopColor={palette.primary}
+                stopOpacity={0.09}
+              />
+              <Stop
+                offset="0.7"
+                stopColor={palette.primary}
+                stopOpacity={0.025}
+              />
               <Stop offset="1" stopColor={palette.primary} stopOpacity={0} />
             </RadialGradient>
           </Defs>
@@ -382,7 +421,10 @@ export function Splash({
 
       {/* ----------- .fl-splash__loader ----------- */}
       <View
-        style={[styles.loaderTrack, { backgroundColor: palette.outlineVariant }]}
+        style={[
+          styles.loaderTrack,
+          { backgroundColor: palette.outlineVariant },
+        ]}
       >
         <Animated.View
           style={[

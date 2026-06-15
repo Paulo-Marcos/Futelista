@@ -158,7 +158,9 @@ function GestaoHome() {
                 },
               ]}
             >
-              <Text style={[styles.devButtonText, { color: palette.onSurface }]}>
+              <Text
+                style={[styles.devButtonText, { color: palette.onSurface }]}
+              >
                 🛠 dev
               </Text>
             </Pressable>

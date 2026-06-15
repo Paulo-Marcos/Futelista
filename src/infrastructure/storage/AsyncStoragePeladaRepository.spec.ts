@@ -158,10 +158,7 @@ describe("AsyncStoragePeladaRepository", () => {
     });
 
     it("descarta payloads corrompidos sem quebrar a listagem", async () => {
-      await AsyncStorage.setItem(
-        "futelista:execucao:lixo",
-        "isso-nao-eh-json",
-      );
+      await AsyncStorage.setItem("futelista:execucao:lixo", "isso-nao-eh-json");
       const jogo = new GestorJogo("Boa", new Rules());
       await repo.salvar(jogo);
 

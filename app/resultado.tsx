@@ -119,10 +119,7 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
       contentContainerStyle={styles.content}
     >
       <View
-        style={[
-          styles.trophy,
-          { backgroundColor: palette.tertiary + "38" },
-        ]}
+        style={[styles.trophy, { backgroundColor: palette.tertiary + "38" }]}
       >
         <MaterialCommunityIcons
           name={draw ? "flag-checkered" : "trophy"}
@@ -186,7 +183,9 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
       >
         <View style={styles.scorersCol}>
           {scorersA.length === 0 ? (
-            <Text style={[styles.scorerNone, { color: palette.onSurfaceVariant }]}>
+            <Text
+              style={[styles.scorerNone, { color: palette.onSurfaceVariant }]}
+            >
               —
             </Text>
           ) : (
@@ -207,7 +206,9 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
         </View>
         <View style={[styles.scorersCol, { alignItems: "flex-end" }]}>
           {scorersB.length === 0 ? (
-            <Text style={[styles.scorerNone, { color: palette.onSurfaceVariant }]}>
+            <Text
+              style={[styles.scorerNone, { color: palette.onSurfaceVariant }]}
+            >
               —
             </Text>
           ) : (
@@ -400,7 +401,10 @@ function PickTeamCard({
         ) : null}
       </View>
       <View
-        style={[styles.pickDivider, { backgroundColor: palette.outlineVariant }]}
+        style={[
+          styles.pickDivider,
+          { backgroundColor: palette.outlineVariant },
+        ]}
       />
       <View style={styles.pickPlayers}>
         {visiveis.map((p) => (

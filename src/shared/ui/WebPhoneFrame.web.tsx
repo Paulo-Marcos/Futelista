@@ -137,29 +137,26 @@ export const WebPhoneFrame = ({ children }: { children: React.ReactNode }) => {
     [],
   );
 
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const drag = dragRef.current;
-      if (!drag) return;
-      const next: Size = { ...sizeRef.current };
-      if (drag.axis === "x" || drag.axis === "both") {
-        next.width = clamp(
-          drag.startW + (e.clientX - drag.startX),
-          MIN_WIDTH,
-          maxWidth(),
-        );
-      }
-      if (drag.axis === "y" || drag.axis === "both") {
-        next.height = clamp(
-          drag.startH + (e.clientY - drag.startY),
-          MIN_HEIGHT,
-          maxHeight(),
-        );
-      }
-      setSize(next);
-    },
-    [],
-  );
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const next: Size = { ...sizeRef.current };
+    if (drag.axis === "x" || drag.axis === "both") {
+      next.width = clamp(
+        drag.startW + (e.clientX - drag.startX),
+        MIN_WIDTH,
+        maxWidth(),
+      );
+    }
+    if (drag.axis === "y" || drag.axis === "both") {
+      next.height = clamp(
+        drag.startH + (e.clientY - drag.startY),
+        MIN_HEIGHT,
+        maxHeight(),
+      );
+    }
+    setSize(next);
+  }, []);
 
   const onPointerUp = useCallback(() => {
     if (!dragRef.current) return;
@@ -195,7 +192,11 @@ export const WebPhoneFrame = ({ children }: { children: React.ReactNode }) => {
             type="button"
             onClick={reset}
             title="Voltar ao tamanho de celular"
-            style={{ ...styles.resetButton, color: c.label, borderColor: c.handle }}
+            style={{
+              ...styles.resetButton,
+              color: c.label,
+              borderColor: c.handle,
+            }}
           >
             Tamanho celular
           </button>

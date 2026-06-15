@@ -1,15 +1,15 @@
-import { Player } from '../Player';
-import { CreateTeamMixingTopTwoTeams } from './CreateTeamMixingTopTwoTeams';
+import { Player } from "../Player";
+import { CreateTeamMixingTopTwoTeams } from "./CreateTeamMixingTopTwoTeams";
 
-describe('Teste da classe CreateTeamMixingTopTwoTeams', () => {
-  it('deverá criar times de forma aleatória 2 primeiros times', () => {
+describe("Teste da classe CreateTeamMixingTopTwoTeams", () => {
+  it("deverá criar times de forma aleatória 2 primeiros times", () => {
     const creator = new CreateTeamMixingTopTwoTeams();
     const players = [
-      new Player({ name: 'a' }),
-      new Player({ name: 'b' }),
-      new Player({ name: 'c' }),
-      new Player({ name: 'd' }),
-      new Player({ name: 'e' }),
+      new Player({ name: "a" }),
+      new Player({ name: "b" }),
+      new Player({ name: "c" }),
+      new Player({ name: "d" }),
+      new Player({ name: "e" }),
     ];
     const teams = creator.create(players, 2);
     const shuffledList = creator.shuffledList;
@@ -20,11 +20,15 @@ describe('Teste da classe CreateTeamMixingTopTwoTeams', () => {
     }
     expect(teams[2].players[0]).toEqual(shuffledList![0]);
   });
-  it('deverá lançar erro se a quantidade de jogadores for menor que 2 vezes numero de jogadores por time', () => {
+  it("deverá lançar erro se a quantidade de jogadores for menor que 2 vezes numero de jogadores por time", () => {
     const creator = new CreateTeamMixingTopTwoTeams();
-    const players = [new Player({ name: 'a' }), new Player({ name: 'b' }), new Player({ name: 'c' })];
+    const players = [
+      new Player({ name: "a" }),
+      new Player({ name: "b" }),
+      new Player({ name: "c" }),
+    ];
     expect(() => creator.create(players, 2)).toThrowError(
-      'Quantidade de jogadores insuficiente para determinar os times.',
+      "Quantidade de jogadores insuficiente para determinar os times.",
     );
   });
 });

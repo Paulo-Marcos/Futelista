@@ -113,9 +113,7 @@ export default function HistoricoScreen() {
         ]}
         ListHeaderComponent={
           ordenadas.length > 0 ? (
-            <Text
-              style={[styles.label, { color: palette.onSurfaceVariant }]}
-            >
+            <Text style={[styles.label, { color: palette.onSurfaceVariant }]}>
               Últimos jogos
             </Text>
           ) : null

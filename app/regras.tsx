@@ -107,9 +107,7 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
       contentContainerStyle={styles.content}
     >
       <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: palette.onSurface }]}>
-          Regras
-        </Text>
+        <Text style={[styles.title, { color: palette.onSurface }]}>Regras</Text>
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
@@ -180,12 +178,7 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
         title="Limite de gols"
         sub="encerra ao atingir"
         control={
-          <Stepper
-            value={goalLimit}
-            onChange={setGoalLimit}
-            min={1}
-            max={20}
-          />
+          <Stepper value={goalLimit} onChange={setGoalLimit} min={1} max={20} />
         }
       />
 
@@ -279,7 +272,9 @@ function RegrasInner({ gestor }: { gestor: GestorJogo }) {
           },
         ]}
       >
-        <Text style={[styles.previewLabel, { color: palette.onSurfaceVariant }]}>
+        <Text
+          style={[styles.previewLabel, { color: palette.onSurfaceVariant }]}
+        >
           PREVIEW
         </Text>
         <Text style={[styles.previewText, { color: palette.onSurface }]}>

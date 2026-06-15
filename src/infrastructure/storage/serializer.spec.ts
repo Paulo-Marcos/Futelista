@@ -152,9 +152,7 @@ describe("serializer (round-trip GestorJogo)", () => {
     // evento Switch registrado em team.switches volta após round-trip.
     const teamARecriado = recriada.playing!.teamA;
     expect(teamARecriado.players.map((p) => p.name)).toContain(reserva.name);
-    expect(teamARecriado.players.map((p) => p.name)).not.toContain(
-      saindo.name,
-    );
+    expect(teamARecriado.players.map((p) => p.name)).not.toContain(saindo.name);
     expect(teamARecriado.switches.length).toBeGreaterThan(0);
   });
 

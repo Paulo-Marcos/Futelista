@@ -18,7 +18,7 @@ import Svg, {
  * Portado 1:1 de prototype/js/crests.jsx.
  */
 
-const CREST_PALETTE: Array<[string, string]> = [
+const CREST_PALETTE: [string, string][] = [
   ["#C62828", "#1C1C1E"],
   ["#1565C0", "#FFFFFF"],
   ["#2E7D32", "#FFFFFF"],
@@ -34,7 +34,13 @@ const CREST_PALETTE: Array<[string, string]> = [
 ];
 
 type Pattern = "halves" | "bands" | "sash" | "stripe" | "hoops";
-const CREST_PATTERNS: Pattern[] = ["halves", "bands", "sash", "stripe", "hoops"];
+const CREST_PATTERNS: Pattern[] = [
+  "halves",
+  "bands",
+  "sash",
+  "stripe",
+  "hoops",
+];
 
 const SHIELD_PATH =
   "M24 2.5 L44 8.5 V27 C44 41.5 35.5 50 24 53.5 C12.5 50 4 41.5 4 27 V8.5 Z";

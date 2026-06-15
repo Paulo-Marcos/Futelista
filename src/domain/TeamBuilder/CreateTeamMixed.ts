@@ -1,5 +1,5 @@
-import { Player } from '../Player';
-import { CreateTeam } from './CreateTeam.abstract';
+import { Player } from "../Player";
+import { CreateTeam } from "./CreateTeam.abstract";
 
 /**
  * Estratégia BY_MIXING_TEAMS — embaralha todos os jogadores antes de

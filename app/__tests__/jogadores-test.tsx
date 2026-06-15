@@ -29,10 +29,11 @@ function buildManager(nomes: string[] = []): GestorJogo {
  * todos os Pressable do app declaram accessibilityState explicitamente).
  */
 function getPressableByLabel(label: string) {
-  const found = screen.UNSAFE_getAllByType(Pressable).find(
-    (p) => p.props.accessibilityLabel === label,
-  );
-  if (!found) throw Error(`Pressable com accessibilityLabel "${label}" não encontrado.`);
+  const found = screen
+    .UNSAFE_getAllByType(Pressable)
+    .find((p) => p.props.accessibilityLabel === label);
+  if (!found)
+    throw Error(`Pressable com accessibilityLabel "${label}" não encontrado.`);
   return found;
 }
 
@@ -79,10 +80,7 @@ describe("Jogadores — adicionar via input + botão", () => {
   it("habilita o '+' depois de digitar um nome", () => {
     renderJogadores(buildManager());
 
-    fireEvent.changeText(
-      screen.getByLabelText("Nome do novo jogador"),
-      "Ana",
-    );
+    fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
 
     expect(getPressableByLabel("Adicionar jogador").props.disabled).toBe(false);
   });
@@ -115,10 +113,7 @@ describe("Jogadores — adicionar via input + botão", () => {
     const gestor = buildManager();
     renderJogadores(gestor);
 
-    fireEvent.changeText(
-      screen.getByLabelText("Nome do novo jogador"),
-      "   ",
-    );
+    fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "   ");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
 
     expect(gestor.players).toHaveLength(0);
@@ -145,10 +140,7 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
     const gestor = buildManager(["Ana"]);
     renderJogadores(gestor);
 
-    fireEvent.changeText(
-      screen.getByLabelText("Nome do novo jogador"),
-      "Ana",
-    );
+    fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
 
     expect(
@@ -160,10 +152,7 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
     const gestor = buildManager(["Ana"]);
     renderJogadores(gestor);
 
-    fireEvent.changeText(
-      screen.getByLabelText("Nome do novo jogador"),
-      "Ana",
-    );
+    fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
 
     fireEvent.press(screen.getByRole("button", { name: "Fechar aviso" }));
@@ -472,9 +461,9 @@ describe("Jogadores — adicionar vários (lote)", () => {
       screen.getByRole("button", { name: "Adicionar vários jogadores" }),
     );
 
-    expect(
-      getPressableByLabel("Confirmar adição em lote").props.disabled,
-    ).toBe(true);
+    expect(getPressableByLabel("Confirmar adição em lote").props.disabled).toBe(
+      true,
+    );
   });
 });
 
@@ -554,9 +543,7 @@ describe("Jogadores — trocar foto", () => {
     // espera por uma resposta que nunca chega.
     const alertSpy = mockAlert((b) => b.text === "Escolher da galeria");
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Trocar foto de Ana" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Trocar foto de Ana" }));
 
     await waitFor(() =>
       expect(setFotoDoJogador).toHaveBeenCalledWith(
@@ -579,15 +566,10 @@ describe("Jogadores — trocar foto", () => {
 
     const alertSpy = mockAlert((b) => b.text === "Remover foto");
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Trocar foto de Ana" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Trocar foto de Ana" }));
 
     await waitFor(() =>
-      expect(setFotoDoJogador).toHaveBeenCalledWith(
-        gestor.players[0].id,
-        null,
-      ),
+      expect(setFotoDoJogador).toHaveBeenCalledWith(gestor.players[0].id, null),
     );
     alertSpy.mockRestore();
   });

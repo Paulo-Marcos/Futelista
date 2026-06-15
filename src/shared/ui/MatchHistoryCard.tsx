@@ -58,7 +58,9 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
               styles.team,
               {
                 color:
-                  winSide === "A" ? palette.onSurface : palette.onSurfaceVariant,
+                  winSide === "A"
+                    ? palette.onSurface
+                    : palette.onSurfaceVariant,
                 fontWeight: winSide === "A" ? "800" : "700",
               },
             ]}
@@ -73,7 +75,9 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
               styles.score,
               {
                 color:
-                  winSide === "A" ? palette.onSurface : palette.onSurfaceVariant,
+                  winSide === "A"
+                    ? palette.onSurface
+                    : palette.onSurfaceVariant,
               },
             ]}
           >
@@ -87,7 +91,9 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
               styles.score,
               {
                 color:
-                  winSide === "B" ? palette.onSurface : palette.onSurfaceVariant,
+                  winSide === "B"
+                    ? palette.onSurface
+                    : palette.onSurfaceVariant,
               },
             ]}
           >
@@ -100,7 +106,9 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
               styles.team,
               {
                 color:
-                  winSide === "B" ? palette.onSurface : palette.onSurfaceVariant,
+                  winSide === "B"
+                    ? palette.onSurface
+                    : palette.onSurfaceVariant,
                 fontWeight: winSide === "B" ? "800" : "700",
                 textAlign: "right",
               },
@@ -122,10 +130,7 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
 
       {scorersA.length > 0 || scorersB.length > 0 ? (
         <View
-          style={[
-            styles.scorers,
-            { borderTopColor: palette.outlineVariant },
-          ]}
+          style={[styles.scorers, { borderTopColor: palette.outlineVariant }]}
         >
           <View style={styles.scorerColLeft}>
             <MaterialCommunityIcons

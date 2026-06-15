@@ -53,10 +53,14 @@ describe("gerarRelatorioExecucao", () => {
   });
 
   it("mostra o total de partidas encerradas e jogadores", () => {
-    const g = execucaoComPartidas(["Ana"], ["Bia"], [
-      [1, 0],
-      [0, 1],
-    ]);
+    const g = execucaoComPartidas(
+      ["Ana"],
+      ["Bia"],
+      [
+        [1, 0],
+        [0, 1],
+      ],
+    );
     const texto = gerarRelatorioExecucao(g);
     expect(texto).toContain("📊 2 partidas · 2 jogadores");
   });
@@ -74,9 +78,7 @@ describe("gerarRelatorioExecucao", () => {
   it("lista artilheiros ordenados por gols desc", () => {
     // Times 2×2 — Ana e Caio em A; Bia e Davi em B.
     // Ana[0] = teamA.players[0] marca 3; Bia[0] = teamB.players[0] marca 2.
-    const g = execucaoComPartidas(["Ana", "Caio"], ["Bia", "Davi"], [
-      [3, 2],
-    ]);
+    const g = execucaoComPartidas(["Ana", "Caio"], ["Bia", "Davi"], [[3, 2]]);
     const texto = gerarRelatorioExecucao(g);
     expect(texto).toContain("⚽ Artilheiros:");
     // Quem fez gol depende do sorteio do team builder; checa só que

@@ -15,7 +15,9 @@ import { ResultMatch } from "./Match";
 
 export function gerarRelatorioExecucao(gestor: GestorJogo): string {
   const linhas: string[] = [];
-  linhas.push(`🏆 ${gestor.name} · ${formatarData(gestor.startedAt ?? gestor.createdAt)}`);
+  linhas.push(
+    `🏆 ${gestor.name} · ${formatarData(gestor.startedAt ?? gestor.createdAt)}`,
+  );
   linhas.push("━".repeat(20));
   linhas.push("");
 
@@ -32,7 +34,9 @@ export function gerarRelatorioExecucao(gestor: GestorJogo): string {
     linhas.push("⚽ Artilheiros:");
     for (let i = 0; i < artilheiros.length; i++) {
       const a = artilheiros[i];
-      linhas.push(`${i + 1}. ${a.nome} — ${a.gols} ${a.gols === 1 ? "gol" : "gols"}`);
+      linhas.push(
+        `${i + 1}. ${a.nome} — ${a.gols} ${a.gols === 1 ? "gol" : "gols"}`,
+      );
     }
     linhas.push("");
   }
@@ -75,9 +79,7 @@ function marcadorResultado(result: ResultMatch): string {
  * execução, é seguro identificar por `Player.id` (sem precisar normalizar
  * por nome como em AgregadosPelada).
  */
-function topArtilheiros(
-  gestor: GestorJogo,
-): { nome: string; gols: number }[] {
+function topArtilheiros(gestor: GestorJogo): { nome: string; gols: number }[] {
   return gestor.players
     .map((p) => ({ nome: p.name, gols: p.goals.length }))
     .filter((a) => a.gols > 0)
@@ -89,13 +91,14 @@ function topArtilheiros(
  * Top 5 jogadores por vitórias na execução. Conta via `Player.stats()`
  * (mesma fonte de dados do bottom sheet do F-04).
  */
-function topVitorias(
-  gestor: GestorJogo,
-): { nome: string; vitorias: number }[] {
+function topVitorias(gestor: GestorJogo): { nome: string; vitorias: number }[] {
   return gestor.players
     .map((p) => ({ nome: p.name, vitorias: p.stats().vitorias }))
     .filter((v) => v.vitorias > 0)
-    .sort((a, b) => b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, "pt-BR"))
+    .sort(
+      (a, b) =>
+        b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, "pt-BR"),
+    )
     .slice(0, 5);
 }
 

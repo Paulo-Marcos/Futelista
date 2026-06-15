@@ -1,14 +1,14 @@
-import { GestorJogo } from '../GestorJogo';
-import { Rules } from '../Rules';
+import { GestorJogo } from "../GestorJogo";
+import { Rules } from "../Rules";
 import {
   BaseFinalResultHandler,
   FinalResultHandler,
   HandleInput,
-} from './FinalResult.handler';
+} from "./FinalResult.handler";
 
 class ConcreteFinalResultHandler extends BaseFinalResultHandler {}
 
-describe('BaseFinalResultHandler', () => {
+describe("BaseFinalResultHandler", () => {
   let baseHandler: BaseFinalResultHandler;
   let nextHandler: FinalResultHandler;
   let input: HandleInput;
@@ -17,18 +17,20 @@ describe('BaseFinalResultHandler', () => {
     baseHandler = new ConcreteFinalResultHandler();
     nextHandler = { handle: jest.fn() } as unknown as FinalResultHandler;
     input = {
-      jogo: new GestorJogo('teste', new Rules()),
+      jogo: new GestorJogo("teste", new Rules()),
     };
   });
 
-  it('deve passar a solicitação para o próximo manipulador quando configurado', () => {
+  it("deve passar a solicitação para o próximo manipulador quando configurado", () => {
     baseHandler.setNextHandler(nextHandler);
     baseHandler.handle(input);
     expect(nextHandler.handle).toHaveBeenCalledWith(input);
   });
 
-  it('não deve chamar o próximo manipulador se não estiver configurado', () => {
-    const nextHandlerSpy = { handle: jest.fn() } as unknown as FinalResultHandler;
+  it("não deve chamar o próximo manipulador se não estiver configurado", () => {
+    const nextHandlerSpy = {
+      handle: jest.fn(),
+    } as unknown as FinalResultHandler;
     baseHandler.handle(input);
     expect(nextHandlerSpy.handle).not.toHaveBeenCalled();
   });

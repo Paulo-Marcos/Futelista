@@ -175,11 +175,8 @@ jest.mock("@gorhom/bottom-sheet", () => {
       return React.createElement(View, null, children);
     },
   );
-  const BottomSheetView = ({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) => React.createElement(View, null, children);
+  const BottomSheetView = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(View, null, children);
   const BottomSheetBackdrop = () => null;
   const BottomSheetModalProvider = ({
     children,
@@ -205,7 +202,10 @@ jest.mock("expo-image-picker", () => ({
   requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true })),
   requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true })),
   launchCameraAsync: jest.fn(async () => ({ canceled: true, assets: [] })),
-  launchImageLibraryAsync: jest.fn(async () => ({ canceled: true, assets: [] })),
+  launchImageLibraryAsync: jest.fn(async () => ({
+    canceled: true,
+    assets: [],
+  })),
   MediaTypeOptions: { Images: "Images", Videos: "Videos", All: "All" },
 }));
 jest.mock("expo-file-system", () => ({

@@ -1,5 +1,5 @@
-import { GestorJogo } from '../GestorJogo';
-import { Team } from '../Team';
+import { GestorJogo } from "../GestorJogo";
+import { Team } from "../Team";
 
 /**
  * Contrato (Chain of Responsibility) para handlers pós-partida.

@@ -41,8 +41,7 @@ export function PitchLines({
   const lineColor = palette.fieldLine;
   const portrait = orientation === "portrait";
   const viewBox = portrait ? "0 0 200 300" : "0 0 300 200";
-  const preserve =
-    fit === "meet" ? "xMidYMid meet" : "xMidYMid slice";
+  const preserve = fit === "meet" ? "xMidYMid meet" : "xMidYMid slice";
   return (
     <View
       pointerEvents="none"

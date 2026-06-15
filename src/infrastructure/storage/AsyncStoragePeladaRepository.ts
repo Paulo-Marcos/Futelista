@@ -77,9 +77,7 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
 
   async carregarExecucoesDe(peladaId: string): Promise<GestorJogo[]> {
     const resumos = await this.lerTodasExecucoes();
-    const ids = resumos
-      .filter((r) => r.peladaId === peladaId)
-      .map((r) => r.id);
+    const ids = resumos.filter((r) => r.peladaId === peladaId).map((r) => r.id);
     const carregadas: GestorJogo[] = [];
     for (const id of ids) {
       const exec = await this.carregar(id);

@@ -26,9 +26,7 @@ export function TabHeader({ title, subtitle }: TabHeaderProps) {
   const palette = usePalette();
   const nomePelada = useGameSlice((g) => g.name);
   return (
-    <View
-      style={[styles.container, { backgroundColor: palette.surface }]}
-    >
+    <View style={[styles.container, { backgroundColor: palette.surface }]}>
       {subtitle ? null : (
         <Text
           style={[styles.overline, { color: palette.onSurfaceVariant }]}

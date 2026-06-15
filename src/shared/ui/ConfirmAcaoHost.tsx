@@ -30,7 +30,9 @@ type Pedido = {
 
 let _handler: ((p: Pedido) => void) | null = null;
 
-export function registrarConfirmAcaoHost(handler: ((p: Pedido) => void) | null) {
+export function registrarConfirmAcaoHost(
+  handler: ((p: Pedido) => void) | null,
+) {
   _handler = handler;
 }
 
@@ -118,7 +120,9 @@ export function ConfirmAcaoHost() {
                 },
               ]}
             >
-              <Text style={[styles.btnTextSecundario, { color: palette.onSurface }]}>
+              <Text
+                style={[styles.btnTextSecundario, { color: palette.onSurface }]}
+              >
                 {textoCancelar}
               </Text>
             </Pressable>
@@ -129,9 +133,7 @@ export function ConfirmAcaoHost() {
               style={({ pressed }) => [
                 styles.btnPrimario,
                 {
-                  backgroundColor: destrutivo
-                    ? palette.error
-                    : palette.primary,
+                  backgroundColor: destrutivo ? palette.error : palette.primary,
                   opacity: pressed ? 0.85 : 1,
                 },
               ]}

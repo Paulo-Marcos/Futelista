@@ -36,9 +36,7 @@ export function RuleCard({
       ]}
     >
       <View style={styles.row}>
-        <View
-          style={[styles.ico, { backgroundColor: palette.primary + "29" }]}
-        >
+        <View style={[styles.ico, { backgroundColor: palette.primary + "29" }]}>
           <MaterialCommunityIcons
             name={icon}
             size={20}

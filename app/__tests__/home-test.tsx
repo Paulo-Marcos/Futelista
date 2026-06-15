@@ -289,9 +289,7 @@ describe("Home — modo execução (com gestor)", () => {
     // M-20: o cog passou a abrir `escolherOpcao` em vez de navegar
     // direto. Verificamos a presença do botão pelo novo label e que
     // o press não dispara router.push imediatamente (vai pro menu).
-    fireEvent.press(
-      screen.getByRole("button", { name: "Gerenciar pelada" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Gerenciar pelada" }));
 
     expect(router.push).not.toHaveBeenCalledWith("/regras");
   });

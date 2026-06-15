@@ -15,8 +15,7 @@ import * as ImagePicker from "expo-image-picker";
  * colisões e facilitar limpeza por arquivo.
  */
 
-const FOTOS_DIR =
-  (FileSystem.documentDirectory ?? "") + "fotos-jogadores/";
+const FOTOS_DIR = (FileSystem.documentDirectory ?? "") + "fotos-jogadores/";
 
 /**
  * Garante que a pasta existe. Idempotente.

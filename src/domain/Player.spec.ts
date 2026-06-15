@@ -1,10 +1,15 @@
-import { Goal } from './Goal';
-import { Match } from './Match';
-import { Player } from './Player';
-import { ScreenTime } from './ScreenTime';
-import { Team } from './Team';
+import { Goal } from "./Goal";
+import { Match } from "./Match";
+import { Player } from "./Player";
+import { ScreenTime } from "./ScreenTime";
+import { Team } from "./Team";
 
-function preparaPartida(teamA: Team, teamB: Team, jogadorA: Player, jogadorB: Player): Match {
+function preparaPartida(
+  teamA: Team,
+  teamB: Team,
+  jogadorA: Player,
+  jogadorB: Player,
+): Match {
   teamA.addPlayer(jogadorA);
   teamB.addPlayer(jogadorB);
   jogadorA.addTeam(teamA);
@@ -15,13 +20,13 @@ function preparaPartida(teamA: Team, teamB: Team, jogadorA: Player, jogadorB: Pl
   return new Match(teamA, teamB);
 }
 
-describe('Teste da classe Player', () => {
-  it('Deverá criar um jogador com id definido', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
+describe("Teste da classe Player", () => {
+  it("Deverá criar um jogador com id definido", () => {
+    const player = new Player({ name: "Paulo Marcos" });
     expect(player.id).toBeDefined();
   });
-  it('Deverá adicionar um gol ao jogador', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
+  it("Deverá adicionar um gol ao jogador", () => {
+    const player = new Player({ name: "Paulo Marcos" });
     const teamA = new Team({ limit: 5 });
     const teamB = new Team({ limit: 5 });
     const match = new Match(teamA, teamB);
@@ -29,31 +34,35 @@ describe('Teste da classe Player', () => {
     player.addGoal(goal);
     expect(player.goals[0]).toBe(goal);
   });
-  it('Deverá Lançar erro se o gol não pertence ao jogador', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
-    const player2 = new Player({ name: 'Paulo Marcos' });
+  it("Deverá Lançar erro se o gol não pertence ao jogador", () => {
+    const player = new Player({ name: "Paulo Marcos" });
+    const player2 = new Player({ name: "Paulo Marcos" });
     const teamA = new Team({ limit: 5 });
     const teamB = new Team({ limit: 5 });
     const match = new Match(teamA, teamB);
     const goal = new Goal(match, player2, teamA, new ScreenTime(1, 125));
-    expect(() => player.addGoal(goal)).toThrowError('Gol não pertence a esse jogador');
+    expect(() => player.addGoal(goal)).toThrowError(
+      "Gol não pertence a esse jogador",
+    );
   });
-  it('Deverá adicionar um novo time para o jogador', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
+  it("Deverá adicionar um novo time para o jogador", () => {
+    const player = new Player({ name: "Paulo Marcos" });
     const team = new Team({ limit: 5 });
     team.addPlayer(player);
     player.addTeam(team);
     expect(player.teams[0]).toBe(team);
   });
-  it('Deverá lançar erro se jogador não pertencer ao time', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
-    const player2 = new Player({ name: 'Paulo Marcos' });
+  it("Deverá lançar erro se jogador não pertencer ao time", () => {
+    const player = new Player({ name: "Paulo Marcos" });
+    const player2 = new Player({ name: "Paulo Marcos" });
     const team = new Team({ limit: 5 });
     team.addPlayer(player2);
-    expect(() => player.addTeam(team)).toThrowError('Jogador não pertence a esse time');
+    expect(() => player.addTeam(team)).toThrowError(
+      "Jogador não pertence a esse time",
+    );
   });
-  it('Deverá adicionar uma partida ao jogador', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
+  it("Deverá adicionar uma partida ao jogador", () => {
+    const player = new Player({ name: "Paulo Marcos" });
     const teamA = new Team({ limit: 5 });
     teamA.addPlayer(player);
     const teamB = new Team({ limit: 5 });
@@ -62,19 +71,19 @@ describe('Teste da classe Player', () => {
     player.addMatch(match);
     expect(player.matches[0]).toBe(match);
   });
-  it('Deverá lançar erro se nenhum time do jogador pertencer a partida', () => {
-    const player = new Player({ name: 'Paulo Marcos' });
+  it("Deverá lançar erro se nenhum time do jogador pertencer a partida", () => {
+    const player = new Player({ name: "Paulo Marcos" });
     const teamA = new Team({ limit: 5 });
     const teamB = new Team({ limit: 5 });
     const match = new Match(teamA, teamB);
     expect(() => player.addMatch(match)).toThrowError(
-      'Jogador não pertence a essa partida',
+      "Jogador não pertence a essa partida",
     );
   });
 
-  describe('stats()', () => {
-    it('jogador recém-criado retorna zeros', () => {
-      const p = new Player({ name: 'A' });
+  describe("stats()", () => {
+    it("jogador recém-criado retorna zeros", () => {
+      const p = new Player({ name: "A" });
       expect(p.stats()).toEqual({
         gols: 0,
         partidas: 0,
@@ -84,11 +93,11 @@ describe('Teste da classe Player', () => {
       });
     });
 
-    it('conta gols feitos e partidas (mesmo em andamento)', () => {
+    it("conta gols feitos e partidas (mesmo em andamento)", () => {
       const teamA = new Team({ limit: 1 });
       const teamB = new Team({ limit: 1 });
-      const jogA = new Player({ name: 'A' });
-      const jogB = new Player({ name: 'B' });
+      const jogA = new Player({ name: "A" });
+      const jogB = new Player({ name: "B" });
       const match = preparaPartida(teamA, teamB, jogA, jogB);
       const goal = new Goal(match, jogA, teamA, new ScreenTime(1, 30));
       jogA.addGoal(goal);
@@ -99,11 +108,11 @@ describe('Teste da classe Player', () => {
       expect(stats.vitorias + stats.empates + stats.derrotas).toBe(0);
     });
 
-    it('contabiliza vitória quando time do jogador venceu', () => {
+    it("contabiliza vitória quando time do jogador venceu", () => {
       const teamA = new Team({ limit: 1 });
       const teamB = new Team({ limit: 1 });
-      const jogA = new Player({ name: 'A' });
-      const jogB = new Player({ name: 'B' });
+      const jogA = new Player({ name: "A" });
+      const jogB = new Player({ name: "B" });
       const match = preparaPartida(teamA, teamB, jogA, jogB);
       jogA.addGoal(new Goal(match, jogA, teamA, new ScreenTime(1, 10)));
       match.addGoal(teamA, jogA, new ScreenTime(1, 10));
@@ -112,22 +121,22 @@ describe('Teste da classe Player', () => {
       expect(jogB.stats().derrotas).toBe(1);
     });
 
-    it('contabiliza empate quando a partida termina sem vencedor', () => {
+    it("contabiliza empate quando a partida termina sem vencedor", () => {
       const teamA = new Team({ limit: 1 });
       const teamB = new Team({ limit: 1 });
-      const jogA = new Player({ name: 'A' });
-      const jogB = new Player({ name: 'B' });
+      const jogA = new Player({ name: "A" });
+      const jogB = new Player({ name: "B" });
       const match = preparaPartida(teamA, teamB, jogA, jogB);
       match.setResult();
       expect(jogA.stats().empates).toBe(1);
       expect(jogB.stats().empates).toBe(1);
     });
 
-    it('soma várias partidas (vitória + empate + derrota)', () => {
+    it("soma várias partidas (vitória + empate + derrota)", () => {
       const teamA = new Team({ limit: 1 });
       const teamB = new Team({ limit: 1 });
-      const jogA = new Player({ name: 'A' });
-      const jogB = new Player({ name: 'B' });
+      const jogA = new Player({ name: "A" });
+      const jogB = new Player({ name: "B" });
       // 1) Empate
       const m1 = preparaPartida(teamA, teamB, jogA, jogB);
       m1.setResult();
@@ -150,75 +159,75 @@ describe('Teste da classe Player', () => {
     });
   });
 
-  describe('Foto (F-19)', () => {
-    it('nasce sem fotoUri', () => {
-      const p = new Player({ name: 'A' });
+  describe("Foto (F-19)", () => {
+    it("nasce sem fotoUri", () => {
+      const p = new Player({ name: "A" });
       expect(p.fotoUri).toBeUndefined();
     });
 
-    it('definirFoto aceita URI file:// e faz trim', () => {
-      const p = new Player({ name: 'A' });
-      p.definirFoto('  file:///tmp/foto.jpg  ');
-      expect(p.fotoUri).toBe('file:///tmp/foto.jpg');
+    it("definirFoto aceita URI file:// e faz trim", () => {
+      const p = new Player({ name: "A" });
+      p.definirFoto("  file:///tmp/foto.jpg  ");
+      expect(p.fotoUri).toBe("file:///tmp/foto.jpg");
     });
 
-    it('definirFoto aceita https:// e data: URIs', () => {
-      const p = new Player({ name: 'A' });
-      p.definirFoto('https://exemplo.com/p.png');
-      expect(p.fotoUri).toBe('https://exemplo.com/p.png');
-      p.definirFoto('data:image/png;base64,abc');
-      expect(p.fotoUri).toBe('data:image/png;base64,abc');
+    it("definirFoto aceita https:// e data: URIs", () => {
+      const p = new Player({ name: "A" });
+      p.definirFoto("https://exemplo.com/p.png");
+      expect(p.fotoUri).toBe("https://exemplo.com/p.png");
+      p.definirFoto("data:image/png;base64,abc");
+      expect(p.fotoUri).toBe("data:image/png;base64,abc");
     });
 
-    it('definirFoto rejeita formato inválido', () => {
-      const p = new Player({ name: 'A' });
-      expect(() => p.definirFoto('foto.jpg')).toThrowError(
+    it("definirFoto rejeita formato inválido", () => {
+      const p = new Player({ name: "A" });
+      expect(() => p.definirFoto("foto.jpg")).toThrowError(
         /URI de foto inválida/,
       );
     });
 
-    it('definirFoto com undefined ou vazio remove a foto', () => {
-      const p = new Player({ name: 'A' });
-      p.definirFoto('file:///tmp/foto.jpg');
-      p.definirFoto('');
+    it("definirFoto com undefined ou vazio remove a foto", () => {
+      const p = new Player({ name: "A" });
+      p.definirFoto("file:///tmp/foto.jpg");
+      p.definirFoto("");
       expect(p.fotoUri).toBeUndefined();
-      p.definirFoto('file:///tmp/foto.jpg');
+      p.definirFoto("file:///tmp/foto.jpg");
       p.definirFoto(undefined);
       expect(p.fotoUri).toBeUndefined();
     });
 
-    it('removerFoto limpa o campo', () => {
-      const p = new Player({ name: 'A' });
-      p.definirFoto('file:///foto.jpg');
+    it("removerFoto limpa o campo", () => {
+      const p = new Player({ name: "A" });
+      p.definirFoto("file:///foto.jpg");
       p.removerFoto();
       expect(p.fotoUri).toBeUndefined();
     });
   });
 
-  describe('Quando renomear o jogador', () => {
-    it('deverá atualizar o nome com a string informada', () => {
-      const player = new Player({ name: 'Antigo' });
-      player.rename('Novo Nome');
-      expect(player.name).toBe('Novo Nome');
+  describe("Quando renomear o jogador", () => {
+    it("deverá atualizar o nome com a string informada", () => {
+      const player = new Player({ name: "Antigo" });
+      player.rename("Novo Nome");
+      expect(player.name).toBe("Novo Nome");
     });
 
-    it('deverá remover espaços nas pontas', () => {
-      const player = new Player({ name: 'Antigo' });
-      player.rename('   Pedro   ');
-      expect(player.name).toBe('Pedro');
+    it("deverá remover espaços nas pontas", () => {
+      const player = new Player({ name: "Antigo" });
+      player.rename("   Pedro   ");
+      expect(player.name).toBe("Pedro");
     });
 
-    it('deverá lançar erro quando o novo nome é vazio', () => {
-      const player = new Player({ name: 'Antigo' });
-      expect(() => player.rename('')).toThrowError(
-        'Nome do jogador não pode ser vazio.',
+    it("deverá lançar erro quando o novo nome é vazio", () => {
+      const player = new Player({ name: "Antigo" });
+      expect(() => player.rename("")).toThrowError(
+        "Nome do jogador não pode ser vazio.",
       );
     });
 
-    it('deverá lançar erro quando o novo nome é só espaços', () => {
-      const player = new Player({ name: 'Antigo' });
-      expect(() => player.rename('   ')).toThrowError(
-        'Nome do jogador não pode ser vazio.',
+    it("deverá lançar erro quando o novo nome é só espaços", () => {
+      const player = new Player({ name: "Antigo" });
+      expect(() => player.rename("   ")).toThrowError(
+        "Nome do jogador não pode ser vazio.",
       );
     });
   });

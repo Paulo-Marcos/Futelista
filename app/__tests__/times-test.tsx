@@ -35,7 +35,10 @@ function buildManager(opts?: {
   const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   if (opts?.jogadores) {
     m.addPlayers(
-      Array.from({ length: opts.jogadores }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
+      Array.from(
+        { length: opts.jogadores },
+        (_, i) => `J${String(i + 1).padStart(2, "0")}`,
+      ),
     );
   }
   if (opts?.comTimes || opts?.comPartida) {
@@ -63,9 +66,9 @@ function mockAlert(pick: (b: { text?: string; style?: string }) => boolean) {
 }
 
 function getPressableByLabel(label: string) {
-  return screen.UNSAFE_getAllByType(Pressable).find(
-    (p) => p.props.accessibilityLabel === label,
-  );
+  return screen
+    .UNSAFE_getAllByType(Pressable)
+    .find((p) => p.props.accessibilityLabel === label);
 }
 
 // ===========================================================================
@@ -81,9 +84,7 @@ describe("Times — guards e EmptyState", () => {
   it("sem times montados e jogadores insuficientes: EmptyState com botão disabled", () => {
     renderTimes(buildManager({ jogadores: 3 }));
 
-    expect(
-      screen.getByText("Times ainda não foram montados"),
-    ).toBeTruthy();
+    expect(screen.getByText("Times ainda não foram montados")).toBeTruthy();
     expect(
       screen.getByText("Adicione pelo menos 8 jogadores para montar 2 times."),
     ).toBeTruthy();
@@ -193,9 +194,7 @@ describe("Times — durante partida em andamento", () => {
         name: "Voltar para a partida em andamento",
       }),
     ).toBeTruthy();
-    expect(
-      screen.queryByLabelText("Sortear times novamente"),
-    ).toBeNull();
+    expect(screen.queryByLabelText("Sortear times novamente")).toBeNull();
   });
 
   it("'Voltar à partida' navega para /partida", () => {
@@ -219,9 +218,7 @@ describe("Times — sortear novamente", () => {
   it("FAB confirmado: chama resetTimes e createTeams", async () => {
     const m = buildManager({ jogadores: 8, comTimes: true });
     const resetSpy = jest.spyOn(m, "resetTimes").mockImplementation(() => {});
-    const createSpy = jest
-      .spyOn(m, "createTeams")
-      .mockImplementation(() => []);
+    const createSpy = jest.spyOn(m, "createTeams").mockImplementation(() => []);
     renderTimes(m);
     const alertSpy = mockAlert((b) => b.text === "Sortear");
 
@@ -313,9 +310,7 @@ describe("Times — seleção e troca de jogadores", () => {
     renderTimes(buildManager({ jogadores: 8, comTimes: true }));
 
     fireEvent.press(screen.getByText("J01"));
-    fireEvent.press(
-      screen.getByRole("button", { name: "Cancelar troca" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Cancelar troca" }));
 
     expect(screen.queryByText(/Trocar "J01"/)).toBeNull();
   });
@@ -328,15 +323,11 @@ describe("Times — seleção e troca de jogadores", () => {
 describe("Times — menu de ações do time", () => {
   it("'Mover para o fim' chama moverTimeParaFim", async () => {
     const m = buildManager({ jogadores: 12, comTimes: true });
-    const spy = jest
-      .spyOn(m, "moverTimeParaFim")
-      .mockImplementation(() => {});
+    const spy = jest.spyOn(m, "moverTimeParaFim").mockImplementation(() => {});
     renderTimes(m);
     const alertSpy = mockAlert((b) => b.text === "Mover para o fim");
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Ações do Time 1" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Ações do Time 1" }));
 
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
     expect(spy.mock.calls[0][0]).toBe(m.next[0]);
@@ -351,14 +342,13 @@ describe("Times — menu de ações do time", () => {
     const alertSpy = jest
       .spyOn(Alert, "alert")
       .mockImplementation((_t, _m, buttons) => {
-        const escolha = buttons?.find((b) => b.text === "Esvaziar time")
-          ?? buttons?.find((b) => b.text === "Esvaziar");
+        const escolha =
+          buttons?.find((b) => b.text === "Esvaziar time") ??
+          buttons?.find((b) => b.text === "Esvaziar");
         escolha?.onPress?.();
       });
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Ações do Time 1" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Ações do Time 1" }));
 
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
     alertSpy.mockRestore();
@@ -371,9 +361,7 @@ describe("Times — menu de ações do time", () => {
     renderTimes(m);
     const alertSpy = mockAlert((b) => b.style === "cancel");
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Ações do Time 1" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Ações do Time 1" }));
 
     await waitFor(() => expect(alertSpy).toHaveBeenCalled());
     expect(moverSpy).not.toHaveBeenCalled();

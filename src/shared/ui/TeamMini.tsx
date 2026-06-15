@@ -61,11 +61,7 @@ export function TeamMini({
   const conteudo = (
     <>
       <View style={styles.header}>
-        <TeamCrest
-          seed={team.id}
-          size={26}
-          corOverride={team.corCustom}
-        />
+        <TeamCrest seed={team.id} size={26} corOverride={team.corCustom} />
         <Text style={[styles.title, { color: palette.onSurface }]}>
           {label}
         </Text>

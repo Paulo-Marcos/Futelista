@@ -1,11 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  TextInputProps,
-  View,
-} from "react-native";
+import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";

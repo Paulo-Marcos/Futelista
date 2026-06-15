@@ -20,7 +20,11 @@ describe("Teste da classe CreateTeamByOrder", () => {
   });
   it("deverá lançar erro se a quantidade de jogadores for menor que 2 vezes numero de jogadores por time", () => {
     const creator = new CreateTeamByOrder();
-    const players = [new Player({ name: "a" }), new Player({ name: "b" }), new Player({ name: "c" })];
+    const players = [
+      new Player({ name: "a" }),
+      new Player({ name: "b" }),
+      new Player({ name: "c" }),
+    ];
     expect(() => creator.create(players, 2)).toThrowError(
       "Quantidade de jogadores insuficiente para determinar os times.",
     );

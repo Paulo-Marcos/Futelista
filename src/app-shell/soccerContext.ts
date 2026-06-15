@@ -111,10 +111,7 @@ export type SoccerContextValue = {
    * (helper `escolherFotoDoJogador` em `src/app-shell/fotoJogador.ts`).
    * Passar `null` remove a foto. Notifica o gestor e persiste.
    */
-  setFotoDoJogador: (
-    jogadorId: string,
-    uri: string | null,
-  ) => Promise<void>;
+  setFotoDoJogador: (jogadorId: string, uri: string | null) => Promise<void>;
 
   /** Reexposto para uso avançado (telas de dev, debug). */
   repositorio: RepositorioPelada;

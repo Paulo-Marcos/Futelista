@@ -129,10 +129,7 @@ describe("SalvarComoPelada — salvar", () => {
       },
     });
 
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Ex.: Fute CEF"),
-      "Outro",
-    );
+    fireEvent.changeText(screen.getByPlaceholderText("Ex.: Fute CEF"), "Outro");
     fireEvent.press(screen.getByRole("button", { name: "Salvar" }));
 
     expect(await screen.findByText("Nome em uso")).toBeTruthy();

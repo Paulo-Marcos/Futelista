@@ -1,5 +1,5 @@
-import { Player } from '../Player';
-import { Team } from '../Team';
+import { Player } from "../Player";
+import { Team } from "../Team";
 
 /**
  * Contrato (Strategy + Template Method) para montagem de times a partir da
@@ -35,7 +35,7 @@ export abstract class CreateTeam {
   protected validar(players: Player[], playersPerTeam: number): void {
     if (players.length < 2 * playersPerTeam) {
       throw Error(
-        'Quantidade de jogadores insuficiente para determinar os times.',
+        "Quantidade de jogadores insuficiente para determinar os times.",
       );
     }
   }

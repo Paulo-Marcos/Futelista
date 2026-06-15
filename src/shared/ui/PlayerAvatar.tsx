@@ -13,7 +13,7 @@ import { usePalette } from "@/src/shared/hooks/usePalette";
  * `ring` envolve com anel duplo (usado na celebração de gol).
  */
 
-const FUN_PALETTE: Array<[string, string]> = [
+const FUN_PALETTE: [string, string][] = [
   ["#FF6B6B", "#FFD93D"],
   ["#4ECDC4", "#1A535C"],
   ["#FF6F61", "#6B5B95"],
@@ -155,13 +155,7 @@ function FunBackground({
         </LinearGradient>
       </Defs>
       <Circle cx="50" cy="50" r="50" fill={`url(#${id})`} />
-      <Circle
-        cx={blobX}
-        cy={blobY}
-        r="32"
-        fill="#FFFFFF"
-        opacity={0.18}
-      />
+      <Circle cx={blobX} cy={blobY} r="32" fill="#FFFFFF" opacity={0.18} />
     </Svg>
   );
 }

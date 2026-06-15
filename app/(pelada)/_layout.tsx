@@ -29,8 +29,7 @@ export default function PeladaLayout() {
   // Antes a aba ficava sempre visível e tocá-la sem matchup caía num
   // EmptyState — barulho visual sem ação possível.
   const matchupOuPartidaPronta =
-    useGameSlice((g) => g.playing !== undefined || g.next.length >= 2) ??
-    false;
+    useGameSlice((g) => g.playing !== undefined || g.next.length >= 2) ?? false;
 
   return (
     <Tabs
@@ -100,8 +99,7 @@ export default function PeladaLayout() {
         name="partida"
         options={{
           title: "Partida",
-          href:
-            temExecucao && matchupOuPartidaPronta ? "/partida" : null,
+          href: temExecucao && matchupOuPartidaPronta ? "/partida" : null,
           tabBarIcon: ({ color, size }) => {
             const s = size ?? 24;
             // Container com tamanho explícito (= tamanho do ícone) e

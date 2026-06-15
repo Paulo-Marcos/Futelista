@@ -1,5 +1,5 @@
-import { Player } from '../Player';
-import { CreateTeam } from './CreateTeam.abstract';
+import { Player } from "../Player";
+import { CreateTeam } from "./CreateTeam.abstract";
 
 /**
  * Estratégia BY_ORDER_MIXING_TOP_TWO_TEAMS — embaralha apenas os primeiros
@@ -10,10 +10,7 @@ import { CreateTeam } from './CreateTeam.abstract';
 export class CreateTeamMixingTopTwoTeams extends CreateTeam {
   shuffledList?: Player[];
 
-  protected prepararLista(
-    players: Player[],
-    playersPerTeam: number,
-  ): Player[] {
+  protected prepararLista(players: Player[], playersPerTeam: number): Player[] {
     const limite = playersPerTeam * 2;
     const topo = this.shuffle(players.slice(0, limite));
     const restante = players.slice(limite);

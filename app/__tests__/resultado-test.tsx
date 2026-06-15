@@ -42,7 +42,10 @@ function buildResultadoManager(opts: {
   const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
   const total = opts.totalJogadores ?? 12;
   m.addPlayers(
-    Array.from({ length: total }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
+    Array.from(
+      { length: total },
+      (_, i) => `J${String(i + 1).padStart(2, "0")}`,
+    ),
   );
   m.createTeams();
   m.setPlayingGame();
@@ -81,7 +84,10 @@ describe("Resultado — guards", () => {
   });
 
   it("'Voltar à partida' chama router.back", () => {
-    const m = buildResultadoManager({ result: ResultMatch.VICTORY, vencedor: "A" });
+    const m = buildResultadoManager({
+      result: ResultMatch.VICTORY,
+      vencedor: "A",
+    });
     renderResultado(m);
 
     fireEvent.press(screen.getByRole("button", { name: "Voltar à partida" }));
@@ -101,7 +107,9 @@ describe("Resultado — vitória", () => {
     );
 
     expect(screen.getByText("Vitória")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Próxima partida" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Próxima partida" }),
+    ).toBeTruthy();
   });
 
   it("'Próxima partida' chama setNextMatch e navega para /times", () => {
@@ -204,9 +212,7 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
       .mockImplementation(() => {});
     renderResultado(m);
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Escolher Time 1" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Escolher Time 1" }));
     fireEvent.press(screen.getByRole("button", { name: "Próxima partida" }));
 
     expect(setNextSpy).toHaveBeenCalledTimes(1);
@@ -221,9 +227,7 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
       .mockImplementation(() => {});
     renderResultado(m);
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Escolher Time 2" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Escolher Time 2" }));
     fireEvent.press(screen.getByRole("button", { name: "Próxima partida" }));
 
     expect(setNextSpy.mock.calls[0][0]).toBe(m.playing!.teamB);
@@ -253,7 +257,10 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
 
 describe("Resultado — erro do domínio", () => {
   it("erro em setNextMatch aparece como texto", () => {
-    const m = buildResultadoManager({ result: ResultMatch.VICTORY, vencedor: "A" });
+    const m = buildResultadoManager({
+      result: ResultMatch.VICTORY,
+      vencedor: "A",
+    });
     jest.spyOn(m, "setNextMatch").mockImplementation(() => {
       throw new Error("Cenário pós-jogo inválido");
     });

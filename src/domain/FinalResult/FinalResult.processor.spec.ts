@@ -1,11 +1,11 @@
-import { GestorJogo } from '../GestorJogo';
-import { Rules } from '../Rules';
+import { GestorJogo } from "../GestorJogo";
+import { Rules } from "../Rules";
 import {
   FinalResultHandler,
   HandleInput,
   BaseFinalResultHandler,
-} from './FinalResult.handler';
-import { FinalResultProcessor } from './FinalResult.processor';
+} from "./FinalResult.handler";
+import { FinalResultProcessor } from "./FinalResult.processor";
 
 class MockHandler extends BaseFinalResultHandler implements FinalResultHandler {
   override handle(input: HandleInput): void {
@@ -13,29 +13,29 @@ class MockHandler extends BaseFinalResultHandler implements FinalResultHandler {
   }
 }
 
-describe('FinalResultProcessor', () => {
+describe("FinalResultProcessor", () => {
   let finalResultProcessor: FinalResultProcessor;
   let input: HandleInput;
 
   beforeEach(() => {
     finalResultProcessor = new FinalResultProcessor();
     input = {
-      jogo: new GestorJogo('teste', new Rules()),
+      jogo: new GestorJogo("teste", new Rules()),
     };
   });
 
-  it('deve processar a solicitação usando a cadeia de manipuladores configurada', () => {
+  it("deve processar a solicitação usando a cadeia de manipuladores configurada", () => {
     const mockHandler1 = new MockHandler();
     const mockHandler2 = new MockHandler();
     const mockHandler3 = new MockHandler();
     const mockHandler4 = new MockHandler();
 
-    jest.spyOn(mockHandler1, 'handle');
-    jest.spyOn(mockHandler2, 'handle');
-    jest.spyOn(mockHandler3, 'handle');
-    jest.spyOn(mockHandler4, 'handle');
+    jest.spyOn(mockHandler1, "handle");
+    jest.spyOn(mockHandler2, "handle");
+    jest.spyOn(mockHandler3, "handle");
+    jest.spyOn(mockHandler4, "handle");
 
-    finalResultProcessor['handlerChain'] = mockHandler1;
+    finalResultProcessor["handlerChain"] = mockHandler1;
     mockHandler1
       .setNextHandler(mockHandler2)
       .setNextHandler(mockHandler3)

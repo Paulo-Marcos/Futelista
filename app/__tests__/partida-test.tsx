@@ -33,7 +33,10 @@ function buildPartidaManager(opts?: {
   const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   const total = opts?.semProximo ? 8 : 12;
   m.addPlayers(
-    Array.from({ length: total }, (_, i) => `J${String(i + 1).padStart(2, "0")}`),
+    Array.from(
+      { length: total },
+      (_, i) => `J${String(i + 1).padStart(2, "0")}`,
+    ),
   );
   m.createTeams();
   m.setPlayingGame();
@@ -93,9 +96,7 @@ describe("Partida — CTA dinâmica", () => {
 
     // No design, "INICIAR" é o disco central — não há CTA "Iniciar" na barra
     // de controles inferior. O label do disco identifica o botão.
-    fireEvent.press(
-      screen.getByLabelText("Apitar início (centro do campo)"),
-    );
+    fireEvent.press(screen.getByLabelText("Apitar início (centro do campo)"));
 
     expect(startSpy).toHaveBeenCalled();
   });
@@ -112,9 +113,7 @@ describe("Partida — CTA dinâmica", () => {
 
   it("status PAUSED: CTA 'Continuar' e dispara gestor.continue", () => {
     const m = buildPartidaManager({ status: TimerStatus.PAUSED });
-    const continueSpy = jest
-      .spyOn(m, "continue")
-      .mockImplementation(() => {});
+    const continueSpy = jest.spyOn(m, "continue").mockImplementation(() => {});
     renderPartida(m);
 
     fireEvent.press(screen.getByRole("button", { name: "Continuar" }));
@@ -248,9 +247,7 @@ describe("Partida — ações por jogador", () => {
     fireEvent.press(screen.getByLabelText("Selecionar J02 para sair"));
     fireEvent.press(screen.getByLabelText("Trocar J10 para entrar"));
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Aplicar 2 trocas" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Aplicar 2 trocas" }));
 
     expect(switchSpy).toHaveBeenCalledTimes(2);
     expect(switchSpy.mock.calls[0][0].name).toBe("J09");

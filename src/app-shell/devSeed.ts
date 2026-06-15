@@ -184,11 +184,10 @@ async function cenarioAvulsaEmAndamento(
 }
 
 function execucaoBase(pelada: Pelada, createdAt: number): GestorJogo {
-  return new GestorJogo(
-    pelada.nome,
-    new Rules(pelada.regras.toData()),
-    { peladaId: pelada.id, createdAt },
-  );
+  return new GestorJogo(pelada.nome, new Rules(pelada.regras.toData()), {
+    peladaId: pelada.id,
+    createdAt,
+  });
 }
 
 async function definirAtiva(id: string): Promise<void> {

@@ -24,7 +24,8 @@ export function PeladaHeader() {
 
   const nome = useGameSlice((g) => g.name) ?? "Pelada";
   const playersPerTeam =
-    useGameSlice((g) => g.rules.playersPerTeam) ?? RULES_DEFAULTS.playersPerTeam;
+    useGameSlice((g) => g.rules.playersPerTeam) ??
+    RULES_DEFAULTS.playersPerTeam;
   const timeMatch =
     useGameSlice((g) => g.rules.timeMatch) ?? RULES_DEFAULTS.timeMatch;
   const numberTimes =

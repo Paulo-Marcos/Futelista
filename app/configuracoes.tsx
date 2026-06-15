@@ -21,7 +21,10 @@ import {
   SegmentedControl,
   SegmentedOption,
 } from "@/src/shared/ui/SegmentedControl";
-import { useTheme, type ThemeModePreference } from "@/src/shared/theme/themeContext";
+import {
+  useTheme,
+  type ThemeModePreference,
+} from "@/src/shared/theme/themeContext";
 import { type ThemeId } from "@/src/shared/theme/themes";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
 

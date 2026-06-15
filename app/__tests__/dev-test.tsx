@@ -5,6 +5,8 @@ import {
   waitFor,
 } from "@/src/test/renderWithProviders";
 
+import DevScreen from "../dev";
+
 // jest.mock é hoisted — usamos jest.fn() dentro da factory e acessamos via require.
 jest.mock("@/src/app-shell/devSeed", () => ({
   CENARIOS: [
@@ -18,8 +20,6 @@ jest.mock("@/src/app-shell/devSeed", () => ({
   devLimparStorage: jest.fn(),
   devAplicarCenario: jest.fn(),
 }));
-
-import DevScreen from "../dev";
 
 const devSeed = require("@/src/app-shell/devSeed");
 const devLimparStorage = devSeed.devLimparStorage as jest.Mock;
@@ -131,7 +131,9 @@ describe("Dev — aplicar cenário", () => {
 // ===========================================================================
 
 describe("Dev — exportar backup (F-14)", () => {
-  const { Share } = require("react-native") as { Share: typeof import("react-native").Share };
+  const { Share } = require("react-native") as {
+    Share: typeof import("react-native").Share;
+  };
 
   it("toque em 'Exportar backup' chama exportarBackup e Share.share com o JSON", async () => {
     const exportarBackup = jest

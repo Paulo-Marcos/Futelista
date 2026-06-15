@@ -81,9 +81,7 @@ describe("ConfiguracoesScreen — Backup", () => {
       soccer: { exportarBackup },
     });
 
-    fireEvent.press(
-      screen.getByRole("button", { name: "Exportar backup" }),
-    );
+    fireEvent.press(screen.getByRole("button", { name: "Exportar backup" }));
 
     await waitFor(() => expect(exportarBackup).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(shareSpy).toHaveBeenCalledTimes(1));

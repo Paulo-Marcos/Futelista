@@ -1,4 +1,4 @@
-import { ScreenTime } from './ScreenTime';
+import { ScreenTime } from "./ScreenTime";
 
 /**
  * Timer da partida.
@@ -25,11 +25,14 @@ export class Timer {
   }
 
   getTime(): ScreenTime {
-    return new ScreenTime(this.currentNumberTime, this.timeMatch - this.restTime);
+    return new ScreenTime(
+      this.currentNumberTime,
+      this.timeMatch - this.restTime,
+    );
   }
 
   start(): void {
-    if (this.status === TimerStatus.ENDED) throw Error('Não há mais etapas');
+    if (this.status === TimerStatus.ENDED) throw Error("Não há mais etapas");
     if (this.status === TimerStatus.PAUSED) return;
     this.status = TimerStatus.STARTED;
     this.timeOutId = setInterval(() => {

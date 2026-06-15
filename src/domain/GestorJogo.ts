@@ -156,9 +156,7 @@ export class GestorJogo {
    * Usar sempre que uma operação puder ter mexido na composição dos times.
    */
   private recomputePlayersWithoutTeam(): void {
-    this.playersWithoutTeam = this.players.filter(
-      (p) => !p.currentTeam,
-    ).length;
+    this.playersWithoutTeam = this.players.filter((p) => !p.currentTeam).length;
   }
 
   setPlayingGame(): void {
@@ -229,9 +227,7 @@ export class GestorJogo {
     // sai (playerOut) em campo. Sem o guard, um `currentTeam` indefinido
     // (jogador parado/removido) estouraria em `.removePlayer`/`.switchPlayer`.
     if (!teamToOut || !teamToIn)
-      throw Error(
-        "Só dá pra trocar jogadores que estão em um time.",
-      );
+      throw Error("Só dá pra trocar jogadores que estão em um time.");
     teamToOut.removePlayer(playerIn);
     // Usa Team.switchPlayer para que a substituição banco→campo fique
     // registrada em teamToIn.switches (estatística histórica). Esse caminho
@@ -369,9 +365,7 @@ export class GestorJogo {
         "Não é possível reordenar jogadores com partida em andamento.",
       );
     if (this.next.length > 0)
-      throw Error(
-        "Resete os times antes de reordenar jogadores.",
-      );
+      throw Error("Resete os times antes de reordenar jogadores.");
     if (novaOrdem.length !== this.players.length)
       throw Error(
         `Reordenação precisa conter exatamente ${this.players.length} jogadores.`,
@@ -398,7 +392,9 @@ export class GestorJogo {
     // Checa partida ANTES de indexOf: um time em partida saiu de `next` ao
     // entrar em `playing`, então `indexOf` seria -1 e a mensagem ficaria errada.
     if (this.playing?.teams.has(team))
-      throw Error("Não é possível mover time que está em partida em andamento.");
+      throw Error(
+        "Não é possível mover time que está em partida em andamento.",
+      );
     const index = this.next.indexOf(team);
     if (index === -1) throw Error("Time não está na fila.");
     if (index === this.next.length - 1) return;
@@ -440,9 +436,7 @@ export class GestorJogo {
    */
   resetTimes(): void {
     if (this.playing)
-      throw Error(
-        "Não é possível resetar times com partida em andamento.",
-      );
+      throw Error("Não é possível resetar times com partida em andamento.");
     this.next = [];
     this.advantageToNext = undefined;
     this.players.forEach((p) => {
