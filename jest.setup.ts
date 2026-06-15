@@ -8,6 +8,11 @@
 
 import "react-native-gesture-handler/jestSetup";
 
+// Telas com carga assíncrona podem demorar mais sob contenção de CPU no runner
+// do CI (várias suítes competindo por poucos núcleos). O timeout padrão de 5s
+// gera falso-negativo nesses casos. Local roda rápido; isto só dá folga.
+jest.setTimeout(15000);
+
 // ---------------------------------------------------------------------------
 // expo-router
 // ---------------------------------------------------------------------------

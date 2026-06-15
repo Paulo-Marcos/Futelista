@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "test:ci": "jest --ci",
+    "test:ci": "jest --ci --maxWorkers=2",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "lint:ci": "eslint . --ext .js,.jsx,.ts,.tsx",
