@@ -10,31 +10,32 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não lançado]
 
-### Adicionado
+### Planejado (rastreado em `COMMITS_PLAN.md`)
 
-- Versão **web** publicada em <https://futelista.expo.app> via EAS Hosting (deploy com `npm run deploy:web`). Scripts `export:web`/`deploy:web` no `package.json` e seção "Web (EAS Hosting)" em `docs/desenvolvedor/build-release.md`.
-- Documentação humana inicial em `docs/`: vitrine no `README.md`, índice, guias de usuário (primeiros passos, fluxo, regras) e de desenvolvedor (instalação, arquitetura, domínio, UI, testes, build/release).
-- Política de privacidade em `PRIVACY.md` (pré-requisito para publicação nas lojas).
-- Primeiros ADRs em `docs/adr/`: roteador (Expo Router file-based) e reatividade (External Store + `useGameSlice`).
-- `LICENSE` MIT — projeto agora é oficialmente código aberto.
-- `CHANGELOG.md` (este arquivo).
-
-### A fazer (rastreado em `COMMITS_PLAN.md`)
-
-- Renomear telas/rotas para PT (`Geriamento`, `index2`, `_layou_t.tsx`, `in_dex.tsx`).
-- Remover `app-example/` (resíduo do template Expo).
+- Passada de formatação (`prettier --write`) e ativação do passo de lint no CI.
 - Substituir `setState([])` por `useSyncExternalStore` na cola React.
-- Corrigir imports case-inconsistentes (`./player` → `./Player`).
-- Limpar 175 linhas comentadas em `app/(tabs)/_layout.tsx`.
-- Remover `console.log` de `providers/soccerProvider.tsx`.
+- Publicação nas lojas (Google Play / App Store).
 
-## [1.0.0] — inicial
+## [1.0.0] — 2026-06-14
+
+Primeira versão oficial: domínio completo e testado, UI navegável, persistência local e o app disponível na **web** e como **APK Android**.
 
 ### Adicionado
 
-- Camada de domínio completa em `src/domain/`: `Player`, `Team`, `Match`, `Goal`, `Switch`, `ScreenTime`, `Timer`, `Rules`, `GameManager`.
-- Factory + Strategy em `TeamBuilder/` (3 modos de escolha de times).
-- Chain of Responsibility em `UpdateDraw/` (4 handlers pós-partida).
-- ~20 specs Jest cobrindo o domínio.
-- UI provisória em `app/(tabs)/` com Expo Router + tabs.
-- Governança para agentes de IA: `CLAUDE.md`, `AGENTS.md`, `AI_NAVIGATION.md`, `.claude/skills/`, `.claude/rules/`, `features/registry.yaml` (lock por arquivo).
+- **Domínio** puro e completo em `src/domain/` (`Player`, `Team`, `Match`, `Goal`, `Switch`, `ScreenTime`, `Timer`, `Rules`, `GestorJogo`), coberto por **540 testes** Jest.
+- **Padrões**: Factory + Strategy (escolha de times) e Chain of Responsibility (pós-partida).
+- **UI** navegável em Expo Router: jogadores, times, partida, placar, histórico, configurações e onboarding.
+- **Persistência local** via AsyncStorage com serialização versionada (payload v4) e cura de saves antigos.
+- **Identidade visual**: ícone oficial em todos os slots de produção, splash e wordmark.
+- **Disponibilização**:
+  - Web pública via EAS Hosting — <https://futelista.expo.app> (`npm run deploy:web`).
+  - APK Android (perfil `preview` do EAS); id do app `com.paulomarcos.futelista`.
+- **CI** (GitHub Actions): type-check (`tsc`) + testes (`jest`) a cada push/PR.
+- **Documentação** humana em `docs/` (guias de usuário e de desenvolvedor, ADRs) e `PRIVACY.md`.
+- **Governança para agentes de IA**: `CLAUDE.md`, `AGENTS.md`, `AI_NAVIGATION.md`, skills/rules e lock por arquivo (`features/registry.yaml`).
+- `LICENSE` MIT — projeto oficialmente código aberto.
+
+### Corrigido
+
+- Guards contra fila vazia e referências nulas no domínio.
+- Arquivamento de partida encerrada no histórico (`setNextMatch`).
