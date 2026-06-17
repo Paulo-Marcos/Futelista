@@ -211,6 +211,70 @@ describe("Times — durante partida em andamento", () => {
 });
 
 // ===========================================================================
+// PARTIDA COM 2 TIMES (FILA VAZIA) — regressão do "aba Times zera"
+// ===========================================================================
+
+describe("Times — partida com 2 times (fila vazia)", () => {
+  it("durante a partida NÃO oferece 'Montar times' destrutivo", () => {
+    // 8 jogadores, playersPerTeam=4 → exatamente 2 times; ao iniciar, ambos
+    // entram em campo e a fila fica vazia. Antes, isso caía no EmptyState
+    // "Montar times" (que recriaria/duplicaria os times em jogo).
+    renderTimes(buildManager({ jogadores: 8, comPartida: true }));
+
+    expect(screen.queryByText("Montar times")).toBeNull();
+    expect(screen.queryByText("Times ainda não foram montados")).toBeNull();
+  });
+
+  it("mostra os times em campo (read-only) e 'Voltar à partida'", () => {
+    renderTimes(buildManager({ jogadores: 8, comPartida: true }));
+
+    expect(screen.getByText("Partida em andamento")).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: "Voltar para a partida em andamento",
+      }),
+    ).toBeTruthy();
+    // Read-only: nenhum menu de ações de time durante a partida.
+    expect(
+      screen.queryByRole("button", { name: "Ações do Time 1" }),
+    ).toBeNull();
+  });
+
+  it("'Alocar agora' chama relocatePlayersWithoutTeam, nunca createTeams", () => {
+    const m = buildManager({ jogadores: 8, comPartida: true, semTime: 2 });
+    const relocate = jest.spyOn(m, "relocatePlayersWithoutTeam");
+    const create = jest.spyOn(m, "createTeams");
+    renderTimes(m);
+
+    expect(screen.getByText("2 jogadores sem time")).toBeTruthy();
+    fireEvent.press(
+      screen.getByRole("button", { name: "Alocar jogadores sem time" }),
+    );
+
+    expect(relocate).toHaveBeenCalledTimes(1);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("após alocar, os recém-chegados formam o próximo time sem tocar na partida", () => {
+    const m = buildManager({ jogadores: 8, comPartida: true, semTime: 2 });
+    const emCampoA = m.playing!.teamA;
+    const emCampoB = m.playing!.teamB;
+    renderTimes(m);
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Alocar jogadores sem time" }),
+    );
+
+    // O domínio formou um time na fila com os 2 recém-chegados.
+    expect(m.next).toHaveLength(1);
+    expect(m.next[0].players).toHaveLength(2);
+    // Partida segue intacta.
+    expect(m.playing!.teamA).toBe(emCampoA);
+    expect(m.playing!.teamB).toBe(emCampoB);
+  });
+});
+
+// ===========================================================================
 // SORTEAR NOVAMENTE (FAB)
 // ===========================================================================
 

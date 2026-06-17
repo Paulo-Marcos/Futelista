@@ -1178,4 +1178,168 @@ describe("Teste da classe Game", () => {
       );
     });
   });
+
+  // Cenário "pelada dinâmica": a galera chega durante o rolê. Adicionar e
+  // alocar jogadores com uma partida em andamento NÃO pode tocar nos times
+  // em campo nem zerar a fila — só pode formar/crescer os próximos times.
+  // Regressão do bug "aba Times zera ao adicionar jogador durante a partida".
+  describe("Adicionar e alocar jogadores durante partida em andamento", () => {
+    function comDoisTimesEmCampo(): GestorJogo {
+      // playersPerTeam=4, 8 jogadores → exatamente 2 times. Ao iniciar a
+      // partida ambos entram em campo e a fila (`next`) fica vazia.
+      const jogo = new GestorJogo(
+        "Dinâmica",
+        new Rules({ playersPerTeam: 4, choosingTeams: ChoosingTeams.BY_ORDER }),
+      );
+      jogo.setPlayers(["A", "B", "C", "D", "E", "F", "G", "H"]);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      return jogo;
+    }
+
+    function jogadorEmDoisTimes(jogo: GestorJogo): string[] {
+      const times = [...jogo.next];
+      if (jogo.playing) times.push(jogo.playing.teamA, jogo.playing.teamB);
+      const cont = new Map<string, number>();
+      times.forEach((t) =>
+        t.players.forEach((p) => cont.set(p.id, (cont.get(p.id) ?? 0) + 1)),
+      );
+      return [...cont.entries()].filter(([, n]) => n > 1).map(([id]) => id);
+    }
+
+    it("addPlayer com partida em andamento não toca em playing nem na fila", () => {
+      // 12 jogadores → 3 times; ao iniciar, 2 entram em campo e o 3º fica na fila.
+      const jogo = new GestorJogo(
+        "Dinâmica",
+        new Rules({ playersPerTeam: 4, choosingTeams: ChoosingTeams.BY_ORDER }),
+      );
+      jogo.setPlayers([
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+      ]);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      const emCampoA = jogo.playing!.teamA;
+      const emCampoB = jogo.playing!.teamB;
+      const rosterA = [...emCampoA.players];
+      const rosterB = [...emCampoB.players];
+      const filaAntes = [...jogo.next];
+
+      jogo.addPlayer("Tardão");
+
+      expect(jogo.playing!.teamA).toBe(emCampoA);
+      expect(jogo.playing!.teamB).toBe(emCampoB);
+      expect(emCampoA.players).toEqual(rosterA);
+      expect(emCampoB.players).toEqual(rosterB);
+      expect(jogo.next).toEqual(filaAntes);
+      expect(jogo.playersWithoutTeam).toBe(1);
+    });
+
+    it("alocar com a fila vazia cria um novo time sem encostar nos que jogam", () => {
+      const jogo = comDoisTimesEmCampo();
+      const emCampoA = jogo.playing!.teamA;
+      const emCampoB = jogo.playing!.teamB;
+      const rosterA = [...emCampoA.players];
+      const rosterB = [...emCampoB.players];
+      expect(jogo.next).toHaveLength(0);
+
+      jogo.addPlayers(["Tardão1", "Tardão2"]);
+      jogo.relocatePlayersWithoutTeam();
+
+      // Um novo time na fila com os recém-chegados — partida intacta.
+      expect(jogo.next).toHaveLength(1);
+      expect(jogo.next[0].players.map((p) => p.name)).toEqual([
+        "Tardão1",
+        "Tardão2",
+      ]);
+      expect(jogo.playing!.teamA).toBe(emCampoA);
+      expect(jogo.playing!.teamB).toBe(emCampoB);
+      expect(emCampoA.players).toEqual(rosterA);
+      expect(emCampoB.players).toEqual(rosterB);
+    });
+
+    it("alocar zera o contador de jogadores sem time", () => {
+      const jogo = comDoisTimesEmCampo();
+      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3"]);
+      expect(jogo.playersWithoutTeam).toBe(3);
+
+      jogo.relocatePlayersWithoutTeam();
+
+      expect(jogo.playersWithoutTeam).toBe(0);
+      expect(
+        jogo.next[0].players.every((p) => p.currentTeam === jogo.next[0]),
+      ).toBe(true);
+    });
+
+    it("alocar com fila vazia não dispara TypeError (getLastTeam undefined)", () => {
+      const jogo = comDoisTimesEmCampo();
+      jogo.addPlayer("Tardão");
+      expect(() => jogo.relocatePlayersWithoutTeam()).not.toThrow();
+    });
+
+    it("alocar não duplica jogadores entre fila e partida", () => {
+      const jogo = comDoisTimesEmCampo();
+      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3", "Tardão4", "Tardão5"]);
+
+      jogo.relocatePlayersWithoutTeam();
+
+      expect(jogadorEmDoisTimes(jogo)).toEqual([]);
+    });
+
+    it("repararIntegridadeDosTimes é no-op após alocar durante a partida", () => {
+      const jogo = comDoisTimesEmCampo();
+      jogo.addPlayers(["Tardão1", "Tardão2"]);
+      jogo.relocatePlayersWithoutTeam();
+      const antes = [...jogo.next].map((t) => t.players.map((p) => p.id));
+
+      jogo.repararIntegridadeDosTimes();
+
+      const depois = [...jogo.next].map((t) => t.players.map((p) => p.id));
+      expect(depois).toEqual(antes);
+      expect(jogadorEmDoisTimes(jogo)).toEqual([]);
+      expect(jogo.playing).toBeDefined();
+    });
+
+    it("alocar completa o último time incompleto da fila antes de abrir outro", () => {
+      // playersPerTeam=4, 10 jogadores → times de 4,4,2. Ao iniciar, os 2
+      // primeiros entram em campo e a fila fica com o 3º time incompleto (2/4).
+      const jogo = new GestorJogo(
+        "Dinâmica",
+        new Rules({ playersPerTeam: 4, choosingTeams: ChoosingTeams.BY_ORDER }),
+      );
+      jogo.setPlayers(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]);
+      jogo.createTeams();
+      jogo.setPlayingGame();
+      const incompleto = jogo.next[0];
+      expect(incompleto.players).toHaveLength(2);
+
+      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3"]);
+      jogo.relocatePlayersWithoutTeam();
+
+      // Os 2 primeiros completam o time incompleto (→ 4); o 3º abre novo time.
+      expect(incompleto.players).toHaveLength(4);
+      expect(jogo.next).toHaveLength(2);
+      expect(jogo.next[1].players).toHaveLength(1);
+    });
+
+    it("addToLastTeam abre um novo time quando a fila está vazia", () => {
+      const jogo = comDoisTimesEmCampo();
+      const recemChegado = jogo.addPlayer("Tardão");
+
+      jogo.addToLastTeam(recemChegado);
+
+      expect(jogo.next).toHaveLength(1);
+      expect(jogo.next[0].players[0]).toBe(recemChegado);
+    });
+  });
 });

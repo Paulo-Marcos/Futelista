@@ -56,6 +56,11 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const playersPerTeam = useGameSliceRequired((g) => g.rules.playersPerTeam);
   const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
   const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
+  // Times atualmente em campo — usados na visão read-only quando a fila ficou
+  // vazia (os 2 únicos times entraram em campo). Refs estáveis enquanto a
+  // partida não troca.
+  const partidaTeamA = useGameSliceRequired((g) => g.playing?.teamA);
+  const partidaTeamB = useGameSliceRequired((g) => g.playing?.teamB);
 
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<string | null>(null);
@@ -314,7 +319,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         onCancelar={() => setJogadorSelecionado(null)}
       />
 
-      {next.length === 0 ? (
+      {next.length === 0 && !temPartida ? (
         <EmptyState
           icon="shield-outline"
           title="Times ainda não foram montados"
@@ -326,6 +331,21 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
           actionLabel="Montar times"
           onAction={montar}
           actionDisabled={!podeMontar}
+        />
+      ) : next.length === 0 && temPartida ? (
+        // Partida em andamento com a fila vazia (os 2 únicos times entraram em
+        // campo). NÃO oferecemos "Montar times" — recriar os times duplicaria
+        // quem está jogando. Mostramos os times em campo (read-only) e, se a
+        // galera chegou no meio do rolê, o banner pra formar o próximo time.
+        <PartidaSemFila
+          teamA={partidaTeamA}
+          teamB={partidaTeamB}
+          playersWithoutTeam={playersWithoutTeam}
+          podeCriarIncompleto={ultimoTimeCheio}
+          onAlocar={alocarSemTime}
+          onVoltar={() => router.push("/partida")}
+          insets={insets}
+          palette={palette}
         />
       ) : (
         <FlatList
@@ -603,6 +623,67 @@ function PrimaryCTA({
         </Text>
       </Pressable>
     </View>
+  );
+}
+
+// Visão da aba Times durante uma partida cuja fila ficou vazia (os dois únicos
+// times entraram em campo). Read-only: mostra quem está jogando, deixa voltar
+// à partida e — quando chega gente nova — formar o próximo time, tudo sem
+// nunca mexer nos times em campo. Substitui o EmptyState "Montar times", que
+// seria destrutivo aqui (recriar os times duplicaria quem está jogando).
+function PartidaSemFila({
+  teamA,
+  teamB,
+  playersWithoutTeam,
+  podeCriarIncompleto,
+  onAlocar,
+  onVoltar,
+  insets,
+  palette,
+}: {
+  teamA?: Team;
+  teamB?: Team;
+  playersWithoutTeam: number;
+  podeCriarIncompleto: boolean;
+  onAlocar: () => void;
+  onVoltar: () => void;
+  insets: ReturnType<typeof useSafeAreaInsets>;
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <ScrollView
+      contentContainerStyle={[
+        styles.scroll,
+        { paddingBottom: insets.bottom + Spacing.xxl },
+      ]}
+    >
+      {playersWithoutTeam > 0 ? (
+        <BannerSemTime
+          quantidade={playersWithoutTeam}
+          podeCriarIncompleto={podeCriarIncompleto}
+          onAlocar={onAlocar}
+        />
+      ) : null}
+
+      <Text
+        style={[styles.sectionTitle, { color: palette.onSurfaceVariant }]}
+        accessibilityRole="header"
+      >
+        Partida em andamento
+      </Text>
+      <View style={styles.nextRow}>
+        {teamA ? <TeamMini team={teamA} idx={0} tone="A" /> : null}
+        {teamB ? <TeamMini team={teamB} idx={1} tone="B" /> : null}
+      </View>
+
+      <PrimaryCTA
+        label="Voltar à partida"
+        icon="play-circle-outline"
+        onPress={onVoltar}
+        palette={palette}
+        accessibilityLabel="Voltar para a partida em andamento"
+      />
+    </ScrollView>
   );
 }
 

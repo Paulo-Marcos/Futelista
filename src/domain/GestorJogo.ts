@@ -181,7 +181,12 @@ export class GestorJogo {
     return this.next[nextNumber - 1];
   }
 
-  getLastTeam(): Team {
+  /**
+   * Último time da fila — `undefined` quando a fila está vazia (caso típico
+   * durante uma partida, com os dois únicos times em campo). O tipo reflete
+   * essa realidade pra obrigar quem chama a tratar a ausência.
+   */
+  getLastTeam(): Team | undefined {
     return this.next[this.next.length - 1];
   }
 
@@ -194,10 +199,24 @@ export class GestorJogo {
 
   addToLastTeam(player: Player): void {
     const lastTeam = this.getLastTeam();
-    lastTeam.fullTeam ? this.addToNewTeam(player) : lastTeam.addPlayer(player);
+    // Fila vazia ou último time cheio → abre um novo time no fim da fila.
+    // O guard de `!lastTeam` é o que permite alocar jogadores recém-chegados
+    // com uma partida em andamento (quando os dois times estão em campo e
+    // `next` ficou vazio): sem ele, `lastTeam.fullTeam` estourava com
+    // TypeError. Nunca toca em `playing` — só cresce a fila.
+    if (!lastTeam || lastTeam.fullTeam) {
+      this.addToNewTeam(player);
+    } else {
+      lastTeam.addPlayer(player);
+    }
     this.notify();
   }
 
+  /**
+   * Aloca todos os jogadores "sem time" na fila — completando o último time
+   * incompleto e/ou criando novos. Funciona com a fila vazia E com partida
+   * em andamento (forma os próximos times sem encostar nos que jogam).
+   */
   relocatePlayersWithoutTeam(): void {
     if (this.playersWithoutTeam === 0) return;
     this.players.forEach((player) => {
@@ -205,6 +224,9 @@ export class GestorJogo {
         this.addToLastTeam(player);
       }
     });
+    // Os realocados agora têm `currentTeam`; ressincroniza o contador com a
+    // fonte de verdade pra o banner "sem time" sumir após a alocação.
+    this.recomputePlayersWithoutTeam();
     this.notify();
   }
 
