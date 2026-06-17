@@ -12,15 +12,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, {
-  Circle,
-  Defs,
-  Line,
-  LinearGradient,
-  RadialGradient,
-  Rect,
-  Stop,
-} from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Circle, Line, Rect } from "react-native-svg";
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
@@ -336,25 +329,14 @@ function AvulsaCard({
           webGlow,
         ]}
       >
-        <Svg
+        <LinearGradient
+          colors={[palette.primary, palette.primaryDim, palette.primaryDim]}
+          locations={[0, 0.65, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFillObject}
-          width="100%"
-          height="100%"
-          aria-hidden
-        >
-          <Defs>
-            <LinearGradient id="avulsaBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={palette.primary} stopOpacity="1" />
-              <Stop
-                offset="0.65"
-                stopColor={palette.primaryDim}
-                stopOpacity="1"
-              />
-              <Stop offset="1" stopColor={palette.primaryDim} stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#avulsaBg)" />
-        </Svg>
+          pointerEvents="none"
+        />
         <AvulsaPitch />
         <View style={styles.avulsaContent}>
           <View
@@ -397,38 +379,21 @@ function AvulsaCard({
 /**
  * Glow avermelhado por baixo do AvulsaCard.
  *
- * RN não suporta `filter:blur`, então simulamos o blur empilhando dois
- * RadialGradients (núcleo + halo) — mesmo padrão do `Splash.tsx`.
- * O `preserveAspectRatio="none"` estica o gradiente circular pra acompanhar
- * o formato horizontal do card. Opacidades fortalecidas para o glow render
- * com clareza em iOS/Android (no web, complemento com boxShadow CSS).
+ * RN não suporta `filter:blur`. Antes simulávamos com RadialGradients SVG,
+ * mas no Android o gradiente radial saía como retângulo sólido. Trocado por
+ * `expo-linear-gradient` (nativo, confiável no Android): um fade vertical
+ * transparente→cor→transparente cria o vazamento de luz ao redor do card.
  */
 function AvulsaGlow({ color }: { color: string }) {
   return (
-    <View style={styles.avulsaGlow} pointerEvents="none">
-      <Svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
-        <Defs>
-          <RadialGradient id="avulsaGlowCore" cx="50" cy="55" r="45">
-            <Stop offset="0" stopColor={color} stopOpacity={0.55} />
-            <Stop offset="0.3" stopColor={color} stopOpacity={0.32} />
-            <Stop offset="0.6" stopColor={color} stopOpacity={0.12} />
-            <Stop offset="1" stopColor={color} stopOpacity={0} />
-          </RadialGradient>
-          <RadialGradient id="avulsaGlowHalo" cx="50" cy="55" r="50">
-            <Stop offset="0" stopColor={color} stopOpacity={0.22} />
-            <Stop offset="0.5" stopColor={color} stopOpacity={0.08} />
-            <Stop offset="1" stopColor={color} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect width="100" height="100" fill="url(#avulsaGlowHalo)" />
-        <Rect width="100" height="100" fill="url(#avulsaGlowCore)" />
-      </Svg>
-    </View>
+    <LinearGradient
+      pointerEvents="none"
+      colors={[color + "00", color + "55", color + "00"]}
+      locations={[0, 0.55, 1]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={[styles.avulsaGlow, { borderRadius: 28 }]}
+    />
   );
 }
 
@@ -1106,164 +1071,261 @@ function Hero({
           },
         ]}
       >
-        <Svg
-          width="100%"
-          height="100%"
+        <LinearGradient
+          colors={[palette.primary + "59", palette.surface, palette.surface]}
+          locations={[0, 0.55, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFillObject}
-          aria-hidden
-        >
-          <Defs>
-            <LinearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={palette.primary} stopOpacity="0.35" />
-              <Stop offset="0.55" stopColor={palette.surface} stopOpacity="1" />
-              <Stop offset="1" stopColor={palette.surface} stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#hg)" />
-        </Svg>
-        <PitchLines opacity={0.16} />
+          pointerEvents="none"
+        />
+        <PitchLines opacity={0.38} />
 
-        <Text style={[styles.heroLabel, { color: palette.onSurfaceVariant }]}>
-          {showMatchup ? "PRÓXIMA PARTIDA" : "PELADA ATIVA"}
-        </Text>
+        {/* Linha superior: status à esquerda, badge de modo à direita —
+            ambos na MESMA linha. */}
+        <HeroHeader
+          badgeLabel={showMatchup ? "PRÓXIMA PARTIDA" : "PELADA ATIVA"}
+          isLive={!!(partida && placar)}
+          live={live}
+          statusLine={statusLine}
+          statusLabel={statusPartidaLabel}
+          cronometro={cronometro}
+          palette={palette}
+        />
 
+        {/* Corpo: placar AO VIVO ou confronto. O modo idle não tem corpo,
+            deixando o campo respirar entre o header e o CTA. */}
         {partida && placar ? (
+          <HeroPlacar partida={partida} placar={placar} palette={palette} />
+        ) : showMatchup && timeAId && timeBId ? (
+          <HeroMatchup
+            timeAId={timeAId}
+            timeBId={timeBId}
+            timeANome={timeANome}
+            timeBNome={timeBNome}
+            timeACor={timeACor}
+            timeBCor={timeBCor}
+            palette={palette}
+          />
+        ) : null}
+
+        {/* CTA ancorado no rodapé do card (marginTop: "auto" no wrap). */}
+        {partida && placar ? (
+          <View style={styles.heroCtaWrap}>
+            <HeroPrimaryCTA
+              label="Abrir partida"
+              icon="play-circle-outline"
+              onPress={onAbrirPartida}
+              palette={palette}
+            />
+          </View>
+        ) : cta ? (
+          <View style={styles.heroCtaWrap}>
+            <HeroPrimaryCTA
+              label={cta.label}
+              icon={cta.icon}
+              onPress={onCta}
+              palette={palette}
+            />
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+/** Badge de estado (PRÓXIMA PARTIDA / PELADA ATIVA) no canto superior direito. */
+function HeroStatusBadge({
+  label,
+  palette,
+}: {
+  label: string;
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <View
+      style={[
+        styles.heroBadge,
+        {
+          backgroundColor: palette.surfaceContainerHigh,
+          borderColor: palette.primary + "55",
+        },
+      ]}
+    >
+      <Text style={[styles.heroLabel, { color: palette.onSurfaceVariant }]}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * Linha superior do Hero — status à esquerda, badge de modo à direita,
+ * ambos na MESMA linha. No modo AO VIVO o status vira "status + cronômetro";
+ * nos demais é a linha de resumo (ex.: "Execução ativa · 16 de jun.").
+ */
+function HeroHeader({
+  badgeLabel,
+  isLive,
+  live,
+  statusLine,
+  statusLabel,
+  cronometro,
+  palette,
+}: {
+  badgeLabel: string;
+  isLive: boolean;
+  live: boolean;
+  statusLine: string;
+  statusLabel: string;
+  cronometro: string;
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <View style={styles.heroHeader}>
+      <View style={styles.heroHeaderStatus}>
+        <LivePulseDot
+          size={isLive ? 8 : 7}
+          color={
+            isLive ? (live ? palette.goal : palette.warning) : palette.goal
+          }
+          live={live}
+        />
+        {isLive ? (
           <>
-            <View style={styles.heroLiveRow}>
-              <View style={styles.heroLiveStatus}>
-                <LivePulseDot
-                  size={8}
-                  color={live ? palette.goal : palette.warning}
-                  live={live}
-                />
-                <Text
-                  style={[
-                    styles.heroLiveLabel,
-                    { color: live ? palette.goal : palette.onSurfaceVariant },
-                  ]}
-                >
-                  {statusPartidaLabel}
-                </Text>
-              </View>
-              <Text
-                style={[styles.heroLiveTimer, { color: palette.onSurface }]}
-              >
-                {cronometro}
-              </Text>
-            </View>
-            <View style={styles.heroPlacarRow}>
-              <TeamCrest
-                seed={partida.teamA.id}
-                size={26}
-                corOverride={partida.teamA.corCustom}
-              />
-              <Text
-                style={[styles.heroPlacarTeam, { color: palette.onSurface }]}
-                numberOfLines={1}
-              >
-                {nomeDoTime(partida.teamA, 0)}
-              </Text>
-              <Text
-                style={[styles.heroPlacarScore, { color: palette.onSurface }]}
-              >
-                {placar.teamA} × {placar.teamB}
-              </Text>
-              <Text
-                style={[
-                  styles.heroPlacarTeam,
-                  { color: palette.onSurface, textAlign: "right" },
-                ]}
-                numberOfLines={1}
-              >
-                {nomeDoTime(partida.teamB, 1)}
-              </Text>
-              <TeamCrest
-                seed={partida.teamB.id}
-                size={26}
-                corOverride={partida.teamB.corCustom}
-              />
-            </View>
-            <View style={styles.heroCtaWrap}>
-              <HeroPrimaryCTA
-                label="Abrir partida"
-                icon="play-circle-outline"
-                onPress={onAbrirPartida}
-                palette={palette}
-              />
-            </View>
+            <Text
+              style={[
+                styles.heroLiveLabel,
+                { color: live ? palette.goal : palette.onSurfaceVariant },
+              ]}
+              numberOfLines={1}
+            >
+              {statusLabel}
+            </Text>
+            <Text style={[styles.heroLiveTimer, { color: palette.onSurface }]}>
+              {cronometro}
+            </Text>
           </>
         ) : (
-          <>
-            {showMatchup && timeAId && timeBId ? (
-              <View style={styles.matchup}>
-                <TeamCrest seed={timeAId} size={30} corOverride={timeACor} />
-                <Text
-                  style={[styles.matchupTeam, { color: palette.onSurface }]}
-                  numberOfLines={1}
-                >
-                  {timeANome ?? "Time 1"}
-                </Text>
-                <Text
-                  style={[
-                    styles.matchupVs,
-                    { color: palette.onSurfaceVariant },
-                  ]}
-                >
-                  vs
-                </Text>
-                <Text
-                  style={[
-                    styles.matchupTeam,
-                    { color: palette.onSurface, textAlign: "right" },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {timeBNome ?? "Time 2"}
-                </Text>
-                <TeamCrest seed={timeBId} size={30} corOverride={timeBCor} />
-              </View>
-            ) : null}
-
-            <View style={styles.heroStatusRow}>
-              <LivePulseDot
-                size={7}
-                color={live ? palette.goal : palette.goal}
-                live={live}
-              />
-              <Text
-                style={[styles.heroStatus, { color: palette.onSurfaceVariant }]}
-              >
-                {statusLine}
-              </Text>
-            </View>
-
-            {cta ? (
-              <View style={styles.heroCtaWrap}>
-                <HeroPrimaryCTA
-                  label={cta.label}
-                  icon={cta.icon}
-                  onPress={onCta}
-                  palette={palette}
-                />
-              </View>
-            ) : null}
-          </>
+          <Text
+            style={[styles.heroStatus, { color: palette.onSurfaceVariant }]}
+            numberOfLines={1}
+          >
+            {statusLine}
+          </Text>
         )}
+      </View>
+      <HeroStatusBadge label={badgeLabel} palette={palette} />
+    </View>
+  );
+}
+
+/** Placar AO VIVO do Hero: crest · nome · score · nome · crest. */
+function HeroPlacar({
+  partida,
+  placar,
+  palette,
+}: {
+  partida: Match;
+  placar: { teamA: number; teamB: number };
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <View style={styles.heroBody}>
+      <View style={styles.heroPlacarRow}>
+        <TeamCrest
+          seed={partida.teamA.id}
+          size={26}
+          corOverride={partida.teamA.corCustom}
+        />
+        <Text
+          style={[styles.heroPlacarTeam, { color: palette.onSurface }]}
+          numberOfLines={1}
+        >
+          {nomeDoTime(partida.teamA, 0)}
+        </Text>
+        <Text style={[styles.heroPlacarScore, { color: palette.onSurface }]}>
+          {placar.teamA} × {placar.teamB}
+        </Text>
+        <Text
+          style={[
+            styles.heroPlacarTeam,
+            { color: palette.onSurface, textAlign: "right" },
+          ]}
+          numberOfLines={1}
+        >
+          {nomeDoTime(partida.teamB, 1)}
+        </Text>
+        <TeamCrest
+          seed={partida.teamB.id}
+          size={26}
+          corOverride={partida.teamB.corCustom}
+        />
+      </View>
+    </View>
+  );
+}
+
+/** Confronto da próxima partida: Time A vs Time B. */
+function HeroMatchup({
+  timeAId,
+  timeBId,
+  timeANome,
+  timeBNome,
+  timeACor,
+  timeBCor,
+  palette,
+}: {
+  timeAId: string;
+  timeBId: string;
+  timeANome?: string;
+  timeBNome?: string;
+  timeACor?: string;
+  timeBCor?: string;
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <View style={styles.heroBody}>
+      <View style={styles.matchup}>
+        <TeamCrest seed={timeAId} size={30} corOverride={timeACor} />
+        <Text
+          style={[styles.matchupTeam, { color: palette.onSurface }]}
+          numberOfLines={1}
+        >
+          {timeANome ?? "Time 1"}
+        </Text>
+        <Text style={[styles.matchupVs, { color: palette.onSurfaceVariant }]}>
+          vs
+        </Text>
+        <Text
+          style={[
+            styles.matchupTeam,
+            { color: palette.onSurface, textAlign: "right" },
+          ]}
+          numberOfLines={1}
+        >
+          {timeBNome ?? "Time 2"}
+        </Text>
+        <TeamCrest seed={timeBId} size={30} corOverride={timeBCor} />
       </View>
     </View>
   );
 }
 
 // Halo vermelho atrás do hero — vazamento colorido que o elevation Android
-// não dá. Dimensões do handoff (left/right 12, top 16, bottom -6).
-// Web NÃO renderiza: lá o boxShadow CSS já faz o blur de verdade; uma View
-// vermelha com bottom:-6 vira um retângulo hard-edged saindo do card.
+// não dá. Web NÃO renderiza: lá o boxShadow CSS já faz o blur de verdade.
+// No nativo, usa expo-linear-gradient (fade vertical) em vez de uma View
+// vermelha sólida — a View chapada virava um retângulo no Android.
 function HeroGlowHalo({ color }: { color: string }) {
   if (Platform.OS === "web") return null;
   return (
-    <View
+    <LinearGradient
       pointerEvents="none"
-      style={[styles.heroGlowHalo, { backgroundColor: color }]}
+      colors={[color + "00", color + "70", color + "00"]}
+      locations={[0, 0.6, 1]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={styles.heroGlowHalo}
     />
   );
 }
@@ -1294,9 +1356,17 @@ function HeroPrimaryCTA({
       ]}
     >
       {Platform.OS !== "web" ? (
-        <View
+        <LinearGradient
           pointerEvents="none"
-          style={[styles.heroCtaHalo, { backgroundColor: palette.primary }]}
+          colors={[
+            palette.primary + "00",
+            palette.primary + "70",
+            palette.primary + "00",
+          ]}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.heroCtaHalo}
         />
       ) : null}
       <Pressable
@@ -2106,7 +2176,6 @@ const styles = StyleSheet.create({
     top: 16,
     bottom: -6,
     borderRadius: Radius.xl,
-    opacity: Platform.OS === "android" ? 0.38 : 0.5,
   },
   hero: {
     borderRadius: Radius.xl,
@@ -2115,7 +2184,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     borderWidth: 1,
     borderCurve: "continuous",
-    gap: Spacing.md,
     // M-03: altura mínima estável evita layout-jump quando o hero alterna
     // entre "PRÓXIMA PARTIDA" (matchup + status + CTA) e "PELADA ATIVA"
     // (placar AO VIVO + cronômetro + CTA). Os dois modos têm conteúdo
@@ -2124,7 +2192,37 @@ const styles = StyleSheet.create({
     minHeight: 220,
   },
   heroCtaWrap: {
-    marginTop: Spacing.xs,
+    // "auto" empurra o CTA para o rodapé do card, aproveitando o espaço
+    // livre do minHeight e deixando o campo (PitchLines) visível no meio.
+    marginTop: "auto",
+  },
+  // Linha superior do Hero: status (esquerda) + badge (direita) na MESMA linha.
+  heroHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: Spacing.sm,
+  },
+  // Grupo de status à esquerda; flexShrink permite truncar o texto e manter o
+  // badge colado à direita quando a linha de status é longa.
+  heroHeaderStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 1,
+  },
+  // Corpo do Hero (matchup ou placar AO VIVO). Fica logo abaixo do header; o
+  // CTA com marginTop:"auto" cuida do rodapé, deixando o campo visível no meio.
+  heroBody: {
+    marginTop: Spacing.md,
+  },
+  // Badge de modo (PRÓXIMA PARTIDA / PELADA ATIVA) — pílula à direita do header.
+  heroBadge: {
+    flexShrink: 0,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
   },
   // CTA "Iniciar partida" dentro do hero — glow em escala menor
   heroCtaShadow: {
@@ -2141,7 +2239,6 @@ const styles = StyleSheet.create({
     top: 14,
     bottom: -4,
     borderRadius: Radius.md,
-    opacity: Platform.OS === "android" ? 0.4 : 0.5,
   },
   heroCta: {
     flexDirection: "row",
@@ -2155,12 +2252,6 @@ const styles = StyleSheet.create({
   },
   heroCtaPressed: { opacity: 0.92, transform: [{ scale: 0.99 }] },
   heroCtaText: { ...Typography.title, fontSize: 16, fontWeight: "800" },
-  heroStatusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 6,
-  },
   heroTop: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -2183,7 +2274,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     letterSpacing: -0.5,
   },
-  heroStatus: { ...Typography.label, marginTop: 6 },
+  heroStatus: { ...Typography.label, flexShrink: 1 },
   heroActions: { flexDirection: "row", gap: Spacing.xs },
   heroIconBtn: {
     width: 40,
@@ -2216,15 +2307,8 @@ const styles = StyleSheet.create({
   },
   heroChips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.xs },
 
-  // Bloco AO VIVO dentro do Hero PELADA ATIVA — absorve o que antes era um
-  // <Card> separado (MiniPlacar). Linha de status + cronômetro acima, linha
-  // de placar (crest · nome · score · nome · crest) abaixo.
-  heroLiveRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  heroLiveStatus: { flexDirection: "row", alignItems: "center", gap: 6 },
+  // Status/cronômetro AO VIVO vivem no header (HeroHeader). Aqui ficam só os
+  // estilos do texto (label + cronômetro) e do placar abaixo.
   heroLiveLabel: {
     ...Typography.label,
     textTransform: "uppercase",
