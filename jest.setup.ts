@@ -165,18 +165,33 @@ jest.mock("expo-haptics", () => ({
 jest.mock("@gorhom/bottom-sheet", () => {
   const React = require("react");
   const { View } = require("react-native");
+  // No device o gorhom mantém os filhos do sheet MONTADOS mesmo fechado
+  // (só anima a posição). O default deste mock desmonta quando fechado —
+  // que é o contrato que a maioria dos testes assume ("fechou → sumiu").
+  // Testes que precisam reproduzir o comportamento real (ex.: autoFocus
+  // disparando na montagem) chamam `__setMountWhenClosed(true)`.
+  let mountWhenClosed = false;
   const BottomSheet = React.forwardRef(
     (
       { children, index }: { children: React.ReactNode; index?: number },
       _ref: unknown,
     ) => {
       // Em props `index >= 0` significa "aberto" no contrato do gorhom.
-      if (index === undefined || index < 0) return null;
+      const fechado = index === undefined || index < 0;
+      if (fechado && !mountWhenClosed) return null;
       return React.createElement(View, null, children);
     },
   );
   const BottomSheetView = ({ children }: { children: React.ReactNode }) =>
     React.createElement(View, null, children);
+  // Lista rolável do gorhom: no device coordena o gesto com o sheet; no teste
+  // basta passar os filhos num View para getByText/getByRole encontrá-los.
+  const BottomSheetScrollView = ({
+    children,
+    ...rest
+  }: {
+    children: React.ReactNode;
+  }) => React.createElement(View, rest, children);
   const BottomSheetBackdrop = () => null;
   const BottomSheetModalProvider = ({
     children,
@@ -187,8 +202,13 @@ jest.mock("@gorhom/bottom-sheet", () => {
     __esModule: true,
     default: BottomSheet,
     BottomSheetView,
+    BottomSheetScrollView,
     BottomSheetBackdrop,
     BottomSheetModalProvider,
+    /** Faz o mock manter os filhos montados com o sheet fechado (= device). */
+    __setMountWhenClosed: (v: boolean) => {
+      mountWhenClosed = v;
+    },
   };
 });
 
@@ -208,7 +228,9 @@ jest.mock("expo-image-picker", () => ({
   })),
   MediaTypeOptions: { Images: "Images", Videos: "Videos", All: "All" },
 }));
-jest.mock("expo-file-system", () => ({
+// SDK 54: a API clássica de arquivos migrou para `expo-file-system/legacy`,
+// que é o caminho importado por fotoJogador.ts — o mock acompanha.
+jest.mock("expo-file-system/legacy", () => ({
   __esModule: true,
   documentDirectory: "file:///mock-doc-dir/",
   getInfoAsync: jest.fn(async () => ({ exists: true })),
@@ -216,8 +238,3 @@ jest.mock("expo-file-system", () => ({
   copyAsync: jest.fn(async () => {}),
   deleteAsync: jest.fn(async () => {}),
 }));
-
-// ---------------------------------------------------------------------------
-// Silenciar warnings ruidosos do RN em ambiente de teste.
-// ---------------------------------------------------------------------------
-jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");

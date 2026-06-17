@@ -3,7 +3,13 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet } from "react-native";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -40,13 +46,31 @@ export function AppBottomSheet({
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => [snapPoint], [snapPoint]);
 
+  // Gorhom mantém os filhos montados mesmo com o sheet fechado (index -1):
+  // ele só anima a posição, nunca desmonta o conteúdo. Isso faz efeitos
+  // colaterais de montagem do conteúdo — em especial um `<TextInput
+  // autoFocus>` — dispararem assim que a TELA monta, antes de o usuário
+  // abrir o sheet (teclado "fantasma" na primeira visita). Aqui só
+  // montamos o conteúdo enquanto o sheet está aberto, espelhando o
+  // contrato "visible controla a presença" que a versão `.web.tsx`
+  // (`<Modal visible>`) já tem de graça.
+  const [conteudoMontado, setConteudoMontado] = useState(visible);
+
   useEffect(() => {
     if (visible) {
+      setConteudoMontado(true);
       sheetRef.current?.expand();
     } else {
       sheetRef.current?.close();
     }
   }, [visible]);
+
+  // Gorhom dispara `onClose` só quando a animação de fechar termina — é o
+  // momento seguro pra desmontar o conteúdo sem cortar a animação no meio.
+  const handleClose = useCallback(() => {
+    setConteudoMontado(false);
+    onClose();
+  }, [onClose]);
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -67,7 +91,7 @@ export function AppBottomSheet({
       index={visible ? 0 : -1}
       snapPoints={snapPoints}
       enablePanDownToClose
-      onClose={onClose}
+      onClose={handleClose}
       backdropComponent={renderBackdrop}
       backgroundStyle={{
         backgroundColor: palette.surface,
@@ -76,7 +100,9 @@ export function AppBottomSheet({
       }}
       handleIndicatorStyle={{ backgroundColor: palette.outline }}
     >
-      <BottomSheetView style={styles.content}>{children}</BottomSheetView>
+      <BottomSheetView style={styles.content}>
+        {conteudoMontado ? children : null}
+      </BottomSheetView>
     </BottomSheet>
   );
 }

@@ -1,10 +1,11 @@
-import { Alert, Pressable } from "react-native";
+import { Alert } from "react-native";
 
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import {
   act,
   fireEvent,
+  getAllPressables,
   renderWithProviders,
   screen,
   waitFor,
@@ -29,9 +30,9 @@ function buildManager(nomes: string[] = []): GestorJogo {
  * todos os Pressable do app declaram accessibilityState explicitamente).
  */
 function getPressableByLabel(label: string) {
-  const found = screen
-    .UNSAFE_getAllByType(Pressable)
-    .find((p) => p.props.accessibilityLabel === label);
+  const found = getAllPressables().find(
+    (p) => p.props.accessibilityLabel === label,
+  );
   if (!found)
     throw Error(`Pressable com accessibilityLabel "${label}" não encontrado.`);
   return found;
@@ -54,6 +55,14 @@ function renderJogadores(gestor: GestorJogo) {
   return renderWithProviders(<JogadoresScreen />, { soccer: { gestor } });
 }
 
+/**
+ * O campo de digitar nome fica escondido por padrão (só lista). Esta helper
+ * toca no botão "Adicionar jogador" (estado fechado) que revela o input.
+ */
+function abrirAdicao() {
+  fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
+}
+
 // ===========================================================================
 // GUARD
 // ===========================================================================
@@ -71,14 +80,54 @@ describe("Jogadores — guard de rota", () => {
 // ===========================================================================
 
 describe("Jogadores — adicionar via input + botão", () => {
+  it("na primeira montagem o input de adicionar NÃO está presente", () => {
+    renderJogadores(buildManager());
+
+    // Invariante da tela: ao abrir, só a lista aparece — nenhum campo de
+    // texto (nem foco/teclado) surge sozinho na primeira montagem.
+    expect(screen.queryByLabelText("Nome do novo jogador")).toBeNull();
+  });
+
+  it("o campo de digitar só aparece após tocar em 'Adicionar jogador'", () => {
+    renderJogadores(buildManager());
+
+    expect(screen.queryByLabelText("Nome do novo jogador")).toBeNull();
+    abrirAdicao();
+    expect(screen.getByLabelText("Nome do novo jogador")).toBeTruthy();
+  });
+
+  it("não monta o autoFocus do sheet de lote enquanto fechado (teclado não abre sozinho)", () => {
+    // Reproduz o comportamento REAL do @gorhom/bottom-sheet: os filhos do
+    // sheet ficam montados mesmo fechado (o mock padrão desmonta, então o
+    // bug ficava invisível em teste). Sem o fix no AppBottomSheet, o
+    // `<TextInput autoFocus>` do sheet "Adicionar vários" montava junto da
+    // tela e roubava o foco — teclado fantasma na primeira visita.
+    const bottomSheet = require("@gorhom/bottom-sheet") as {
+      __setMountWhenClosed: (v: boolean) => void;
+    };
+    bottomSheet.__setMountWhenClosed(true);
+    try {
+      renderJogadores(buildManager());
+
+      expect(
+        screen.queryByLabelText("Lista de nomes para adicionar em lote"),
+      ).toBeNull();
+      expect(screen.queryByLabelText("Nome do novo jogador")).toBeNull();
+    } finally {
+      bottomSheet.__setMountWhenClosed(false);
+    }
+  });
+
   it("começa com o botão '+' desabilitado (input vazio)", () => {
     renderJogadores(buildManager());
+    abrirAdicao();
 
     expect(getPressableByLabel("Adicionar jogador").props.disabled).toBe(true);
   });
 
   it("habilita o '+' depois de digitar um nome", () => {
     renderJogadores(buildManager());
+    abrirAdicao();
 
     fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
 
@@ -88,6 +137,7 @@ describe("Jogadores — adicionar via input + botão", () => {
   it("press do '+' adiciona o jogador (trimado) na lista", () => {
     const gestor = buildManager();
     renderJogadores(gestor);
+    abrirAdicao();
 
     fireEvent.changeText(
       screen.getByLabelText("Nome do novo jogador"),
@@ -101,6 +151,7 @@ describe("Jogadores — adicionar via input + botão", () => {
 
   it("limpa o input após adicionar com sucesso", () => {
     renderJogadores(buildManager());
+    abrirAdicao();
 
     const input = screen.getByLabelText("Nome do novo jogador");
     fireEvent.changeText(input, "Ana");
@@ -112,6 +163,7 @@ describe("Jogadores — adicionar via input + botão", () => {
   it("nome só com espaços não adiciona", () => {
     const gestor = buildManager();
     renderJogadores(gestor);
+    abrirAdicao();
 
     fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "   ");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
@@ -122,12 +174,63 @@ describe("Jogadores — adicionar via input + botão", () => {
   it("onSubmitEditing também adiciona", () => {
     const gestor = buildManager();
     renderJogadores(gestor);
+    abrirAdicao();
 
     const input = screen.getByLabelText("Nome do novo jogador");
     fireEvent.changeText(input, "Bia");
     fireEvent(input, "submitEditing");
 
     expect(gestor.players.map((p) => p.name)).toEqual(["Bia"]);
+  });
+});
+
+// ===========================================================================
+// ADICIONAR DURANTE PARTIDA EM ANDAMENTO (pelada dinâmica)
+// ===========================================================================
+
+describe("Jogadores — adicionar durante partida em andamento", () => {
+  function comPartida(): GestorJogo {
+    // playersPerTeam=2, 4 jogadores → 2 times; ao iniciar a partida ambos
+    // entram em campo e a fila (`next`) fica vazia.
+    const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 2 }));
+    m.addPlayers(["Ana", "Bia", "Caio", "Davi"]);
+    m.createTeams();
+    m.setPlayingGame();
+    return m;
+  }
+
+  it("adicionar jogador não altera os times em campo nem a fila", () => {
+    const gestor = comPartida();
+    const teamA = gestor.playing!.teamA;
+    const rosterA = [...teamA.players];
+    const filaAntes = [...gestor.next];
+    renderJogadores(gestor);
+    abrirAdicao();
+
+    fireEvent.changeText(
+      screen.getByLabelText("Nome do novo jogador"),
+      "Tardão",
+    );
+    fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
+
+    expect(gestor.players.map((p) => p.name)).toContain("Tardão");
+    expect(teamA.players).toEqual(rosterA);
+    expect(gestor.next).toEqual(filaAntes);
+    expect(gestor.playersWithoutTeam).toBe(1);
+  });
+
+  it("o contador reflete o recém-chegado como 'sem time'", () => {
+    const gestor = comPartida();
+    renderJogadores(gestor);
+    abrirAdicao();
+
+    fireEvent.changeText(
+      screen.getByLabelText("Nome do novo jogador"),
+      "Tardão",
+    );
+    fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
+
+    expect(screen.getByText("5 jogadores · 1 sem time")).toBeTruthy();
   });
 });
 
@@ -139,6 +242,7 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
   it("mostra mensagem de erro quando o domínio rejeita", () => {
     const gestor = buildManager(["Ana"]);
     renderJogadores(gestor);
+    abrirAdicao();
 
     fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
@@ -151,6 +255,7 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
   it("botão X do banner fecha o erro", () => {
     const gestor = buildManager(["Ana"]);
     renderJogadores(gestor);
+    abrirAdicao();
 
     fireEvent.changeText(screen.getByLabelText("Nome do novo jogador"), "Ana");
     fireEvent.press(screen.getByRole("button", { name: "Adicionar jogador" }));
@@ -167,6 +272,7 @@ describe("Jogadores — erro ao adicionar duplicata", () => {
     try {
       const gestor = buildManager(["Ana"]);
       renderJogadores(gestor);
+      abrirAdicao();
 
       fireEvent.changeText(
         screen.getByLabelText("Nome do novo jogador"),

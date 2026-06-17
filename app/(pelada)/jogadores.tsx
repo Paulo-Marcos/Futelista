@@ -62,6 +62,9 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   );
 
   const [novoNome, setNovoNome] = useState("");
+  // O campo de digitar só aparece depois de tocar em "Adicionar jogador" —
+  // por padrão a tela mostra só a lista (sem teclado/input no caminho).
+  const [addAberto, setAddAberto] = useState(false);
   const [busca, setBusca] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -242,49 +245,111 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
           A FlatList sai com `flex:1` pra ocupar o resto da tela. */}
       <View style={styles.body}>
         <View style={styles.addRow}>
-          <TextInput
-            value={novoNome}
-            onChangeText={setNovoNome}
-            placeholder="Adicionar jogador"
-            placeholderTextColor={palette.onSurfaceVariant}
-            onSubmitEditing={adicionar}
-            returnKeyType="done"
-            accessibilityLabel="Nome do novo jogador"
-            style={[
-              styles.input,
-              {
-                borderColor: palette.outline,
-                backgroundColor: palette.surface,
-                color: palette.onSurface,
-              },
-            ]}
-          />
-          <AddButton
-            enabled={!!novoNome.trim()}
-            onPress={adicionar}
-            palette={palette}
-            accessibilityLabel="Adicionar jogador"
-          />
-          <Pressable
-            onPress={() => setLoteAberto(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Adicionar vários jogadores"
-            style={({ pressed }) => [
-              styles.loteButton,
-              {
-                borderColor: palette.outline,
-                backgroundColor: palette.surface,
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-            android_ripple={{ color: palette.primary + "22" }}
-          >
-            <MaterialCommunityIcons
-              name="format-list-bulleted-square"
-              size={22}
-              color={palette.primary}
-            />
-          </Pressable>
+          {addAberto ? (
+            <>
+              <TextInput
+                value={novoNome}
+                onChangeText={setNovoNome}
+                placeholder="Nome do jogador"
+                placeholderTextColor={palette.onSurfaceVariant}
+                onSubmitEditing={adicionar}
+                returnKeyType="done"
+                autoFocus
+                accessibilityLabel="Nome do novo jogador"
+                style={[
+                  styles.input,
+                  {
+                    borderColor: palette.outline,
+                    backgroundColor: palette.surface,
+                    color: palette.onSurface,
+                  },
+                ]}
+              />
+              <AddButton
+                enabled={!!novoNome.trim()}
+                onPress={adicionar}
+                palette={palette}
+                accessibilityLabel="Adicionar jogador"
+              />
+              <Pressable
+                onPress={() => {
+                  setAddAberto(false);
+                  setNovoNome("");
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar adição de jogador"
+                style={({ pressed }) => [
+                  styles.loteButton,
+                  {
+                    borderColor: palette.outline,
+                    backgroundColor: palette.surface,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+                android_ripple={{ color: palette.primary + "22" }}
+              >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={22}
+                  color={palette.onSurfaceVariant}
+                />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setAddAberto(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar jogador"
+                style={({ pressed }) => [
+                  styles.addOpenBtn,
+                  {
+                    borderColor: palette.outline,
+                    backgroundColor: palette.surface,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+                android_ripple={{ color: palette.primary + "22" }}
+              >
+                <MaterialCommunityIcons
+                  name="account-plus"
+                  size={20}
+                  color={palette.primary}
+                />
+                <Text
+                  style={[styles.addOpenBtnText, { color: palette.onSurface }]}
+                >
+                  Adicionar jogador
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setLoteAberto(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar vários jogadores"
+                accessibilityHint="Abre uma janela para colar ou digitar vários nomes de uma vez"
+                style={({ pressed }) => [
+                  styles.loteOpenBtn,
+                  {
+                    borderColor: palette.outline,
+                    backgroundColor: palette.surface,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+                android_ripple={{ color: palette.primary + "22" }}
+              >
+                <MaterialCommunityIcons
+                  name="account-multiple-plus"
+                  size={20}
+                  color={palette.primary}
+                />
+                <Text
+                  style={[styles.loteOpenBtnText, { color: palette.onSurface }]}
+                >
+                  Vários
+                </Text>
+              </Pressable>
+            </>
+          )}
         </View>
 
         {players.length >= 5 ? (
@@ -1074,6 +1139,24 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderCurve: "continuous",
   },
+  // Botão que revela o campo de adicionar jogador (estado fechado). Mesma
+  // identidade visual do input (bg surface + borda outline), em linha.
+  addOpenBtn: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderRadius: Radius.md,
+    borderCurve: "continuous",
+  },
+  addOpenBtnText: {
+    ...Typography.body,
+    fontSize: 16,
+    fontWeight: "600",
+  },
   loteButton: {
     width: 48,
     height: 48,
@@ -1082,6 +1165,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderCurve: "continuous",
+  },
+  // Botão "Adicionar vários" (estado fechado). Mesma identidade visual do
+  // input/`addOpenBtn` (bg surface + borda outline), mas dimensionado ao
+  // conteúdo (sem flex) — assim "Adicionar jogador" continua sendo o
+  // primário dominante e este fica como atalho secundário ao lado, com
+  // rótulo textual visível para deixar a função óbvia.
+  loteOpenBtn: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderRadius: Radius.md,
+    borderCurve: "continuous",
+  },
+  loteOpenBtnText: {
+    ...Typography.body,
+    fontSize: 16,
+    fontWeight: "600",
   },
   // Caixa de busca com a mesma identidade do input "Adicionar jogador":
   // bg=surface, borda outline (hand-off `searchRow`: bg `T.surface`, border 1 `T.line`).
@@ -1178,6 +1281,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalCard: {
+    flex: 1,
     padding: Spacing.lg,
     borderTopLeftRadius: Radius.lg,
     borderTopRightRadius: Radius.lg,
@@ -1189,9 +1293,12 @@ const styles = StyleSheet.create({
   modalHint: {
     ...Typography.body,
   },
+  // `flex: 1` faz o textarea ocupar o espaço sobrando entre o cabeçalho e os
+  // botões e rolar internamente quando a lista é grande — antes ele crescia
+  // (até maxHeight) e empurrava os botões pra fora da área visível do sheet.
   modalInput: {
-    minHeight: 140,
-    maxHeight: 240,
+    flex: 1,
+    minHeight: 96,
     borderWidth: 1,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
