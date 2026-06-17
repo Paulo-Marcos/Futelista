@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
 import { MyProviders } from "@/src/app-shell/myProviders";
+import { useImmersiveNavBar } from "@/src/shared/hooks/useImmersiveNavBar";
 import { useTheme } from "@/src/shared/theme/themeContext";
 import { Splash } from "@/src/shared/ui/Splash";
 
@@ -44,6 +45,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // Modo imersivo (Android): mantém a barra de navegação do sistema oculta,
+  // reaplicando a ocultação quando o SO a reexibe (background, teclado, swipe).
+  useImmersiveNavBar();
 
   if (!loaded) {
     return null;
