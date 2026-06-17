@@ -275,6 +275,46 @@ describe("Partida — ações por jogador", () => {
 });
 
 // ===========================================================================
+// BANCO LATERAL (BenchRail) — só à esquerda, e só quando há reservas
+// ===========================================================================
+
+describe("Partida — banco lateral esquerdo (BenchRail)", () => {
+  it("COM próximo time na fila: o banco esquerdo aparece com as reservas", () => {
+    // Default = 12 jogadores, 4 por time → 3 times. Após setPlayingGame()
+    // sobra 1 time (4 jogadores) na fila = reservas no banco.
+    const m = buildPartidaManager();
+    const reservas = m.next[0].players.length;
+    renderPartida(m);
+
+    expect(
+      screen.getByLabelText(new RegExp(`Banco com ${reservas} reservas`)),
+    ).toBeTruthy();
+  });
+
+  it("tocar no banco esquerdo abre a sheet de Trocas", () => {
+    const m = buildPartidaManager();
+    const reservas = m.next[0].players.length;
+    renderPartida(m);
+
+    fireEvent.press(
+      screen.getByLabelText(new RegExp(`Banco com ${reservas} reservas`)),
+    );
+
+    // A sheet de Trocas expõe o cabeçalho "Substituição".
+    expect(screen.getByText("Substituição")).toBeTruthy();
+  });
+
+  it("SEM próximo time (2 times, fila vazia): o banco esquerdo não renderiza", () => {
+    // 8 jogadores, 4 por time → 2 times. setPlayingGame() esvazia a fila,
+    // logo não há reservas e o trilho do banco fica ausente (correto).
+    const m = buildPartidaManager({ semProximo: true });
+    renderPartida(m);
+
+    expect(screen.queryByLabelText(/Banco com .* reservas/)).toBeNull();
+  });
+});
+
+// ===========================================================================
 // ENCERRAR + NAVEGAÇÃO
 // ===========================================================================
 

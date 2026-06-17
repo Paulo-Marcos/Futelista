@@ -6,7 +6,6 @@ import {
   Animated,
   Easing,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   Vibration,
@@ -20,6 +19,8 @@ import Svg, {
   Pattern,
   Rect as SvgRect,
 } from "react-native-svg";
+
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
@@ -388,12 +389,6 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
           posicaoNaFila={proximoTime ? 3 : null}
           onOpen={() => setSubOpen(true)}
         />
-        <BenchRail
-          side="right"
-          reserves={reservas}
-          posicaoNaFila={proximoTime ? 3 : null}
-          onOpen={() => setSubOpen(true)}
-        />
 
         <View style={styles.halfTop}>
           {teamA.players.map((p, i) => {
@@ -511,12 +506,16 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
           variant="ghost"
           onPress={() => setSubOpen(true)}
         />
-        <CtrlButton
-          label="Encerrar"
-          icon="flag-checkered"
-          variant="danger"
-          onPress={onEncerrar}
-        />
+        {/* "Encerrar" só faz sentido depois que a partida começou — antes do
+            apito inicial (ready) o jogo nem rola, então o botão fica oculto. */}
+        {!ready ? (
+          <CtrlButton
+            label="Encerrar"
+            icon="flag-checkered"
+            variant="danger"
+            onPress={onEncerrar}
+          />
+        ) : null}
       </View>
 
       <ScorerSheet
@@ -805,15 +804,6 @@ function FieldBackdrop() {
           stroke={LINE}
           strokeWidth={SW}
         />
-        {/* círculo central */}
-        <SvgCircle
-          cx={100}
-          cy={180}
-          r={42}
-          fill="none"
-          stroke={LINE}
-          strokeWidth={SW}
-        />
         {/* grande área superior + pequena área superior */}
         <SvgRect
           x={60}
@@ -852,6 +842,28 @@ function FieldBackdrop() {
           stroke={LINE}
           strokeWidth={SW}
         />
+      </Svg>
+
+      {/* Círculo central num SVG separado com preserveAspectRatio="meet":
+          o backdrop acima usa "none" (estica listras/linhas pra preencher o
+          campo), o que deformava o círculo numa elipse. Aqui o "meet" mantém
+          a proporção 1:1 — o círculo fica redondo e centralizado no campo. */}
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 200 360"
+        preserveAspectRatio="xMidYMid meet"
+        style={StyleSheet.absoluteFill}
+      >
+        <SvgCircle
+          cx={100}
+          cy={180}
+          r={42}
+          fill="none"
+          stroke={LINE}
+          strokeWidth={SW}
+        />
+        <SvgCircle cx={100} cy={180} r={3} fill={LINE} />
       </Svg>
     </View>
   );
@@ -1162,6 +1174,10 @@ function BenchRail({
   const palette = usePalette();
   if (!reserves || reserves.length === 0) return null;
   const visiveis = reserves.slice(0, 5);
+  // O trilho tem fundo escuro fixo (vidro sobre o gramado), independente do
+  // tema. Por isso ícone e rótulo usam claro fixo — `palette.onSurface` seria
+  // preto no tema claro e sumiria sobre o fundo escuro.
+  const FG = "rgba(255,255,255,0.95)";
   return (
     <Pressable
       onPress={onOpen}
@@ -1178,17 +1194,13 @@ function BenchRail({
       ]}
     >
       <View style={styles.benchRailHead}>
-        <MaterialCommunityIcons
-          name="seat-outline"
-          size={13}
-          color={palette.onSurfaceVariant}
-        />
+        <MaterialCommunityIcons name="seat" size={18} color={FG} />
         <View style={styles.benchRailLabelWrap}>
           <Text
             style={[
               styles.benchRailLabel,
               {
-                color: palette.onSurfaceVariant,
+                color: FG,
                 transform: [{ rotate: side === "left" ? "-90deg" : "90deg" }],
               },
             ]}
@@ -1456,8 +1468,8 @@ function SubstitutionSheet({
   };
 
   return (
-    <AppBottomSheet visible={open} onClose={onClose} snapPoint="75%">
-      <View style={styles.sheet}>
+    <AppBottomSheet visible={open} onClose={onClose} snapPoint="85%">
+      <View style={[styles.sheet, styles.subSheetFill]}>
         <View style={styles.sheetHead}>
           <View>
             <Text
@@ -1555,7 +1567,7 @@ function SubstitutionSheet({
           </Text>
         </View>
 
-        <ScrollView style={{ maxHeight: 380 }}>
+        <BottomSheetScrollView style={styles.subScroll}>
           <Text
             style={[
               styles.sheetEyebrow,
@@ -1685,7 +1697,7 @@ function SubstitutionSheet({
               })}
             </View>
           )}
-        </ScrollView>
+        </BottomSheetScrollView>
 
         {multi ? (
           <Pressable
@@ -2243,7 +2255,7 @@ function ChangeAuthorSheet({
           </Pressable>
         </View>
 
-        <ScrollView style={{ maxHeight: 380 }}>
+        <BottomSheetScrollView style={styles.subAuthorScroll}>
           <View style={styles.subColRow}>
             <View style={styles.subCol}>
               <View
@@ -2288,7 +2300,7 @@ function ChangeAuthorSheet({
               ))}
             </View>
           </View>
-        </ScrollView>
+        </BottomSheetScrollView>
       </View>
     </AppBottomSheet>
   );
@@ -2602,13 +2614,14 @@ const styles = StyleSheet.create({
   kickHintText: { ...Typography.label, fontSize: 11 },
 
   // Banco — design `.bench`: largura 40, centralizado vertical via marginTop = -altura/2.
-  // Altura total ~180 (cabeçalho ~80 + ~5 avatares 26 sobrepostos -5 = ~100). Não cresce
-  // para cobrir o campo todo. Toque abre SubstitutionSheet.
+  // Altura total ~240 (cabeçalho ~100: ícone + rótulo vertical 74 · ~5 avatares
+  // 26 sobrepostos -5 = ~118). Não cresce para cobrir o campo todo. Toque abre
+  // SubstitutionSheet.
   benchRail: {
     position: "absolute",
     top: "50%",
     width: 40,
-    marginTop: -90,
+    marginTop: -120,
     borderWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 4,
@@ -2628,21 +2641,31 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 14,
     borderBottomLeftRadius: 14,
   },
+  // Coluna: ícone em cima, rótulo "BANCO" (vertical) embaixo. Sem altura fixa
+  // — cresce para acomodar o rótulo rotacionado, evitando o ícone por cima.
   benchRailHead: {
     alignItems: "center",
-    gap: 8,
-    height: 70,
+    gap: 6,
     justifyContent: "center",
   },
-  benchRailLabelWrap: { alignItems: "center", justifyContent: "center" },
+  // O rótulo é rotacionado 90°: sem dimensões explícitas o RN reserva só a
+  // caixa não-rotacionada (~14px de altura) e o texto vaza por cima do ícone.
+  // Fixamos largura/altura iguais à projeção pós-rotação para reservar o espaço.
+  benchRailLabelWrap: {
+    width: 16,
+    height: 74,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   benchRailLabel: {
     ...Typography.label,
-    fontSize: 8,
+    fontSize: 9,
+    fontWeight: "800",
     letterSpacing: 1.5,
     width: 70,
     textAlign: "center",
   },
-  benchRailAvs: { alignItems: "center" },
+  benchRailAvs: { alignItems: "center", marginTop: 8 },
   benchAv: { borderWidth: 1.5, borderRadius: 999 },
 
   // ----- Controls -----
@@ -2693,6 +2716,13 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     borderCurve: "continuous",
   },
+  // Substituição: o card preenche o sheet (85%) e a lista de campo+banco
+  // rola por dentro (BottomSheetScrollView), mantendo o botão "Aplicar" fixo.
+  subSheetFill: { flex: 1 },
+  subScroll: { flex: 1 },
+  // Sheet de troca de autor do gol: lista pode passar de uma tela; altura
+  // limitada com rolagem própria (também via BottomSheetScrollView).
+  subAuthorScroll: { maxHeight: 380 },
   sheetGrab: {
     width: 44,
     height: 5,
