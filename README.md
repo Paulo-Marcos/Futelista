@@ -46,8 +46,8 @@ Fluxo de trabalho do dia a dia (commit → push → deploy → release) em [docs
 
 | Camada     | Tecnologia                                     |
 | ---------- | ---------------------------------------------- |
-| App        | [Expo](https://expo.dev) 51, React Native 0.74 |
-| Roteamento | [Expo Router](https://docs.expo.dev/router) 3  |
+| App        | [Expo](https://expo.dev) 54, React Native 0.81 |
+| Roteamento | [Expo Router](https://docs.expo.dev/router) 6  |
 | Linguagem  | TypeScript estrito                             |
 | Testes     | Jest (preset `jest-expo`)                      |
 | Lint       | ESLint (config Expo) + Prettier                |
