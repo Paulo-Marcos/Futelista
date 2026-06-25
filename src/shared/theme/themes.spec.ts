@@ -76,12 +76,16 @@ describe("THEME_REGISTRY", () => {
     const dark = THEME_REGISTRY.rubro.dark;
     expect(dark.fieldA).toBe("#163A24");
     expect(dark.fieldB).toBe("#13321F");
+    // Linha mais forte que o 0.10 antigo — quase invisível na tela de início.
+    expect(dark.fieldLine).toBe("rgba(255, 255, 255, 0.28)");
   });
 
-  it("deverá usar o gramado claro com linhas brancas no modo claro", () => {
+  it("deverá usar o gramado claro com linha vívida no modo claro", () => {
     const light = THEME_REGISTRY.rubro.light;
     expect(light.fieldA).toBe("#43A64F");
     expect(light.fieldB).toBe("#3A9446");
+    // Linha verde vívida (não branca) — branca sumia sobre fundos claros.
+    expect(light.fieldLine).toBe("rgba(31, 122, 64, 0.55)");
   });
 
   it("deverá manter a primária escura igual ao spec do protótipo", () => {

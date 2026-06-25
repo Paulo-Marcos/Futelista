@@ -8,7 +8,7 @@ describe("gerarFormacao", () => {
 
   it("para qtd=1 devolve uma posição central no meio-campo", () => {
     const result = gerarFormacao(1);
-    expect(result).toEqual([{ x: 0.5, y: 0.5 }]);
+    expect(result).toEqual([{ x: 0.5, y: 0.55 }]);
   });
 
   it("preserva o tamanho do array igual à quantidade pedida", () => {
@@ -17,10 +17,23 @@ describe("gerarFormacao", () => {
     });
   });
 
-  it("primeira posição é sempre o goleiro (x=0.5, y=0.15)", () => {
+  it("não reserva goleiro: nenhum jogador isolado na linha de fundo", () => {
+    // Antes, f[0] era sempre {x:0.5, y:0.15} (goleiro). Agora ninguém deve
+    // ficar nessa posição — todos jogam de linha.
     [2, 5, 8, 11].forEach((qtd) => {
       const f = gerarFormacao(qtd);
-      expect(f[0]).toEqual({ x: 0.5, y: 0.15 });
+      expect(f.every((p) => p.y >= 0.22)).toBe(true);
+    });
+  });
+
+  it("para qtd<=3 distribui todos numa única linha (mesmo y)", () => {
+    [2, 3].forEach((qtd) => {
+      const f = gerarFormacao(qtd);
+      const ysUnicos = [...new Set(f.map((p) => p.y))];
+      expect(ysUnicos.length).toBe(1);
+      // x's distintos — jogadores lado a lado, não empilhados
+      const xsUnicos = [...new Set(f.map((p) => p.x))];
+      expect(xsUnicos.length).toBe(qtd);
     });
   });
 
@@ -43,29 +56,18 @@ describe("gerarFormacao", () => {
     expect(unicas.size).toBe(f.length);
   });
 
-  it("para qtd=5 mantém o formato 1-2-2 do FORMATION fixo anterior", () => {
-    const f = gerarFormacao(5);
-    // 1 goleiro + 2 linhas de 2 jogadores
-    expect(f.length).toBe(5);
-    // Linhas têm jogadores em y ≠ do goleiro
-    const ysSemGoleiro = f.slice(1).map((p) => p.y);
-    const ysUnicos = [...new Set(ysSemGoleiro)].sort((a, b) => a - b);
-    expect(ysUnicos.length).toBe(2);
-  });
-
-  it("para qtd=7 distribui em 3 linhas (1 + 2 + 2 + 2)", () => {
-    const f = gerarFormacao(7);
-    const ysSemGoleiro = f.slice(1).map((p) => p.y);
-    const ysUnicos = [...new Set(ysSemGoleiro)];
-    expect(ysUnicos.length).toBe(3);
+  it("para qtd entre 4 e 6 usa 2 linhas", () => {
+    [4, 5, 6].forEach((qtd) => {
+      const f = gerarFormacao(qtd);
+      const ysUnicos = [...new Set(f.map((p) => p.y))];
+      expect(ysUnicos.length).toBe(2);
+    });
   });
 
   it("Y das linhas é crescente (defesa em cima, ataque embaixo)", () => {
     const f = gerarFormacao(7);
     const ys = f.map((p) => p.y);
-    // Goleiro tem o menor Y; depois a ordem das linhas é crescente
-    expect(ys[0]).toBe(0.15);
-    for (let i = 2; i < ys.length; i++) {
+    for (let i = 1; i < ys.length; i++) {
       expect(ys[i]).toBeGreaterThanOrEqual(ys[i - 1]);
     }
   });

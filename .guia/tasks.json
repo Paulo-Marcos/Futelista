@@ -2,6 +2,38 @@
   "schemaVersion": 1,
   "tasks": [
     {
+      "id": "D-041",
+      "kind": "feature",
+      "title": "Chip de regra de sorteio e ajustes visuais",
+      "status": "Validada",
+      "origin": "Sessao 2026-06-24",
+      "context": "Aba Times ganha chip 'Sorteio: <regra>' que leva as Regras; glow do CTA vira LinearGradient (times e peladas/[id]); formacao sem goleiro dedicado (ate 3 na linha); badge da splash redondo; linha do campo mais visivel no tema.",
+      "createdAt": "2026-06-25",
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json",
+        "app/(pelada)/times.tsx",
+        "app/peladas/[id].tsx",
+        "src/shared/theme/themes.spec.ts",
+        "src/shared/theme/themes.ts",
+        "src/shared/ui/Splash.tsx",
+        "src/shared/ui/formacao.spec.ts",
+        "src/shared/ui/formacao.ts"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo.",
+        "RegraTimesChip + glow gradiente + formacao + Splash + themes",
+        "Demanda finalizada via Guia Fluxo."
+      ],
+      "validations": [
+        "npx jest formacao.spec themes.spec"
+      ],
+      "pending": []
+    },
+    {
       "id": "D-040",
       "kind": "feature",
       "title": "Reabrir partida encerrada para analise no resultado",

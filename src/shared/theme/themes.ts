@@ -317,12 +317,17 @@ export type Palette = {
 const FIELD_DARK = {
   fieldA: "#163A24",
   fieldB: "#13321F",
-  fieldLine: "rgba(255, 255, 255, 0.10)",
+  // Era 0.10 — somado ao opacity do PitchLines no Hero (0.38) ficava ~quase
+  // invisível na tela de início. 0.28 deixa a linha perceptível sem chapar.
+  fieldLine: "rgba(255, 255, 255, 0.28)",
 };
 const FIELD_LIGHT = {
   fieldA: "#43A64F",
   fieldB: "#3A9446",
-  fieldLine: "rgba(255, 255, 255, 0.62)",
+  // Linha branca sumia onde o fundo do modo claro vai pro branco (gradiente do
+  // Hero, fundo da Splash). Verde de gramado vívido contrasta sobre branco e
+  // sobre o tinte vermelho do brand, sem depender do gramado verde.
+  fieldLine: "rgba(31, 122, 64, 0.55)",
 };
 
 // ---------------------------------------------------------------------------

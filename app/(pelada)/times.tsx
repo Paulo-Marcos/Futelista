@@ -13,10 +13,12 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
+import { ChoosingTeams } from "@/src/domain/Rules";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
 import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
@@ -51,6 +53,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const flatListRef = useRef<FlatList<Team> | null>(null);
 
   const next = useGameSliceRequired((g) => g.next);
+  const choosingTeams = useGameSliceRequired((g) => g.rules.choosingTeams);
   const advantageId = useGameSliceRequired((g) => g.advantageToNext?.id);
   const totalJogadores = useGameSliceRequired((g) => g.players.length);
   const playersPerTeam = useGameSliceRequired((g) => g.rules.playersPerTeam);
@@ -341,6 +344,13 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         ) : null}
       </View>
 
+      {mostraDice ? (
+        <RegraTimesChip
+          choosingTeams={choosingTeams}
+          onPress={() => router.push("/regras")}
+        />
+      ) : null}
+
       <BannerSucesso mensagem={sucesso} onFechar={() => setSucesso(null)} />
 
       <BannerSelecao
@@ -622,9 +632,17 @@ function PrimaryCTA({
       ]}
     >
       {!disabled && Platform.OS === "android" ? (
-        <View
+        <LinearGradient
           pointerEvents="none"
-          style={[styles.glowHalo, { backgroundColor: palette.primary }]}
+          colors={[
+            palette.primary + "00",
+            palette.primary + "70",
+            palette.primary + "00",
+          ]}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.glowHalo}
         />
       ) : null}
       <Pressable
@@ -716,6 +734,67 @@ function PartidaSemFila({
     </ScrollView>
   );
 }
+
+// Chip informativo: mostra qual regra de montagem de times está em uso, pra o
+// usuário entender o resultado do sorteio antes de ficar apertando o dado.
+// Toque leva às Regras pra trocar a estratégia.
+function rotuloRegraTimes(c: ChoosingTeams): string {
+  switch (c) {
+    case ChoosingTeams.BY_ORDER:
+      return "Por ordem de chegada";
+    case ChoosingTeams.BY_ORDER_MIXING_TOP_TWO_TEAMS:
+      return "Sorteia os 2 primeiros times";
+    case ChoosingTeams.BY_MIXING_TEAMS:
+      return "Sorteio geral (embaralha todos)";
+  }
+}
+
+const RegraTimesChip = memo(function RegraTimesChip({
+  choosingTeams,
+  onPress,
+}: {
+  choosingTeams: ChoosingTeams;
+  onPress: () => void;
+}) {
+  const palette = usePalette();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Regra de sorteio: ${rotuloRegraTimes(choosingTeams)}. Toque para mudar nas regras.`}
+      style={({ pressed }) => [
+        styles.regraChip,
+        {
+          backgroundColor: palette.surfaceContainerHigh,
+          borderColor: palette.outlineVariant,
+          opacity: pressed ? 0.75 : 1,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons
+        name="shuffle-variant"
+        size={14}
+        color={palette.primary}
+      />
+      <Text
+        style={[styles.regraChipLabel, { color: palette.onSurfaceVariant }]}
+      >
+        Sorteio:
+      </Text>
+      <Text
+        style={[styles.regraChipText, { color: palette.onSurface }]}
+        numberOfLines={1}
+      >
+        {rotuloRegraTimes(choosingTeams)}
+      </Text>
+      <MaterialCommunityIcons
+        name="pencil-outline"
+        size={13}
+        color={palette.onSurfaceVariant}
+      />
+    </Pressable>
+  );
+});
 
 const BannerSucesso = memo(function BannerSucesso({
   mensagem,
@@ -1105,6 +1184,33 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xs,
   },
   headerCol: { flex: 1, minWidth: 0 },
+  // Chip "Sorteio: <regra>" — fica logo abaixo do header, alinhado à margem.
+  regraChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    alignSelf: "flex-start",
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    borderCurve: "continuous",
+    maxWidth: "92%",
+  },
+  regraChipLabel: {
+    ...Typography.label,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  regraChipText: {
+    ...Typography.label,
+    fontSize: 12,
+    fontWeight: "700",
+    flexShrink: 1,
+  },
   headerTitle: {
     fontSize: 30,
     fontWeight: "800",
@@ -1154,7 +1260,6 @@ const styles = StyleSheet.create({
     top: 14,
     bottom: -6,
     borderRadius: Radius.md,
-    opacity: 0.4,
   },
   cta: {
     flexDirection: "row",

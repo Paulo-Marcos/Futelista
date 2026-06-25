@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { useGameSlice } from "@/src/app-shell/useGameSlice";
 import { useSoccer } from "@/src/app-shell/useSoccer";
@@ -420,9 +421,17 @@ function PrimaryCTAComGlow({
       ]}
     >
       {!disabled && Platform.OS !== "web" ? (
-        <View
+        <LinearGradient
           pointerEvents="none"
-          style={[styles.ctaHalo, { backgroundColor: palette.primary }]}
+          colors={[
+            palette.primary + "00",
+            palette.primary + "70",
+            palette.primary + "00",
+          ]}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.ctaHalo}
         />
       ) : null}
       <Pressable
@@ -854,7 +863,6 @@ const styles = StyleSheet.create({
     top: 14,
     bottom: -6,
     borderRadius: Radius.md,
-    opacity: Platform.OS === "android" ? 0.4 : 0.55,
   },
   cta: {
     flexDirection: "row",

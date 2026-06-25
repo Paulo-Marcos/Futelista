@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 96,
     height: 96,
-    borderRadius: 30,
+    borderRadius: 48,
     borderWidth: 3,
   },
   badgeWrap: {
@@ -499,12 +499,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.55,
     shadowRadius: 25,
     elevation: 16,
-    borderRadius: 30,
+    borderRadius: 48,
   },
+  // Badge redondo (raio = metade de 96) — fica como um disco no círculo
+  // central do campo, em vez do quadrado arredondado anterior.
   badge: {
     width: 96,
     height: 96,
-    borderRadius: 30,
+    borderRadius: 48,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
