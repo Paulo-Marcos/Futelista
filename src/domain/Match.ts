@@ -1,9 +1,11 @@
 import "react-native-get-random-values";
 import * as uuid from "uuid";
 import { Goal } from "./Goal";
-import { Team, TeamSituation } from "./Team";
-import { Player } from "./Player";
 import { ScreenTime } from "./ScreenTime";
+import { ResultMatch } from "./ResultMatch";
+import { TeamSituation } from "./TeamSituation";
+import type { Player } from "./Player";
+import type { Team } from "./Team";
 
 /**
  * Partida entre dois times. Mantém o conjunto de gols, decide vencedor e
@@ -90,13 +92,7 @@ export class Match {
   }
 }
 
-/**
- * Resultado final de uma partida.
- *
- *  - DRAW:    empate (ambos os times com mesmo número de gols).
- *  - VICTORY: vitória de um dos times — `winner` e `loser` definidos.
- */
-export enum ResultMatch {
-  DRAW,
-  VICTORY,
-}
+// `ResultMatch` foi extraído para ./ResultMatch (quebra o require cycle
+// Match ⇄ Player). Re-exportado aqui para manter a API
+// `import { ResultMatch } from "./Match"` dos consumidores existentes.
+export { ResultMatch } from "./ResultMatch";

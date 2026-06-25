@@ -1,9 +1,11 @@
 import "react-native-get-random-values";
-import { Goal } from "./Goal";
-import { Match } from "./Match";
-import { Player, PlayerSituation } from "./Player";
 import { Switch } from "./Switch";
 import * as uuid from "uuid";
+import { PlayerSituation } from "./PlayerSituation";
+import { TeamSituation } from "./TeamSituation";
+import type { Goal } from "./Goal";
+import type { Match } from "./Match";
+import type { Player } from "./Player";
 
 /**
  * Time de pelada — agrupamento de até `limit` jogadores.
@@ -160,17 +162,6 @@ export class Team {
   }
 }
 
-/**
- * Situação atual do time na fila/partida.
- *
- *  - CREATED:  recém-formado, ainda não entrou na fila de próximos.
- *  - ON_NEXT:  aguardando na fila para entrar em partida.
- *  - PLAYING:  jogando partida atual.
- *  - STOPPED:  saiu da rodada (perdeu, foi removido manualmente etc.).
- */
-export enum TeamSituation {
-  PLAYING,
-  STOPPED,
-  ON_NEXT,
-  CREATED,
-}
+// `TeamSituation` foi extraído para ./TeamSituation (quebra o require cycle
+// Match ⇄ Team). Re-exportado aqui para manter a API existente.
+export { TeamSituation } from "./TeamSituation";

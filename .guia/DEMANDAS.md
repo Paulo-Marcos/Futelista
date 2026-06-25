@@ -2,6 +2,50 @@
 
 ---
 
+## [D-037] 🧹 Extrai enums do dominio para quebrar require cycles
+
+- **Status:** Aguardando validacao
+- **Origem:** Sessao 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** Move ResultMatch, PlayerSituation e TeamSituation para arquivos proprios, com re-export nos modulos originais e imports type-only. Quebra o ciclo Match<->Team<->Player sem mudar a API publica.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
+- `app/(pelada)/times.tsx`
+- `app/__tests__/resultado-test.tsx`
+- `app/peladas/[id].tsx`
+- `app/resultado.tsx`
+- `src/domain/GestorJogo.ts`
+- `src/domain/Goal.ts`
+- `src/domain/Match.ts`
+- `src/domain/Player.ts`
+- `src/domain/Switch.ts`
+- `src/domain/Team.ts`
+- `src/domain/Timer.ts`
+- `src/infrastructure/storage/serializer.ts`
+- `src/shared/theme/themes.spec.ts`
+- `src/shared/theme/themes.ts`
+- `src/shared/ui/Splash.tsx`
+- `src/shared/ui/formacao.spec.ts`
+- `src/shared/ui/formacao.ts`
+
+### O que foi feito
+
+- Demanda criada via Guia Fluxo.
+- Enums em arquivos proprios + import type; API preservada via re-export
+
+### Validacao feita
+
+- npx tsc --noEmit
+
+### Validacao pendente
+
+- Validacao manual do desenvolvedor.
+
 ## [D-036] 🧹 Atualiza Expo SDK 51 para 54
 
 - **Status:** Aguardando validacao

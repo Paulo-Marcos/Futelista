@@ -1,1 +1,1 @@
-D-036 🧹 - #FINALIZADO - Atualiza Expo SDK 51 para 54
+D-037 🧹 - #FINALIZADO - Extrai enums do dominio para quebrar require cycles

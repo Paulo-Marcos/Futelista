@@ -1,6 +1,6 @@
 {
-  "taskId": "D-036",
+  "taskId": "D-037",
   "status": "Validada",
-  "title": "Atualiza Expo SDK 51 para 54",
-  "chatTitle": "D-036 \ud83e\uddf9 - #FINALIZADO - Atualiza Expo SDK 51 para 54"
+  "title": "Extrai enums do dominio para quebrar require cycles",
+  "chatTitle": "D-037 \ud83e\uddf9 - #FINALIZADO - Extrai enums do dominio para quebrar require cycles"
 }

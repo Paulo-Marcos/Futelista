@@ -1,8 +1,10 @@
 import "react-native-get-random-values";
 import * as uuid from "uuid";
-import { Goal } from "./Goal";
-import { Team } from "./Team";
-import { Match, ResultMatch } from "./Match";
+import { PlayerSituation } from "./PlayerSituation";
+import { ResultMatch } from "./ResultMatch";
+import type { Goal } from "./Goal";
+import type { Match } from "./Match";
+import type { Team } from "./Team";
 
 /**
  * Jogador participante de uma pelada.
@@ -148,15 +150,6 @@ export type EstatisticasJogador = {
   derrotas: number;
 };
 
-/**
- * Estado momentâneo do jogador na pelada.
- *
- *  - NO_TEAM: cadastrado mas ainda sem time atribuído.
- *  - ACTIVE:  está em um time (`currentTeam` definido).
- *  - STOPPED: foi removido do time e não joga até voltar.
- */
-export enum PlayerSituation {
-  STOPPED,
-  ACTIVE,
-  NO_TEAM,
-}
+// `PlayerSituation` foi extraído para ./PlayerSituation (quebra o require
+// cycle Team ⇄ Player). Re-exportado aqui para manter a API existente.
+export { PlayerSituation } from "./PlayerSituation";

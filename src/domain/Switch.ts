@@ -1,5 +1,5 @@
-import { Player } from "./Player";
-import { Team } from "./Team";
+import type { Player } from "./Player";
+import type { Team } from "./Team";
 
 /**
  * Troca de jogador num time — value object imutável.

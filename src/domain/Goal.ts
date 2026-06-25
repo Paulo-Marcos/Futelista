@@ -1,7 +1,7 @@
-import { Match } from "./Match";
 import { ScreenTime } from "./ScreenTime";
-import { Team } from "./Team";
-import { Player } from "./Player";
+import type { Match } from "./Match";
+import type { Player } from "./Player";
+import type { Team } from "./Team";
 
 /**
  * Gol — value object imutável que liga partida, autor, time beneficiado
