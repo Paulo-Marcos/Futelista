@@ -165,6 +165,15 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const alocarSemTime = () =>
     safeAction(() => gestor.relocatePlayersWithoutTeam());
 
+  // Apenas em dev (__DEV__): sanea times de saves antigos corrompidos
+  // (jogador no roster de dois times, referência de time repetida em next)
+  // sem precisar fechar/reabrir a pelada. O autosave persiste o resultado.
+  const repararDev = () =>
+    safeAction(() => {
+      gestor.repararIntegridadeDosTimes();
+      setSucesso("Integridade dos times reparada.");
+    });
+
   const iniciarPartida = async () => {
     if (playersWithoutTeam > 0) {
       const ok = await confirmAcao({
@@ -288,6 +297,27 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
             Vencedor fica · perdedor sai
           </Text>
         </View>
+        {__DEV__ ? (
+          <Pressable
+            onPress={repararDev}
+            accessibilityRole="button"
+            accessibilityLabel="DEV: reparar integridade dos times"
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              {
+                backgroundColor: palette.surfaceContainerHigh,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            android_ripple={{ color: palette.primary + "22" }}
+          >
+            <MaterialCommunityIcons
+              name="wrench-outline"
+              size={20}
+              color={palette.warning}
+            />
+          </Pressable>
+        ) : null}
         {mostraDice ? (
           <Pressable
             onPress={sortearNovamente}

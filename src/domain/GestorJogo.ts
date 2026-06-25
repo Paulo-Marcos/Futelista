@@ -95,8 +95,16 @@ export class GestorJogo {
   setPlayers(names: string[]): Player[] {
     this.players = [];
     this.playersWithoutTeam = 0;
+    // Mesma política de `addPlayers`: ignora nomes vazios e duplicados
+    // (trim + case-insensitive). Sem isto, nomes repetidos vindos de uma
+    // lista herdada criavam jogadores fantasma — que `createTeams` depois
+    // distribuía como se fossem pessoas distintas, duplicando jogadores
+    // entre os times.
     names.forEach((name) => {
-      const newPlayer = new Player({ name });
+      const limpo = name.trim();
+      if (limpo.length === 0) return;
+      if (this.encontrarPorNome(limpo)) return;
+      const newPlayer = new Player({ name: limpo });
       this.players.push(newPlayer);
       this.playersWithoutTeam++;
     });
@@ -157,6 +165,78 @@ export class GestorJogo {
    */
   private recomputePlayersWithoutTeam(): void {
     this.playersWithoutTeam = this.players.filter((p) => !p.currentTeam).length;
+  }
+
+  /**
+   * Sanea invariantes de composição que saves antigos podem violar
+   * (gerados por versões com bugs históricos de troca/remoção/realocação):
+   *
+   *  1. `next` não pode ter a mesma referência de time duas vezes.
+   *  2. Um time que está em `playing` não pode estar também em `next`.
+   *  3. Um jogador não pode aparecer no roster de mais de um time ativo
+   *     (fila + partida), nem repetido dentro do mesmo time.
+   *  4. `currentTeam` aponta para o time ativo que de fato o contém
+   *     (ou `undefined` se ele não está em nenhum).
+   *
+   * Conflitos de posse são resolvidos a favor do time apontado por
+   * `currentTeam`; na ausência dele, a favor do primeiro time que o lista.
+   * Idempotente: rodar sobre um estado já íntegro é no-op.
+   *
+   * Notifica no fim (como todo mutador público) para que a UI re-renderize
+   * e o autosave persista o estado saneado. Na reidratação isso roda antes
+   * de qualquer listener existir, então é inofensivo.
+   */
+  repararIntegridadeDosTimes(): void {
+    const idsTime = new Set<string>();
+    this.next = this.next.filter((t) => {
+      if (idsTime.has(t.id)) return false;
+      idsTime.add(t.id);
+      return true;
+    });
+
+    if (this.playing) {
+      const idsEmJogo = new Set([
+        this.playing.teamA.id,
+        this.playing.teamB.id,
+      ]);
+      this.next = this.next.filter((t) => !idsEmJogo.has(t.id));
+    }
+
+    const ativos: Team[] = [...this.next];
+    if (this.playing) ativos.push(this.playing.teamA, this.playing.teamB);
+
+    // Time "canônico" de cada jogador: prioriza o apontado por currentTeam.
+    const canonico = new Map<string, Team>();
+    for (const team of ativos) {
+      for (const player of team.players) {
+        const atual = canonico.get(player.id);
+        if (!atual || player.currentTeam === team) {
+          canonico.set(player.id, team);
+        }
+      }
+    }
+
+    // Mantém cada jogador só no time canônico, sem repetição interna.
+    for (const team of ativos) {
+      const mantidos: Player[] = [];
+      const vistos = new Set<string>();
+      for (const player of team.players) {
+        if (vistos.has(player.id)) continue;
+        if (canonico.get(player.id) !== team) continue;
+        vistos.add(player.id);
+        mantidos.push(player);
+      }
+      team.players = mantidos;
+      team.updateSizeTeam();
+    }
+
+    for (const player of this.players) {
+      const dono = canonico.get(player.id);
+      if (player.currentTeam !== dono) player.currentTeam = dono;
+    }
+
+    this.recomputePlayersWithoutTeam();
+    this.notify();
   }
 
   setPlayingGame(): void {

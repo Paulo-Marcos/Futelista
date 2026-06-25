@@ -354,6 +354,13 @@ function buildGestorJogo(payload: Payload): GestorJogo {
     jogo.timer = rehydrateTimer(payload.timer, () => jogo["notify"]?.());
   }
 
+  // Saves gerados por versões antigas (com bugs históricos de troca/remoção)
+  // podiam gravar um jogador no roster de dois times ou referências de time
+  // repetidas em `next`. O relink acima reproduz fielmente a corrupção, então
+  // saneamos antes de devolver o agregado — sem isto, a tela de Times mostra
+  // jogadores duplicados mesmo com a lista de jogadores intacta.
+  jogo.repararIntegridadeDosTimes();
+
   return jogo;
 }
 
