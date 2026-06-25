@@ -81,13 +81,17 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
     }
   };
 
-  const encerrarPelada = () => {
-    try {
-      gestor.setNextMatch();
-    } catch {
-      /* já encerrada — segue para tela */
-    }
-    router.replace("/peladas");
+  // "Voltar ao início": só fecha o resultado e volta pra home da pelada.
+  // A opção de encerrar/finalizar a pelada vive no menu da home (cog).
+  const voltarAoInicio = () => {
+    router.replace("/");
+  };
+
+  // "Voltar à partida": reabre a partida (cronômetro pausado) para análise
+  // e leva de volta à tela da partida, de onde o usuário pode continuar.
+  const voltarAPartida = () => {
+    gestor.reabrirPartida();
+    router.replace("/partida");
   };
 
   const placarA = goals?.teamA ?? 0;
@@ -323,15 +327,15 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
           fullWidth
         />
         <SecondaryButton
-          label="Encerrar pelada"
-          icon="flag-checkered"
-          onPress={encerrarPelada}
+          label="Voltar ao início"
+          icon="home-outline"
+          onPress={voltarAoInicio}
           fullWidth
         />
         <SecondaryButton
           label="Voltar à partida"
           icon="arrow-left"
-          onPress={() => router.back()}
+          onPress={voltarAPartida}
           fullWidth
         />
       </View>

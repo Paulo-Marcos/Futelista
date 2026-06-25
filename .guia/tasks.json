@@ -2,6 +2,40 @@
   "schemaVersion": 1,
   "tasks": [
     {
+      "id": "D-040",
+      "kind": "feature",
+      "title": "Reabrir partida encerrada para analise no resultado",
+      "status": "Validada",
+      "origin": "Sessao 2026-06-24",
+      "context": "Na tela de resultado, 'Encerrar pelada' vira 'Voltar ao inicio' (home) e 'Voltar a partida' agora reabre a partida (reabrirPartida limpa resultado/vencedor e pausa o cronometro) e navega para /partida, em vez de router.back.",
+      "createdAt": "2026-06-25",
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json",
+        "app/__tests__/resultado-test.tsx",
+        "app/peladas/[id].tsx",
+        "app/resultado.tsx",
+        "src/domain/GestorJogo.ts",
+        "src/shared/theme/themes.spec.ts",
+        "src/shared/theme/themes.ts",
+        "src/shared/ui/Splash.tsx",
+        "src/shared/ui/formacao.spec.ts",
+        "src/shared/ui/formacao.ts"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo.",
+        "reabrirPartida() no dominio + nova navegacao em resultado.tsx",
+        "Demanda finalizada via Guia Fluxo."
+      ],
+      "validations": [
+        "npx jest resultado-test"
+      ],
+      "pending": []
+    },
+    {
       "id": "D-039",
       "kind": "bug",
       "title": "Times duplicavam jogadores em saves antigos",

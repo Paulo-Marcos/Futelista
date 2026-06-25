@@ -83,7 +83,7 @@ describe("Resultado — guards", () => {
     expect(screen.getByText("Nenhum resultado pendente")).toBeTruthy();
   });
 
-  it("'Voltar à partida' chama router.back", () => {
+  it("'Voltar à partida' reabre a partida e navega para /partida", () => {
     const m = buildResultadoManager({
       result: ResultMatch.VICTORY,
       vencedor: "A",
@@ -92,7 +92,22 @@ describe("Resultado — guards", () => {
 
     fireEvent.press(screen.getByRole("button", { name: "Voltar à partida" }));
 
-    expect(router.back).toHaveBeenCalledTimes(1);
+    // Reabre a partida: limpa o resultado pra UI não pular de volta pro
+    // resultado, e leva o usuário de volta à tela da partida.
+    expect(m.playing!.result).toBeUndefined();
+    expect(router.replace).toHaveBeenCalledWith("/partida");
+  });
+
+  it("'Voltar ao início' navega para a home", () => {
+    const m = buildResultadoManager({
+      result: ResultMatch.VICTORY,
+      vencedor: "A",
+    });
+    renderResultado(m);
+
+    fireEvent.press(screen.getByRole("button", { name: "Voltar ao início" }));
+
+    expect(router.replace).toHaveBeenCalledWith("/");
   });
 });
 

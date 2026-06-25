@@ -747,6 +747,24 @@ export class GestorJogo {
     this.notify();
   }
 
+  /**
+   * Reabre a partida recém-encerrada para análise (botão "Voltar à partida"
+   * da tela de resultado). Limpa o resultado/vencedor — sem isso a UI pularia
+   * de volta pro resultado — e deixa o cronômetro PAUSADO, pra o usuário
+   * revisar o jogo e então continuar ou encerrar de novo.
+   *
+   * No-op quando não há partida ou ela ainda não tinha resultado definido.
+   */
+  reabrirPartida(): void {
+    const partida = this.playing;
+    if (!partida || partida.result === undefined) return;
+    partida.result = undefined;
+    partida.winner = undefined;
+    partida.loser = undefined;
+    if (this.timer) this.timer.status = TimerStatus.PAUSED;
+    this.notify();
+  }
+
   // Atualiza os novos times, considerando o resultado do jogo.
   setNextMatch(teamWithExternalAdvantage?: Team): void {
     this.arquivarPartidaEncerrada();

@@ -2,6 +2,42 @@
 
 ---
 
+## [D-040] ✨ Reabrir partida encerrada para analise no resultado
+
+- **Status:** Aguardando validacao
+- **Origem:** Sessao 2026-06-24
+- **Tipo:** Feature
+- **Contexto:** Na tela de resultado, 'Encerrar pelada' vira 'Voltar ao inicio' (home) e 'Voltar a partida' agora reabre a partida (reabrirPartida limpa resultado/vencedor e pausa o cronometro) e navega para /partida, em vez de router.back.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
+- `app/__tests__/resultado-test.tsx`
+- `app/peladas/[id].tsx`
+- `app/resultado.tsx`
+- `src/domain/GestorJogo.ts`
+- `src/shared/theme/themes.spec.ts`
+- `src/shared/theme/themes.ts`
+- `src/shared/ui/Splash.tsx`
+- `src/shared/ui/formacao.spec.ts`
+- `src/shared/ui/formacao.ts`
+
+### O que foi feito
+
+- Demanda criada via Guia Fluxo.
+- reabrirPartida() no dominio + nova navegacao em resultado.tsx
+
+### Validacao feita
+
+- npx jest resultado-test
+
+### Validacao pendente
+
+- Validacao manual do desenvolvedor.
+
 ## [D-039] 🐛 Times duplicavam jogadores em saves antigos
 
 - **Status:** Aguardando validacao

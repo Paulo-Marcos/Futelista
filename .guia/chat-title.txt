@@ -1,1 +1,1 @@
-D-039 🐛 - #FINALIZADO - Times duplicavam jogadores em saves antigos
+D-040 ✨ - #FINALIZADO - Reabrir partida encerrada para analise no resultado
