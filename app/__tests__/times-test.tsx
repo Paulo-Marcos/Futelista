@@ -1,9 +1,10 @@
-import { Alert, Pressable } from "react-native";
+import { Alert } from "react-native";
 
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Rules } from "@/src/domain/Rules";
 import {
   fireEvent,
+  getAllPressables,
   renderWithProviders,
   screen,
   waitFor,
@@ -66,9 +67,7 @@ function mockAlert(pick: (b: { text?: string; style?: string }) => boolean) {
 }
 
 function getPressableByLabel(label: string) {
-  return screen
-    .UNSAFE_getAllByType(Pressable)
-    .find((p) => p.props.accessibilityLabel === label);
+  return getAllPressables().find((p) => p.props.accessibilityLabel === label);
 }
 
 // ===========================================================================

@@ -7,11 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0C0C0E"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.paulomarcos.futelista"
@@ -32,7 +27,15 @@
       "icon": "./assets/images/notification-icon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0C0C0E",
+          "image": "./assets/images/icon.png",
+          "imageWidth": 160
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

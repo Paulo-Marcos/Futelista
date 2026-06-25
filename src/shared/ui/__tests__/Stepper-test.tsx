@@ -1,18 +1,17 @@
 import { Stepper } from "../Stepper";
 import {
   fireEvent,
+  getAllPressables,
   renderWithProviders,
   screen,
 } from "@/src/test/renderWithProviders";
 
 /**
  * O Stepper expõe dois Pressable sem accessibilityLabel.
- * Testamos via UNSAFE_getAllByType(Pressable) — a ordem é [-, +].
+ * Pegamos por ordem de renderização — [-, +].
  */
-import { Pressable } from "react-native";
-
 function getButtons() {
-  const all = screen.UNSAFE_getAllByType(Pressable);
+  const all = getAllPressables();
   return { decrementar: all[0], incrementar: all[1] };
 }
 

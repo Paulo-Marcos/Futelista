@@ -1,4 +1,7 @@
-import * as FileSystem from "expo-file-system";
+// SDK 54: a API clássica de arquivos (documentDirectory, getInfoAsync,
+// copyAsync, deleteAsync) migrou para o submódulo `/legacy`. A nova API
+// (File/Directory/Paths) fica para um refactor futuro — ver F-19.
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 
 /**

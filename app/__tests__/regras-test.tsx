@@ -1,10 +1,9 @@
-import { Pressable } from "react-native";
-
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams, Rules } from "@/src/domain/Rules";
 import { Timer, TimerStatus } from "@/src/domain/Timer";
 import {
   fireEvent,
+  getAllPressables,
   renderWithProviders,
   screen,
 } from "@/src/test/renderWithProviders";
@@ -52,9 +51,7 @@ function renderRegras(gestor: GestorJogo | null) {
 }
 
 function getPressableByLabel(label: string) {
-  return screen
-    .UNSAFE_getAllByType(Pressable)
-    .find((p) => p.props.accessibilityLabel === label);
+  return getAllPressables().find((p) => p.props.accessibilityLabel === label);
 }
 
 // ===========================================================================
