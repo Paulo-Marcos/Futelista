@@ -568,7 +568,7 @@ export class GestorJogo {
       placar.teamA >= this.rules.goalLimit ||
       placar.teamB >= this.rules.goalLimit
     ) {
-      this.timer.status = TimerStatus.ENDED;
+      this.timer.encerrar();
       partida.setResult();
     }
   }
@@ -659,6 +659,11 @@ export class GestorJogo {
 
   setResult(): void {
     this.playing?.setResult();
+    // Encerramento manual ("Encerrar"): para o cronômetro de vez (limpa o
+    // setInterval e marca ENDED). Sem isto ele seguia decrementando em
+    // segundo plano na tela de resultado e era reaproveitado pela metade
+    // na próxima partida.
+    this.timer?.encerrar();
     this.notify();
   }
 
@@ -669,7 +674,20 @@ export class GestorJogo {
       jogo: this,
       externalAdvantage: teamWithExternalAdvantage,
     });
+    // Cada partida tem o seu cronômetro. Ao trocar de jogo, descarta o
+    // anterior para que a próxima comece com o tempo cheio — sem isto o
+    // `start()` reaproveitava o Timer com o `restTime` que sobrou.
+    this.descartarTimer();
     this.notify();
+  }
+
+  /**
+   * Encerra e descarta o cronômetro da partida arquivada. A próxima
+   * partida cria um Timer novo (tempo cheio) no `start()`.
+   */
+  private descartarTimer(): void {
+    this.timer?.encerrar();
+    this.timer = undefined;
   }
 
   /**

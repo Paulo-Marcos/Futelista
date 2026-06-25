@@ -2,6 +2,43 @@
   "schemaVersion": 1,
   "tasks": [
     {
+      "id": "D-038",
+      "kind": "bug",
+      "title": "Cronometro nao encerrava ao fim da partida",
+      "status": "Validada",
+      "origin": "Sessao 2026-06-24",
+      "context": "Ao encerrar (manual ou gol-limite) o Timer seguia decrementando em segundo plano e era reaproveitado pela metade na proxima partida. Novo Timer.encerrar() limpa o setInterval e marca ENDED; setNextMatch descarta o timer.",
+      "createdAt": "2026-06-24",
+      "updatedAt": "2026-06-24",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json",
+        "app/(pelada)/times.tsx",
+        "app/__tests__/resultado-test.tsx",
+        "app/peladas/[id].tsx",
+        "app/resultado.tsx",
+        "src/domain/GestorJogo.ts",
+        "src/domain/Timer.ts",
+        "src/infrastructure/storage/serializer.ts",
+        "src/shared/theme/themes.spec.ts",
+        "src/shared/theme/themes.ts",
+        "src/shared/ui/Splash.tsx",
+        "src/shared/ui/formacao.spec.ts",
+        "src/shared/ui/formacao.ts"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo.",
+        "Timer.encerrar() + descartarTimer; chamado em gol-limite, setResult e setNextMatch",
+        "Demanda finalizada via Guia Fluxo."
+      ],
+      "validations": [
+        "npx jest GestorJogo.timer.spec"
+      ],
+      "pending": []
+    },
+    {
       "id": "D-037",
       "kind": "chore",
       "title": "Extrai enums do dominio para quebrar require cycles",

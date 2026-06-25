@@ -67,6 +67,17 @@ export class Timer {
     this.status = TimerStatus.INTERVAL;
     this.onChange?.();
   }
+
+  /**
+   * Encerra o cronômetro imediatamente: interrompe o tick e marca ENDED.
+   * Diferente de `stop()`, não avança para o próximo tempo — encerra a
+   * partida inteira (encerramento manual ou por gol-limite). Não notifica:
+   * quem chama (GestorJogo) já dispara o `notify()` da mudança de estado.
+   */
+  encerrar(): void {
+    clearInterval(this.timeOutId);
+    this.status = TimerStatus.ENDED;
+  }
 }
 
 export enum TimerStatus {
