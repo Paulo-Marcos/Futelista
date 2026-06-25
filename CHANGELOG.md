@@ -12,7 +12,7 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ### Planejado (rastreado em `COMMITS_PLAN.md`)
 
-- Passada de formatação (`prettier --write`) e ativação do passo de lint no CI.
+- Passada de formatação (`prettier --write`) em toda a base.
 - Substituir `setState([])` por `useSyncExternalStore` na cola React.
 - Publicação nas lojas (Google Play / App Store).
 
@@ -30,7 +30,7 @@ Primeira versão oficial: domínio completo e testado, UI navegável, persistên
 - **Disponibilização**:
   - Web pública via EAS Hosting — <https://futelista.expo.app> (`npm run deploy:web`).
   - APK Android (perfil `preview` do EAS); id do app `com.paulomarcos.futelista`.
-- **CI** (GitHub Actions): type-check (`tsc`) + testes (`jest`) a cada push/PR.
+- **CI** (GitHub Actions): type-check (`tsc`) + lint (`eslint` + `prettier`) + testes (`jest`) a cada push/PR.
 - **Documentação** humana em `docs/` (guias de usuário e de desenvolvedor, ADRs) e `PRIVACY.md`.
 - **Governança para agentes de IA**: `CLAUDE.md`, `AGENTS.md`, `AI_NAVIGATION.md`, skills/rules e lock por arquivo (`features/registry.yaml`).
 - `LICENSE` MIT — projeto oficialmente código aberto.
