@@ -146,7 +146,7 @@
 
 ## [D-007] 🧹 Verificar links de docs/ (AI_NAVIGATION, guias)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Confirmar] README/CHANGELOG citam AI_NAVIGATION.md e guias; conferir que os arquivos linkados existem. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #7). Skills-base: open-source-readiness.
@@ -163,6 +163,7 @@
 
 - Em desenvolvimento desde 2026-06-25.
 - Varredura de links relativos em README/CHANGELOG/AI_NAVIGATION/docs (161 links). README e CHANGELOG: todos resolvem. Corrigi 14 links quebrados por refactor (raiz contexts/providers/hooks/components -> src/app-shell e src/shared; app/(tabs) -> app/(pelada)): 8 em ui.md, 1 em arquitetura.md, 2 em adr/0002, 11 em AI_NAVIGATION.md.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -170,7 +171,13 @@
 
 ### Validacao pendente
 
-- 2 alvos inexistentes deixados como demanda derivada (nao criar arquivo): tela 'Gerenciamento' app/(tabs)/GestorJogo.tsx removida no refactor (AI_NAVIGATION.md:37); pasta docs/assets/screenshots/ ainda sem capturas (docs/README.md:36)
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T23:19:01-03:00
 
 ## [D-023] 🧹 Remover comentario-cicatriz em Team.ts:114
 
