@@ -44,7 +44,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("preserva fila de próximos com mesmos jogadores em cada time", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
@@ -58,7 +58,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("religa Player.currentTeam para o mesmo Team reidratado (mesma referência)", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
@@ -71,14 +71,14 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("preserva partida em andamento com gols e placar", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     const teamA = original.playing!.teamA;
     const teamB = original.playing!.teamB;
-    original.addGoal(teamA, teamA.players[0]);
-    original.addGoal(teamA, teamA.players[1]);
-    original.addGoal(teamB, teamB.players[0]);
+    original.marcarGol(teamA, teamA.players[0]);
+    original.marcarGol(teamA, teamA.players[1]);
+    original.marcarGol(teamB, teamB.players[0]);
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
@@ -90,7 +90,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("Timer que estava STARTED volta como PAUSED no reload", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     expect(original.timer!.status).toBe(TimerStatus.STARTED);
@@ -107,7 +107,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("[F-17] preserva o restTime exato do cronômetro entre reloads", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     // Pausa e decrementa manualmente o restTime — simula app fechado
@@ -122,7 +122,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("[F-17] preserva currentNumberTime > 1 (partida no 2º tempo)", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     original.pause();
@@ -138,13 +138,13 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("[F-17] preserva substituições banco→campo no roster após reload", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     const teamA = original.playing!.teamA;
     const reserva = original.next[0].players[0];
     const saindo = teamA.players[0];
-    original.switchPlayerLeft(reserva, saindo);
+    original.trocarJogadorPelaEsquerda(reserva, saindo);
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
@@ -170,7 +170,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("[F-18] preserva nomeCustom e corCustom do time entre reloads", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.next[0].renomear("Vermelhos");
     original.next[0].mudarCor("#E11D2A");
 
@@ -182,13 +182,13 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("[F-17] preserva instante do gol (ScreenTime) entre reloads", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     // Simula que passaram 45s no cronômetro antes do gol.
     original.timer!.restTime = original.timer!.timeMatch - 45;
     const team = original.playing!.teamA;
-    original.addGoal(team, team.players[0]);
+    original.marcarGol(team, team.players[0]);
     const golOriginal = original.playing!.goals[0];
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
@@ -200,13 +200,13 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("após vitória, preserva o time com vantagem para a próxima partida", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     const teamVencedor = original.playing!.teamA;
-    original.addGoal(teamVencedor, teamVencedor.players[0]);
+    original.marcarGol(teamVencedor, teamVencedor.players[0]);
     original.setResult();
-    original.setNextMatch();
+    original.definirProximaPartida();
 
     const recriada = deserializeGestorJogo(serializeGestorJogo(original));
 
@@ -231,12 +231,12 @@ describe("serializer (round-trip GestorJogo)", () => {
       }),
     );
     jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-    jogo.createTeams(); // 2 times de 2
+    jogo.criarTimes(); // 2 times de 2
     jogo.setPlayingGame(); // ambos em campo → fila vazia
     jogo.start();
 
     // Tira um jogador do time em campo sem reserva pra puxar.
-    jogo.removeFromGame(jogo.playing!.teamA.players[0]);
+    jogo.tirarDoJogo(jogo.playing!.teamA.players[0]);
 
     expect(() => serializeGestorJogo(jogo)).not.toThrow();
     const recriada = deserializeGestorJogo(serializeGestorJogo(jogo));
@@ -260,17 +260,17 @@ describe("serializer (round-trip GestorJogo)", () => {
       artilheiroDoPerdedor: Player;
     } {
       const jogo = buildPeladaComJogadores(); // 6 jogadores, 2 por time
-      jogo.createTeams(); // 3 times (BY_ORDER)
+      jogo.criarTimes(); // 3 times (BY_ORDER)
       jogo.setPlayingGame(); // A x B em campo; fila: [C]
       jogo.start();
       const teamA = jogo.playing!.teamA;
       const teamB = jogo.playing!.teamB;
       const artilheiroDoPerdedor = teamB.players[0];
-      jogo.addGoal(teamA, teamA.players[0]);
-      jogo.addGoal(teamA, teamA.players[1]);
-      jogo.addGoal(teamB, artilheiroDoPerdedor);
+      jogo.marcarGol(teamA, teamA.players[0]);
+      jogo.marcarGol(teamA, teamA.players[1]);
+      jogo.marcarGol(teamB, artilheiroDoPerdedor);
       jogo.setResult(); // A vence 2x1
-      jogo.setNextMatch(); // B vai pra fila; A x C em campo
+      jogo.definirProximaPartida(); // B vai pra fila; A x C em campo
       return { jogo, artilheiroDoPerdedor };
     }
 
@@ -295,7 +295,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
     it("salva de novo após reload com jogador removido que tinha gol marcado", () => {
       const { jogo, artilheiroDoPerdedor } = buildPeladaComPartidaEncerrada();
-      jogo.removePlayer(artilheiroDoPerdedor);
+      jogo.removerJogador(artilheiroDoPerdedor);
 
       const reidratada = deserializeGestorJogo(serializeGestorJogo(jogo));
 
@@ -410,7 +410,7 @@ describe("serializer (round-trip GestorJogo)", () => {
 
   it("dispara notify do GestorJogo reidratado quando o Timer ticka", () => {
     const original = buildPeladaComJogadores();
-    original.createTeams();
+    original.criarTimes();
     original.setPlayingGame();
     original.start();
     original.pause();

@@ -102,7 +102,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
     const nome = novoNome.trim();
     if (!nome) return;
     try {
-      gestor.addPlayer(nome);
+      gestor.adicionarJogador(nome);
       setNovoNome("");
       setErro(null);
       // Rolar até o fim para tornar visível o jogador recém-criado.
@@ -114,7 +114,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
 
   const adicionarLote = (nomes: string[]) => {
     try {
-      const criados = gestor.addPlayers(nomes);
+      const criados = gestor.adicionarJogadores(nomes);
       setLoteAberto(false);
       if (criados.length === 0) {
         setErro("Nenhum jogador adicionado (todos vazios ou duplicados).");
@@ -136,7 +136,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
     });
     if (!ok) return;
     try {
-      gestor.removePlayer(p);
+      gestor.removerJogador(p);
       setErro(null);
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));
@@ -206,7 +206,7 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
       return;
     }
     try {
-      gestor.renamePlayer(p, editingNome);
+      gestor.renomearJogador(p, editingNome);
       cancelarEdicao();
       setErro(null);
     } catch (e) {

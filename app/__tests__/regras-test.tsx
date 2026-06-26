@@ -35,8 +35,8 @@ function buildManager(opts?: {
     new Rules({ playersPerTeam: 4, ...opts?.rules }),
   );
   if (opts?.comTimes || opts?.comPartida) {
-    m.addPlayers(Array.from({ length: 8 }, (_, i) => `J${i + 1}`));
-    m.createTeams();
+    m.adicionarJogadores(Array.from({ length: 8 }, (_, i) => `J${i + 1}`));
+    m.criarTimes();
     if (opts?.comPartida) m.setPlayingGame();
   }
   if (opts?.status !== undefined) {
@@ -189,7 +189,7 @@ describe("Regras — preview", () => {
   it("mostra times completos e sobra quando aplicável", () => {
     // 9 jogadores, 4 por time → 2 times completos + 1 sobrando.
     const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
-    m.addPlayers(Array.from({ length: 9 }, (_, i) => `J${i + 1}`));
+    m.adicionarJogadores(Array.from({ length: 9 }, (_, i) => `J${i + 1}`));
     renderRegras(m);
 
     expect(

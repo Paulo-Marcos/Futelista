@@ -30,7 +30,7 @@ describe("WithVictory", () => {
       "Ramos",
       "Otavio",
     ]);
-    teams = jogo.createTeams();
+    teams = jogo.criarTimes();
     jogo.setPlayingGame();
   });
 
@@ -41,10 +41,10 @@ describe("WithVictory", () => {
     jogo.playing!.result = ResultMatch.VICTORY;
     jogo.playing!.loser = teamA;
     jogo.playing!.winner = teamB;
-    jest.spyOn(jogo, "relocateTeam");
+    jest.spyOn(jogo, "realocarTime");
     const input: HandleInput = { jogo };
     withVictory.handle(input);
-    expect(jogo.relocateTeam).toHaveBeenCalledWith(teamA);
+    expect(jogo.realocarTime).toHaveBeenCalledWith(teamA);
     expect(jogo.playing).toEqual(expect.any(Match));
     expect(jogo.playing!.teamA).toEqual(teamB);
     expect(jogo.playing!.teamB).toEqual(nextTeam);

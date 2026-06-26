@@ -671,15 +671,25 @@
       "id": "D-022",
       "kind": "chore",
       "title": "Decidir convencao PT/EN e renomear no GestorJogo",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "[Confirmar] Mistura addPlayer/removeFromGame vs reordenarJogadores/esvaziarTime no mesmo agregado. Acao: decidir convencao (regra sugere PT p/ dominio) e renomear em bloco; API consumida pela UI. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #3). Skills-base: clean-code, uncle-bob-craft.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/domain/GestorJogo.ts"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Padroniza para PT os 19 metodos de acao do vocabulario de dominio do GestorJogo (addPlayer->adicionarJogador, removeFromGame->tirarDoJogo, setNextMatch->definirProximaPartida, addGoal->marcarGol, switchPlayer*/relocate*/resize*/update*...). Tecnicos/getters/lifecycle (subscribe/get*/start/pause/setPlayers/setResult) mantidos EN. Colisoes Team/Player/Match resolvidas por receptor. 31 arquivos."
+      ],
+      "validations": [
+        "npx jest suite completa 57 suites/585 testes; tsc --noEmit 0; eslint 0 erros"
+      ],
+      "pending": [
+        "VALIDAR NO APP: acoes de jogador/time/gol/partida (mesma logica, so nomes)"
+      ],
       "parentId": "E-009"
     },
     {

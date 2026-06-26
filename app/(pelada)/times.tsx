@@ -146,7 +146,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
     }
   };
 
-  const montar = () => safeAction(() => gestor.createTeams());
+  const montar = () => safeAction(() => gestor.criarTimes());
 
   const sortearNovamente = async () => {
     const ok = await confirmAcao({
@@ -158,12 +158,12 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
     if (!ok) return;
     safeAction(() => {
       gestor.resetTimes();
-      gestor.createTeams();
+      gestor.criarTimes();
     });
   };
 
   const alocarSemTime = () =>
-    safeAction(() => gestor.relocatePlayersWithoutTeam());
+    safeAction(() => gestor.realocarJogadoresSemTime());
 
   // Apenas em dev (__DEV__): sanea times de saves antigos corrompidos
   // (jogador no roster de dois times, referência de time repetida em next)
@@ -217,7 +217,7 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
       return;
     }
     safeAction(() => {
-      gestor.switchPlayerFromTeam(p1, p2);
+      gestor.trocarJogadorDoTime(p1, p2);
       setJogadorSelecionado(null);
       setSucesso(`${p1.name} ↔ ${p2.name} trocados.`);
     });

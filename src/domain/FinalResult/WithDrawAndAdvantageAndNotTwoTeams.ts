@@ -15,7 +15,7 @@ export class WithDrawAndAdvantageAndNotTwoTeams extends BaseFinalResultHandler {
       this.isDrawWithAdvantageAndNotTwoTeams(input)
     ) {
       const loser = input.jogo.getOtherPlayingTeam(input.jogo.advantageToNext!);
-      input.jogo.relocateTeam(loser);
+      input.jogo.realocarTime(loser);
       input.jogo.playing = new Match(
         input.jogo.advantageToNext!,
         input.jogo.tirarDaFila(),

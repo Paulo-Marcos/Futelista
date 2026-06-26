@@ -29,7 +29,7 @@ describe("WithDrawAndAdvantageAndTwoTeams", () => {
       "otavio",
       "mesquita",
     ]);
-    teams = jogo.createTeams();
+    teams = jogo.criarTimes();
     jogo.setPlayingGame();
   });
 
@@ -41,10 +41,10 @@ describe("WithDrawAndAdvantageAndTwoTeams", () => {
     const nextTeam = jogo.getNthNext(1);
     const nextTeam2 = jogo.getNthNext(2);
     const input: HandleInput = { jogo };
-    jest.spyOn(jogo, "relocateTeam");
+    jest.spyOn(jogo, "realocarTime");
     withDraw.handle(input);
-    expect(jogo.relocateTeam).toHaveBeenCalledWith(teamB);
-    expect(jogo.relocateTeam).toHaveBeenCalledWith(teamB);
+    expect(jogo.realocarTime).toHaveBeenCalledWith(teamB);
+    expect(jogo.realocarTime).toHaveBeenCalledWith(teamB);
     expect(jogo.playing).toEqual(expect.any(Match));
     expect(jogo.playing!.teamA).toEqual(nextTeam);
     expect(jogo.playing!.teamB).toEqual(nextTeam2);

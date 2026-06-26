@@ -15,11 +15,11 @@ describe("GestorJogo.reabrirPartida", () => {
     });
     const jogo = new GestorJogo("Pelada", rules);
     jogo.setPlayers(["Paulo", "Marcos", "Rodrigues", "Oliveira"]);
-    jogo.createTeams();
+    jogo.criarTimes();
     jogo.setPlayingGame();
     jogo.start();
     const vencedor = jogo.playing!.teamA;
-    jogo.addGoal(vencedor, vencedor.players[0]);
+    jogo.marcarGol(vencedor, vencedor.players[0]);
     jogo.setResult();
     return jogo;
   }

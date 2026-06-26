@@ -26,13 +26,13 @@ function jogadorEmDoisTimes(jogo: GestorJogo): string[] {
 }
 
 describe("setPlayers — deduplicação", () => {
-  it("ignora nomes repetidos (trim + case-insensitive), como addPlayers", () => {
+  it("ignora nomes repetidos (trim + case-insensitive), como adicionarJogadores", () => {
     const jogo = new GestorJogo("P", regras());
     jogo.setPlayers(["Ana", "Bia", " ana ", "Caio", "BIA", ""]);
     expect(jogo.players.map((p) => p.name)).toEqual(["Ana", "Bia", "Caio"]);
   });
 
-  it("nome repetido não duplica jogador entre times no createTeams", () => {
+  it("nome repetido não duplica jogador entre times no criarTimes", () => {
     const jogo = new GestorJogo("P", regras(4));
     // 9 nomes com "Ana" repetido (8 distintos) — antes o repetido virava
     // jogador fantasma e era distribuído como se fosse outra pessoa.
@@ -48,7 +48,7 @@ describe("setPlayers — deduplicação", () => {
       "Ana",
     ]);
     expect(jogo.players.length).toBe(8);
-    jogo.createTeams();
+    jogo.criarTimes();
     expect(jogadorEmDoisTimes(jogo)).toEqual([]);
   });
 });
@@ -56,8 +56,8 @@ describe("setPlayers — deduplicação", () => {
 describe("repararIntegridadeDosTimes — cura saves corrompidos", () => {
   it("remove jogador duplicado entre dois times ao reabrir o save", () => {
     const jogo = new GestorJogo("P", regras(4));
-    jogo.addPlayers(["A", "B", "C", "D", "E", "F", "G", "H"]);
-    jogo.createTeams();
+    jogo.adicionarJogadores(["A", "B", "C", "D", "E", "F", "G", "H"]);
+    jogo.criarTimes();
 
     // Simula um save gerado por versão antiga: jogador do time 0 também no time 1.
     const payload = JSON.parse(serializeGestorJogo(jogo));
@@ -70,13 +70,15 @@ describe("repararIntegridadeDosTimes — cura saves corrompidos", () => {
     // a vítima continua em exatamente um time, coerente com currentTeam
     const vitima = recarregado.players.find((p) => p.id === idVitima)!;
     expect(vitima.currentTeam).toBeDefined();
-    expect(vitima.currentTeam!.players.filter((p) => p.id === idVitima)).toHaveLength(1);
+    expect(
+      vitima.currentTeam!.players.filter((p) => p.id === idVitima),
+    ).toHaveLength(1);
   });
 
   it("remove referência de time duplicada em next", () => {
     const jogo = new GestorJogo("P", regras(4));
-    jogo.addPlayers(["A", "B", "C", "D", "E", "F", "G", "H"]);
-    jogo.createTeams();
+    jogo.adicionarJogadores(["A", "B", "C", "D", "E", "F", "G", "H"]);
+    jogo.criarTimes();
 
     const payload = JSON.parse(serializeGestorJogo(jogo));
     payload.nextTeamIds.push(payload.nextTeamIds[0]); // mesma id 2x
@@ -88,8 +90,8 @@ describe("repararIntegridadeDosTimes — cura saves corrompidos", () => {
 
   it("é idempotente sobre um estado já íntegro", () => {
     const jogo = new GestorJogo("P", regras(4));
-    jogo.addPlayers(["A", "B", "C", "D", "E", "F", "G", "H"]);
-    jogo.createTeams();
+    jogo.adicionarJogadores(["A", "B", "C", "D", "E", "F", "G", "H"]);
+    jogo.criarTimes();
     const antes = jogo.next.map((t) => t.players.map((p) => p.id));
     jogo.repararIntegridadeDosTimes();
     const depois = jogo.next.map((t) => t.players.map((p) => p.id));

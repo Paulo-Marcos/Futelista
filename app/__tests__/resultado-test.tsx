@@ -41,13 +41,13 @@ function buildResultadoManager(opts: {
 }) {
   const m = new GestorJogo("Pelada", new Rules({ playersPerTeam: 4 }));
   const total = opts.totalJogadores ?? 12;
-  m.addPlayers(
+  m.adicionarJogadores(
     Array.from(
       { length: total },
       (_, i) => `J${String(i + 1).padStart(2, "0")}`,
     ),
   );
-  m.createTeams();
+  m.criarTimes();
   m.setPlayingGame();
 
   const playing = m.playing!;
@@ -127,13 +127,13 @@ describe("Resultado — vitória", () => {
     ).toBeTruthy();
   });
 
-  it("'Próxima partida' chama setNextMatch e navega para /times", () => {
+  it("'Próxima partida' chama definirProximaPartida e navega para /times", () => {
     const m = buildResultadoManager({
       result: ResultMatch.VICTORY,
       vencedor: "A",
     });
     const setNextSpy = jest
-      .spyOn(m, "setNextMatch")
+      .spyOn(m, "definirProximaPartida")
       .mockImplementation(() => {});
     renderResultado(m);
 
@@ -176,13 +176,13 @@ describe("Resultado — empate automático", () => {
     ).toBeTruthy();
   });
 
-  it("empate automático: 'Próxima partida' chama setNextMatch sem argumento", () => {
+  it("empate automático: 'Próxima partida' chama definirProximaPartida sem argumento", () => {
     const m = buildResultadoManager({
       result: ResultMatch.DRAW,
       comAdvantage: true,
     });
     const setNextSpy = jest
-      .spyOn(m, "setNextMatch")
+      .spyOn(m, "definirProximaPartida")
       .mockImplementation(() => {});
     renderResultado(m);
 
@@ -220,10 +220,10 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
     expect(btn.props.accessibilityState).toMatchObject({ disabled: true });
   });
 
-  it("escolher Time 1 e confirmar passa teamA para setNextMatch", () => {
+  it("escolher Time 1 e confirmar passa teamA para definirProximaPartida", () => {
     const m = buildEmpateManual();
     const setNextSpy = jest
-      .spyOn(m, "setNextMatch")
+      .spyOn(m, "definirProximaPartida")
       .mockImplementation(() => {});
     renderResultado(m);
 
@@ -235,10 +235,10 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
     expect(router.replace).toHaveBeenCalledWith("/times");
   });
 
-  it("escolher Time 2 e confirmar passa teamB para setNextMatch", () => {
+  it("escolher Time 2 e confirmar passa teamB para definirProximaPartida", () => {
     const m = buildEmpateManual();
     const setNextSpy = jest
-      .spyOn(m, "setNextMatch")
+      .spyOn(m, "definirProximaPartida")
       .mockImplementation(() => {});
     renderResultado(m);
 
@@ -271,12 +271,12 @@ describe("Resultado — empate manual (decisão do usuário)", () => {
 // ===========================================================================
 
 describe("Resultado — erro do domínio", () => {
-  it("erro em setNextMatch aparece como texto", () => {
+  it("erro em definirProximaPartida aparece como texto", () => {
     const m = buildResultadoManager({
       result: ResultMatch.VICTORY,
       vencedor: "A",
     });
-    jest.spyOn(m, "setNextMatch").mockImplementation(() => {
+    jest.spyOn(m, "definirProximaPartida").mockImplementation(() => {
       throw new Error("Cenário pós-jogo inválido");
     });
     renderResultado(m);

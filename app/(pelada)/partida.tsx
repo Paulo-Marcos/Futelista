@@ -123,7 +123,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
           side === "A"
             ? (playing as NonNullable<typeof playing>).teamA
             : (playing as NonNullable<typeof playing>).teamB;
-        gestor.addGoal(team, player);
+        gestor.marcarGol(team, player);
         const afterA = (goals?.teamA ?? 0) + (side === "A" ? 1 : 0);
         const afterB = (goals?.teamB ?? 0) + (side === "B" ? 1 : 0);
         setCelebration({ player, side, scoreA: afterA, scoreB: afterB });
@@ -293,7 +293,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         throw Error("Não há jogador no próximo time para entrar.");
       }
       const inPlayer = proximoTime.players[0];
-      gestor.switchPlayerLeft(inPlayer, outPlayer);
+      gestor.trocarJogadorPelaEsquerda(inPlayer, outPlayer);
       setSubToast({ inP: inPlayer, outP: outPlayer, side });
       // M-06: feedback visual da troca — destaca o jogador que acabou de
       // entrar com o mesmo pulse usado em gol (`spotlight`). É limpo
@@ -340,7 +340,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     if (pares.length === 0) return;
     safeAction(() => {
       for (const par of pares) {
-        gestor.switchPlayerLeft(par.inP, par.outP);
+        gestor.trocarJogadorPelaEsquerda(par.inP, par.outP);
       }
       const ultimo = pares[pares.length - 1];
       setSubToast({
@@ -462,7 +462,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         goals={goalEvents}
         teamA={teamA}
         teamB={teamB}
-        onUndo={() => safeAction(() => gestor.undoLastGoal())}
+        onUndo={() => safeAction(() => gestor.desfazerUltimoGol())}
         onLongPressGol={(g) => setGolEmAcao(g)}
       />
 

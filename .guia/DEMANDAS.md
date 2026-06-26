@@ -2,6 +2,31 @@
 
 ---
 
+## [D-022] 🧹 Decidir convencao PT/EN e renomear no GestorJogo
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** [Confirmar] Mistura addPlayer/removeFromGame vs reordenarJogadores/esvaziarTime no mesmo agregado. Acao: decidir convencao (regra sugere PT p/ dominio) e renomear em bloco; API consumida pela UI. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #3). Skills-base: clean-code, uncle-bob-craft.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `src/domain/GestorJogo.ts`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Padroniza para PT os 19 metodos de acao do vocabulario de dominio do GestorJogo (addPlayer->adicionarJogador, removeFromGame->tirarDoJogo, setNextMatch->definirProximaPartida, addGoal->marcarGol, switchPlayer*/relocate*/resize*/update*...). Tecnicos/getters/lifecycle (subscribe/get*/start/pause/setPlayers/setResult) mantidos EN. Colisoes Team/Player/Match resolvidas por receptor. 31 arquivos.
+
+### Validacao feita
+
+- npx jest suite completa 57 suites/585 testes; tsc --noEmit 0; eslint 0 erros
+
+### Validacao pendente
+
+- VALIDAR NO APP: acoes de jogador/time/gol/partida (mesma logica, so nomes)
+
 ## [D-031] 🧹 Documentar esquema M-/F- de origem no CLAUDE.md
 
 - **Status:** Aguardando validacao

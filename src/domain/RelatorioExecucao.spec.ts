@@ -23,8 +23,8 @@ function execucaoComPartidas(
   const gestor = new GestorJogo(opts.name ?? "Fute CEF", rules, {
     startedAt: opts.startedAt,
   });
-  gestor.addPlayers([...nomesA, ...nomesB]);
-  gestor.createTeams();
+  gestor.adicionarJogadores([...nomesA, ...nomesB]);
+  gestor.criarTimes();
   const teamA = gestor.next[0];
   const teamB = gestor.next[1];
   for (const [golsA, golsB] of partidas) {

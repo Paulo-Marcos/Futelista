@@ -29,8 +29,8 @@ function gestorComUmaPartida(): GestorJogo {
     "Fute CEF",
     new Rules({ playersPerTeam: 1, goalLimit: 5 }),
   );
-  g.addPlayers(["Ana", "Bia"]);
-  g.createTeams();
+  g.adicionarJogadores(["Ana", "Bia"]);
+  g.criarTimes();
   const teamA = g.next[0];
   const teamB = g.next[1];
   const match = new Match(teamA, teamB);

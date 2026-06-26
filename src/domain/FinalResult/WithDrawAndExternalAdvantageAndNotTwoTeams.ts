@@ -14,7 +14,7 @@ export class WithDrawAndExternalAdvantageAndNotTwoTeams extends BaseFinalResultH
       input.jogo.playing?.result === ResultMatch.DRAW &&
       this.isDrawWithExternalAdvantageAndNotTwoTeams(input)
     ) {
-      input.jogo.relocateTeam(
+      input.jogo.realocarTime(
         input.jogo.getOtherPlayingTeam(input.externalAdvantage!),
       );
       input.jogo.playing = new Match(

@@ -19,7 +19,7 @@ describe("GestorJogo — ciclo de vida do cronômetro", () => {
     });
     const jogo = new GestorJogo("Pelada", rules);
     jogo.setPlayers(["A1", "A2", "B1", "B2", "C1", "C2"]);
-    jogo.createTeams();
+    jogo.criarTimes();
     jogo.setPlayingGame();
     return jogo;
   }
@@ -41,15 +41,15 @@ describe("GestorJogo — ciclo de vida do cronômetro", () => {
     expect(jogo.timer!.restTime).toBe(restTimeAoEncerrar);
   });
 
-  it("mudar de jogo (setNextMatch) descarta o Timer da partida anterior", () => {
+  it("mudar de jogo (definirProximaPartida) descarta o Timer da partida anterior", () => {
     const jogo = jogoComTresTimes();
     jogo.start();
     jest.advanceTimersByTime(20_000); // 20s correm
     const vencedor = jogo.playing!.teamA;
-    jogo.addGoal(vencedor, vencedor.players[0]);
+    jogo.marcarGol(vencedor, vencedor.players[0]);
     jogo.setResult();
 
-    jogo.setNextMatch();
+    jogo.definirProximaPartida();
 
     expect(jogo.timer).toBeUndefined();
   });
@@ -59,9 +59,9 @@ describe("GestorJogo — ciclo de vida do cronômetro", () => {
     jogo.start();
     jest.advanceTimersByTime(20_000); // gasta 20s da primeira partida
     const vencedor = jogo.playing!.teamA;
-    jogo.addGoal(vencedor, vencedor.players[0]);
+    jogo.marcarGol(vencedor, vencedor.players[0]);
     jogo.setResult();
-    jogo.setNextMatch();
+    jogo.definirProximaPartida();
 
     // Nova partida, novo apito: tempo cheio, não os 40s restantes.
     jogo.start();

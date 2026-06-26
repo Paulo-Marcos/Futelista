@@ -14,8 +14,8 @@ export class WithDrawAndAdvantageAndTwoTeams extends BaseFinalResultHandler {
       input.jogo.playing?.result === ResultMatch.DRAW &&
       this.isDrawWithAdvantageAndTwoTeams(input)
     ) {
-      input.jogo.relocateTeam(input.jogo.advantageToNext!);
-      input.jogo.relocateTeam(
+      input.jogo.realocarTime(input.jogo.advantageToNext!);
+      input.jogo.realocarTime(
         input.jogo.playing?.getOtherTeam(input.jogo.advantageToNext!),
       );
       input.jogo.playing = undefined;

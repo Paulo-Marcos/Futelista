@@ -19,7 +19,7 @@ import JogadoresScreen from "../(pelada)/jogadores";
 
 function buildManager(nomes: string[] = []): GestorJogo {
   const m = new GestorJogo("Pelada teste", new Rules());
-  if (nomes.length > 0) m.addPlayers(nomes);
+  if (nomes.length > 0) m.adicionarJogadores(nomes);
   return m;
 }
 
@@ -193,8 +193,8 @@ describe("Jogadores — adicionar durante partida em andamento", () => {
     // playersPerTeam=2, 4 jogadores → 2 times; ao iniciar a partida ambos
     // entram em campo e a fila (`next`) fica vazia.
     const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 2 }));
-    m.addPlayers(["Ana", "Bia", "Caio", "Davi"]);
-    m.createTeams();
+    m.adicionarJogadores(["Ana", "Bia", "Caio", "Davi"]);
+    m.criarTimes();
     m.setPlayingGame();
     return m;
   }
@@ -339,7 +339,7 @@ describe("Jogadores — contador", () => {
   it("omite o sufixo 'sem time' quando todos têm time", () => {
     const gestor = buildManager(["Ana", "Bia"]);
     // Cria times: cada um vai pra um time (Rules.playersPerTeam default = 4).
-    // Como temos só 2 jogadores e o time exige 4, o createTeams ainda
+    // Como temos só 2 jogadores e o time exige 4, o criarTimes ainda
     // distribui — mas pra simplificar o teste, simulo zerando o
     // playersWithoutTeam diretamente (válido para o cenário visual).
     gestor.playersWithoutTeam = 0;
@@ -419,7 +419,7 @@ describe("Jogadores — editar", () => {
 
   it("confirmar com mesmo nome é no-op (não altera nada)", () => {
     const gestor = buildManager(["Ana"]);
-    const renameSpy = jest.spyOn(gestor, "renamePlayer");
+    const renameSpy = jest.spyOn(gestor, "renomearJogador");
     renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
@@ -429,9 +429,9 @@ describe("Jogadores — editar", () => {
     expect(screen.queryByLabelText("Editar nome do jogador")).toBeNull();
   });
 
-  it("cancelar edição não chama renamePlayer", () => {
+  it("cancelar edição não chama renomearJogador", () => {
     const gestor = buildManager(["Ana"]);
-    const renameSpy = jest.spyOn(gestor, "renamePlayer");
+    const renameSpy = jest.spyOn(gestor, "renomearJogador");
     renderJogadores(gestor);
 
     fireEvent.press(screen.getByRole("button", { name: "Editar Ana" }));
@@ -445,7 +445,7 @@ describe("Jogadores — editar", () => {
     expect(gestor.players[0].name).toBe("Ana");
   });
 
-  it("erro do renamePlayer aparece no banner", () => {
+  it("erro do renomearJogador aparece no banner", () => {
     const gestor = buildManager(["Ana", "Bia"]);
     renderJogadores(gestor);
 

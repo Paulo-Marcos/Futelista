@@ -10,7 +10,7 @@ import { BaseFinalResultHandler, HandleInput } from "./FinalResult.handler";
 export class WithVictory extends BaseFinalResultHandler {
   override handle(input: HandleInput): void {
     if (input.jogo.playing?.result === ResultMatch.VICTORY) {
-      input.jogo.relocateTeam(input.jogo.playing?.loser!);
+      input.jogo.realocarTime(input.jogo.playing?.loser!);
       input.jogo.advantageToNext = input.jogo.playing.winner!;
       input.jogo.playing = new Match(
         input.jogo.playing?.winner!,

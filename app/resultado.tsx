@@ -74,7 +74,7 @@ function ResultadoInner({ gestor }: { gestor: GestorJogo }) {
 
   const proxima = (timeExterno?: Team) => {
     try {
-      gestor.setNextMatch(timeExterno);
+      gestor.definirProximaPartida(timeExterno);
       router.replace("/times");
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));

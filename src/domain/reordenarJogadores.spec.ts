@@ -52,7 +52,7 @@ describe("GestorJogo.reordenarJogadores (M-07)", () => {
 
   it("rejeita reordenação com times já formados", () => {
     const jogo = jogoCom(["Ana", "Bia", "Caio", "Diego"]);
-    jogo.createTeams();
+    jogo.criarTimes();
     const ids = jogo.players.map((p) => p.id);
     expect(() => jogo.reordenarJogadores(ids.reverse())).toThrow(
       /Resete os times/,
@@ -61,7 +61,7 @@ describe("GestorJogo.reordenarJogadores (M-07)", () => {
 
   it("rejeita reordenação com partida em andamento", () => {
     const jogo = jogoCom(["Ana", "Bia", "Caio", "Diego"]);
-    jogo.createTeams();
+    jogo.criarTimes();
     jogo.setPlayingGame();
     const ids = jogo.players.map((p) => p.id);
     expect(() => jogo.reordenarJogadores(ids.reverse())).toThrow(

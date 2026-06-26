@@ -30,12 +30,12 @@ function buildManager(opts?: {
   jogadores?: number;
   comTimes?: boolean;
   comPartida?: boolean;
-  /** Jogadores adicionados DEPOIS de createTeams — ficam sem time. */
+  /** Jogadores adicionados DEPOIS de criarTimes — ficam sem time. */
   semTime?: number;
 }) {
   const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   if (opts?.jogadores) {
-    m.addPlayers(
+    m.adicionarJogadores(
       Array.from(
         { length: opts.jogadores },
         (_, i) => `J${String(i + 1).padStart(2, "0")}`,
@@ -43,13 +43,13 @@ function buildManager(opts?: {
     );
   }
   if (opts?.comTimes || opts?.comPartida) {
-    m.createTeams();
+    m.criarTimes();
     if (opts?.comPartida) m.setPlayingGame();
   }
   if (opts?.semTime) {
     const base = opts?.jogadores ?? 0;
     for (let i = 0; i < opts.semTime; i++) {
-      m.addPlayer(`S${String(base + i + 1).padStart(2, "0")}`);
+      m.adicionarJogador(`S${String(base + i + 1).padStart(2, "0")}`);
     }
   }
   return m;
@@ -91,9 +91,9 @@ describe("Times — guards e EmptyState", () => {
     expect(btn?.props.disabled).toBe(true);
   });
 
-  it("com jogadores suficientes: clicar 'Montar times' chama createTeams", () => {
+  it("com jogadores suficientes: clicar 'Montar times' chama criarTimes", () => {
     const m = buildManager({ jogadores: 8 });
-    const spy = jest.spyOn(m, "createTeams");
+    const spy = jest.spyOn(m, "criarTimes");
     renderTimes(m);
 
     fireEvent.press(screen.getByText("Montar times"));
@@ -239,10 +239,10 @@ describe("Times — partida com 2 times (fila vazia)", () => {
     ).toBeNull();
   });
 
-  it("'Alocar agora' chama relocatePlayersWithoutTeam, nunca createTeams", () => {
+  it("'Alocar agora' chama realocarJogadoresSemTime, nunca criarTimes", () => {
     const m = buildManager({ jogadores: 8, comPartida: true, semTime: 2 });
-    const relocate = jest.spyOn(m, "relocatePlayersWithoutTeam");
-    const create = jest.spyOn(m, "createTeams");
+    const relocate = jest.spyOn(m, "realocarJogadoresSemTime");
+    const create = jest.spyOn(m, "criarTimes");
     renderTimes(m);
 
     expect(screen.getByText("2 jogadores sem time")).toBeTruthy();
@@ -278,10 +278,10 @@ describe("Times — partida com 2 times (fila vazia)", () => {
 // ===========================================================================
 
 describe("Times — sortear novamente", () => {
-  it("FAB confirmado: chama resetTimes e createTeams", async () => {
+  it("FAB confirmado: chama resetTimes e criarTimes", async () => {
     const m = buildManager({ jogadores: 8, comTimes: true });
     const resetSpy = jest.spyOn(m, "resetTimes").mockImplementation(() => {});
-    const createSpy = jest.spyOn(m, "createTeams").mockImplementation(() => []);
+    const createSpy = jest.spyOn(m, "criarTimes").mockImplementation(() => []);
     renderTimes(m);
     const alertSpy = mockAlert((b) => b.text === "Sortear");
 
@@ -317,10 +317,10 @@ describe("Times — banner 'sem time'", () => {
     expect(screen.getByText("1 jogador sem time")).toBeTruthy();
   });
 
-  it("'Alocar agora' chama relocatePlayersWithoutTeam", () => {
+  it("'Alocar agora' chama realocarJogadoresSemTime", () => {
     const m = buildManager({ jogadores: 8, comTimes: true, semTime: 1 });
     const spy = jest
-      .spyOn(m, "relocatePlayersWithoutTeam")
+      .spyOn(m, "realocarJogadoresSemTime")
       .mockImplementation(() => {});
     renderTimes(m);
 
@@ -355,10 +355,10 @@ describe("Times — seleção e troca de jogadores", () => {
     expect(screen.queryByText(/Selecione um jogador de outro time/)).toBeNull();
   });
 
-  it("tocar em jogador de outro time: chama switchPlayerFromTeam e mostra sucesso", () => {
+  it("tocar em jogador de outro time: chama trocarJogadorDoTime e mostra sucesso", () => {
     const m = buildManager({ jogadores: 8, comTimes: true });
     const spy = jest
-      .spyOn(m, "switchPlayerFromTeam")
+      .spyOn(m, "trocarJogadorDoTime")
       .mockImplementation(() => {});
     renderTimes(m);
 

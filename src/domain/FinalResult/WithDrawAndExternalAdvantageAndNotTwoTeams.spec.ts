@@ -27,7 +27,7 @@ describe("WithDrawAndExternalAdvantageAndNotTwoTeams", () => {
       "Matos",
       "Peres",
     ]);
-    teams = jogo.createTeams();
+    teams = jogo.criarTimes();
     jogo.setPlayingGame();
   });
 
@@ -38,9 +38,9 @@ describe("WithDrawAndExternalAdvantageAndNotTwoTeams", () => {
     const teamB = jogo.playing!.teamB;
     const nextTeam = jogo.getNthNext(1);
     const input: HandleInput = { jogo, externalAdvantage: teamA };
-    jest.spyOn(jogo, "relocateTeam");
+    jest.spyOn(jogo, "realocarTime");
     withDraw.handle(input);
-    expect(jogo.relocateTeam).toHaveBeenCalledWith(teamB);
+    expect(jogo.realocarTime).toHaveBeenCalledWith(teamB);
     expect(jogo.playing).toEqual(expect.any(Match));
     expect(jogo.playing!.teamA).toEqual(teamA);
     expect(jogo.playing!.teamB).toEqual(nextTeam);

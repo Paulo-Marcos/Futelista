@@ -42,7 +42,7 @@ describe("AsyncStoragePeladaRepository", () => {
 
   it("salva e recarrega uma pelada preservando o nome", async () => {
     const original = new GestorJogo("Pelada Quarta", new Rules());
-    original.addPlayer("Zé");
+    original.adicionarJogador("Zé");
 
     await repo.salvar(original);
     const recarregada = await repo.carregar(original.id);
@@ -131,7 +131,7 @@ describe("AsyncStoragePeladaRepository", () => {
 
     it("traz status, nome e totais no resumo", async () => {
       const jogo = new GestorJogo("Quinta", new Rules());
-      jogo.addPlayer("Ana");
+      jogo.adicionarJogador("Ana");
       jogo.iniciar();
       await repo.salvar(jogo);
 

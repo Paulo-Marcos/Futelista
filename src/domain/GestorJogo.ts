@@ -84,16 +84,16 @@ export class GestorJogo {
 
   /**
    * Substitui a lista de jogadores pela informada — comportamento
-   * destrutivo. Para acrescentar mantendo os existentes use `addPlayers`.
+   * destrutivo. Para acrescentar mantendo os existentes use `adicionarJogadores`.
    *
    * Útil em boot (hidratar pelada a partir de nomes salvos) e em devSeed.
    */
   setPlayers(names: string[]): Player[] {
     this.players = [];
     this.playersWithoutTeam = 0;
-    // Mesma política de `addPlayers`: ignora nomes vazios e duplicados
+    // Mesma política de `adicionarJogadores`: ignora nomes vazios e duplicados
     // (trim + case-insensitive). Sem isto, nomes repetidos vindos de uma
-    // lista herdada criavam jogadores fantasma — que `createTeams` depois
+    // lista herdada criavam jogadores fantasma — que `criarTimes` depois
     // distribuía como se fossem pessoas distintas, duplicando jogadores
     // entre os times.
     names.forEach((name) => {
@@ -108,7 +108,7 @@ export class GestorJogo {
     return this.players;
   }
 
-  addPlayer(name: string): Player {
+  adicionarJogador(name: string): Player {
     const limpo = name.trim();
     if (limpo.length === 0) throw Error("Nome do jogador não pode ser vazio.");
     if (this.encontrarPorNome(limpo))
@@ -125,7 +125,7 @@ export class GestorJogo {
    * Nomes vazios são ignorados; duplicatas (entre os já existentes ou dentro
    * do próprio lote) também — sem lançar erro. Retorna apenas os criados.
    */
-  addPlayers(names: string[]): Player[] {
+  adicionarJogadores(names: string[]): Player[] {
     const criados: Player[] = [];
     names.forEach((name) => {
       const limpo = name.trim();
@@ -146,7 +146,7 @@ export class GestorJogo {
     return this.players.find((p) => p.name.toLowerCase() === alvo);
   }
 
-  createTeams(): Team[] {
+  criarTimes(): Team[] {
     if (this.next.length > 0) throw Error("Times já foram criados");
     const createTeam = CreateTeamFactory.fabricate(this.rules.choosingTeams);
     this.next = createTeam.create(this.players, this.rules.playersPerTeam);
@@ -263,14 +263,14 @@ export class GestorJogo {
     return this.next[this.next.length - 1];
   }
 
-  addToNewTeam(player: Player): void {
+  adicionarAoNovoTime(player: Player): void {
     const newTeam = new Team({ limit: this.rules.playersPerTeam });
     newTeam.addPlayer(player);
     this.next.push(newTeam);
     this.notify();
   }
 
-  addToLastTeam(player: Player): void {
+  adicionarAoUltimoTime(player: Player): void {
     const lastTeam = this.getLastTeam();
     // Fila vazia ou último time cheio → abre um novo time no fim da fila.
     // O guard de `!lastTeam` é o que permite alocar jogadores recém-chegados
@@ -278,7 +278,7 @@ export class GestorJogo {
     // `next` ficou vazio): sem ele, `lastTeam.fullTeam` estourava com
     // TypeError. Nunca toca em `playing` — só cresce a fila.
     if (!lastTeam || lastTeam.fullTeam) {
-      this.addToNewTeam(player);
+      this.adicionarAoNovoTime(player);
     } else {
       lastTeam.addPlayer(player);
     }
@@ -290,11 +290,11 @@ export class GestorJogo {
    * incompleto e/ou criando novos. Funciona com a fila vazia E com partida
    * em andamento (forma os próximos times sem encostar nos que jogam).
    */
-  relocatePlayersWithoutTeam(): void {
+  realocarJogadoresSemTime(): void {
     if (this.playersWithoutTeam === 0) return;
     this.players.forEach((player) => {
       if (!player.currentTeam) {
-        this.addToLastTeam(player);
+        this.adicionarAoUltimoTime(player);
       }
     });
     // Os realocados agora têm `currentTeam`; ressincroniza o contador com a
@@ -315,7 +315,7 @@ export class GestorJogo {
     this.notify();
   }
 
-  switchPlayerLeft(playerIn: Player, playerOut: Player): void {
+  trocarJogadorPelaEsquerda(playerIn: Player, playerOut: Player): void {
     const teamToOut = playerIn.currentTeam;
     const teamToIn = playerOut.currentTeam;
     // Ambos precisam estar num time: o reserva (playerIn) no banco e o que
@@ -332,11 +332,11 @@ export class GestorJogo {
     // do jogo, não trocou de time.
     teamToIn.switchPlayer(playerIn, playerOut);
     playerOut.setSituation(PlayerSituation.STOPPED);
-    this.updateTeams(teamToOut);
+    this.atualizarTimes(teamToOut);
     this.notify();
   }
 
-  resizeTeams(beginTeam?: Team): void {
+  redimensionarTimes(beginTeam?: Team): void {
     const begin = beginTeam ? this.next.indexOf(beginTeam) : 0;
     // `beginTeam` fora da fila (indexOf === -1) significa que o time já saiu
     // de `next` — não há o que redimensionar. Sem este guard, o loop leria
@@ -344,17 +344,17 @@ export class GestorJogo {
     if (begin < 0) return;
     for (let i = begin; i <= this.next.length - 2; i++) {
       if (this.next[i].fullTeam) continue;
-      this.relocatePlayers(this.next[i + 1], this.next[i]);
+      this.realocarJogadores(this.next[i + 1], this.next[i]);
     }
   }
 
-  relocatePlayers(teamFrom: Team, teamTo: Team): void {
+  realocarJogadores(teamFrom: Team, teamTo: Team): void {
     while (!teamTo.fullTeam && teamFrom.players.length !== 0) {
       teamTo.addPlayer(teamFrom.removeNewestPlayer());
     }
   }
 
-  resizePlayingGame(team: Team): void {
+  redimensionarPartida(team: Team): void {
     // Reposição vem do primeiro time da fila. Se a fila está vazia (ou o
     // time da frente já está sem jogadores), não há reserva pra puxar — o
     // time em campo segue desfalcado. Tentar puxar "ninguém" colocaria um
@@ -363,26 +363,26 @@ export class GestorJogo {
     if (!proximoNaFila || proximoNaFila.players.length === 0) return;
     const playerEnters = proximoNaFila.removeNewestPlayer();
     team.addPlayer(playerEnters);
-    this.resizeTeams();
+    this.redimensionarTimes();
   }
 
   // remover jogador da pelada sem incluir outro no lugar
-  updateTeams(beginTeam: Team): void {
+  atualizarTimes(beginTeam: Team): void {
     beginTeam.situation === TeamSituation.PLAYING
-      ? this.resizePlayingGame(beginTeam)
-      : this.resizeTeams(beginTeam);
+      ? this.redimensionarPartida(beginTeam)
+      : this.redimensionarTimes(beginTeam);
   }
 
-  removeFromGame(removedPlayer: Player): void {
+  tirarDoJogo(removedPlayer: Player): void {
     const team = removedPlayer.currentTeam!;
     team.removePlayer(removedPlayer);
     removedPlayer.setSituation(PlayerSituation.STOPPED);
-    this.updateTeams(team);
+    this.atualizarTimes(team);
     this.notify();
   }
 
   // Trocar jogador entre Times
-  switchPlayerFromTeam(player1: Player, player2: Player): void {
+  trocarJogadorDoTime(player1: Player, player2: Player): void {
     const team1 = player1.currentTeam;
     const team2 = player2.currentTeam;
     // Ambos precisam estar em um time. Sem o guard, um `currentTeam`
@@ -398,12 +398,12 @@ export class GestorJogo {
 
   /**
    * Remove um jogador definitivamente da pelada. Se ele estiver em um time,
-   * tira do time primeiro (usando o caminho já testado de removeFromGame).
+   * tira do time primeiro (usando o caminho já testado de tirarDoJogo).
    *
    * Bloqueia se o jogador está em time que está em partida em andamento —
    * mexer na composição de um time jogando deixaria o placar inconsistente.
    */
-  removePlayer(player: Player): void {
+  removerJogador(player: Player): void {
     const index = this.players.indexOf(player);
     if (index === -1) throw Error("Jogador não está na pelada.");
     if (this.estaEmPartidaAtiva(player))
@@ -411,7 +411,7 @@ export class GestorJogo {
         "Não é possível remover jogador que está em partida em andamento.",
       );
     if (player.currentTeam) {
-      this.removeFromGame(player);
+      this.tirarDoJogo(player);
     } else if (this.playersWithoutTeam > 0) {
       this.playersWithoutTeam--;
     }
@@ -428,7 +428,7 @@ export class GestorJogo {
    * Renomeia um jogador da pelada. Delega a validação de nome para Player.rename
    * e adiciona checagem de duplicata com outros jogadores.
    */
-  renamePlayer(player: Player, novoNome: string): void {
+  renomearJogador(player: Player, novoNome: string): void {
     if (!this.players.includes(player))
       throw Error("Jogador não está na pelada.");
     const limpo = novoNome.trim();
@@ -480,7 +480,7 @@ export class GestorJogo {
 
   /**
    * Move um time da fila para o fim (operação manual de reordenação).
-   * Diferente de `relocateTeam` — esse método não redistribui jogadores;
+   * Diferente de `realocarTime` — esse método não redistribui jogadores;
    * apenas reposiciona. Bloqueia se o time está em partida em andamento.
    */
   moverTimeParaFim(team: Team): void {
@@ -524,7 +524,7 @@ export class GestorJogo {
 
   /**
    * Limpa a fila de times e o estado de vantagem, devolvendo todos os jogadores
-   * para a situação "sem time". Permite re-sortear depois com createTeams().
+   * para a situação "sem time". Permite re-sortear depois com criarTimes().
    *
    * Bloqueado quando há partida em andamento — mudar times no meio do jogo
    * deixaria refs inconsistentes em playing.
@@ -613,7 +613,7 @@ export class GestorJogo {
     this.notify();
   }
 
-  addGoal(team: Team, playerGoal: Player): void {
+  marcarGol(team: Team, playerGoal: Player): void {
     // Sem partida ou sem cronômetro iniciado não há instante (ScreenTime) pra
     // carimbar o gol — vira no-op. O `this.timer!` original estourava quando
     // havia partida aberta mas o tempo ainda não tinha sido iniciado.
@@ -653,7 +653,7 @@ export class GestorJogo {
    * Retorna `true` se algo foi desfeito; `false` se não havia gols ou
    * partida em curso.
    */
-  undoLastGoal(): boolean {
+  desfazerUltimoGol(): boolean {
     const partida = this.playing;
     if (!partida || partida.goals.length === 0) return false;
     const lastGoal = partida.goals.pop()!;
@@ -664,7 +664,7 @@ export class GestorJogo {
 
   /**
    * Remove um gol arbitrário da partida em andamento — versão do
-   * `undoLastGoal` que aceita corrigir um gol antigo sem precisar
+   * `desfazerUltimoGol` que aceita corrigir um gol antigo sem precisar
    * desfazer tudo dali em diante.
    *
    * Retorna `true` se o gol foi encontrado e removido; `false` se a
@@ -719,7 +719,7 @@ export class GestorJogo {
   /**
    * Remove o gol das listas de team e player. Mantém a partida intocada
    * — quem chama é responsável por tirar o gol de `partida.goals`.
-   * Compartilhado por undoLastGoal, removerGol e corrigirAutorDoGol.
+   * Compartilhado por desfazerUltimoGol, removerGol e corrigirAutorDoGol.
    */
   private limparEstatisticasDoGol(goal: Goal): void {
     const teamIdx = goal.team.goals.indexOf(goal);
@@ -759,7 +759,7 @@ export class GestorJogo {
   }
 
   // Atualiza os novos times, considerando o resultado do jogo.
-  setNextMatch(teamWithExternalAdvantage?: Team): void {
+  definirProximaPartida(teamWithExternalAdvantage?: Team): void {
     this.arquivarPartidaEncerrada();
     this.updateResult.process({
       jogo: this,
@@ -795,12 +795,12 @@ export class GestorJogo {
     this.matches.push(partida);
   }
 
-  relocateTeam(team: Team): void {
+  realocarTime(team: Team): void {
     const lastTeam = this.next.pop();
     // Fila vazia (caso comum com só 2 times): não há time no fim pra absorver
-    // jogadores incompletos — apenas recoloca `team`. Antes, `relocatePlayers`
+    // jogadores incompletos — apenas recoloca `team`. Antes, `realocarJogadores`
     // recebia `lastTeam` undefined e estourava em `teamTo.fullTeam`.
-    if (lastTeam && !lastTeam.fullTeam) this.relocatePlayers(team, lastTeam);
+    if (lastTeam && !lastTeam.fullTeam) this.realocarJogadores(team, lastTeam);
     if (lastTeam) this.next.push(lastTeam);
     this.next.push(team);
   }

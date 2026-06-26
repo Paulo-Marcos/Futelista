@@ -32,13 +32,13 @@ function buildPartidaManager(opts?: {
 }): GestorJogo {
   const m = new GestorJogo("Pelada teste", new Rules({ playersPerTeam: 4 }));
   const total = opts?.semProximo ? 8 : 12;
-  m.addPlayers(
+  m.adicionarJogadores(
     Array.from(
       { length: total },
       (_, i) => `J${String(i + 1).padStart(2, "0")}`,
     ),
   );
-  m.createTeams();
+  m.criarTimes();
   m.setPlayingGame();
 
   if (opts?.status !== undefined || opts?.restTime !== undefined) {
@@ -173,7 +173,7 @@ describe("Partida — scoreboard", () => {
 describe("Partida — ações por jogador", () => {
   it("tap no dot do jogador adiciona gol para o time dele", () => {
     const m = buildPartidaManager({ status: TimerStatus.STARTED });
-    const addGoalSpy = jest.spyOn(m, "addGoal");
+    const addGoalSpy = jest.spyOn(m, "marcarGol");
     renderPartida(m);
 
     fireEvent.press(screen.getByLabelText("Gol de J01"));
@@ -186,7 +186,7 @@ describe("Partida — ações por jogador", () => {
   it("ao atingir o gol-limite a partida encerra e navega para /resultado [F-12]", () => {
     const m = buildPartidaManager({ status: TimerStatus.STARTED });
     // Rules default: goalLimit=2 — marcar 1 gol antes deixa o time em 1.
-    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]);
+    m.marcarGol(m.playing!.teamA, m.playing!.teamA.players[0]);
     renderPartida(m);
 
     // Próximo gol do mesmo time dispara `encerrarSeAtingiuLimite`.
@@ -197,10 +197,10 @@ describe("Partida — ações por jogador", () => {
     expect(router.replace).toHaveBeenCalledWith("/resultado");
   });
 
-  it("substituir via sheet Trocas COM próximo time chama switchPlayerLeft", () => {
+  it("substituir via sheet Trocas COM próximo time chama trocarJogadorPelaEsquerda", () => {
     const m = buildPartidaManager(); // 3 times — sobra 1 em next
     const switchSpy = jest
-      .spyOn(m, "switchPlayerLeft")
+      .spyOn(m, "trocarJogadorPelaEsquerda")
       .mockImplementation(() => {});
     renderPartida(m);
 
@@ -230,7 +230,7 @@ describe("Partida — ações por jogador", () => {
 
   it("modo multi: aplica 2 trocas em sequência ao tocar 'Aplicar'", () => {
     const m = buildPartidaManager();
-    const switchSpy = jest.spyOn(m, "switchPlayerLeft");
+    const switchSpy = jest.spyOn(m, "trocarJogadorPelaEsquerda");
     renderPartida(m);
 
     fireEvent.press(screen.getByRole("button", { name: "Trocas" }));
@@ -417,8 +417,8 @@ describe("Partida — long-press na timeline (F-11)", () => {
    */
   function buildComDoisGols(): GestorJogo {
     const m = buildPartidaManager({ status: TimerStatus.STARTED });
-    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[0]); // gol antigo (J01)
-    m.addGoal(m.playing!.teamA, m.playing!.teamA.players[1]); // gol recente (J02)
+    m.marcarGol(m.playing!.teamA, m.playing!.teamA.players[0]); // gol antigo (J01)
+    m.marcarGol(m.playing!.teamA, m.playing!.teamA.players[1]); // gol recente (J02)
     return m;
   }
 

@@ -33,9 +33,9 @@ function execucaoComPartidas(
     createdAt: opts.createdAt,
     peladaId: opts.peladaId,
   });
-  gestor.addPlayers([...nomesTimeA, ...nomesTimeB]);
-  gestor.createTeams();
-  // createTeams empilha 2 times em `gestor.next`; teamA/B vêm de lá.
+  gestor.adicionarJogadores([...nomesTimeA, ...nomesTimeB]);
+  gestor.criarTimes();
+  // criarTimes empilha 2 times em `gestor.next`; teamA/B vêm de lá.
   const teamA = gestor.next[0];
   const teamB = gestor.next[1];
   for (const [golsA, golsB] of partidas) {

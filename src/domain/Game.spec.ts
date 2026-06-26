@@ -21,7 +21,7 @@ describe("Teste da classe Game", () => {
     });
     it("Deverá adicionar um jogador", () => {
       const jogo = new GestorJogo("Futebol de quarta", new Rules());
-      jogo.addPlayer("Pedro");
+      jogo.adicionarJogador("Pedro");
       expect(
         jogo.players.find((player) => player.name === "Pedro"),
       ).toBeInstanceOf(Player);
@@ -42,31 +42,31 @@ describe("Teste da classe Game", () => {
     it("deve chamar CreateTeamFactory corretamente e definir this.next", () => {
       const choosingTeams = ChoosingTeams.BY_ORDER;
       jest.spyOn(CreateTeamFactory, "fabricate");
-      const next = jogo.createTeams();
+      const next = jogo.criarTimes();
       expect(CreateTeamFactory.fabricate).toHaveBeenCalledWith(choosingTeams);
       expect(next).toBeDefined();
       expect(next.length).toBeGreaterThan(0);
     });
 
-    it("createTeams zera playersWithoutTeam (todos passam a ter time)", () => {
+    it("criarTimes zera playersWithoutTeam (todos passam a ter time)", () => {
       // Regressão: o contador continuava marcando o nº original de jogadores
       // mesmo após todos serem distribuídos em times.
       expect(jogo.playersWithoutTeam).toBe(4);
-      jogo.createTeams();
+      jogo.criarTimes();
       expect(jogo.playersWithoutTeam).toBe(0);
       jogo.players.forEach((p) => expect(p.currentTeam).toBeDefined());
     });
 
-    it("createTeams reflete jogadores que sobraram sem time", () => {
+    it("criarTimes reflete jogadores que sobraram sem time", () => {
       // 5 jogadores em times de 2 → 2 times de 2 + 1 sobrando.
-      jogo.addPlayer("Quinto");
-      jogo.createTeams();
+      jogo.adicionarJogador("Quinto");
+      jogo.criarTimes();
       const semTime = jogo.players.filter((p) => !p.currentTeam).length;
       expect(jogo.playersWithoutTeam).toBe(semTime);
     });
 
     it("deverá criar uma partida a partir das próximas", () => {
-      const next = jogo.createTeams();
+      const next = jogo.criarTimes();
       const teamA = next[0];
       const teamB = next[1];
       jogo.setPlayingGame();
@@ -75,7 +75,7 @@ describe("Teste da classe Game", () => {
     });
 
     it("deverá lançar erro se já estiver uma partida acontecendo", () => {
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       expect(() => jogo.setPlayingGame()).toThrowError(
         "Já existe uma partida acontecendo.",
@@ -83,67 +83,67 @@ describe("Teste da classe Game", () => {
     });
 
     it("deve lançar um erro se times já foram criados", () => {
-      jogo.createTeams();
-      expect(() => jogo.createTeams()).toThrowError("Times já foram criados");
+      jogo.criarTimes();
+      expect(() => jogo.criarTimes()).toThrowError("Times já foram criados");
     });
 
     it("deve retirar um n-ésimo time", () => {
-      const teams = jogo.createTeams();
+      const teams = jogo.criarTimes();
       expect(teams[0]).toEqual(jogo.getNthNext(1));
       expect(teams[1]).toEqual(jogo.getNthNext(2));
     });
 
     it("deve retirar um time das próximas", () => {
-      jogo.createTeams();
+      jogo.criarTimes();
       const team = jogo.getNthNext(1);
       expect(jogo.tirarDaFila()).toEqual(team);
     });
 
     it("getLastTeam deve retornar o último time", () => {
-      const teams = jogo.createTeams();
+      const teams = jogo.criarTimes();
       const result = jogo.getLastTeam();
       expect(result).toBe(teams[1]);
     });
 
-    it("addToNewTeam deve adicionar jogador a um novo time", () => {
+    it("adicionarAoNovoTime deve adicionar jogador a um novo time", () => {
       const mockPlayer = new Player({ name: "JogadorTeste" });
-      jogo.addToNewTeam(mockPlayer);
+      jogo.adicionarAoNovoTime(mockPlayer);
       expect(jogo.getNthNext(1).players.length).toBe(1);
       expect(jogo.getNthNext(1).players[0]).toBe(mockPlayer);
     });
 
-    it("addToLastTeam deve adicionar jogador ao último time", () => {
+    it("adicionarAoUltimoTime deve adicionar jogador ao último time", () => {
       const mockPlayer = new Player({ name: "JogadorTeste" });
       const mockLastTeam = new Team({ limit: 3 });
       jest.spyOn(jogo, "getLastTeam").mockReturnValue(mockLastTeam);
-      jogo.addToLastTeam(mockPlayer);
+      jogo.adicionarAoUltimoTime(mockPlayer);
       expect(mockLastTeam.players.length).toBe(1);
       expect(mockLastTeam.players[0]).toBe(mockPlayer);
     });
 
-    it("addToLastTeam deve criar novo time se o último estiver cheio", () => {
+    it("adicionarAoUltimoTime deve criar novo time se o último estiver cheio", () => {
       const mockPlayer = new Player({ name: "JogadorTeste" });
       const mockLastTeam = new Team({ limit: 1 });
       mockLastTeam.addPlayer(new Player({ name: "teste" }));
       jest.spyOn(jogo, "getLastTeam").mockReturnValue(mockLastTeam);
-      jogo.addToLastTeam(mockPlayer);
+      jogo.adicionarAoUltimoTime(mockPlayer);
       expect(jogo.getNthNext(1).players.length).toBe(1);
       expect(jogo.getNthNext(1).players[0]).toBe(mockPlayer);
     });
 
-    it("relocatePlayersWithoutTeam deve adicionar jogadores sem time ao último time", () => {
-      jogo.createTeams();
+    it("realocarJogadoresSemTime deve adicionar jogadores sem time ao último time", () => {
+      jogo.criarTimes();
       const mockLastTeam = new Team({ limit: 3 });
       jest.spyOn(jogo, "getLastTeam").mockReturnValue(mockLastTeam);
-      const addedPlayer = jogo.addPlayer("JogadorSemTime");
-      jogo.relocatePlayersWithoutTeam();
+      const addedPlayer = jogo.adicionarJogador("JogadorSemTime");
+      jogo.realocarJogadoresSemTime();
       expect(mockLastTeam.players.length).toBe(1);
       expect(mockLastTeam.players[0]).toBe(addedPlayer);
     });
 
-    it("relocatePlayersWithoutTeam não deve fazer nada se playersWithoutTeam for zerado", () => {
+    it("realocarJogadoresSemTime não deve fazer nada se playersWithoutTeam for zerado", () => {
       jogo.playersWithoutTeam = 0;
-      jogo.relocatePlayersWithoutTeam();
+      jogo.realocarJogadoresSemTime();
       expect(jogo.getLastTeam()).toBeUndefined();
     });
   });
@@ -169,16 +169,16 @@ describe("Teste da classe Game", () => {
         "Ramos",
         "Otavio",
       ]);
-      teams = jogo.createTeams();
+      teams = jogo.criarTimes();
     });
 
-    it("relocatePlayers deve realocar jogadores corretamente", () => {
+    it("realocarJogadores deve realocar jogadores corretamente", () => {
       jest.spyOn(teams[3], "addPlayer");
       jest.spyOn(teams[4], "removeNewestPlayer");
       teams[3].removeNewestPlayer();
       teams[3].removeNewestPlayer();
       const relocatedPlayer = teams[4].players[0];
-      jogo.relocatePlayers(teams[4], teams[3]);
+      jogo.realocarJogadores(teams[4], teams[3]);
 
       expect(teams[3].addPlayer).toHaveBeenCalled();
       expect(
@@ -187,46 +187,46 @@ describe("Teste da classe Game", () => {
       expect(teams[4].hasPlayer(relocatedPlayer)).toBe(false);
     });
 
-    it("resizeTeams deve redimensionar times corretamente", () => {
-      jest.spyOn(jogo, "relocatePlayers");
+    it("redimensionarTimes deve redimensionar times corretamente", () => {
+      jest.spyOn(jogo, "realocarJogadores");
       teams[2].removeNewestPlayer();
-      jogo.resizeTeams(teams[2]);
-      expect(jogo.relocatePlayers).toHaveBeenCalledTimes(2);
-      expect(jogo.relocatePlayers).toHaveBeenCalledWith(teams[3], teams[2]);
+      jogo.redimensionarTimes(teams[2]);
+      expect(jogo.realocarJogadores).toHaveBeenCalledTimes(2);
+      expect(jogo.realocarJogadores).toHaveBeenCalledWith(teams[3], teams[2]);
     });
 
-    it("resizeTeams não deverá chamar relocatePlayers quando o time estiver completo", () => {
-      jest.spyOn(jogo, "relocatePlayers");
-      jogo.resizeTeams(teams[2]);
-      expect(jogo.relocatePlayers).toHaveBeenCalledTimes(0);
+    it("redimensionarTimes não deverá chamar realocarJogadores quando o time estiver completo", () => {
+      jest.spyOn(jogo, "realocarJogadores");
+      jogo.redimensionarTimes(teams[2]);
+      expect(jogo.realocarJogadores).toHaveBeenCalledTimes(0);
     });
 
-    it("resizePlayingGame deverá redimensionar os times quando faltar um no jogo atual", () => {
+    it("redimensionarPartida deverá redimensionar os times quando faltar um no jogo atual", () => {
       jogo.setPlayingGame();
       jogo.playing?.teamA.removeNewestPlayer();
-      jest.spyOn(jogo, "resizeTeams");
-      jogo.resizePlayingGame(jogo.playing!.teamA);
-      expect(jogo.resizeTeams).toHaveBeenCalledTimes(1);
+      jest.spyOn(jogo, "redimensionarTimes");
+      jogo.redimensionarPartida(jogo.playing!.teamA);
+      expect(jogo.redimensionarTimes).toHaveBeenCalledTimes(1);
     });
 
-    it("switchPlayerLeft deve trocar jogadores entre times corretamente", () => {
+    it("trocarJogadorPelaEsquerda deve trocar jogadores entre times corretamente", () => {
       const teamA = players[1].currentTeam!;
       const teamB = players[4].currentTeam!;
       const switchesAntes = teamA.switches.length;
 
       jest.spyOn(teamB, "removePlayer");
       jest.spyOn(teamA, "switchPlayer");
-      jest.spyOn(jogo, "resizeTeams");
+      jest.spyOn(jogo, "redimensionarTimes");
 
-      jogo.switchPlayerLeft(players[4], players[1]);
+      jogo.trocarJogadorPelaEsquerda(players[4], players[1]);
 
       expect(teamB.removePlayer).toHaveBeenCalledWith(players[4]);
       expect(teamA.switchPlayer).toHaveBeenCalledWith(players[4], players[1]);
       expect(teamA.switches.length).toBe(switchesAntes + 1);
-      expect(jogo.resizeTeams).toHaveBeenCalledWith(teamB);
+      expect(jogo.redimensionarTimes).toHaveBeenCalledWith(teamB);
     });
 
-    it("switchPlayerLeft deve trocar jogadores entre atualizado o jogo atual", () => {
+    it("trocarJogadorPelaEsquerda deve trocar jogadores entre atualizado o jogo atual", () => {
       jogo.setPlayingGame();
       const teamA = players[0].currentTeam!;
       const teamB = players[2].currentTeam!;
@@ -234,51 +234,51 @@ describe("Teste da classe Game", () => {
 
       jest.spyOn(teamB, "removePlayer");
       jest.spyOn(teamA, "switchPlayer");
-      jest.spyOn(jogo, "updateTeams");
+      jest.spyOn(jogo, "atualizarTimes");
 
-      jogo.switchPlayerLeft(players[2], players[0]);
+      jogo.trocarJogadorPelaEsquerda(players[2], players[0]);
 
       expect(teamB.removePlayer).toHaveBeenCalledWith(players[2]);
       expect(teamA.switchPlayer).toHaveBeenCalledWith(players[2], players[0]);
       expect(teamA.switches.length).toBe(switchesAntes + 1);
-      expect(jogo.updateTeams).toHaveBeenCalledWith(teamB);
+      expect(jogo.atualizarTimes).toHaveBeenCalledWith(teamB);
     });
 
-    it("updateTeams atualiza os times quando faltar jogador no jogo atual", () => {
-      jest.spyOn(jogo, "resizePlayingGame");
+    it("atualizarTimes atualiza os times quando faltar jogador no jogo atual", () => {
+      jest.spyOn(jogo, "redimensionarPartida");
       jogo.setPlayingGame();
       const teamA = jogo.playing!.teamA;
       teamA.removeNewestPlayer();
-      jogo.updateTeams(teamA);
-      expect(jogo.resizePlayingGame).toHaveBeenCalledWith(teamA);
+      jogo.atualizarTimes(teamA);
+      expect(jogo.redimensionarPartida).toHaveBeenCalledWith(teamA);
     });
 
-    it("updateTeams atualiza os times quando faltar jogador nas próximas", () => {
-      jest.spyOn(jogo, "resizeTeams");
+    it("atualizarTimes atualiza os times quando faltar jogador nas próximas", () => {
+      jest.spyOn(jogo, "redimensionarTimes");
       jogo.setPlayingGame();
       teams[2].removeNewestPlayer();
-      jogo.updateTeams(teams[2]);
-      expect(jogo.resizeTeams).toHaveBeenCalledWith(teams[2]);
+      jogo.atualizarTimes(teams[2]);
+      expect(jogo.redimensionarTimes).toHaveBeenCalledWith(teams[2]);
     });
 
-    it("removeFromGame deverá remover um jogador da pelada", () => {
+    it("tirarDoJogo deverá remover um jogador da pelada", () => {
       jogo.setPlayingGame();
       const player = jogo.players[2];
       const team = jogo.players[2].currentTeam!;
-      jest.spyOn(jogo, "updateTeams");
-      jogo.removeFromGame(player);
-      expect(jogo.updateTeams).toHaveBeenCalledWith(team);
+      jest.spyOn(jogo, "atualizarTimes");
+      jogo.tirarDoJogo(player);
+      expect(jogo.atualizarTimes).toHaveBeenCalledWith(team);
       expect(team.hasPlayer(player)).toBe(false);
       expect(player.situation).toBe(PlayerSituation.STOPPED);
     });
 
-    it("switchPlayerFromTeam deverá trocar 2 jogadores", () => {
+    it("trocarJogadorDoTime deverá trocar 2 jogadores", () => {
       jogo.setPlayingGame();
       const player1 = jogo.players[2];
       const team1 = player1.currentTeam!;
       const player2 = jogo.players[6];
       const team2 = player2.currentTeam!;
-      jogo.switchPlayerFromTeam(player1, player2);
+      jogo.trocarJogadorDoTime(player1, player2);
       expect(team1.hasPlayer(player1)).toBe(false);
       expect(team1.hasPlayer(player2)).toBe(true);
       expect(team2.hasPlayer(player2)).toBe(false);
@@ -301,30 +301,30 @@ describe("Teste da classe Game", () => {
       });
       jogo = new GestorJogo("Futebol de quarta", rules);
       jogo.setPlayers(["Paulo", "Marcos", "Rodrigues", "Oliveira"]);
-      jogo.createTeams(); // 2 times de 2
+      jogo.criarTimes(); // 2 times de 2
       jogo.setPlayingGame(); // ambos entram em campo → fila vazia
     });
 
-    it("removeFromGame com fila vazia deixa o time desfalcado, sem undefined", () => {
+    it("tirarDoJogo com fila vazia deixa o time desfalcado, sem undefined", () => {
       const team = jogo.playing!.teamA;
       const alvo = team.players[0];
 
-      expect(() => jogo.removeFromGame(alvo)).not.toThrow();
+      expect(() => jogo.tirarDoJogo(alvo)).not.toThrow();
 
       expect(team.players).toHaveLength(1);
       expect(team.players.every((p) => p !== undefined)).toBe(true);
       expect(team.hasPlayer(alvo)).toBe(false);
     });
 
-    it("resizePlayingGame é no-op quando não há reserva na fila", () => {
+    it("redimensionarPartida é no-op quando não há reserva na fila", () => {
       const team = jogo.playing!.teamA;
       team.removeNewestPlayer(); // simula a saída de um jogador
-      jest.spyOn(jogo, "resizeTeams");
+      jest.spyOn(jogo, "redimensionarTimes");
 
-      expect(() => jogo.resizePlayingGame(team)).not.toThrow();
+      expect(() => jogo.redimensionarPartida(team)).not.toThrow();
 
       expect(team.players.every((p) => p !== undefined)).toBe(true);
-      expect(jogo.resizeTeams).not.toHaveBeenCalled();
+      expect(jogo.redimensionarTimes).not.toHaveBeenCalled();
     });
   });
 
@@ -348,25 +348,25 @@ describe("Teste da classe Game", () => {
 
     it("setPlayingGame com menos de 2 times lança erro de domínio", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      // Monta apenas 1 time na fila (createTeams exige 2×perTeam jogadores).
-      jogo.addToNewTeam(jogo.players[0]);
+      // Monta apenas 1 time na fila (criarTimes exige 2×perTeam jogadores).
+      jogo.adicionarAoNovoTime(jogo.players[0]);
       expect(jogo.next.length).toBe(1);
       expect(() => jogo.setPlayingGame()).toThrowError(
         "É preciso ter ao menos 2 times na fila para iniciar uma partida.",
       );
     });
 
-    it("vitória com só 2 times: setNextMatch recoloca o confronto sem estourar", () => {
+    it("vitória com só 2 times: definirProximaPartida recoloca o confronto sem estourar", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]); // 2 times
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       jogo.start();
       const vencedor = jogo.playing!.teamA;
       const perdedor = jogo.playing!.teamB;
-      jogo.addGoal(vencedor, vencedor.players[0]);
+      jogo.marcarGol(vencedor, vencedor.players[0]);
       jogo.setResult();
 
-      expect(() => jogo.setNextMatch()).not.toThrow();
+      expect(() => jogo.definirProximaPartida()).not.toThrow();
 
       expect(jogo.playing).toBeDefined();
       expect(jogo.playing!.teamA.id).toBe(vencedor.id);
@@ -375,18 +375,18 @@ describe("Teste da classe Game", () => {
       expect(jogo.next.every((t) => t !== undefined)).toBe(true);
     });
 
-    it("empate com vantagem e só 2 times: setNextMatch mantém o vantajoso em campo", () => {
-      // Outro handler que toca relocateTeam com fila vazia
+    it("empate com vantagem e só 2 times: definirProximaPartida mantém o vantajoso em campo", () => {
+      // Outro handler que toca realocarTime com fila vazia
       // (WithDrawAndAdvantageAndNotTwoTeams): antes do guard, também estourava.
       const jogo = novo(2, ["A", "B", "C", "D"]); // 2 times
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const comVantagem = jogo.playing!.teamA;
       const outro = jogo.playing!.teamB;
       jogo.advantageToNext = comVantagem;
       jogo.setResult(); // 0 x 0 → empate
 
-      expect(() => jogo.setNextMatch()).not.toThrow();
+      expect(() => jogo.definirProximaPartida()).not.toThrow();
 
       expect(jogo.playing).toBeDefined();
       expect(jogo.playing!.teams.has(comVantagem)).toBe(true);
@@ -394,34 +394,34 @@ describe("Teste da classe Game", () => {
       expect(jogo.next.length).toBe(0);
     });
 
-    it("switchPlayerFromTeam exige que ambos estejam em um time", () => {
+    it("trocarJogadorDoTime exige que ambos estejam em um time", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
       const players = jogo.players;
-      jogo.createTeams();
+      jogo.criarTimes();
       const semTime = new Player({ name: "Solto" });
-      expect(() => jogo.switchPlayerFromTeam(players[0], semTime)).toThrowError(
+      expect(() => jogo.trocarJogadorDoTime(players[0], semTime)).toThrowError(
         "Só dá pra trocar jogadores que estão em um time.",
       );
     });
 
-    it("switchPlayerLeft exige reserva e jogador a sair em times válidos", () => {
+    it("trocarJogadorPelaEsquerda exige reserva e jogador a sair em times válidos", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
       const players = jogo.players;
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const semTime = new Player({ name: "Solto" });
-      expect(() => jogo.switchPlayerLeft(semTime, players[0])).toThrowError(
-        "Só dá pra trocar jogadores que estão em um time.",
-      );
+      expect(() =>
+        jogo.trocarJogadorPelaEsquerda(semTime, players[0]),
+      ).toThrowError("Só dá pra trocar jogadores que estão em um time.");
     });
 
-    it("addGoal sem cronômetro iniciado é no-op, não estoura", () => {
+    it("marcarGol sem cronômetro iniciado é no-op, não estoura", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame(); // partida existe, mas start() não foi chamado
       const team = jogo.playing!.teamA;
 
-      expect(() => jogo.addGoal(team, team.players[0])).not.toThrow();
+      expect(() => jogo.marcarGol(team, team.players[0])).not.toThrow();
       expect(jogo.playing!.countGoals()).toEqual({ teamA: 0, teamB: 0 });
     });
   });
@@ -448,7 +448,7 @@ describe("Teste da classe Game", () => {
         "Ramos",
         "Otavio",
       ]);
-      teams = jogo.createTeams();
+      teams = jogo.criarTimes();
       jogo.setPlayingGame();
     });
 
@@ -472,25 +472,25 @@ describe("Teste da classe Game", () => {
       expect(jogo.timer!.status).toBe(TimerStatus.STARTED);
     });
 
-    it("deve adicionar um gol quando addGoal() é chamado", () => {
+    it("deve adicionar um gol quando marcarGol() é chamado", () => {
       jogo.start();
       jest.spyOn(jogo.timer!, "getTime");
       const team = jogo.playing!.teamA;
       const playerGoal = team.players[0];
-      jogo.addGoal(team, playerGoal);
+      jogo.marcarGol(team, playerGoal);
       expect(team.goals.length).toBe(1);
       expect(playerGoal.goals.length).toBe(1);
       expect(playerGoal.goals[0]).toEqual(team.goals[0]);
     });
 
-    it("undoLastGoal desfaz o gol mais recente e zera as estatísticas do autor", () => {
+    it("desfazerUltimoGol desfaz o gol mais recente e zera as estatísticas do autor", () => {
       jogo.start();
       const team = jogo.playing!.teamA;
       const playerGoal = team.players[0];
-      jogo.addGoal(team, playerGoal);
+      jogo.marcarGol(team, playerGoal);
       expect(jogo.playing!.goals.length).toBe(1);
 
-      const desfeito = jogo.undoLastGoal();
+      const desfeito = jogo.desfazerUltimoGol();
 
       expect(desfeito).toBe(true);
       expect(jogo.playing!.goals.length).toBe(0);
@@ -498,20 +498,20 @@ describe("Teste da classe Game", () => {
       expect(playerGoal.goals.length).toBe(0);
     });
 
-    it("undoLastGoal retorna false quando não há gols para desfazer", () => {
+    it("desfazerUltimoGol retorna false quando não há gols para desfazer", () => {
       jogo.start();
-      expect(jogo.undoLastGoal()).toBe(false);
+      expect(jogo.desfazerUltimoGol()).toBe(false);
     });
 
     it("encerra a partida automaticamente quando o time atinge o gol-limite", () => {
       // Rules default: goalLimit=2.
       jogo.start();
       const team = jogo.playing!.teamA;
-      jogo.addGoal(team, team.players[0]);
+      jogo.marcarGol(team, team.players[0]);
       // Status ainda STARTED — 1 gol não atinge.
       expect(jogo.timer!.status).toBe(TimerStatus.STARTED);
 
-      jogo.addGoal(team, team.players[1]);
+      jogo.marcarGol(team, team.players[1]);
 
       expect(jogo.timer!.status).toBe(TimerStatus.ENDED);
       expect(jogo.playing!.result).toBeDefined();
@@ -521,7 +521,7 @@ describe("Teste da classe Game", () => {
     it("não encerra antes de atingir o gol-limite", () => {
       jogo.start();
       const team = jogo.playing!.teamA;
-      jogo.addGoal(team, team.players[0]);
+      jogo.marcarGol(team, team.players[0]);
       expect(jogo.timer!.status).toBe(TimerStatus.STARTED);
       expect(jogo.playing!.result).toBeUndefined();
     });
@@ -531,8 +531,8 @@ describe("Teste da classe Game", () => {
       const team = jogo.playing!.teamA;
       const p1 = team.players[0];
       const p2 = team.players[1];
-      jogo.addGoal(team, p1);
-      jogo.addGoal(team, p2);
+      jogo.marcarGol(team, p1);
+      jogo.marcarGol(team, p2);
       const golDoP1 = jogo.playing!.goals[0];
       expect(jogo.playing!.goals.length).toBe(2);
 
@@ -549,9 +549,9 @@ describe("Teste da classe Game", () => {
     it("removerGol retorna false quando gol não pertence à partida", () => {
       jogo.start();
       const team = jogo.playing!.teamA;
-      jogo.addGoal(team, team.players[0]);
+      jogo.marcarGol(team, team.players[0]);
       const golValido = jogo.playing!.goals[0];
-      jogo.undoLastGoal(); // remove de partida.goals
+      jogo.desfazerUltimoGol(); // remove de partida.goals
       expect(jogo.removerGol(golValido)).toBe(false);
     });
 
@@ -560,7 +560,7 @@ describe("Teste da classe Game", () => {
       const team = jogo.playing!.teamA;
       const errado = team.players[0];
       const certo = team.players[1];
-      jogo.addGoal(team, errado);
+      jogo.marcarGol(team, errado);
       const golOriginal = jogo.playing!.goals[0];
 
       const ok = jogo.corrigirAutorDoGol(golOriginal, certo);
@@ -579,7 +579,7 @@ describe("Teste da classe Game", () => {
       jogo.start();
       const teamA = jogo.playing!.teamA;
       const teamB = jogo.playing!.teamB;
-      jogo.addGoal(teamA, teamA.players[0]);
+      jogo.marcarGol(teamA, teamA.players[0]);
       const gol = jogo.playing!.goals[0];
 
       const adversario = teamB.players[0];
@@ -596,7 +596,7 @@ describe("Teste da classe Game", () => {
     it("corrigirAutorDoGol no-op quando o autor é o mesmo", () => {
       jogo.start();
       const team = jogo.playing!.teamA;
-      jogo.addGoal(team, team.players[0]);
+      jogo.marcarGol(team, team.players[0]);
       const gol = jogo.playing!.goals[0];
 
       expect(jogo.corrigirAutorDoGol(gol, team.players[0])).toBe(false);
@@ -608,7 +608,7 @@ describe("Teste da classe Game", () => {
       jogo.start();
       const team = jogo.playing!.teamA;
       const playerGoal = team.players[0];
-      jogo.addGoal(team, playerGoal);
+      jogo.marcarGol(team, playerGoal);
       setTimeout(() => {
         jogo.setResult();
         expect(jogo.playing!.result).toBe(ResultMatch.VICTORY);
@@ -621,9 +621,9 @@ describe("Teste da classe Game", () => {
   describe("Quando remover um jogador da pelada", () => {
     it("deverá remover jogador sem time e decrementar playersWithoutTeam", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      const ana = jogo.addPlayer("Ana");
-      jogo.addPlayer("Bia");
-      jogo.removePlayer(ana);
+      const ana = jogo.adicionarJogador("Ana");
+      jogo.adicionarJogador("Bia");
+      jogo.removerJogador(ana);
       expect(jogo.players).toHaveLength(1);
       expect(jogo.players[0].name).toBe("Bia");
       expect(jogo.playersWithoutTeam).toBe(1);
@@ -632,10 +632,10 @@ describe("Teste da classe Game", () => {
     it("deverá tirar o jogador do time antes de remover da pelada", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       const ana = jogo.players.find((p) => p.name === "Ana")!;
       const time = ana.currentTeam!;
-      jogo.removePlayer(ana);
+      jogo.removerJogador(ana);
       expect(jogo.players).toHaveLength(3);
       expect(time.hasPlayer(ana)).toBe(false);
       expect(ana.situation).toBe(PlayerSituation.STOPPED);
@@ -644,7 +644,7 @@ describe("Teste da classe Game", () => {
     it("deverá lançar erro ao tentar remover jogador inexistente", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
       const fantasma = new Player({ name: "Fantasma" });
-      expect(() => jogo.removePlayer(fantasma)).toThrowError(
+      expect(() => jogo.removerJogador(fantasma)).toThrowError(
         "Jogador não está na pelada.",
       );
     });
@@ -653,87 +653,87 @@ describe("Teste da classe Game", () => {
   describe("Quando renomear um jogador da pelada", () => {
     it("deverá renomear o jogador via Player.rename", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      const player = jogo.addPlayer("Antigo");
-      jogo.renamePlayer(player, "Novo");
+      const player = jogo.adicionarJogador("Antigo");
+      jogo.renomearJogador(player, "Novo");
       expect(player.name).toBe("Novo");
     });
 
     it("deverá lançar erro ao renomear jogador que não está na pelada", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
       const fantasma = new Player({ name: "Fantasma" });
-      expect(() => jogo.renamePlayer(fantasma, "Algo")).toThrowError(
+      expect(() => jogo.renomearJogador(fantasma, "Algo")).toThrowError(
         "Jogador não está na pelada.",
       );
     });
 
     it("deverá lançar erro ao renomear para nome já usado por outro jogador", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      const bia = jogo.addPlayer("Bia");
-      expect(() => jogo.renamePlayer(bia, "Ana")).toThrowError(
+      jogo.adicionarJogador("Ana");
+      const bia = jogo.adicionarJogador("Bia");
+      expect(() => jogo.renomearJogador(bia, "Ana")).toThrowError(
         'Já existe jogador chamado "Ana" na pelada.',
       );
     });
 
     it("deverá tratar duplicata na renomeação ignorando caixa e espaços", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      const bia = jogo.addPlayer("Bia");
-      expect(() => jogo.renamePlayer(bia, "  ana  ")).toThrowError(
+      jogo.adicionarJogador("Ana");
+      const bia = jogo.adicionarJogador("Bia");
+      expect(() => jogo.renomearJogador(bia, "  ana  ")).toThrowError(
         'Já existe jogador chamado "ana" na pelada.',
       );
     });
 
     it("deverá permitir renomear para o mesmo nome (no-op de duplicata)", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      const ana = jogo.addPlayer("Ana");
-      expect(() => jogo.renamePlayer(ana, "Ana")).not.toThrow();
+      const ana = jogo.adicionarJogador("Ana");
+      expect(() => jogo.renomearJogador(ana, "Ana")).not.toThrow();
     });
   });
 
-  describe("Quando adicionar um jogador (addPlayer)", () => {
+  describe("Quando adicionar um jogador (adicionarJogador)", () => {
     it("deverá fazer trim do nome antes de criar", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      const p = jogo.addPlayer("   Pedro   ");
+      const p = jogo.adicionarJogador("   Pedro   ");
       expect(p.name).toBe("Pedro");
     });
 
     it("deverá lançar erro quando o nome é vazio", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      expect(() => jogo.addPlayer("")).toThrowError(
+      expect(() => jogo.adicionarJogador("")).toThrowError(
         "Nome do jogador não pode ser vazio.",
       );
     });
 
     it("deverá lançar erro quando o nome só tem espaços", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      expect(() => jogo.addPlayer("    ")).toThrowError(
+      expect(() => jogo.adicionarJogador("    ")).toThrowError(
         "Nome do jogador não pode ser vazio.",
       );
     });
 
     it("deverá lançar erro ao adicionar jogador com nome já existente", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      expect(() => jogo.addPlayer("Ana")).toThrowError(
+      jogo.adicionarJogador("Ana");
+      expect(() => jogo.adicionarJogador("Ana")).toThrowError(
         'Já existe jogador chamado "Ana" na pelada.',
       );
     });
 
     it("deverá considerar duplicata ignorando caixa e espaços", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      expect(() => jogo.addPlayer("  ANA  ")).toThrowError(
+      jogo.adicionarJogador("Ana");
+      expect(() => jogo.adicionarJogador("  ANA  ")).toThrowError(
         'Já existe jogador chamado "ANA" na pelada.',
       );
     });
   });
 
-  describe("Quando adicionar vários jogadores em lote (addPlayers)", () => {
+  describe("Quando adicionar vários jogadores em lote (adicionarJogadores)", () => {
     it("deverá acrescentar todos os nomes válidos sem resetar a lista", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      const criados = jogo.addPlayers(["Bia", "Caio", "Davi"]);
+      jogo.adicionarJogador("Ana");
+      const criados = jogo.adicionarJogadores(["Bia", "Caio", "Davi"]);
       expect(criados).toHaveLength(3);
       expect(jogo.players.map((p) => p.name)).toEqual([
         "Ana",
@@ -746,8 +746,8 @@ describe("Teste da classe Game", () => {
 
     it("deverá ignorar nomes vazios e duplicatas sem lançar erro", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      const criados = jogo.addPlayers([
+      jogo.adicionarJogador("Ana");
+      const criados = jogo.adicionarJogadores([
         "",
         "   ",
         "Bia",
@@ -761,8 +761,8 @@ describe("Teste da classe Game", () => {
 
     it("deverá retornar lista vazia quando nada é criado", () => {
       const jogo = new GestorJogo("Pelada", new Rules());
-      jogo.addPlayer("Ana");
-      const criados = jogo.addPlayers(["", "Ana", "   "]);
+      jogo.adicionarJogador("Ana");
+      const criados = jogo.adicionarJogadores(["", "Ana", "   "]);
       expect(criados).toEqual([]);
       expect(jogo.players).toHaveLength(1);
     });
@@ -775,7 +775,7 @@ describe("Teste da classe Game", () => {
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi", "Edu", "Fê"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       return jogo;
     }
 
@@ -821,7 +821,7 @@ describe("Teste da classe Game", () => {
         new Rules({ playersPerTeam: 2, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       return jogo;
     }
 
@@ -884,12 +884,12 @@ describe("Teste da classe Game", () => {
     it("deverá lançar erro ao remover jogador de time que está em partida", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const playingPlayer = [...jogo.playing!.teams].flatMap(
         (t) => t.players,
       )[0];
-      expect(() => jogo.removePlayer(playingPlayer)).toThrowError(
+      expect(() => jogo.removerJogador(playingPlayer)).toThrowError(
         "Não é possível remover jogador que está em partida em andamento.",
       );
     });
@@ -897,12 +897,12 @@ describe("Teste da classe Game", () => {
     it("deverá permitir remover jogador que NÃO está na partida atual", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi", "Edu", "Fê"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const semPartida = jogo.players.find(
         (p) => p.currentTeam && !jogo.playing!.teams.has(p.currentTeam),
       )!;
-      expect(() => jogo.removePlayer(semPartida)).not.toThrow();
+      expect(() => jogo.removerJogador(semPartida)).not.toThrow();
     });
   });
 
@@ -911,7 +911,7 @@ describe("Teste da classe Game", () => {
     beforeEach(() => {
       jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
     });
 
     it("deverá esvaziar a fila de próximos", () => {
@@ -934,9 +934,9 @@ describe("Teste da classe Game", () => {
       expect(jogo.playersWithoutTeam).toBe(4);
     });
 
-    it("deverá permitir createTeams novamente após reset", () => {
+    it("deverá permitir criarTimes novamente após reset", () => {
       jogo.resetTimes();
-      expect(() => jogo.createTeams()).not.toThrow();
+      expect(() => jogo.criarTimes()).not.toThrow();
       expect(jogo.next.length).toBeGreaterThan(0);
     });
 
@@ -978,7 +978,7 @@ describe("Teste da classe Game", () => {
     it("deverá lançar erro ao mudar playersPerTeam com times montados", () => {
       const jogo = pelada();
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       expect(() => jogo.atualizarRegras({ playersPerTeam: 3 })).toThrowError(
         /Não é possível mudar jogadores por time/,
       );
@@ -987,7 +987,7 @@ describe("Teste da classe Game", () => {
     it("deverá lançar erro ao mudar choosingTeams com times montados", () => {
       const jogo = pelada();
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       expect(() =>
         jogo.atualizarRegras({ choosingTeams: ChoosingTeams.BY_MIXING_TEAMS }),
       ).toThrowError(/modo de sorteio/);
@@ -996,7 +996,7 @@ describe("Teste da classe Game", () => {
     it("deverá permitir alterar timeMatch e goalLimit a qualquer momento", () => {
       const jogo = pelada();
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       jogo.atualizarRegras({ timeMatch: "00:05:00", goalLimit: 10 });
       expect(jogo.rules.timeMatch).toBe("00:05:00");
@@ -1051,7 +1051,7 @@ describe("Teste da classe Game", () => {
     it("finalizar() falha se houver partida em andamento", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.iniciar();
       jogo.setPlayingGame();
       expect(() => jogo.finalizar()).toThrowError(/partida em andamento/);
@@ -1069,7 +1069,7 @@ describe("Teste da classe Game", () => {
   // de FinalResult substituía `playing` sem arquivar a partida encerrada.
   // "Últimos jogos" na Home, a tela de Histórico e o RelatorioExecucao
   // ficavam permanentemente vazios.
-  describe("Arquivamento da partida encerrada (setNextMatch)", () => {
+  describe("Arquivamento da partida encerrada (definirProximaPartida)", () => {
     function novo(perTeam: number, nomes: string[]): GestorJogo {
       const jogo = new GestorJogo(
         "Arquivamento",
@@ -1085,15 +1085,15 @@ describe("Teste da classe Game", () => {
 
     it("vitória: arquiva a partida encerrada antes de montar a próxima", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       jogo.start();
       const encerrada = jogo.playing!;
       const vencedor = encerrada.teamA;
-      jogo.addGoal(vencedor, vencedor.players[0]);
+      jogo.marcarGol(vencedor, vencedor.players[0]);
       jogo.setResult();
 
-      jogo.setNextMatch();
+      jogo.definirProximaPartida();
 
       expect(jogo.matches.map((m) => m.id)).toEqual([encerrada.id]);
       expect(jogo.playing!.id).not.toBe(encerrada.id);
@@ -1101,41 +1101,41 @@ describe("Teste da classe Game", () => {
 
     it("empate: arquiva a partida empatada", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const encerrada = jogo.playing!;
       jogo.advantageToNext = encerrada.teamA;
       jogo.setResult(); // 0 x 0 → empate
 
-      jogo.setNextMatch();
+      jogo.definirProximaPartida();
 
       expect(jogo.matches.map((m) => m.id)).toEqual([encerrada.id]);
     });
 
     it("partida sem resultado não vai para o histórico", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
 
-      jogo.setNextMatch(); // sem setResult — nada a arquivar
+      jogo.definirProximaPartida(); // sem setResult — nada a arquivar
 
       expect(jogo.matches).toHaveLength(0);
     });
 
     it("partidas consecutivas acumulam no histórico em ordem", () => {
       const jogo = novo(2, ["A", "B", "C", "D"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       jogo.start();
       const primeira = jogo.playing!;
-      jogo.addGoal(primeira.teamA, primeira.teamA.players[0]);
+      jogo.marcarGol(primeira.teamA, primeira.teamA.players[0]);
       jogo.setResult();
-      jogo.setNextMatch();
+      jogo.definirProximaPartida();
       const segunda = jogo.playing!;
-      jogo.addGoal(segunda.teamA, segunda.teamA.players[0]);
+      jogo.marcarGol(segunda.teamA, segunda.teamA.players[0]);
       jogo.setResult();
 
-      jogo.setNextMatch();
+      jogo.definirProximaPartida();
 
       expect(jogo.matches.map((m) => m.id)).toEqual([primeira.id, segunda.id]);
     });
@@ -1145,7 +1145,7 @@ describe("Teste da classe Game", () => {
     it("esvazia jogadores, fila e jogadores-sem-time preservando regras e nome", () => {
       const jogo = new GestorJogo("Sábado", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.limparJogadoresETimes();
       expect(jogo.players).toHaveLength(0);
       expect(jogo.next).toHaveLength(0);
@@ -1158,7 +1158,7 @@ describe("Teste da classe Game", () => {
     it("preserva o histórico de partidas", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       jogo.setResult();
       // Move playing para matches manualmente para simular fim de partida.
@@ -1171,7 +1171,7 @@ describe("Teste da classe Game", () => {
     it("bloqueia limpeza com partida em andamento", () => {
       const jogo = new GestorJogo("Pelada", new Rules({ playersPerTeam: 2 }));
       jogo.setPlayers(["Ana", "Bia", "Caio", "Davi"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       expect(() => jogo.limparJogadoresETimes()).toThrowError(
         /partida em andamento/,
@@ -1192,7 +1192,7 @@ describe("Teste da classe Game", () => {
         new Rules({ playersPerTeam: 4, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
       jogo.setPlayers(["A", "B", "C", "D", "E", "F", "G", "H"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       return jogo;
     }
@@ -1207,7 +1207,7 @@ describe("Teste da classe Game", () => {
       return [...cont.entries()].filter(([, n]) => n > 1).map(([id]) => id);
     }
 
-    it("addPlayer com partida em andamento não toca em playing nem na fila", () => {
+    it("adicionarJogador com partida em andamento não toca em playing nem na fila", () => {
       // 12 jogadores → 3 times; ao iniciar, 2 entram em campo e o 3º fica na fila.
       const jogo = new GestorJogo(
         "Dinâmica",
@@ -1227,7 +1227,7 @@ describe("Teste da classe Game", () => {
         "K",
         "L",
       ]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const emCampoA = jogo.playing!.teamA;
       const emCampoB = jogo.playing!.teamB;
@@ -1235,7 +1235,7 @@ describe("Teste da classe Game", () => {
       const rosterB = [...emCampoB.players];
       const filaAntes = [...jogo.next];
 
-      jogo.addPlayer("Tardão");
+      jogo.adicionarJogador("Tardão");
 
       expect(jogo.playing!.teamA).toBe(emCampoA);
       expect(jogo.playing!.teamB).toBe(emCampoB);
@@ -1253,8 +1253,8 @@ describe("Teste da classe Game", () => {
       const rosterB = [...emCampoB.players];
       expect(jogo.next).toHaveLength(0);
 
-      jogo.addPlayers(["Tardão1", "Tardão2"]);
-      jogo.relocatePlayersWithoutTeam();
+      jogo.adicionarJogadores(["Tardão1", "Tardão2"]);
+      jogo.realocarJogadoresSemTime();
 
       // Um novo time na fila com os recém-chegados — partida intacta.
       expect(jogo.next).toHaveLength(1);
@@ -1270,10 +1270,10 @@ describe("Teste da classe Game", () => {
 
     it("alocar zera o contador de jogadores sem time", () => {
       const jogo = comDoisTimesEmCampo();
-      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3"]);
+      jogo.adicionarJogadores(["Tardão1", "Tardão2", "Tardão3"]);
       expect(jogo.playersWithoutTeam).toBe(3);
 
-      jogo.relocatePlayersWithoutTeam();
+      jogo.realocarJogadoresSemTime();
 
       expect(jogo.playersWithoutTeam).toBe(0);
       expect(
@@ -1283,23 +1283,29 @@ describe("Teste da classe Game", () => {
 
     it("alocar com fila vazia não dispara TypeError (getLastTeam undefined)", () => {
       const jogo = comDoisTimesEmCampo();
-      jogo.addPlayer("Tardão");
-      expect(() => jogo.relocatePlayersWithoutTeam()).not.toThrow();
+      jogo.adicionarJogador("Tardão");
+      expect(() => jogo.realocarJogadoresSemTime()).not.toThrow();
     });
 
     it("alocar não duplica jogadores entre fila e partida", () => {
       const jogo = comDoisTimesEmCampo();
-      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3", "Tardão4", "Tardão5"]);
+      jogo.adicionarJogadores([
+        "Tardão1",
+        "Tardão2",
+        "Tardão3",
+        "Tardão4",
+        "Tardão5",
+      ]);
 
-      jogo.relocatePlayersWithoutTeam();
+      jogo.realocarJogadoresSemTime();
 
       expect(jogadorEmDoisTimes(jogo)).toEqual([]);
     });
 
     it("repararIntegridadeDosTimes é no-op após alocar durante a partida", () => {
       const jogo = comDoisTimesEmCampo();
-      jogo.addPlayers(["Tardão1", "Tardão2"]);
-      jogo.relocatePlayersWithoutTeam();
+      jogo.adicionarJogadores(["Tardão1", "Tardão2"]);
+      jogo.realocarJogadoresSemTime();
       const antes = [...jogo.next].map((t) => t.players.map((p) => p.id));
 
       jogo.repararIntegridadeDosTimes();
@@ -1318,13 +1324,13 @@ describe("Teste da classe Game", () => {
         new Rules({ playersPerTeam: 4, choosingTeams: ChoosingTeams.BY_ORDER }),
       );
       jogo.setPlayers(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]);
-      jogo.createTeams();
+      jogo.criarTimes();
       jogo.setPlayingGame();
       const incompleto = jogo.next[0];
       expect(incompleto.players).toHaveLength(2);
 
-      jogo.addPlayers(["Tardão1", "Tardão2", "Tardão3"]);
-      jogo.relocatePlayersWithoutTeam();
+      jogo.adicionarJogadores(["Tardão1", "Tardão2", "Tardão3"]);
+      jogo.realocarJogadoresSemTime();
 
       // Os 2 primeiros completam o time incompleto (→ 4); o 3º abre novo time.
       expect(incompleto.players).toHaveLength(4);
@@ -1332,11 +1338,11 @@ describe("Teste da classe Game", () => {
       expect(jogo.next[1].players).toHaveLength(1);
     });
 
-    it("addToLastTeam abre um novo time quando a fila está vazia", () => {
+    it("adicionarAoUltimoTime abre um novo time quando a fila está vazia", () => {
       const jogo = comDoisTimesEmCampo();
-      const recemChegado = jogo.addPlayer("Tardão");
+      const recemChegado = jogo.adicionarJogador("Tardão");
 
-      jogo.addToLastTeam(recemChegado);
+      jogo.adicionarAoUltimoTime(recemChegado);
 
       expect(jogo.next).toHaveLength(1);
       expect(jogo.next[0].players[0]).toBe(recemChegado);
