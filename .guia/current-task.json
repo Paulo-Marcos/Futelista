@@ -1,6 +1,6 @@
 {
   "taskId": "D-029",
-  "status": "Aguardando validacao",
+  "status": "Validada",
   "title": "Adotar gitmoji nos commits e decidir hook commit-msg",
-  "chatTitle": "D-029 \ud83e\uddf9 - #VALIDACAO - Adotar gitmoji nos commits e decidir hook commit-msg"
+  "chatTitle": "D-029 \ud83e\uddf9 - #FINALIZADO - Adotar gitmoji nos commits e decidir hook commit-msg"
 }

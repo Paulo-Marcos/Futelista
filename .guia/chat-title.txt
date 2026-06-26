@@ -1,1 +1,1 @@
-D-029 🧹 - #VALIDACAO - Adotar gitmoji nos commits e decidir hook commit-msg
+D-029 🧹 - #FINALIZADO - Adotar gitmoji nos commits e decidir hook commit-msg

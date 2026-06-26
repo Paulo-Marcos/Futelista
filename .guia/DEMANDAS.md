@@ -4,7 +4,7 @@
 
 ## [D-029] 🧹 Adotar gitmoji nos commits e decidir hook commit-msg
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Confirmar] Nenhum commit usa gitmoji antes do tipo (unico desvio sistematico). Acao: adotar daqui pra frente; decidir se o hook commit-msg passa a exigir/validar. Historico passado e imutavel. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (conventional-commit-gitmoji #1). Skills-base: conventional-commit-gitmoji.
@@ -14,11 +14,15 @@
 - `.guia/DEMANDAS.md`
 - `.githooks/commit-msg`
 - `bin/check-gitmoji.py`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - commit-msg passa a exigir gitmoji antes do tipo (via bin/check-gitmoji.py), rodando antes do check de lock. Excecoes: Merge/Revert/fixup. Commits auto do guia (sem --no-commit) sao rejeitados de proposito.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -26,11 +30,11 @@
 
 ### Validacao pendente
 
-- Fluxo: rodar guia finish/ready com --no-commit (o engine auto-commita sem emoji e seria rejeitado)
+- Nenhuma.
 
 ## [D-022] 🧹 Decidir convencao PT/EN e renomear no GestorJogo
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Confirmar] Mistura addPlayer/removeFromGame vs reordenarJogadores/esvaziarTime no mesmo agregado. Acao: decidir convencao (regra sugere PT p/ dominio) e renomear em bloco; API consumida pela UI. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #3). Skills-base: clean-code, uncle-bob-craft.
@@ -39,11 +43,15 @@
 
 - `.guia/DEMANDAS.md`
 - `src/domain/GestorJogo.ts`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Padroniza para PT os 19 metodos de acao do vocabulario de dominio do GestorJogo (addPlayer->adicionarJogador, removeFromGame->tirarDoJogo, setNextMatch->definirProximaPartida, addGoal->marcarGol, switchPlayer*/relocate*/resize*/update*...). Tecnicos/getters/lifecycle (subscribe/get*/start/pause/setPlayers/setResult) mantidos EN. Colisoes Team/Player/Match resolvidas por receptor. 31 arquivos.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -51,11 +59,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP: acoes de jogador/time/gol/partida (mesma logica, so nomes)
+- Nenhuma.
 
 ## [D-031] 🧹 Documentar esquema M-/F- de origem no CLAUDE.md
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Opcional] Ha rastreabilidade via marcadores M-NN/F-NN no assunto, sem documentacao. Acao: documentar como esquema oficial de origem. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (conventional-commit-gitmoji #5). Skills-base: conventional-commit-gitmoji.
@@ -64,11 +72,15 @@
 
 - `.guia/DEMANDAS.md`
 - `CLAUDE.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Documenta rastreabilidade de origem dos commits no CLAUDE.md: vigente D-NNN (Guia Fluxo) no escopo + gitmoji; legado [M-NN] no fim do assunto (marco do roadmap, neutro), so historico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -76,11 +88,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-034] 🧹 Estreitar overlap clean-code x uncle-bob-craft
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Opcional] Ambas disparam juntas em qualquer edicao. Acao: estreitar uncle-bob-craft p/ macro (SOLID/boundaries) e clean-code p/ micro (nomes/funcoes/smells). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #3,#4). Skills-base: skill-router, skill-creator.
@@ -90,11 +102,15 @@
 - `.guia/DEMANDAS.md`
 - `.claude/skills/clean-code/SKILL.md`
 - `.claude/skills/uncle-bob-craft/SKILL.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Estreita descricoes: clean-code=MICRO (nomes/funcao/smells/refactorings Fowler), uncle-bob-craft=MACRO (arquitetura/SOLID/boundaries/pattern). Complementaridade explicita, gatilhos nao colidem.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -102,11 +118,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-033] 🧹 Retunar description de react-best-practices (tirar vies Next.js)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Opcional] Description fala React/Next.js/SSR/Vercel, mas projeto e Expo+RN sem Next. Acao: incluir RN/Expo/FlatList/re-render e remover vies Next.js/SSR. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #2). Skills-base: skill-router, skill-creator.
@@ -115,11 +131,15 @@
 
 - `.guia/DEMANDAS.md`
 - `.claude/skills/react-best-practices/SKILL.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Retuna description: foco RN/Expo Router, re-render, memo/useMemo/useCallback, useSyncExternalStore, FlatList/SectionList; remove vies Next.js/SSR/Vercel.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -127,11 +147,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-016] 🧹 Memoizar itens de lista em src/shared/ui
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** TeamMini/TeamQueue/PlayerRow/PlayerAvatar/TeamCard sem memo re-renderizam toda a arvore a cada notify(). Acao: memo nos componentes de item. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #2). Skills-base: react-best-practices.
@@ -146,11 +166,15 @@
 - `src/shared/ui/TeamCrest.tsx`
 - `src/shared/ui/RuleChip.tsx`
 - `src/shared/ui/MatchHistoryCard.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Envolve 7 folhas de item de lista (PlayerRow, PlayerAvatar, TeamMini, TeamQueue, TeamCrest, RuleChip, MatchHistoryCard) em React.memo. Aditivo, comportamento identico. TeamCard pulado: sem consumidores.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -158,11 +182,11 @@
 
 ### Validacao pendente
 
-- DERIVADA: TeamCard sem consumidores (codigo morto, junto com MiniPlacar/UltimaPartidaCard). VALIDAR NO APP: listas de jogadores/times/proximos/historico inalteradas.
+- Nenhuma.
 
 ## [D-015] 🧹 Memoizar PlayerDot e estabilizar handler onScore
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Cada tick re-renderiza todos os PlayerDot com closures novas; store compara so version. Acao: React.memo em PlayerDot + handler estavel (useCallback ou onScore(side,player)). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #1, alta). Skills-base: react-best-practices.
@@ -172,11 +196,15 @@
 - `.guia/DEMANDAS.md`
 - `src/shared/ui/partida/PlayerDot.tsx`
 - `app/(pelada)/partida.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Memoiza PlayerDot (React.memo); onScore passa a receber (side, player); registrarGol estabilizado com useCallback; formacao espelhada do time B pre-computada com useMemo. Props estaveis nos dois times -> memo segura a cada tick. Comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -184,11 +212,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP: marcar gol no jogador certo (A e B), animacao de burst, posicoes espelhadas
+- Nenhuma.
 
 ## [D-025] 🧹 Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** toSeconds reatribui parametro e usa parseInt sem radix/validacao. Acao: variavel local + parseInt(.,10) com guarda de formato. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #6). Skills-base: clean-code.
@@ -202,6 +230,7 @@
 
 - Em desenvolvimento desde 2026-06-26.
 - Saneia toSeconds: nao reatribui param, parseInt com radix 10, partes ausentes/vazias viram 0 via helper local. Comportamento identico p/ entradas validas.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -209,7 +238,7 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-011] 🧹 Extrair subcomponentes e hooks de partida.tsx
 
