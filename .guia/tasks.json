@@ -811,15 +811,29 @@
       "id": "D-013",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de times.tsx",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "times.tsx ~1477 linhas. Acao: extrair subcomponentes e hook useMontagemDeTimes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "app/(pelada)/times.tsx",
+        "src/shared/ui/times/PrimaryCTA.tsx",
+        "src/shared/ui/times/PartidaSemFila.tsx",
+        "src/shared/ui/times/EditarTimeSheet.tsx",
+        "src/shared/ui/times/BannerSemTime.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Extrai PrimaryCTA, PartidaSemFila, EditarTimeSheet e BannerSemTime (leaf compartilhado) para src/shared/ui/times/ (1477->962). StyleSheet particionado; 2 chaves mortas removidas. Estrutural, comportamento identico."
+      ],
+      "validations": [
+        "npx tsc --noEmit (0); npx eslint nos 5 arquivos (0)"
+      ],
+      "pending": [
+        "VALIDAR NO APP: tela Times - CTA, partida sem fila, editar time (nome/cor), banners"
+      ],
       "parentId": "E-003"
     },
     {

@@ -4,16 +4,12 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   BackHandler,
   FlatList,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
@@ -21,13 +17,14 @@ import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { Team } from "@/src/domain/Team";
 import { usePalette } from "@/src/shared/hooks/usePalette";
-import { AppBottomSheet } from "@/src/shared/ui/AppBottomSheet";
-import { Card } from "@/src/shared/ui/Card";
 import { EmptyState } from "@/src/shared/ui/EmptyState";
 import { ErrorToast } from "@/src/shared/ui/ErrorToast";
-import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { TeamMini } from "@/src/shared/ui/TeamMini";
 import { TeamQueue } from "@/src/shared/ui/TeamQueue";
+import { BannerSemTime } from "@/src/shared/ui/times/BannerSemTime";
+import { EditarTimeSheet } from "@/src/shared/ui/times/EditarTimeSheet";
+import { PartidaSemFila } from "@/src/shared/ui/times/PartidaSemFila";
+import { PrimaryCTA } from "@/src/shared/ui/times/PrimaryCTA";
 import { confirmAcao, escolherOpcao } from "@/src/shared/ui/confirmAcao";
 import { nomeDoTime } from "@/src/shared/ui/teamLabel";
 import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
@@ -590,151 +587,6 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
 // Subcomponentes
 // ---------------------------------------------------------------------------
 
-// CTA grande "Iniciar partida" / "Voltar à partida" com glow vermelho.
-// Receita do README_Times.md, mesma do PrimaryCTA da Nova pelada:
-//   iOS:     shadowColor=primary HEX opaco + offset/opacity/radius.
-//   Android: <GlowHalo/> (View vermelha translúcida atrás) — elevation só
-//            gera relevo cinza.
-//   Web:     `boxShadow` CSS via Platform.select — RN Web não traduz
-//            `shadowColor` para sombra colorida.
-// Desabilitado vira `primaryDim` (vermelho queimado) sem glow — mais
-// próximo do CSS do handoff (`background: var(--primary)` sempre) que do
-// `T.surface2` cinza do hand-off TSX. Pattern já usado em Nova pelada e
-// Jogadores nesta árvore.
-function PrimaryCTA({
-  label,
-  icon,
-  disabled,
-  onPress,
-  palette,
-  accessibilityLabel,
-}: {
-  label: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  disabled?: boolean;
-  onPress: () => void;
-  palette: ReturnType<typeof usePalette>;
-  accessibilityLabel: string;
-}) {
-  const webGlow =
-    !disabled && Platform.OS === "web"
-      ? ({
-          boxShadow: `0 12px 30px -8px ${palette.glow}, 0 2px 4px rgba(0,0,0,0.4)`,
-        } as object)
-      : null;
-  return (
-    <View
-      style={[
-        styles.ctaShadow,
-        { shadowColor: palette.primary },
-        disabled && styles.ctaShadowOff,
-        webGlow,
-      ]}
-    >
-      {!disabled && Platform.OS === "android" ? (
-        <LinearGradient
-          pointerEvents="none"
-          colors={[
-            palette.primary + "00",
-            palette.primary + "70",
-            palette.primary + "00",
-          ]}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.glowHalo}
-        />
-      ) : null}
-      <Pressable
-        onPress={onPress}
-        disabled={disabled}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ disabled: !!disabled }}
-        style={({ pressed }) => [
-          styles.cta,
-          {
-            backgroundColor: disabled ? palette.primaryDim : palette.primary,
-            opacity: disabled ? 0.6 : 1,
-          },
-          pressed && !disabled && styles.pressedSoft,
-        ]}
-        android_ripple={{ color: palette.onPrimary + "22" }}
-      >
-        <MaterialCommunityIcons
-          name={icon}
-          size={22}
-          color={palette.onPrimary}
-        />
-        <Text style={[styles.ctaText, { color: palette.onPrimary }]}>
-          {label}
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
-
-// Visão da aba Times durante uma partida cuja fila ficou vazia (os dois únicos
-// times entraram em campo). Read-only: mostra quem está jogando, deixa voltar
-// à partida e — quando chega gente nova — formar o próximo time, tudo sem
-// nunca mexer nos times em campo. Substitui o EmptyState "Montar times", que
-// seria destrutivo aqui (recriar os times duplicaria quem está jogando).
-function PartidaSemFila({
-  teamA,
-  teamB,
-  playersWithoutTeam,
-  podeCriarIncompleto,
-  onAlocar,
-  onVoltar,
-  insets,
-  palette,
-}: {
-  teamA?: Team;
-  teamB?: Team;
-  playersWithoutTeam: number;
-  podeCriarIncompleto: boolean;
-  onAlocar: () => void;
-  onVoltar: () => void;
-  insets: ReturnType<typeof useSafeAreaInsets>;
-  palette: ReturnType<typeof usePalette>;
-}) {
-  return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.scroll,
-        { paddingBottom: insets.bottom + Spacing.xxl },
-      ]}
-    >
-      {playersWithoutTeam > 0 ? (
-        <BannerSemTime
-          quantidade={playersWithoutTeam}
-          podeCriarIncompleto={podeCriarIncompleto}
-          onAlocar={onAlocar}
-        />
-      ) : null}
-
-      <Text
-        style={[styles.sectionTitle, { color: palette.onSurfaceVariant }]}
-        accessibilityRole="header"
-      >
-        Partida em andamento
-      </Text>
-      <View style={styles.nextRow}>
-        {teamA ? <TeamMini team={teamA} idx={0} tone="A" /> : null}
-        {teamB ? <TeamMini team={teamB} idx={1} tone="B" /> : null}
-      </View>
-
-      <PrimaryCTA
-        label="Voltar à partida"
-        icon="play-circle-outline"
-        onPress={onVoltar}
-        palette={palette}
-        accessibilityLabel="Voltar para a partida em andamento"
-      />
-    </ScrollView>
-  );
-}
-
 // Chip informativo: mostra qual regra de montagem de times está em uso, pra o
 // usuário entender o resultado do sorteio antes de ficar apertando o dado.
 // Toque leva às Regras pra trocar a estratégia.
@@ -893,49 +745,6 @@ const BannerSelecao = memo(function BannerSelecao({
   );
 });
 
-const BannerSemTime = memo(function BannerSemTime({
-  quantidade,
-  podeCriarIncompleto,
-  onAlocar,
-}: {
-  quantidade: number;
-  podeCriarIncompleto: boolean;
-  onAlocar: () => void;
-}) {
-  const palette = usePalette();
-  // Sempre mostramos o efeito do "Alocar agora" — varia se completa o último
-  // time ou cria um novo (potencialmente incompleto).
-  const hint = podeCriarIncompleto
-    ? 'Como o último time está cheio, "Alocar agora" cria um novo time — que pode ficar incompleto.'
-    : '"Alocar agora" completa o último time com os jogadores disponíveis.';
-  return (
-    <Card variant="surface">
-      <View style={styles.bannerRow}>
-        <MaterialCommunityIcons
-          name="account-question"
-          size={20}
-          color={palette.warning}
-        />
-        <Text style={[styles.bannerText, { color: palette.onSurface }]}>
-          {quantidade}{" "}
-          {quantidade === 1 ? "jogador sem time" : "jogadores sem time"}
-        </Text>
-      </View>
-      <Text style={[styles.bannerHint, { color: palette.onSurfaceVariant }]}>
-        {hint}
-      </Text>
-      <View style={{ marginTop: Spacing.sm }}>
-        <SecondaryButton
-          label="Alocar agora"
-          onPress={onAlocar}
-          fullWidth
-          accessibilityLabel="Alocar jogadores sem time"
-        />
-      </View>
-    </Card>
-  );
-});
-
 const PlaceholderTime = memo(function PlaceholderTime({
   faltam,
 }: {
@@ -980,188 +789,6 @@ const PlaceholderTime = memo(function PlaceholderTime({
     </View>
   );
 });
-
-// ---------------------------------------------------------------------------
-// Editar time (F-18) — sheet de renomear + cor
-// ---------------------------------------------------------------------------
-
-/** Paleta de cores predefinidas para o usuário escolher. Hex 6 dígitos. */
-const CORES_TIME: readonly { hex: string; label: string }[] = [
-  { hex: "#E11D2A", label: "Vermelho" },
-  { hex: "#2E6BE6", label: "Azul" },
-  { hex: "#12A150", label: "Verde" },
-  { hex: "#F4C20D", label: "Amarelo" },
-  { hex: "#1C1C1E", label: "Preto" },
-  { hex: "#7B3FE4", label: "Roxo" },
-];
-
-function EditarTimeSheet({
-  team,
-  idx,
-  onClose,
-  onSalvar,
-}: {
-  team: Team | null;
-  idx: number;
-  onClose: () => void;
-  onSalvar: (time: Team, patch: { nome?: string; cor?: string }) => void;
-}) {
-  const palette = usePalette();
-  const [nome, setNome] = useState("");
-  const [cor, setCor] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!team) return;
-    setNome(team.nomeCustom ?? "");
-    setCor(team.corCustom);
-  }, [team?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!team) return null;
-
-  const placeholderNome = nomeDoTime(team, idx);
-
-  return (
-    <AppBottomSheet visible onClose={onClose} snapPoint="75%">
-      <View style={styles.sheet}>
-        <View style={styles.sheetHead}>
-          <View>
-            <Text
-              style={[styles.sheetEyebrow, { color: palette.onSurfaceVariant }]}
-            >
-              Personalizar
-            </Text>
-            <Text style={[styles.sheetTitle, { color: palette.onSurface }]}>
-              Editar time
-            </Text>
-          </View>
-          <Pressable
-            onPress={onClose}
-            accessibilityRole="button"
-            accessibilityLabel="Fechar editor de time"
-            style={styles.sheetCloseBtn}
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={18}
-              color={palette.onSurface}
-            />
-          </Pressable>
-        </View>
-
-        <ScrollView style={{ maxHeight: 420 }}>
-          <Text
-            style={[styles.sheetLabel, { color: palette.onSurfaceVariant }]}
-          >
-            Nome
-          </Text>
-          <TextInput
-            value={nome}
-            onChangeText={setNome}
-            placeholder={placeholderNome}
-            placeholderTextColor={palette.onSurfaceVariant}
-            maxLength={30}
-            accessibilityLabel="Nome do time"
-            style={[
-              styles.sheetInput,
-              {
-                color: palette.onSurface,
-                borderColor: palette.outline,
-                backgroundColor: palette.background,
-              },
-            ]}
-          />
-
-          <Text
-            style={[
-              styles.sheetLabel,
-              { color: palette.onSurfaceVariant, marginTop: Spacing.md },
-            ]}
-          >
-            Cor
-          </Text>
-          <View style={styles.coresGrid}>
-            <Pressable
-              onPress={() => setCor(undefined)}
-              accessibilityRole="button"
-              accessibilityLabel="Cor padrão (do escudo)"
-              accessibilityState={{ selected: cor === undefined }}
-              style={({ pressed }) => [
-                styles.corChip,
-                {
-                  backgroundColor: palette.surfaceContainerHigh,
-                  borderColor:
-                    cor === undefined ? palette.primary : palette.outline,
-                  borderWidth: cor === undefined ? 2 : 1,
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="palette-swatch"
-                size={18}
-                color={palette.onSurfaceVariant}
-              />
-              <Text style={[styles.corLabel, { color: palette.onSurface }]}>
-                Padrão
-              </Text>
-            </Pressable>
-            {CORES_TIME.map((c) => (
-              <Pressable
-                key={c.hex}
-                onPress={() => setCor(c.hex)}
-                accessibilityRole="button"
-                accessibilityLabel={`Cor ${c.label}`}
-                accessibilityState={{ selected: cor === c.hex }}
-                style={({ pressed }) => [
-                  styles.corChip,
-                  {
-                    backgroundColor: palette.surfaceContainerHigh,
-                    borderColor:
-                      cor === c.hex ? palette.primary : palette.outline,
-                    borderWidth: cor === c.hex ? 2 : 1,
-                    opacity: pressed ? 0.8 : 1,
-                  },
-                ]}
-              >
-                <View style={[styles.corDot, { backgroundColor: c.hex }]} />
-                <Text style={[styles.corLabel, { color: palette.onSurface }]}>
-                  {c.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
-
-        <Pressable
-          onPress={() =>
-            onSalvar(team, {
-              nome: nome.trim(),
-              cor: cor ?? "",
-            })
-          }
-          accessibilityRole="button"
-          accessibilityLabel="Salvar edição do time"
-          style={({ pressed }) => [
-            styles.sheetSalvar,
-            {
-              backgroundColor: palette.primary,
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="check"
-            size={18}
-            color={palette.onPrimary}
-          />
-          <Text style={[styles.sheetSalvarText, { color: palette.onPrimary }]}>
-            Salvar
-          </Text>
-        </Pressable>
-      </View>
-    </AppBottomSheet>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Estilos
@@ -1239,45 +866,6 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
     gap: 14,
   },
-  pressedSoft: { opacity: 0.92, transform: [{ scale: 0.99 }] },
-  // CTA com glow vermelho — receita do `Times.html` linha 99:
-  //   box-shadow: 0 12px 30px -8px var(--glow), 0 2px 4px rgba(0,0,0,.4)
-  // shadowColor é injetado em runtime no PrimaryCTA (precisa de HEX opaco; o
-  // alpha vem do shadowOpacity). elevation é só reforço Android — o brilho
-  // colorido vem do <GlowHalo/>.
-  ctaShadow: {
-    borderRadius: Radius.md,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  ctaShadowOff: { shadowOpacity: 0, elevation: 0 },
-  glowHalo: {
-    position: "absolute",
-    left: 10,
-    right: 10,
-    top: 14,
-    bottom: -6,
-    borderRadius: Radius.md,
-  },
-  cta: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    minHeight: 56,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: Radius.md,
-    alignSelf: "stretch",
-    overflow: "hidden",
-    borderCurve: "continuous",
-  },
-  ctaText: {
-    fontSize: 17,
-    fontWeight: "800",
-    letterSpacing: 0.1,
-  },
   successBanner: {
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.md,
@@ -1330,19 +918,6 @@ const styles = StyleSheet.create({
     ...Typography.label,
     flex: 1,
   },
-  bannerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  bannerText: {
-    ...Typography.body,
-    flex: 1,
-  },
-  bannerHint: {
-    ...Typography.label,
-    marginTop: Spacing.xs,
-  },
   // Hand-off `.label`: 11/700, letter-spacing .06em, uppercase, dim.
   sectionTitle: {
     fontSize: 11,
@@ -1353,9 +928,6 @@ const styles = StyleSheet.create({
   nextRow: {
     flexDirection: "row",
     gap: Spacing.md,
-  },
-  flex: {
-    flex: 1,
   },
   hint: {
     ...Typography.label,
@@ -1387,91 +959,4 @@ const styles = StyleSheet.create({
     ...Typography.label,
     textAlign: "center",
   },
-
-  // ----- Sheet "Editar time" (F-18) -----
-  sheetWrap: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.45)",
-  },
-  sheet: {
-    padding: Spacing.lg,
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    gap: Spacing.sm,
-  },
-  sheetGrab: {
-    alignSelf: "center",
-    width: 38,
-    height: 4,
-    borderRadius: 2,
-    opacity: 0.5,
-    marginBottom: Spacing.sm,
-  },
-  sheetHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Spacing.sm,
-  },
-  sheetEyebrow: {
-    ...Typography.label,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    fontSize: 10,
-  },
-  sheetTitle: { ...Typography.headline, fontSize: 18, marginTop: 2 },
-  sheetCloseBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sheetLabel: {
-    ...Typography.label,
-    fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: Spacing.xs,
-  },
-  sheetInput: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    minHeight: 44,
-    ...Typography.body,
-    fontSize: 15,
-    borderCurve: "continuous",
-  },
-  coresGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  corChip: {
-    flexBasis: "30%",
-    flexGrow: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.md,
-    borderCurve: "continuous",
-  },
-  corDot: { width: 18, height: 18, borderRadius: 9 },
-  corLabel: { ...Typography.label, fontSize: 12, flex: 1 },
-  sheetSalvar: {
-    marginTop: Spacing.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.md,
-    borderCurve: "continuous",
-  },
-  sheetSalvarText: { ...Typography.title, fontSize: 15, fontWeight: "800" },
 });

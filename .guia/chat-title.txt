@@ -1,1 +1,1 @@
-D-014 🧹 - #VALIDACAO - Extrair subcomponentes e hooks de jogadores.tsx
+D-013 🧹 - #VALIDACAO - Extrair subcomponentes e hooks de times.tsx
