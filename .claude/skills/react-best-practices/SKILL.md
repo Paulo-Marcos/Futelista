@@ -1,6 +1,6 @@
 ---
 name: react-best-practices
-description: "Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Use when writing new React components or Next.js pages, implementing data fetching (client or server-side), or reviewing code for performance issues."
+description: "Performance and correctness guide for React and React Native (Expo Router) components and hooks. Covers avoiding unnecessary re-renders, memoization (memo/useMemo/useCallback), derived state, reactive external stores (useSyncExternalStore), and rendering large lists with FlatList/SectionList. Use when writing or refactoring components, hooks, providers or contexts, or reviewing code for performance issues."
 paths:
   - "app/**"
   - "components/**"

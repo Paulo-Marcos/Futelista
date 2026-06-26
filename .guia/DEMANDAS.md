@@ -2,6 +2,55 @@
 
 ---
 
+## [D-034] 🧹 Estreitar overlap clean-code x uncle-bob-craft
+
+- **Status:** Em desenvolvimento
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** [Opcional] Ambas disparam juntas em qualquer edicao. Acao: estreitar uncle-bob-craft p/ macro (SOLID/boundaries) e clean-code p/ micro (nomes/funcoes/smells). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #3,#4). Skills-base: skill-router, skill-creator.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+
+### Validacao feita
+
+- Nenhuma.
+
+### Validacao pendente
+
+- Nenhuma.
+
+
+## [D-033] 🧹 Retunar description de react-best-practices (tirar vies Next.js)
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** [Opcional] Description fala React/Next.js/SSR/Vercel, mas projeto e Expo+RN sem Next. Acao: incluir RN/Expo/FlatList/re-render e remover vies Next.js/SSR. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #2). Skills-base: skill-router, skill-creator.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `.claude/skills/react-best-practices/SKILL.md`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Retuna description: foco RN/Expo Router, re-render, memo/useMemo/useCallback, useSyncExternalStore, FlatList/SectionList; remove vies Next.js/SSR/Vercel.
+
+### Validacao feita
+
+- frontmatter YAML valido; name/paths/corpo intactos
+
+### Validacao pendente
+
+- Validacao manual do desenvolvedor.
+
 ## [D-016] 🧹 Memoizar itens de lista em src/shared/ui
 
 - **Status:** Aguardando validacao

@@ -1,1 +1,1 @@
-D-016 🧹 - #VALIDACAO - Memoizar itens de lista em src/shared/ui
+D-033 🧹 - #VALIDACAO - Retunar description de react-best-practices (tirar vies Next.js)
