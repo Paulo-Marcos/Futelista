@@ -1,6 +1,15 @@
 ---
 name: uncle-bob-craft
 description: "Use when performing code review, writing or refactoring code, or discussing architecture; complements clean-code and does not replace project linter/formatter."
+paths:
+  - "src/domain/**"
+  - "app/**"
+  - "components/**"
+  - "providers/**"
+  - "contexts/**"
+  - "hooks/**"
+  - "src/app-shell/**"
+  - "src/shared/**"
 category: code-quality
 risk: safe
 source: community
