@@ -527,7 +527,7 @@
       "id": "D-023",
       "kind": "chore",
       "title": "Remover comentario-cicatriz em Team.ts:114",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Comentario '//tava deletando mais de um.' descreve bug antigo. Acao: remover (nome+teste ja documentam). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #4). Skills-base: clean-code.",
       "createdAt": "2026-06-24",
@@ -539,15 +539,31 @@
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
         "Removido o comentario-cicatriz '//tava deletando mais de um.' em removePlayer (Team.ts:114). Logica intacta; nome do metodo + regressao em Team.spec.ts ja documentam o comportamento.",
-        "ATENCAO: o working tree e compartilhado por varios chips guia concorrentes. O Team.ts staged foi varrido para o commit acd4169 (rotulado D-032) por outro processo; nao ha commit D-023 dedicado e nao reescrevi historico (seria destrutivo)."
+        "ATENCAO: o working tree e compartilhado por varios chips guia concorrentes. O Team.ts staged foi varrido para o commit acd4169 (rotulado D-032) por outro processo; nao ha commit D-023 dedicado e nao reescrevi historico (seria destrutivo).",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx jest Team"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
-      "parentId": "E-009"
+      "pending": [],
+      "parentId": "E-009",
+      "finishedAt": "2026-06-25T22:40:52-03:00",
+      "qualityReview": {
+        "candidates": [
+          "src/domain/Team.ts"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "alteracao trivial: remocao de um comentario obsoleto em removePlayer, sem mudanca de logica; cobertura ja verde (npx jest Team 38/38). Codigo ja commitado em arvore (HEAD)."
+      }
     },
     {
       "id": "D-022",
@@ -796,26 +812,44 @@
       "id": "D-008",
       "kind": "feature",
       "title": "Escrever ADR-0003 persistencia Ports&Adapters",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Camada de persistencia (porta RepositorioPelada + adapters AsyncStorage/EmMemoria + serializers + backup) adicionada sem ADR; decisao com trade-off real. Acao: criar docs/adr/0003. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #1, alta). Skills-base: proposal-architect.",
       "createdAt": "2026-06-24",
       "updatedAt": "2026-06-25",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        "docs/adr/0003-persistencia-ports-adapters.md"
+        "docs/adr/0003-persistencia-ports-adapters.md",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "ADR-0003 retroativo: porta RepositorioPelada no dominio + adapters AsyncStorage/EmMemoria, serializers (grafo ciclico, PAYLOAD_VERSION), storageKeys e backup JSON; injecao via soccerProvider. Formato espelha ADR-0001/0002 (contexto, decisao, 4 alternativas, consequencias boas/ruins/neutras), status Aceito."
+        "ADR-0003 retroativo: porta RepositorioPelada no dominio + adapters AsyncStorage/EmMemoria, serializers (grafo ciclico, PAYLOAD_VERSION), storageKeys e backup JSON; injecao via soccerProvider. Formato espelha ADR-0001/0002 (contexto, decisao, 4 alternativas, consequencias boas/ruins/neutras), status Aceito.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "confer\u00eancia manual contra src/domain/ports e src/infrastructure/storage"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
-      "parentId": "E-002"
+      "pending": [],
+      "parentId": "E-002",
+      "finishedAt": "2026-06-25T22:42:25-03:00",
+      "qualityReview": {
+        "candidates": [
+          "docs/adr/0003-persistencia-ports-adapters.md"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "alteracao 100% documental (ADR markdown), sem codigo/funcoes/testes \u2014 skills de qualidade (clean-code/clean-architecture/tdd) nao se aplicam; aderencia ao formato dos ADRs 0001/0002 conferida"
+      }
     },
     {
       "id": "D-007",

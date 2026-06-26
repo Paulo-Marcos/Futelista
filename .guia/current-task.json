@@ -1,6 +1,6 @@
 {
-  "taskId": "D-009",
+  "taskId": "D-008",
   "status": "Validada",
-  "title": "Escrever ADR modelagem Pelada x Execucao",
-  "demandTitle": "D-009 \u2728 - #FINALIZADO - Escrever ADR modelagem Pelada x Execucao"
+  "title": "Escrever ADR-0003 persistencia Ports&Adapters",
+  "demandTitle": "D-008 \u2728 - #FINALIZADO - Escrever ADR-0003 persistencia Ports&Adapters"
 }

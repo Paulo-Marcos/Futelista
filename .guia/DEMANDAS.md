@@ -42,7 +42,7 @@
 
 ## [D-008] ✨ Escrever ADR-0003 persistencia Ports&Adapters
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Camada de persistencia (porta RepositorioPelada + adapters AsyncStorage/EmMemoria + serializers + backup) adicionada sem ADR; decisao com trade-off real. Acao: criar docs/adr/0003. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #1, alta). Skills-base: proposal-architect.
@@ -51,11 +51,14 @@
 
 - `.guia/DEMANDAS.md`
 - `docs/adr/0003-persistencia-ports-adapters.md`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - ADR-0003 retroativo: porta RepositorioPelada no dominio + adapters AsyncStorage/EmMemoria, serializers (grafo ciclico, PAYLOAD_VERSION), storageKeys e backup JSON; injecao via soccerProvider. Formato espelha ADR-0001/0002 (contexto, decisao, 4 alternativas, consequencias boas/ruins/neutras), status Aceito.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -63,7 +66,13 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T22:42:25-03:00
 
 ## [D-004] 🧹 Corrigir PRIVACY.md (persistencia AsyncStorage ativa)
 
@@ -158,7 +167,7 @@
 
 ## [D-023] 🧹 Remover comentario-cicatriz em Team.ts:114
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Comentario '//tava deletando mais de um.' descreve bug antigo. Acao: remover (nome+teste ja documentam). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #4). Skills-base: clean-code.
@@ -173,6 +182,7 @@
 - Em desenvolvimento desde 2026-06-25.
 - Removido o comentario-cicatriz '//tava deletando mais de um.' em removePlayer (Team.ts:114). Logica intacta; nome do metodo + regressao em Team.spec.ts ja documentam o comportamento.
 - ATENCAO: o working tree e compartilhado por varios chips guia concorrentes. O Team.ts staged foi varrido para o commit acd4169 (rotulado D-032) por outro processo; nao ha commit D-023 dedicado e nao reescrevi historico (seria destrutivo).
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -180,7 +190,13 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T22:40:52-03:00
 
 ## [D-032] 🧹 Adicionar paths: as 4 skills do projeto
 
