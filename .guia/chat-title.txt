@@ -1,1 +1,1 @@
-D-034 🧹 - #VALIDACAO - Estreitar overlap clean-code x uncle-bob-craft
+D-031 🧹 - #VALIDACAO - Documentar esquema M-/F- de origem no CLAUDE.md

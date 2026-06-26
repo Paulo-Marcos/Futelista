@@ -186,6 +186,11 @@ git config core.hooksPath .githooks
 
 Detalhes completos em [features/README.md](features/README.md).
 
+### Rastreabilidade de origem nos commits
+
+- **Vigente** — a demanda do Guia Fluxo entra no escopo do commit como `D-NNN`, com gitmoji na frente: `<gitmoji> tipo(D-NNN): descrição imperativa em pt-BR`. Ex.: `🧹 chore(D-031): documentar rastreabilidade de origem nos commits`. É assim que se rastreia a origem de uma mudança hoje.
+- **Legado** — commits antigos (M-03..M-20) trazem `[M-NN]` no fim do assunto: marcador de etapa/marco do roadmap (ver [COMMITS_PLAN.md](COMMITS_PLAN.md)), preservado no histórico apenas. Não usar `[M-NN]` em novas demandas; use `D-NNN`.
+
 ---
 
 ## Princípios de Engenharia (aplicar com pragmatismo)
