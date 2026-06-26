@@ -1,6 +1,6 @@
 {
-  "taskId": "D-041",
-  "status": "Validada",
-  "title": "Chip de regra de sorteio e ajustes visuais",
-  "chatTitle": "D-041 \u2728 - #FINALIZADO - Chip de regra de sorteio e ajustes visuais"
+  "taskId": "D-027",
+  "status": "Aguardando validacao",
+  "title": "Criar release.yml disparado em tags v*.*.*",
+  "chatTitle": "D-027 \u2728 - #VALIDACAO - Criar release.yml disparado em tags v*.*.*"
 }

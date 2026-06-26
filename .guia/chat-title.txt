@@ -1,1 +1,1 @@
-D-041 ✨ - #FINALIZADO - Chip de regra de sorteio e ajustes visuais
+D-027 ✨ - #VALIDACAO - Criar release.yml disparado em tags v*.*.*
