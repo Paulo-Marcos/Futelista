@@ -21,10 +21,9 @@ A UI fica em `app/` (rotas Expo Router), `components/`, `providers/`, `contexts/
 ## Estado e re-render
 
 - **Não** force re-render com `setValorAtual([])`. Isso é cheiro de gambiarra.
-- Para reatividade real, prefira uma destas opções (a definir em refactor futuro):
-  - Observer tipado no `GestorJogo` + hook que faz `useSyncExternalStore`.
-  - Adapter externo (Zustand, Jotai) que escuta o agregado e expõe seletores.
-- Subscreva o **mínimo** que o componente precisa. Subscrever um array enorme só para ler `.length` causa re-render desnecessário (`@react-best-practices: rerender-derived-state`).
+- O padrão reativo já está **decidido e implementado** ([ADR-0002](../../docs/adr/0002-reatividade-external-store.md)): o `GestorJogo` implementa o contrato de **external store** do React — expõe `subscribe(listener)`, `version` e chama `notify()` internamente a cada mudança de estado (inclusive ticks do `Timer`).
+- Para reagir a mudanças do domínio, **sempre** consuma via [`useGameSlice`](../../src/app-shell/useGameSlice.ts) (ou `useGameSliceRequired` quando há garantia de execução ativa). O hook centraliza o `useSyncExternalStore` — não escreva `useSyncExternalStore` solto no componente nem reintroduza observers ad hoc.
+- Passe ao `useGameSlice` um **seletor** que devolve só o slice necessário. Subscreva o **mínimo** que o componente precisa: subscrever um array enorme só para ler `.length` causa re-render desnecessário (`@react-best-practices: rerender-derived-state`).
 
 ## Listas
 
