@@ -1,0 +1,88 @@
+name: Release
+
+# Dispara SOMENTE em tags de versao semantica (ex.: v1.0.0).
+# Nao roda em push normal de branch nem em pull request.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write # necessario para criar o GitHub Release
+
+jobs:
+  release:
+    name: Build APK (EAS) e publicar Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup EAS / Expo
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Extrair notas do CHANGELOG
+        id: changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Extraindo notas da versao ${VERSION} do CHANGELOG.md"
+          # Captura o bloco entre "## [VERSION]" e o proximo cabecalho "## ".
+          NOTES="$(awk -v ver="${VERSION}" '
+            $0 ~ "^## \\[" ver "\\]" { capture = 1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' CHANGELOG.md)"
+          if [ -z "$(printf "%s" "$NOTES" | tr -d "[:space:]")" ]; then
+            echo "Nenhuma secao encontrada para a versao ${VERSION}; usando texto padrao."
+            NOTES="Release ${VERSION}. Consulte o CHANGELOG.md para detalhes."
+          fi
+          {
+            echo "notes<<EOF"
+            printf "%s\n" "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build do APK Android (EAS)
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Perfil "preview" e o unico do eas.json que gera APK (android.buildType: apk).
+          BUILD_JSON="$(eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json)"
+          ARTIFACT_URL="$(printf "%s" "$BUILD_JSON" | jq -r '.[0].artifacts.buildUrl // .[0].artifacts.applicationArchiveUrl')"
+          if [ -z "$ARTIFACT_URL" ] || [ "$ARTIFACT_URL" = "null" ]; then
+            echo "Nao foi possivel obter a URL do artefato do build." >&2
+            exit 1
+          fi
+          echo "Baixando APK de ${ARTIFACT_URL}"
+          curl -fSL "$ARTIFACT_URL" -o "futelista-${GITHUB_REF_NAME}.apk"
+          echo "apk_path=futelista-${GITHUB_REF_NAME}.apk" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.notes }}
+          files: ${{ steps.build.outputs.apk_path }}
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
