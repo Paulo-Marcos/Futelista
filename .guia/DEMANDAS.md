@@ -2,6 +2,32 @@
 
 ---
 
+## [D-015] 🧹 Memoizar PlayerDot e estabilizar handler onScore
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** Cada tick re-renderiza todos os PlayerDot com closures novas; store compara so version. Acao: React.memo em PlayerDot + handler estavel (useCallback ou onScore(side,player)). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #1, alta). Skills-base: react-best-practices.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `src/shared/ui/partida/PlayerDot.tsx`
+- `app/(pelada)/partida.tsx`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Memoiza PlayerDot (React.memo); onScore passa a receber (side, player); registrarGol estabilizado com useCallback; formacao espelhada do time B pre-computada com useMemo. Props estaveis nos dois times -> memo segura a cada tick. Comportamento identico.
+
+### Validacao feita
+
+- npx tsc --noEmit (0); npx eslint PlayerDot + partida.tsx (0, exhaustive-deps ok)
+
+### Validacao pendente
+
+- VALIDAR NO APP: marcar gol no jogador certo (A e B), animacao de burst, posicoes espelhadas
+
 ## [D-025] 🧹 Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)
 
 - **Status:** Aguardando validacao

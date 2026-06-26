@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import {
   Animated,
   Easing,
@@ -14,12 +14,13 @@ import { usePalette } from "@/src/shared/hooks/usePalette";
 import { PlayerAvatar } from "@/src/shared/ui/PlayerAvatar";
 import { Typography } from "@/src/shared/theme/Colors";
 
-export function PlayerDot({
+export const PlayerDot = memo(function PlayerDot({
   player,
   tone,
   pos,
   active,
   spot,
+  side,
   onScore,
 }: {
   player: Player;
@@ -27,7 +28,8 @@ export function PlayerDot({
   pos: { x: number; y: number };
   active: boolean;
   spot: boolean;
-  onScore: () => void;
+  side: "A" | "B";
+  onScore: (side: "A" | "B", player: Player) => void;
 }) {
   const palette = usePalette();
   const goalsCount = player.goals.length;
@@ -72,7 +74,7 @@ export function PlayerDot({
 
   return (
     <Pressable
-      onPress={() => active && onScore()}
+      onPress={() => active && onScore(side, player)}
       disabled={!active}
       accessibilityRole="button"
       accessibilityLabel={`Gol de ${player.name}`}
@@ -149,7 +151,7 @@ export function PlayerDot({
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   dot: {

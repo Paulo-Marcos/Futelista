@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, Vibration, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -106,29 +106,32 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
   const reservas = proximoTime?.players ?? [];
 
-  const safeAction = (fn: () => void) => {
+  const safeAction = useCallback((fn: () => void) => {
     try {
       fn();
       setErro(null);
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));
     }
-  };
+  }, []);
 
-  const registrarGol = (side: "A" | "B", player: Player) => {
-    if (status === TimerStatus.ENDED) return;
-    safeAction(() => {
-      const team =
-        side === "A"
-          ? (playing as NonNullable<typeof playing>).teamA
-          : (playing as NonNullable<typeof playing>).teamB;
-      gestor.addGoal(team, player);
-      const afterA = (goals?.teamA ?? 0) + (side === "A" ? 1 : 0);
-      const afterB = (goals?.teamB ?? 0) + (side === "B" ? 1 : 0);
-      setCelebration({ player, side, scoreA: afterA, scoreB: afterB });
-      setSpotlight(player.id);
-    });
-  };
+  const registrarGol = useCallback(
+    (side: "A" | "B", player: Player) => {
+      if (status === TimerStatus.ENDED) return;
+      safeAction(() => {
+        const team =
+          side === "A"
+            ? (playing as NonNullable<typeof playing>).teamA
+            : (playing as NonNullable<typeof playing>).teamB;
+        gestor.addGoal(team, player);
+        const afterA = (goals?.teamA ?? 0) + (side === "A" ? 1 : 0);
+        const afterB = (goals?.teamB ?? 0) + (side === "B" ? 1 : 0);
+        setCelebration({ player, side, scoreA: afterA, scoreB: afterB });
+        setSpotlight(player.id);
+      });
+    },
+    [status, safeAction, playing, goals, gestor],
+  );
 
   useEffect(() => {
     if (!celebration) return;
@@ -228,6 +231,14 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const formacaoB = useMemo(
     () => gerarFormacao(playing?.teamB.players.length ?? 0),
     [playing?.teamB.players.length],
+  );
+  // Time B joga na metade de baixo: espelhamos o Y da formação. Pré-computado
+  // (em vez de criar `{ x, y: 1 - pos.y }` dentro do .map) para que a prop
+  // `pos` de cada PlayerDot seja referência estável entre renders — senão o
+  // React.memo do dot do time B nunca segura (paridade com o time A).
+  const formacaoBMirror = useMemo(
+    () => formacaoB.map((p) => ({ x: p.x, y: 1 - p.y })),
+    [formacaoB],
   );
 
   if (!playing) {
@@ -395,7 +406,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
                 pos={pos}
                 active={running}
                 spot={spotlight === p.id}
-                onScore={() => registrarGol("A", p)}
+                side="A"
+                onScore={registrarGol}
               />
             );
           })}
@@ -403,17 +415,18 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
         <View style={styles.halfBottom}>
           {teamB.players.map((p, i) => {
-            const pos = formacaoB[i] ?? formacaoB[formacaoB.length - 1];
-            const mirrored = { x: pos.x, y: 1 - pos.y };
+            const pos =
+              formacaoBMirror[i] ?? formacaoBMirror[formacaoBMirror.length - 1];
             return (
               <PlayerDot
                 key={p.id}
                 player={p}
                 tone="B"
-                pos={mirrored}
+                pos={pos}
                 active={running}
                 spot={spotlight === p.id}
-                onScore={() => registrarGol("B", p)}
+                side="B"
+                onScore={registrarGol}
               />
             );
           })}

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-025",
+  "taskId": "D-015",
   "status": "Aguardando validacao",
-  "title": "Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)",
-  "chatTitle": "D-025 \ud83e\uddf9 - #VALIDACAO - Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)"
+  "title": "Memoizar PlayerDot e estabilizar handler onScore",
+  "chatTitle": "D-015 \ud83e\uddf9 - #VALIDACAO - Memoizar PlayerDot e estabilizar handler onScore"
 }
