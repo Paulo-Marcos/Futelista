@@ -645,25 +645,27 @@
       "id": "D-021",
       "kind": "chore",
       "title": "Remover any do dominio em Rules.ts:54",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "choosingTeams: any viola a regra 'sem any' do dominio. Acao: trocar por unknown/ChoosingTeams validado via includes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #2, alta). Skills-base: clean-code, uncle-bob-craft.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25",
+      "updatedAt": "2026-06-26",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        "src/domain/Rules.ts"
+        "src/domain/Rules.ts",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Troca any por unknown em checkChoosingTeams (validacao de entrada); narrowing via as ChoosingTeams no includes"
+        "Troca any por unknown em checkChoosingTeams (validacao de entrada); narrowing via as ChoosingTeams no includes",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx jest src/domain/Rules (10/10)"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
+      "pending": [],
       "parentId": "E-009"
     },
     {
@@ -685,25 +687,28 @@
       "id": "D-019",
       "kind": "chore",
       "title": "Avaliar extrair reatividade/servicos de GestorJogo",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "GestorJogo ~892 ln/50 metodos acumula jogadores/times/timer/gols/regras + contrato de store. Acao: avaliar extrair Observable e servicos de dominio coesos. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #2). Skills-base: clean-architecture-guardian, domain-driven-design, uncle-bob-craft.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25",
+      "updatedAt": "2026-06-26",
       "modifiedFiles": [
         "src/domain/GestorJogo.ts",
         "src/domain/Observable.ts",
-        "src/domain/Observable.spec.ts"
+        "src/domain/Observable.spec.ts",
+        ".guia/DEMANDAS.md",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
-        "Extrai o external store para Observable (composicao); GestorJogo delega version/subscribe/notify. API publica e comportamento identicos. Agrupamento em servicos adiado (nota)."
+        "Extrai o external store para Observable (composicao); GestorJogo delega version/subscribe/notify. API publica e comportamento identicos. Agrupamento em servicos adiado (nota).",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx jest src/domain 29 suites/273 testes; tsc --noEmit; eslint 0 errors"
       ],
-      "pending": [
-        "Agrupar metodos de time/jogador em servicos de dominio: demanda futura (invasivo)"
-      ],
+      "pending": [],
       "parentId": "E-004"
     },
     {
@@ -725,25 +730,27 @@
       "id": "D-017",
       "kind": "chore",
       "title": "Envolver value do SoccerContext em useMemo",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "value={{...}} literal novo a cada render re-renderiza todos useSoccer(). Acao: useMemo no value. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #3). Skills-base: react-best-practices.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25",
+      "updatedAt": "2026-06-26",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        "src/app-shell/soccerProvider.tsx"
+        "src/app-shell/soccerProvider.tsx",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Envolve o value do SoccerContext.Provider em useMemo (antes do early-return de boot), evitando re-render de todos os useSoccer a cada render"
+        "Envolve o value do SoccerContext.Provider em useMemo (antes do early-return de boot), evitando re-render de todos os useSoccer a cada render",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx tsc --noEmit; npx eslint src/app-shell/soccerProvider.tsx (sem rules-of-hooks/exhaustive-deps)"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
+      "pending": [],
       "parentId": "E-008"
     },
     {
@@ -780,11 +787,11 @@
       "id": "D-014",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de jogadores.tsx",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "jogadores.tsx ~1393 linhas. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25",
+      "updatedAt": "2026-06-26",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
         "app/(pelada)/jogadores.tsx",
@@ -793,25 +800,27 @@
         "src/shared/ui/jogadores/LinhaEdicao.tsx",
         "src/shared/ui/jogadores/ModalAdicionarLote.tsx",
         "src/shared/ui/jogadores/EstatisticasJogadorSheet.tsx",
-        "src/shared/ui/jogadores/StatTile.tsx"
+        "src/shared/ui/jogadores/StatTile.tsx",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Extrai 6 subcomponentes de jogadores.tsx para src/shared/ui/jogadores/ (1393->672 linhas); StyleSheet particionado por consumo. Estrutural, comportamento identico."
+        "Extrai 6 subcomponentes de jogadores.tsx para src/shared/ui/jogadores/ (1393->672 linhas); StyleSheet particionado por consumo. Estrutural, comportamento identico.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx tsc --noEmit (0); npx eslint nos 7 arquivos (0)"
       ],
-      "pending": [
-        "VALIDAR NO APP (Expo/emulador): tela Jogadores visualmente identica - adicionar, editar, lote, estatisticas, busca"
-      ],
+      "pending": [],
       "parentId": "E-003"
     },
     {
       "id": "D-013",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de times.tsx",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "times.tsx ~1477 linhas. Acao: extrair subcomponentes e hook useMontagemDeTimes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
@@ -822,25 +831,27 @@
         "src/shared/ui/times/PrimaryCTA.tsx",
         "src/shared/ui/times/PartidaSemFila.tsx",
         "src/shared/ui/times/EditarTimeSheet.tsx",
-        "src/shared/ui/times/BannerSemTime.tsx"
+        "src/shared/ui/times/BannerSemTime.tsx",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-26.",
-        "Extrai PrimaryCTA, PartidaSemFila, EditarTimeSheet e BannerSemTime (leaf compartilhado) para src/shared/ui/times/ (1477->962). StyleSheet particionado; 2 chaves mortas removidas. Estrutural, comportamento identico."
+        "Extrai PrimaryCTA, PartidaSemFila, EditarTimeSheet e BannerSemTime (leaf compartilhado) para src/shared/ui/times/ (1477->962). StyleSheet particionado; 2 chaves mortas removidas. Estrutural, comportamento identico.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx tsc --noEmit (0); npx eslint nos 5 arquivos (0)"
       ],
-      "pending": [
-        "VALIDAR NO APP: tela Times - CTA, partida sem fila, editar time (nome/cor), banners"
-      ],
+      "pending": [],
       "parentId": "E-003"
     },
     {
       "id": "D-012",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de (pelada)/index.tsx",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "index.tsx ~2478 linhas mistura render+estado+orquestracao. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
@@ -848,25 +859,27 @@
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
         "app/(pelada)/index.tsx",
-        "src/shared/ui/home/"
+        "src/shared/ui/home/",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-26.",
-        "Extrai ~18 subcomponentes da Home para src/shared/ui/home/ (+ home/hero/), 2478->874 linhas. Arvore de composicao do Hero respeitada; StyleSheet particionado; orfas removidas. Estrutural, comportamento identico."
+        "Extrai ~18 subcomponentes da Home para src/shared/ui/home/ (+ home/hero/), 2478->874 linhas. Arvore de composicao do Hero respeitada; StyleSheet particionado; orfas removidas. Estrutural, comportamento identico.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx tsc --noEmit (0); npx eslint index + home/**/* (0)"
       ],
-      "pending": [
-        "VALIDAR NO APP: Home (gestao e execucao) - cards Pelada/Avulsa, Hero (placar/matchup/CTA), ultimos jogos, proximos. DERIVADA: MiniPlacar e UltimaPartidaCard sao codigo morto (extraidos sem uso) - remover ou ligar numa demanda futura."
-      ],
+      "pending": [],
       "parentId": "E-003"
     },
     {
       "id": "D-011",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de partida.tsx",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "partida.tsx ~2999 linhas com 15+ componentes num arquivo. Acao: mover subcomponentes+styles p/ src/shared/ui/partida/* e extrair hook usePartida; tela vira composicao. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1, clean-code-review #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
@@ -874,18 +887,20 @@
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
         "app/(pelada)/partida.tsx",
-        "src/shared/ui/partida/"
+        "src/shared/ui/partida/",
+        ".guia/chat-title.txt",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-26.",
-        "Extrai 17 subcomponentes + helpers da tela de Partida para src/shared/ui/partida/ (2998->628). Composicao e animacoes (Animated/loops/cleanup) preservadas; PlayerDot extraido como esta (pronto p/ D-015); StyleSheet particionado, orfas removidas. Estrutural, comportamento identico."
+        "Extrai 17 subcomponentes + helpers da tela de Partida para src/shared/ui/partida/ (2998->628). Composicao e animacoes (Animated/loops/cleanup) preservadas; PlayerDot extraido como esta (pronto p/ D-015); StyleSheet particionado, orfas removidas. Estrutural, comportamento identico.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx tsc --noEmit (0); npx eslint partida + partida/**/* (0)"
       ],
-      "pending": [
-        "VALIDAR NO APP com atencao as ANIMACOES: campo, PlayerDot (gol burst), CenterDisc (pulse), GoalCelebration/Confetti, toasts, sheets (gol/troca/autor), scoreboard, banco"
-      ],
+      "pending": [],
       "parentId": "E-003"
     },
     {
@@ -1255,25 +1270,24 @@
       "id": "D-002",
       "kind": "chore",
       "title": "Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Docs apontam providers/contexts/hooks e app/(tabs)/ que nao existem; real e src/{domain,app-shell,infrastructure,shared} e app/(pelada)/. Acao: atualizar a secao Arquitetura/Conceitos. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #4, clean-code-review #7, proposal-architect #2). Skills-base: proposal-architect, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25",
+      "updatedAt": "2026-06-26",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
         "CLAUDE.md"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Alinha secao Arquitetura do CLAUDE.md a estrutura real (src/app-shell, src/infrastructure, src/shared; app/(pelada))"
+        "Alinha secao Arquitetura do CLAUDE.md a estrutura real (src/app-shell, src/infrastructure, src/shared; app/(pelada))",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "grep: sem mencoes a app/(tabs), MyProviders na raiz, providers/contexts/hooks na raiz"
       ],
-      "pending": [
-        "rules/mobile.md ainda descreve estrutura antiga (demanda derivada)"
-      ],
+      "pending": [],
       "dependsOn": [
         "D-001"
       ],

@@ -4,7 +4,7 @@
 
 ## [D-011] 🧹 Extrair subcomponentes e hooks de partida.tsx
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** partida.tsx ~2999 linhas com 15+ componentes num arquivo. Acao: mover subcomponentes+styles p/ src/shared/ui/partida/* e extrair hook usePartida; tela vira composicao. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1, clean-code-review #1). Skills-base: react-best-practices, clean-code.
@@ -14,11 +14,15 @@
 - `.guia/DEMANDAS.md`
 - `app/(pelada)/partida.tsx`
 - `src/shared/ui/partida/`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Extrai 17 subcomponentes + helpers da tela de Partida para src/shared/ui/partida/ (2998->628). Composicao e animacoes (Animated/loops/cleanup) preservadas; PlayerDot extraido como esta (pronto p/ D-015); StyleSheet particionado, orfas removidas. Estrutural, comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -26,11 +30,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP com atencao as ANIMACOES: campo, PlayerDot (gol burst), CenterDisc (pulse), GoalCelebration/Confetti, toasts, sheets (gol/troca/autor), scoreboard, banco
+- Nenhuma.
 
 ## [D-012] 🧹 Extrair subcomponentes e hooks de (pelada)/index.tsx
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** index.tsx ~2478 linhas mistura render+estado+orquestracao. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.
@@ -40,11 +44,15 @@
 - `.guia/DEMANDAS.md`
 - `app/(pelada)/index.tsx`
 - `src/shared/ui/home/`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Extrai ~18 subcomponentes da Home para src/shared/ui/home/ (+ home/hero/), 2478->874 linhas. Arvore de composicao do Hero respeitada; StyleSheet particionado; orfas removidas. Estrutural, comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -52,11 +60,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP: Home (gestao e execucao) - cards Pelada/Avulsa, Hero (placar/matchup/CTA), ultimos jogos, proximos. DERIVADA: MiniPlacar e UltimaPartidaCard sao codigo morto (extraidos sem uso) - remover ou ligar numa demanda futura.
+- Nenhuma.
 
 ## [D-013] 🧹 Extrair subcomponentes e hooks de times.tsx
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** times.tsx ~1477 linhas. Acao: extrair subcomponentes e hook useMontagemDeTimes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.
@@ -69,11 +77,15 @@
 - `src/shared/ui/times/PartidaSemFila.tsx`
 - `src/shared/ui/times/EditarTimeSheet.tsx`
 - `src/shared/ui/times/BannerSemTime.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Extrai PrimaryCTA, PartidaSemFila, EditarTimeSheet e BannerSemTime (leaf compartilhado) para src/shared/ui/times/ (1477->962). StyleSheet particionado; 2 chaves mortas removidas. Estrutural, comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -81,11 +93,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP: tela Times - CTA, partida sem fila, editar time (nome/cor), banners
+- Nenhuma.
 
 ## [D-014] 🧹 Extrair subcomponentes e hooks de jogadores.tsx
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** jogadores.tsx ~1393 linhas. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.
@@ -100,11 +112,15 @@
 - `src/shared/ui/jogadores/ModalAdicionarLote.tsx`
 - `src/shared/ui/jogadores/EstatisticasJogadorSheet.tsx`
 - `src/shared/ui/jogadores/StatTile.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Extrai 6 subcomponentes de jogadores.tsx para src/shared/ui/jogadores/ (1393->672 linhas); StyleSheet particionado por consumo. Estrutural, comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -112,11 +128,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP (Expo/emulador): tela Jogadores visualmente identica - adicionar, editar, lote, estatisticas, busca
+- Nenhuma.
 
 ## [D-019] 🧹 Avaliar extrair reatividade/servicos de GestorJogo
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** GestorJogo ~892 ln/50 metodos acumula jogadores/times/timer/gols/regras + contrato de store. Acao: avaliar extrair Observable e servicos de dominio coesos. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #2). Skills-base: clean-architecture-guardian, domain-driven-design, uncle-bob-craft.
@@ -126,10 +142,15 @@
 - `src/domain/GestorJogo.ts`
 - `src/domain/Observable.ts`
 - `src/domain/Observable.spec.ts`
+- `.guia/DEMANDAS.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Extrai o external store para Observable (composicao); GestorJogo delega version/subscribe/notify. API publica e comportamento identicos. Agrupamento em servicos adiado (nota).
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -137,12 +158,11 @@
 
 ### Validacao pendente
 
-- Agrupar metodos de time/jogador em servicos de dominio: demanda futura (invasivo)
-
+- Nenhuma.
 
 ## [D-017] 🧹 Envolver value do SoccerContext em useMemo
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** value={{...}} literal novo a cada render re-renderiza todos useSoccer(). Acao: useMemo no value. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #3). Skills-base: react-best-practices.
@@ -151,11 +171,15 @@
 
 - `.guia/DEMANDAS.md`
 - `src/app-shell/soccerProvider.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Envolve o value do SoccerContext.Provider em useMemo (antes do early-return de boot), evitando re-render de todos os useSoccer a cada render
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -163,11 +187,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-021] 🧹 Remover any do dominio em Rules.ts:54
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** choosingTeams: any viola a regra 'sem any' do dominio. Acao: trocar por unknown/ChoosingTeams validado via includes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #2, alta). Skills-base: clean-code, uncle-bob-craft.
@@ -176,11 +200,15 @@
 
 - `.guia/DEMANDAS.md`
 - `src/domain/Rules.ts`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Troca any por unknown em checkChoosingTeams (validacao de entrada); narrowing via as ChoosingTeams no includes
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -188,7 +216,7 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-002] 🧹 Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md
 
