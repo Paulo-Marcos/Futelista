@@ -103,11 +103,11 @@ Outros pontos da UI que ainda vão mudar:
 
 O fluxo é curto e tem só 4 peças:
 
-### 1. `MyProviders` ([providers/myProviders.tsx](../../providers/myProviders.tsx))
+### 1. `MyProviders` ([src/app-shell/myProviders.tsx](../../src/app-shell/myProviders.tsx))
 
 Composição de providers. Hoje só envolve o `SoccerProvider`, mas o ponto único existe pra quando entrarem outros (ex.: `ThemeProvider` customizado, `PersistenceProvider`).
 
-### 2. `SoccerProvider` ([providers/soccerProvider.tsx](../../providers/soccerProvider.tsx))
+### 2. `SoccerProvider` ([src/app-shell/soccerProvider.tsx](../../src/app-shell/soccerProvider.tsx))
 
 Cria **uma única instância** do `GestorJogo` (via `useRef`) que vive o ciclo todo do app e a injeta no Context:
 
@@ -122,11 +122,11 @@ return (
 
 > O nome `"teste"` e o `Rules()` default são provisórios — quando a tela de criação de pelada estiver pronta, esses parâmetros vêm de input do usuário.
 
-### 3. `SoccerContext` ([contexts/soccerContext.ts](../../contexts/soccerContext.ts))
+### 3. `SoccerContext` ([src/app-shell/soccerContext.ts](../../src/app-shell/soccerContext.ts))
 
 Context React puro. Tipo: `{ manager: GestorJogo }`. Nada mais.
 
-### 4. `useSoccer()` ([hooks/useSoccer.ts](../../hooks/useSoccer.ts))
+### 4. `useSoccer()` ([src/app-shell/useSoccer.ts](../../src/app-shell/useSoccer.ts))
 
 Atalho para `useContext(SoccerContext)`. Devolve `{ manager }`. Componente que só precisa **disparar ações** (e não reagir a estado) usa esse hook.
 
@@ -138,7 +138,7 @@ O `GestorJogo` é mutável (entidades de domínio se referenciam, mudam in-place
 - Cada método público que muta estado chama `notify()` → incrementa `version` → dispara listeners.
 - O `Timer` recebe um `onChange` no construtor, então **ticks de cronômetro também disparam** `notify`.
 
-O hook [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts) embrulha isso em `useSyncExternalStore`:
+O hook [src/app-shell/useGameSlice.ts](../../src/app-shell/useGameSlice.ts) embrulha isso em `useSyncExternalStore`:
 
 ```ts
 export function useGameSlice<T>(selector: (game: GestorJogo) => T): T {
@@ -215,9 +215,9 @@ Componentes **burros**: JSX + estilo, **sem** acesso ao domínio. Recebem dados 
 
 ## Tema (light/dark)
 
-- Cores em [constants/Colors.ts](../../constants/Colors.ts) com chaves `light` e `dark`.
-- [hooks/useColorScheme.ts](../../hooks/useColorScheme.ts) detecta o modo do sistema.
-- [hooks/useThemeColor.ts](../../hooks/useThemeColor.ts) resolve uma cor pelo modo atual.
+- Cores em [src/shared/theme/Colors.ts](../../src/shared/theme/Colors.ts) com chaves `light` e `dark`.
+- [src/shared/hooks/useColorScheme.ts](../../src/shared/hooks/useColorScheme.ts) detecta o modo do sistema.
+- [src/shared/hooks/useThemeColor.ts](../../src/shared/hooks/useThemeColor.ts) resolve uma cor pelo modo atual.
 - O `_layout.tsx` raiz embrulha tudo em `<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>` (do `@react-navigation/native`).
 
 **Não usar** cor hard-coded no JSX (`backgroundColor: "red"`). Se for debug, é debug — não comita.

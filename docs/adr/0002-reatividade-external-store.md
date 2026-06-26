@@ -43,7 +43,7 @@ class GestorJogo {
 
 Todo método público que muda estado chama `notify()` no final. O `Timer` recebe um callback `onChange` no construtor; o `GestorJogo` passa `() => this.notify()` para que ticks também propaguem.
 
-O hook em [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts):
+O hook em [src/app-shell/useGameSlice.ts](../../src/app-shell/useGameSlice.ts):
 
 ```ts
 export function useGameSlice<T>(selector: (game: GestorJogo) => T): T {
@@ -121,7 +121,7 @@ export function useGameSlice<T>(selector: (game: GestorJogo) => T): T {
 
 ## Referências
 
-- [hooks/useGameSlice.ts](../../hooks/useGameSlice.ts) — implementação.
+- [src/app-shell/useGameSlice.ts](../../src/app-shell/useGameSlice.ts) — implementação.
 - [src/domain/GestorJogo.ts](../../src/domain/GestorJogo.ts) → `subscribe`, `version`, `notify`.
 - [src/domain/Timer.ts](../../src/domain/Timer.ts) → callback `onChange`.
 - [docs/desenvolvedor/ui.md → Reatividade](../desenvolvedor/ui.md#reatividade-usegameslice)

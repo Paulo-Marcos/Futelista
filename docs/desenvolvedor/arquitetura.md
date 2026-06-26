@@ -108,7 +108,7 @@ subscribe(listener: () => void): () => void { ... }
 private notify(): void { this._version++; this.listeners.forEach(l => l()); }
 ```
 
-Toda operação que muda estado chama `notify()` no final. O `Timer` recebe um callback `onChange` para que os ticks também notifiquem. Componentes consomem isso via [`useGameSlice`](../../hooks/useGameSlice.ts) (que envelopa `useSyncExternalStore`). A motivação completa dessa escolha — incluindo as alternativas descartadas (imutabilidade, Zustand, `setState([])`) — está em [ADR-0002](../adr/0002-reatividade-external-store.md).
+Toda operação que muda estado chama `notify()` no final. O `Timer` recebe um callback `onChange` para que os ticks também notifiquem. Componentes consomem isso via [`useGameSlice`](../../src/app-shell/useGameSlice.ts) (que envelopa `useSyncExternalStore`). A motivação completa dessa escolha — incluindo as alternativas descartadas (imutabilidade, Zustand, `setState([])`) — está em [ADR-0002](../adr/0002-reatividade-external-store.md).
 
 ### 3. `src/domain/` — domínio puro
 
