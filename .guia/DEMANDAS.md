@@ -418,7 +418,7 @@
 
 ## [D-027] ✨ Criar release.yml disparado em tags v*.*.*
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Ha ci.yml e lock-check.yml mas nenhum workflow de release. Acao: release.yml (build APK via EAS + release a partir do CHANGELOG). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #4). Skills-base: open-source-readiness.
@@ -427,11 +427,14 @@
 
 - `.guia/DEMANDAS.md`
 - `.github/workflows/release.yml`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Criei .github/workflows/release.yml disparado somente em tags v*.*.*; build do APK Android via EAS (perfil preview, unico que gera APK no eas.json) com expo/expo-github-action e EXPO_TOKEN, extracao das notas da secao correspondente do CHANGELOG.md via awk, e publicacao do GitHub Release com softprops/action-gh-release anexando o APK.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -439,7 +442,13 @@
 
 ### Validacao pendente
 
-- Configurar o secret EXPO_TOKEN no repositorio (Settings > Secrets > Actions), se ainda nao houver.
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T23:02:26-03:00
 
 ## [D-030] 🧹 Padronizar trailer Co-Authored-By canonico
 

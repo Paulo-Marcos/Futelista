@@ -1,6 +1,6 @@
 {
-  "taskId": "D-008",
+  "taskId": "D-027",
   "status": "Validada",
-  "title": "Escrever ADR-0003 persistencia Ports&Adapters",
-  "demandTitle": "D-008 \u2728 - #FINALIZADO - Escrever ADR-0003 persistencia Ports&Adapters"
+  "title": "Criar release.yml disparado em tags v*.*.*",
+  "demandTitle": "D-027 \u2728 - #FINALIZADO - Criar release.yml disparado em tags v*.*.*"
 }

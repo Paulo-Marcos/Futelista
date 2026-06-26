@@ -318,7 +318,7 @@
       "id": "D-032",
       "kind": "chore",
       "title": "Adicionar paths: as 4 skills do projeto",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "[Opcional] Nenhuma skill do projeto declara paths:; vinculo escopo->skill vive so em prosa. Acao: paths: em domain-driven-design(src/domain/**), react-best-practices(app|components|providers|contexts|hooks), clean-code/uncle-bob-craft(ambos). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #1). Skills-base: skill-router, skill-creator.",
       "createdAt": "2026-06-24",
@@ -332,15 +332,34 @@
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Adicionei o campo paths: (lista YAML de globs) ao frontmatter das 4 skills: domain-driven-design -> src/domain/**; react-best-practices -> camada de UI (app/components/providers/contexts/hooks/src/app-shell/src/shared); clean-code e uncle-bob-craft -> ambos os conjuntos. name/description/corpo intactos."
+        "Adicionei o campo paths: (lista YAML de globs) ao frontmatter das 4 skills: domain-driven-design -> src/domain/**; react-best-practices -> camada de UI (app/components/providers/contexts/hooks/src/app-shell/src/shared); clean-code e uncle-bob-craft -> ambos os conjuntos. name/description/corpo intactos.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "frontmatter YAML v\u00e1lido nas 4 skills (yaml.safe_load confirma paths em cada uma)"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
-      "parentId": "E-007"
+      "pending": [],
+      "parentId": "E-007",
+      "finishedAt": "2026-06-25T22:58:22-03:00",
+      "qualityReview": {
+        "candidates": [
+          ".claude/skills/clean-code/SKILL.md",
+          ".claude/skills/uncle-bob-craft/SKILL.md",
+          ".claude/skills/domain-driven-design/SKILL.md",
+          ".claude/skills/react-best-practices/SKILL.md"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "alteracao apenas de metadados YAML (campo paths: no frontmatter); sem codigo/funcoes/testes a avaliar; YAML ja validado parseavel via yaml.safe_load nas 4 skills"
+      }
     },
     {
       "id": "D-031",
@@ -446,26 +465,47 @@
       "id": "D-027",
       "kind": "feature",
       "title": "Criar release.yml disparado em tags v*.*.*",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Ha ci.yml e lock-check.yml mas nenhum workflow de release. Acao: release.yml (build APK via EAS + release a partir do CHANGELOG). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #4). Skills-base: open-source-readiness.",
       "createdAt": "2026-06-24",
       "updatedAt": "2026-06-25",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        ".github/workflows/release.yml"
+        ".github/workflows/release.yml",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Criei .github/workflows/release.yml disparado somente em tags v*.*.*; build do APK Android via EAS (perfil preview, unico que gera APK no eas.json) com expo/expo-github-action e EXPO_TOKEN, extracao das notas da secao correspondente do CHANGELOG.md via awk, e publicacao do GitHub Release com softprops/action-gh-release anexando o APK."
+        "Criei .github/workflows/release.yml disparado somente em tags v*.*.*; build do APK Android via EAS (perfil preview, unico que gera APK no eas.json) com expo/expo-github-action e EXPO_TOKEN, extracao das notas da secao correspondente do CHANGELOG.md via awk, e publicacao do GitHub Release com softprops/action-gh-release anexando o APK.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npx js-yaml parseou sem erro; python yaml.safe_load confirmou que on.push.tags == ['v*.*.*'] (nao roda em push de branch nem PR)."
       ],
-      "pending": [
-        "Configurar o secret EXPO_TOKEN no repositorio (Settings > Secrets > Actions), se ainda nao houver."
-      ],
-      "parentId": "E-005"
+      "pending": [],
+      "parentId": "E-005",
+      "finishedAt": "2026-06-25T23:02:26-03:00",
+      "qualityReview": {
+        "candidates": [
+          ".github/workflows/release.yml"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [
+          "clean-code-review"
+        ],
+        "findings": [
+          "Revisao clean-code do release.yml: passos com responsabilidade unica e nomes claros (consistentes com ci.yml), set -euo pipefail em todo step shell, fallback na extracao do CHANGELOG e guarda na URL do artefato, secrets referenciados (nao hardcoded); sem refactor necessario."
+        ],
+        "checkedAt": "2026-06-25"
+      }
     },
     {
       "id": "D-026",
