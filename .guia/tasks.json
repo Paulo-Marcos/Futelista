@@ -767,15 +767,31 @@
       "id": "D-016",
       "kind": "chore",
       "title": "Memoizar itens de lista em src/shared/ui",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "TeamMini/TeamQueue/PlayerRow/PlayerAvatar/TeamCard sem memo re-renderizam toda a arvore a cada notify(). Acao: memo nos componentes de item. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #2). Skills-base: react-best-practices.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/shared/ui/PlayerRow.tsx",
+        "src/shared/ui/PlayerAvatar.tsx",
+        "src/shared/ui/TeamMini.tsx",
+        "src/shared/ui/TeamQueue.tsx",
+        "src/shared/ui/TeamCrest.tsx",
+        "src/shared/ui/RuleChip.tsx",
+        "src/shared/ui/MatchHistoryCard.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Envolve 7 folhas de item de lista (PlayerRow, PlayerAvatar, TeamMini, TeamQueue, TeamCrest, RuleChip, MatchHistoryCard) em React.memo. Aditivo, comportamento identico. TeamCard pulado: sem consumidores."
+      ],
+      "validations": [
+        "npx tsc --noEmit (0); npx eslint src/shared/ui/*.tsx (0)"
+      ],
+      "pending": [
+        "DERIVADA: TeamCard sem consumidores (codigo morto, junto com MiniPlacar/UltimaPartidaCard). VALIDAR NO APP: listas de jogadores/times/proximos/historico inalteradas."
+      ],
       "parentId": "E-008"
     },
     {

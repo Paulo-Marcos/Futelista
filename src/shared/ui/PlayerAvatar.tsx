@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Image, StyleSheet, Text, View, ViewStyle } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 
@@ -54,7 +55,7 @@ type PlayerAvatarProps = {
   ring?: boolean;
 };
 
-export function PlayerAvatar({
+export const PlayerAvatar = memo(function PlayerAvatar({
   player,
   size = 40,
   tone,
@@ -130,7 +131,7 @@ export function PlayerAvatar({
     return <View style={ringOuter}>{node}</View>;
   }
   return node;
-}
+});
 
 function FunBackground({
   c1,

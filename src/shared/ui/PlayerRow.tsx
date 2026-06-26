@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Player, PlayerSituation } from "@/src/domain/Player";
@@ -24,7 +25,7 @@ type PlayerRowProps = {
  * Avatar circular com inicial do nome em cor derivada do id, nome principal,
  * badge de situação opcional, contador de gols opcional, slot livre à direita.
  */
-export function PlayerRow({
+export const PlayerRow = memo(function PlayerRow({
   player,
   onPress,
   onLongPress,
@@ -113,7 +114,7 @@ export function PlayerRow({
       {right}
     </Pressable>
   );
-}
+});
 
 function labelSituacao(s: PlayerSituation): string {
   switch (s) {

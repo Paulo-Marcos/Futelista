@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { memo, useId } from "react";
 import { StyleProp, ViewStyle } from "react-native";
 import Svg, {
   ClipPath,
@@ -83,7 +83,7 @@ type TeamCrestProps = {
   corOverride?: string;
 };
 
-export function TeamCrest({
+export const TeamCrest = memo(function TeamCrest({
   seed,
   size = 32,
   style,
@@ -128,7 +128,7 @@ export function TeamCrest({
       />
     </Svg>
   );
-}
+});
 
 function PatternFill({ pattern, c2 }: { pattern: Pattern; c2: string }) {
   switch (pattern) {

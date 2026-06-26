@@ -1,1 +1,1 @@
-D-015 🧹 - #VALIDACAO - Memoizar PlayerDot e estabilizar handler onScore
+D-016 🧹 - #VALIDACAO - Memoizar itens de lista em src/shared/ui

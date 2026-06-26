@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Team } from "@/src/domain/Team";
@@ -14,7 +15,7 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  * TeamCrest 26 + avatares 30 sobrepostos (marginLeft -8 ring surface) +
  * nomes "X · Y · Z" (12 dim, flex:1).
  */
-export function TeamQueue({
+export const TeamQueue = memo(function TeamQueue({
   team,
   idx,
   onActionsPress,
@@ -76,7 +77,7 @@ export function TeamQueue({
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

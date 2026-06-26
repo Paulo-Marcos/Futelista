@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Player } from "@/src/domain/Player";
@@ -17,7 +18,7 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  * header: TeamCrest 26 + título 15/800; lista compacta: PlayerAvatar 26 +
  * nome 13/600 + gols (goal num 800 à direita).
  */
-export function TeamMini({
+export const TeamMini = memo(function TeamMini({
   team,
   idx,
   tone,
@@ -141,7 +142,7 @@ export function TeamMini({
     );
   }
   return <View style={cardStyle}>{conteudo}</View>;
-}
+});
 
 function PlayerLine({
   player,

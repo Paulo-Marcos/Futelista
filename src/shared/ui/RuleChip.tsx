@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { usePalette } from "@/src/shared/hooks/usePalette";
@@ -11,7 +12,7 @@ type RuleChipProps = {
  * Chip pequeno para mostrar uma regra ativa (ex.: "4×4", "10min", "Ordem").
  * Usado em filas/headers de status da pelada.
  */
-export function RuleChip({ label }: RuleChipProps) {
+export const RuleChip = memo(function RuleChip({ label }: RuleChipProps) {
   const palette = usePalette();
   return (
     <View
@@ -28,7 +29,7 @@ export function RuleChip({ label }: RuleChipProps) {
       </Text>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   chip: {

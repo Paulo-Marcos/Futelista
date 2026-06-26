@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Match, ResultMatch } from "@/src/domain/Match";
@@ -13,7 +14,11 @@ import { Radius, Spacing, Typography } from "@/src/shared/theme/Colors";
  * linha de artilheiros (borderTop outlineVariant) com bola dos dois lados;
  * "when" no rodapé.
  */
-export function MatchHistoryCard({ partida }: { partida: Match }) {
+export const MatchHistoryCard = memo(function MatchHistoryCard({
+  partida,
+}: {
+  partida: Match;
+}) {
   const palette = usePalette();
   const placar = partida.countGoals();
   const drew = partida.result === ResultMatch.DRAW || !partida.winner;
@@ -165,7 +170,7 @@ export function MatchHistoryCard({ partida }: { partida: Match }) {
       ) : null}
     </View>
   );
-}
+});
 
 function aggregate(names: string[]): string[] {
   const map = new Map<string, number>();

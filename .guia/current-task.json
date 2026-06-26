@@ -1,6 +1,6 @@
 {
-  "taskId": "D-015",
+  "taskId": "D-016",
   "status": "Aguardando validacao",
-  "title": "Memoizar PlayerDot e estabilizar handler onScore",
-  "chatTitle": "D-015 \ud83e\uddf9 - #VALIDACAO - Memoizar PlayerDot e estabilizar handler onScore"
+  "title": "Memoizar itens de lista em src/shared/ui",
+  "chatTitle": "D-016 \ud83e\uddf9 - #VALIDACAO - Memoizar itens de lista em src/shared/ui"
 }
