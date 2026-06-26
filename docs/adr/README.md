@@ -36,6 +36,9 @@ Numeração monotônica. Status: `proposto`, `aceito`, `substituído por NNNN`, 
 | ---- | ----------------------------------------------------- | -------- |
 | 0001 | [Expo Router file-based como roteador](0001-expo-router.md) | Aceito   |
 | 0002 | [Reatividade via External Store no GestorJogo](0002-reatividade-external-store.md) | Aceito   |
+| 0003 | [Persistência via Ports & Adapters](0003-persistencia-ports-adapters.md) | Aceito   |
+| 0004 | [Modelagem Pelada × Execução](0004-modelagem-pelada-execucao.md) | Aceito   |
+| 0005 | [Conclusão da migração para Expo Router](0005-conclusao-migracao-expo-router.md) | Aceito   |
 
 ## Template
 

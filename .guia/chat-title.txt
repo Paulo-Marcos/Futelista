@@ -1,1 +1,1 @@
-D-029 🧹 - #FINALIZADO - Adotar gitmoji nos commits e decidir hook commit-msg
+D-010 🧹 - #VALIDACAO - Registrar fechamento do ADR-0001 (router)

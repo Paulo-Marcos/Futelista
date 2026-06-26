@@ -2,6 +2,80 @@
 
 ---
 
+## [D-010] 🧹 Registrar fechamento do ADR-0001 (router)
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** [Confirmar] Se a tab-bar imperativa (createBottomTabNavigator) ja foi removida, registrar fechamento via novo ADR/nota (ADR e imutavel). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #5). Skills-base: proposal-architect.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `docs/adr/0005-conclusao-migracao-expo-router.md`
+- `docs/adr/README.md`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Registra ADR-0005 fechando o estado transitorio do ADR-0001: tab-bar imperativa removida, navegacao 100% Expo Router file-based. Completa o indice do README (0003/0004/0005).
+
+### Validacao feita
+
+- tab-bar confirmada removida (grep sem createBottomTabNavigator)
+
+### Validacao pendente
+
+- Validacao manual do desenvolvedor.
+
+## [D-044] 🧹 Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard
+
+- **Status:** Em desenvolvimento
+- **Origem:** Derivada do diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** Derivada das D-012/D-016: TeamCard (src/shared/ui), MiniPlacar e UltimaPartidaCard (src/shared/ui/home) nao tem consumidor (codigo morto, extraidos sem uso). Remover apos confirmar zero referencia. Skills-base: clean-code.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+
+### O que foi feito
+
+- Demanda criada via Guia Fluxo.
+
+### Validacao feita
+
+- Nenhuma.
+
+### Validacao pendente
+
+- Executar implementacao e validacoes.
+
+
+## [D-043] 🧹 Atualizar estrutura de pastas em rules/mobile.md
+
+- **Status:** Em desenvolvimento
+- **Origem:** Derivada do diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** Derivada da D-002: rules/mobile.md ainda descreve UI em components/providers/contexts/hooks na raiz e app/(tabs)/, mas o real e src/app-shell, src/shared/ui e app/(pelada). Skills-base: proposal-architect.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+
+### O que foi feito
+
+- Demanda criada via Guia Fluxo.
+
+### Validacao feita
+
+- Nenhuma.
+
+### Validacao pendente
+
+- Executar implementacao e validacoes.
+
+
 ## [D-029] 🧹 Adotar gitmoji nos commits e decidir hook commit-msg
 
 - **Status:** Validada

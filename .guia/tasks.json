@@ -2,6 +2,61 @@
   "schemaVersion": 1,
   "tasks": [
     {
+      "id": "D-044",
+      "kind": "chore",
+      "title": "Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard",
+      "status": "Em desenvolvimento",
+      "origin": "Derivada do diagnostico 2026-06-24",
+      "context": "Derivada das D-012/D-016: TeamCard (src/shared/ui), MiniPlacar e UltimaPartidaCard (src/shared/ui/home) nao tem consumidor (codigo morto, extraidos sem uso). Remover apos confirmar zero referencia. Skills-base: clean-code.",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo."
+      ],
+      "validations": [],
+      "pending": [
+        "Executar implementacao e validacoes."
+      ]
+    },
+    {
+      "id": "D-043",
+      "kind": "chore",
+      "title": "Atualizar estrutura de pastas em rules/mobile.md",
+      "status": "Em desenvolvimento",
+      "origin": "Derivada do diagnostico 2026-06-24",
+      "context": "Derivada da D-002: rules/mobile.md ainda descreve UI em components/providers/contexts/hooks na raiz e app/(tabs)/, mas o real e src/app-shell, src/shared/ui e app/(pelada). Skills-base: proposal-architect.",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo."
+      ],
+      "validations": [],
+      "pending": [
+        "Executar implementacao e validacoes."
+      ]
+    },
+    {
+      "id": "D-042",
+      "kind": "chore",
+      "title": "Agrupar metodos do GestorJogo em servicos de dominio",
+      "status": "Backlog",
+      "origin": "Derivada do diagnostico 2026-06-24",
+      "context": "Adiado da D-019: GestorJogo (~890 ln) acumula jogadores/times/timer/gols/regras. Agrupar em servicos de dominio coesos e invasivo (estado mutavel compartilhado, API consumida pela UI e ~585 testes). Demanda dedicada futura. Skills-base: clean-architecture-guardian, domain-driven-design, uncle-bob-craft.",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [],
+      "summary": [],
+      "validations": [],
+      "pending": [],
+      "parentId": "E-004"
+    },
+    {
       "id": "D-041",
       "kind": "feature",
       "title": "Chip de regra de sorteio e ajustes visuais",
@@ -1009,15 +1064,26 @@
       "id": "D-010",
       "kind": "chore",
       "title": "Registrar fechamento do ADR-0001 (router)",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "[Confirmar] Se a tab-bar imperativa (createBottomTabNavigator) ja foi removida, registrar fechamento via novo ADR/nota (ADR e imutavel). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #5). Skills-base: proposal-architect.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "docs/adr/0005-conclusao-migracao-expo-router.md",
+        "docs/adr/README.md"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Registra ADR-0005 fechando o estado transitorio do ADR-0001: tab-bar imperativa removida, navegacao 100% Expo Router file-based. Completa o indice do README (0003/0004/0005)."
+      ],
+      "validations": [
+        "tab-bar confirmada removida (grep sem createBottomTabNavigator)"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ],
       "parentId": "E-002"
     },
     {
