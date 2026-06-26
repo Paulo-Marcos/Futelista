@@ -1,1 +1,1 @@
-D-011 🧹 - #FINALIZADO - Extrair subcomponentes e hooks de partida.tsx
+D-025 🧹 - #VALIDACAO - Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-011",
-  "status": "Validada",
-  "title": "Extrair subcomponentes e hooks de partida.tsx",
-  "chatTitle": "D-011 \ud83e\uddf9 - #FINALIZADO - Extrair subcomponentes e hooks de partida.tsx"
+  "taskId": "D-025",
+  "status": "Aguardando validacao",
+  "title": "Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)",
+  "chatTitle": "D-025 \ud83e\uddf9 - #VALIDACAO - Sanear Rules.toSeconds (param reatribuido, parseInt sem radix)"
 }

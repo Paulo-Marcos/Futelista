@@ -60,12 +60,9 @@ export class Rules {
   }
 
   static toSeconds(timeString: string): number {
-    if (timeString === "") timeString = "00:00:00";
-    const parts = timeString.split(":");
-    const hoursInSeconds = parseInt(parts[0]) * 3600;
-    const minutesInSeconds = parseInt(parts[1]) * 60;
-    const seconds = parseInt(parts[2]);
-    return hoursInSeconds + minutesInSeconds + seconds;
+    const toInt = (part?: string): number => parseInt(part || "0", 10);
+    const [hours, minutes, seconds] = timeString.split(":");
+    return toInt(hours) * 3600 + toInt(minutes) * 60 + toInt(seconds);
   }
 
   /**
