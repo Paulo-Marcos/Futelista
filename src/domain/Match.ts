@@ -42,9 +42,11 @@ export class Match {
   countGoals(): { teamA: number; teamB: number } {
     return this.goals.reduce(
       (resultGoals, goal) => {
-        goal.team.id === this.teamA.id
-          ? (resultGoals.teamA += 1)
-          : (resultGoals.teamB += 1);
+        if (goal.team.id === this.teamA.id) {
+          resultGoals.teamA += 1;
+        } else {
+          resultGoals.teamB += 1;
+        }
         return resultGoals;
       },
       { teamA: 0, teamB: 0 },

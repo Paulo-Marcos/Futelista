@@ -368,9 +368,11 @@ export class GestorJogo {
 
   // remover jogador da pelada sem incluir outro no lugar
   atualizarTimes(beginTeam: Team): void {
-    beginTeam.situation === TeamSituation.PLAYING
-      ? this.redimensionarPartida(beginTeam)
-      : this.redimensionarTimes(beginTeam);
+    if (beginTeam.situation === TeamSituation.PLAYING) {
+      this.redimensionarPartida(beginTeam);
+    } else {
+      this.redimensionarTimes(beginTeam);
+    }
   }
 
   tirarDoJogo(removedPlayer: Player): void {

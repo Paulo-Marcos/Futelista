@@ -691,15 +691,26 @@
       "id": "D-024",
       "kind": "chore",
       "title": "Converter ternarios com efeito colateral em if/else",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "Ternario por efeito colateral em GestorJogo updateTeams:378-380 e Match countGoals:46-50. Acao: trocar por if/else. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #5). Skills-base: clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/domain/Match.ts",
+        "src/domain/GestorJogo.ts"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Converte 2 ternarios usados por efeito colateral em if/else: Match.countGoals e GestorJogo.atualizarTimes. Comportamento identico; warning no-unused-expressions eliminado."
+      ],
+      "validations": [
+        "npx jest src/domain (Match/GestorJogo/Game) 130 testes; eslint 0"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ],
       "parentId": "E-009"
     },
     {
