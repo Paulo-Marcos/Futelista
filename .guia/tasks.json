@@ -511,27 +511,48 @@
       "id": "D-026",
       "kind": "feature",
       "title": "Regra ESLint no-restricted-imports na fronteira do dominio",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Pureza do dominio e so convencao; nada barra um import de react/react-native/expo em src/domain. Acao: ESLint no-restricted-imports (ou dependency-cruiser) com whitelist do polyfill react-native-get-random-values. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #5). Skills-base: clean-architecture-guardian, open-source-readiness.",
       "createdAt": "2026-06-24",
       "updatedAt": "2026-06-25",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        ".eslintrc.js"
+        ".eslintrc.js",
+        ".guia/current-task.json",
+        ".guia/tasks.json"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Adicionado overrides para src/domain/** no .eslintrc.js com no-restricted-imports barrando react, react-dom, react-native (e react-native/*), expo, expo-*, @expo/*, @react-native-async-storage/* e a camada de infra (@/providers|contexts|hooks|app-shell). Polyfill react-native-get-random-values preservado por barrar apenas o nome exato react-native, nunca react-native*. Pureza do dominio agora verificada por maquina."
+        "Adicionado overrides para src/domain/** no .eslintrc.js com no-restricted-imports barrando react, react-dom, react-native (e react-native/*), expo, expo-*, @expo/*, @react-native-async-storage/* e a camada de infra (@/providers|contexts|hooks|app-shell). Polyfill react-native-get-random-values preservado por barrar apenas o nome exato react-native, nunca react-native*. Pureza do dominio agora verificada por maquina.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "npm run lint",
         "teste negativo: probe temporario com imports de react/react-native/expo-constants/expo-router gerou 4 erros no-restricted-imports; react-native-get-random-values e uuid passaram"
       ],
-      "pending": [
-        "npm run lint ja tinha 2 erros prettier/prettier PRE-EXISTENTES em src/domain/GestorJogo.ts e GestorJogo.integridade.spec.ts (fora do escopo desta demanda); minha mudanca nao adiciona nenhum erro novo"
-      ],
-      "parentId": "E-005"
+      "pending": [],
+      "parentId": "E-005",
+      "finishedAt": "2026-06-25T23:16:55-03:00",
+      "qualityReview": {
+        "candidates": [
+          ".eslintrc.js"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [
+          "clean-architecture-guardian"
+        ],
+        "findings": [
+          "fronteira do dominio coberta nos vetores reais (react/react-native/expo bare imports); whitelist do polyfill por nome exato; SRP/tamanho ok; sem refactor; gap \ud83d\udd35 opcional de import relativo de infra anotado, fora de escopo"
+        ],
+        "checkedAt": "2026-06-25"
+      }
     },
     {
       "id": "D-025",
@@ -1037,7 +1058,7 @@
       "id": "D-004",
       "kind": "chore",
       "title": "Corrigir PRIVACY.md (persistencia AsyncStorage ativa)",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "PRIVACY.md afirma que nao ha persistencia, mas AsyncStorage foi entregue na 1.0.0. Risco de compliance de loja. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #3). Skills-base: open-source-readiness.",
       "createdAt": "2026-06-24",
@@ -1049,15 +1070,31 @@
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
         "Corrigi a se\u00e7\u00e3o de dados/persist\u00eancia: os dados da pelada s\u00e3o persistidos localmente no dispositivo via AsyncStorage (n\u00e3o mais descartados ao fechar), exclusivamente no aparelho, sem envio a servidor. Atualizei Portabilidade (export JSON local), Exclus\u00e3o, o Expo SDK 51->54 e adicionei entrada no hist\u00f3rico (25/06/2026) + data de atualiza\u00e7\u00e3o.",
-        "ATENCAO: por corrida entre chips concorrentes, o D-026 rodou um commit abrangente e capturou meu PRIVACY.md ja staged; a mudanca ficou integra dentro do commit f27b142 em vez de um commit dedicado 'docs(D-004)'. Conteudo correto e versionado; nao fiz reescrita de historico para nao corromper o trabalho paralelo."
+        "ATENCAO: por corrida entre chips concorrentes, o D-026 rodou um commit abrangente e capturou meu PRIVACY.md ja staged; a mudanca ficou integra dentro do commit f27b142 em vez de um commit dedicado 'docs(D-004)'. Conteudo correto e versionado; nao fiz reescrita de historico para nao corromper o trabalho paralelo.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "confer\u00eancia manual contra src/infrastructure/storage e CHANGELOG"
       ],
-      "pending": [
-        "Validacao manual do desenvolvedor."
-      ],
-      "parentId": "E-001"
+      "pending": [],
+      "parentId": "E-001",
+      "finishedAt": "2026-06-25T23:12:45-03:00",
+      "qualityReview": {
+        "candidates": [
+          "PRIVACY.md"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "Unico arquivo de produto alterado e PRIVACY.md (markdown de politica de privacidade); skills de qualidade (clean-code/arquitetura/tdd) miram codigo, nao prosa. Conferencia manual contra src/infrastructure/storage e CHANGELOG ja feita."
+      }
     },
     {
       "id": "D-003",

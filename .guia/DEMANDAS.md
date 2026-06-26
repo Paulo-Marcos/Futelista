@@ -76,7 +76,7 @@
 
 ## [D-004] 🧹 Corrigir PRIVACY.md (persistencia AsyncStorage ativa)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** PRIVACY.md afirma que nao ha persistencia, mas AsyncStorage foi entregue na 1.0.0. Risco de compliance de loja. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #3). Skills-base: open-source-readiness.
@@ -91,6 +91,7 @@
 - Em desenvolvimento desde 2026-06-25.
 - Corrigi a seção de dados/persistência: os dados da pelada são persistidos localmente no dispositivo via AsyncStorage (não mais descartados ao fechar), exclusivamente no aparelho, sem envio a servidor. Atualizei Portabilidade (export JSON local), Exclusão, o Expo SDK 51->54 e adicionei entrada no histórico (25/06/2026) + data de atualização.
 - ATENCAO: por corrida entre chips concorrentes, o D-026 rodou um commit abrangente e capturou meu PRIVACY.md ja staged; a mudanca ficou integra dentro do commit f27b142 em vez de um commit dedicado 'docs(D-004)'. Conteudo correto e versionado; nao fiz reescrita de historico para nao corromper o trabalho paralelo.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -98,7 +99,13 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T23:12:45-03:00
 
 ## [D-009] ✨ Escrever ADR modelagem Pelada x Execucao
 
@@ -392,7 +399,7 @@
 
 ## [D-026] ✨ Regra ESLint no-restricted-imports na fronteira do dominio
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Pureza do dominio e so convencao; nada barra um import de react/react-native/expo em src/domain. Acao: ESLint no-restricted-imports (ou dependency-cruiser) com whitelist do polyfill react-native-get-random-values. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #5). Skills-base: clean-architecture-guardian, open-source-readiness.
@@ -401,11 +408,14 @@
 
 - `.guia/DEMANDAS.md`
 - `.eslintrc.js`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Adicionado overrides para src/domain/** no .eslintrc.js com no-restricted-imports barrando react, react-dom, react-native (e react-native/*), expo, expo-*, @expo/*, @react-native-async-storage/* e a camada de infra (@/providers|contexts|hooks|app-shell). Polyfill react-native-get-random-values preservado por barrar apenas o nome exato react-native, nunca react-native*. Pureza do dominio agora verificada por maquina.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -414,7 +424,13 @@
 
 ### Validacao pendente
 
-- npm run lint ja tinha 2 erros prettier/prettier PRE-EXISTENTES em src/domain/GestorJogo.ts e GestorJogo.integridade.spec.ts (fora do escopo desta demanda); minha mudanca nao adiciona nenhum erro novo
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T23:16:55-03:00
 
 ## [D-027] ✨ Criar release.yml disparado em tags v*.*.*
 
