@@ -2,6 +2,32 @@
 
 ---
 
+## [D-012] 🧹 Extrair subcomponentes e hooks de (pelada)/index.tsx
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** index.tsx ~2478 linhas mistura render+estado+orquestracao. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `app/(pelada)/index.tsx`
+- `src/shared/ui/home/`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Extrai ~18 subcomponentes da Home para src/shared/ui/home/ (+ home/hero/), 2478->874 linhas. Arvore de composicao do Hero respeitada; StyleSheet particionado; orfas removidas. Estrutural, comportamento identico.
+
+### Validacao feita
+
+- npx tsc --noEmit (0); npx eslint index + home/**/* (0)
+
+### Validacao pendente
+
+- VALIDAR NO APP: Home (gestao e execucao) - cards Pelada/Avulsa, Hero (placar/matchup/CTA), ultimos jogos, proximos. DERIVADA: MiniPlacar e UltimaPartidaCard sao codigo morto (extraidos sem uso) - remover ou ligar numa demanda futura.
+
 ## [D-013] 🧹 Extrair subcomponentes e hooks de times.tsx
 
 - **Status:** Aguardando validacao

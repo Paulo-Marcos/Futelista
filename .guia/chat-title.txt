@@ -1,1 +1,1 @@
-D-013 🧹 - #VALIDACAO - Extrair subcomponentes e hooks de times.tsx
+D-012 🧹 - #VALIDACAO - Extrair subcomponentes e hooks de (pelada)/index.tsx
