@@ -1,6 +1,6 @@
 {
-  "taskId": "D-026",
+  "taskId": "D-007",
   "status": "Validada",
-  "title": "Regra ESLint no-restricted-imports na fronteira do dominio",
-  "demandTitle": "D-026 \u2728 - #FINALIZADO - Regra ESLint no-restricted-imports na fronteira do dominio"
+  "title": "Verificar links de docs/ (AI_NAVIGATION, guias)",
+  "demandTitle": "D-007 \ud83e\uddf9 - #FINALIZADO - Verificar links de docs/ (AI_NAVIGATION, guias)"
 }

@@ -916,7 +916,7 @@
       "id": "D-007",
       "kind": "chore",
       "title": "Verificar links de docs/ (AI_NAVIGATION, guias)",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "[Confirmar] README/CHANGELOG citam AI_NAVIGATION.md e guias; conferir que os arquivos linkados existem. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #7). Skills-base: open-source-readiness.",
       "createdAt": "2026-06-24",
@@ -930,15 +930,34 @@
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Varredura de links relativos em README/CHANGELOG/AI_NAVIGATION/docs (161 links). README e CHANGELOG: todos resolvem. Corrigi 14 links quebrados por refactor (raiz contexts/providers/hooks/components -> src/app-shell e src/shared; app/(tabs) -> app/(pelada)): 8 em ui.md, 1 em arquitetura.md, 2 em adr/0002, 11 em AI_NAVIGATION.md."
+        "Varredura de links relativos em README/CHANGELOG/AI_NAVIGATION/docs (161 links). README e CHANGELOG: todos resolvem. Corrigi 14 links quebrados por refactor (raiz contexts/providers/hooks/components -> src/app-shell e src/shared; app/(tabs) -> app/(pelada)): 8 em ui.md, 1 em arquitetura.md, 2 em adr/0002, 11 em AI_NAVIGATION.md.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "varredura manual/script de links relativos em README/CHANGELOG/docs; re-scan confirma 0 quebrados com alvo existente"
       ],
-      "pending": [
-        "2 alvos inexistentes deixados como demanda derivada (nao criar arquivo): tela 'Gerenciamento' app/(tabs)/GestorJogo.tsx removida no refactor (AI_NAVIGATION.md:37); pasta docs/assets/screenshots/ ainda sem capturas (docs/README.md:36)"
-      ],
-      "parentId": "E-001"
+      "pending": [],
+      "parentId": "E-001",
+      "finishedAt": "2026-06-25T23:19:01-03:00",
+      "qualityReview": {
+        "candidates": [
+          "AI_NAVIGATION.md",
+          "docs/desenvolvedor/ui.md",
+          "docs/desenvolvedor/arquitetura.md",
+          "docs/adr/0002-reatividade-external-store.md"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "alteracao apenas de caminhos de links em arquivos markdown (AI_NAVIGATION + guias); sem codigo de produto, sem impacto em SRP/cobertura/qualidade de codigo"
+      }
     },
     {
       "id": "D-006",
