@@ -1,1 +1,1 @@
-D-021 🧹 - #VALIDACAO - Remover any do dominio em Rules.ts:54
+D-017 🧹 - #VALIDACAO - Envolver value do SoccerContext em useMemo

@@ -715,15 +715,25 @@
       "id": "D-017",
       "kind": "chore",
       "title": "Envolver value do SoccerContext em useMemo",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "value={{...}} literal novo a cada render re-renderiza todos useSoccer(). Acao: useMemo no value. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #3). Skills-base: react-best-practices.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/app-shell/soccerProvider.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-25.",
+        "Envolve o value do SoccerContext.Provider em useMemo (antes do early-return de boot), evitando re-render de todos os useSoccer a cada render"
+      ],
+      "validations": [
+        "npx tsc --noEmit; npx eslint src/app-shell/soccerProvider.tsx (sem rules-of-hooks/exhaustive-deps)"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ],
       "parentId": "E-008"
     },
     {

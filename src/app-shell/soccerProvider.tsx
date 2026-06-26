@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   AUTOSAVE_DEBOUNCE_MS,
@@ -339,37 +339,63 @@ export const SoccerProvider = ({
     [gestor, marcarSalvamento],
   );
 
+  // Memoiza o value para não recriar o objeto (e re-renderizar todos os
+  // consumidores de useSoccer) a cada render. As callbacks já são estáveis
+  // via useCallback; mesmo assim entram nas deps por corretude. repoRef é
+  // um ref estável, então repoRef.current não precisa virar dependência.
+  const value = useMemo(
+    () => ({
+      gestor,
+      saving,
+      criarPelada,
+      atualizarPelada,
+      excluirPelada,
+      arquivarPelada,
+      desarquivarPelada,
+      listarPeladas,
+      carregarPelada,
+      iniciarExecucao,
+      iniciarExecucaoAvulsa,
+      finalizarExecucao,
+      voltarParaGestao,
+      salvarExecucaoAtualComoPelada,
+      limparJogadoresETimes,
+      selecionarExecucao,
+      listarExecucoesDe,
+      carregarExecucoesDe,
+      exportarBackup,
+      setFotoDoJogador,
+      repositorio: repoRef.current,
+    }),
+    [
+      gestor,
+      saving,
+      criarPelada,
+      atualizarPelada,
+      excluirPelada,
+      arquivarPelada,
+      desarquivarPelada,
+      listarPeladas,
+      carregarPelada,
+      iniciarExecucao,
+      iniciarExecucaoAvulsa,
+      finalizarExecucao,
+      voltarParaGestao,
+      salvarExecucaoAtualComoPelada,
+      limparJogadoresETimes,
+      selecionarExecucao,
+      listarExecucoesDe,
+      carregarExecucoesDe,
+      exportarBackup,
+      setFotoDoJogador,
+    ],
+  );
+
   // Bloqueia render até terminar o boot (evita flicker estado-vazio).
   if (!bootConcluido) return null;
 
   return (
-    <SoccerContext.Provider
-      value={{
-        gestor,
-        saving,
-        criarPelada,
-        atualizarPelada,
-        excluirPelada,
-        arquivarPelada,
-        desarquivarPelada,
-        listarPeladas,
-        carregarPelada,
-        iniciarExecucao,
-        iniciarExecucaoAvulsa,
-        finalizarExecucao,
-        voltarParaGestao,
-        salvarExecucaoAtualComoPelada,
-        limparJogadoresETimes,
-        selecionarExecucao,
-        listarExecucoesDe,
-        carregarExecucoesDe,
-        exportarBackup,
-        setFotoDoJogador,
-        repositorio: repoRef.current,
-      }}
-    >
-      {children}
-    </SoccerContext.Provider>
+    <SoccerContext.Provider value={value}>{children}</SoccerContext.Provider>
   );
 };
 

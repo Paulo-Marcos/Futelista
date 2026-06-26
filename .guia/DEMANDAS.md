@@ -2,6 +2,31 @@
 
 ---
 
+## [D-017] 🧹 Envolver value do SoccerContext em useMemo
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** value={{...}} literal novo a cada render re-renderiza todos useSoccer(). Acao: useMemo no value. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #3). Skills-base: react-best-practices.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `src/app-shell/soccerProvider.tsx`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-25.
+- Envolve o value do SoccerContext.Provider em useMemo (antes do early-return de boot), evitando re-render de todos os useSoccer a cada render
+
+### Validacao feita
+
+- npx tsc --noEmit; npx eslint src/app-shell/soccerProvider.tsx (sem rules-of-hooks/exhaustive-deps)
+
+### Validacao pendente
+
+- Validacao manual do desenvolvedor.
+
 ## [D-021] 🧹 Remover any do dominio em Rules.ts:54
 
 - **Status:** Aguardando validacao

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-021",
+  "taskId": "D-017",
   "status": "Aguardando validacao",
-  "title": "Remover any do dominio em Rules.ts:54",
-  "chatTitle": "D-021 \ud83e\uddf9 - #VALIDACAO - Remover any do dominio em Rules.ts:54"
+  "title": "Envolver value do SoccerContext em useMemo",
+  "chatTitle": "D-017 \ud83e\uddf9 - #VALIDACAO - Envolver value do SoccerContext em useMemo"
 }
