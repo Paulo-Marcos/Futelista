@@ -48,7 +48,7 @@ Estas boas práticas valem **também no frontend** deste projeto. Aplique, além
 
 - **Web / React**: componentes pequenos e focados; separação clara entre componente burro (JSX/estilo) e hook (lógica + I/O); estado mínimo necessário e elevado só quando justificado; `key` estável em listas; evitar re-render desnecessário (`useMemo`/`useCallback` quando o profiler indicar, não preventivamente); efeitos com dependências corretas e cleanup; acessibilidade básica (labels, foco, contraste).
 - **Mobile / React Native + Expo**: listas grandes com `FlatList`/`SectionList` (nunca `Array.map` dentro de `ScrollView` para listas variáveis); `keyExtractor` por `id`; respeitar safe area; teste em iOS, Android e Web quando o componente for compartilhado; cuidado com `Image` (cache, dimensões), animações via `Animated`/`Reanimated` no driver nativo quando possível; offline-first quando houver persistência.
-- **Adaptação ao FuteLista**: este projeto não tem backend FastAPI/SQLAlchemy nem `infrastructure/n8n/Gemini/FFmpeg` — a "camada pura" equivalente é [src/domain/](src/domain/), e a "cola" entre UI e domínio são [providers/](providers/), [contexts/](contexts/) e [hooks/](hooks/). O vocabulário aqui é **Pelada / Partida / Time / Jogador / Vantagem / Próximos** (não `Projeto/Corte/Short`). Os enums de contrato são `PlayerSituation`, `TeamSituation`, `TimerStatus`, `ResultMatch`, `ChoosingTeams`. Em "teste no navegador" entenda **teste no Expo Go / emulador / web**.
+- **Adaptação ao FuteLista**: este projeto não tem backend FastAPI/SQLAlchemy nem `infrastructure/n8n/Gemini/FFmpeg` — a "camada pura" equivalente é [src/domain/](src/domain/), a "cola" entre UI e domínio vive em [src/app-shell/](src/app-shell/) (provider, contexto e hooks `useSoccer`/`useGameSlice`), e o I/O (persistência AsyncStorage) fica em [src/infrastructure/](src/infrastructure/). O vocabulário aqui é **Pelada / Partida / Time / Jogador / Vantagem / Próximos** (não `Projeto/Corte/Short`). Os enums de contrato são `PlayerSituation`, `TeamSituation`, `TimerStatus`, `ResultMatch`, `ChoosingTeams`. Em "teste no navegador" entenda **teste no Expo Go / emulador / web**.
 
 ---
 
@@ -76,30 +76,37 @@ npm run lint             # ESLint (config expo + prettier)
 
 ```
 app/                    ← Rotas Expo Router (file-based routing)
-  (tabs)/               ← Tabs (index, list, Teams, GestorJogo, CurrentGame)
+  (pelada)/             ← Fluxo da pelada (index, jogadores, times, partida, historico, _layout)
   _layout.tsx           ← Layout raiz com ThemeProvider + MyProviders
+  configuracoes.tsx, regras.tsx, onboarding.tsx, resultado.tsx, peladas/ …
 src/
   domain/               ← Domínio puro TS, sem React, sem I/O, sem persistência
-    Player, Team, Match, Goal, Switch, ScreenTime, Timer, Rules
-    GestorJogo        ← Agregado raiz / orquestrador
-    TeamBuilder/       ← Factory + Strategy: criação de times
-    FinalResult/       ← Chain of Responsibility: pós-partida
-components/             ← Componentes RN reutilizáveis (ThemedText, ParallaxScrollView…)
-contexts/               ← React Contexts (SoccerContext)
-providers/              ← Provider que injeta o GestorJogo via Context
-hooks/                  ← Hooks (useSoccer, useColorScheme, useThemeColor)
-constants/              ← Cores e constantes
+    Pelada, Player, Team, Match, Goal, Switch, ScreenTime, Timer, Rules
+    GestorJogo          ← Agregado raiz / orquestrador
+    AgregadosPelada, ConvitePelada, RelatorioExecucao
+    PlayerSituation, TeamSituation, ResultMatch  ← enums de contrato
+    TeamBuilder/        ← Factory + Strategy: criação de times
+    FinalResult/        ← Chain of Responsibility: pós-partida
+    ports/              ← Portas (interfaces) que o domínio expõe à infra
+  app-shell/            ← Cola React entre UI e domínio
+    soccerContext, soccerProvider, myProviders  ← Context + Provider do GestorJogo
+    useSoccer, useGameSlice                      ← hooks de acesso ao domínio
+    peladaAtiva, devSeed, constants
+  infrastructure/       ← Adaptadores de I/O (storage/ — persistência AsyncStorage)
+  shared/               ← Transversais (hooks, navigation, prefs, theme, ui)
+  test/                 ← Utilitários de teste
 assets/                 ← Fontes, imagens, ícones
 ```
 
 ### Dependência entre camadas
 
 ```
-app/ (rotas)  →  hooks/providers/contexts  →  src/domain/ (puro)
+app/ (rotas)  →  src/app-shell/ (cola React)  →  src/domain/ (puro)
+                                              ↘  src/infrastructure/ (I/O via ports)
 ```
 
 - `src/domain/` é **puro**: sem React, sem Expo, sem AsyncStorage, sem HTTP.
-- Componentes em `app/` e `components/` consomem domínio **apenas via hooks/providers** — nunca instanciam `GestorJogo` direto.
+- Componentes em `app/` consomem domínio **apenas via hooks/providers** de `src/app-shell/` — nunca instanciam `GestorJogo` direto.
 - Lógica de negócio mora no domínio. Componentes só renderizam e disparam ações.
 
 ## Conceitos do Domínio
@@ -136,7 +143,7 @@ Cadeia em [src/domain/FinalResult](src/domain/FinalResult) decide quem vai pra p
 Este projeto adota guidelines baseadas em skills (ver [.claude/skills](.claude/skills)):
 
 - **Domínio (`src/domain/`)**: aplicar `@clean-code`, `@uncle-bob-craft`, `@domain-driven-design`.
-- **UI (`app/`, `components/`, `providers/`, `hooks/`)**: aplicar `@clean-code`, `@react-best-practices`.
+- **UI (`app/`, `src/app-shell/`, `src/shared/`)**: aplicar `@clean-code`, `@react-best-practices`.
 - **Testes (`*.spec.ts`)**: aplicar `@clean-code` (F.I.R.S.T.) e princípios TDD do `@uncle-bob-craft`.
 
 As regras por área estão em [.claude/rules/](.claude/rules/).
@@ -202,11 +209,11 @@ Este é um app pessoal. Aplique o que faz sentido para o tamanho do projeto; **n
 ### Clean Architecture
 
 ```
-app/ (rotas Expo)  →  providers/contexts/hooks (cola React)  →  src/domain/ (puro)
+app/ (rotas Expo)  →  src/app-shell/ (cola React)  →  src/domain/ (puro)
 ```
 
 - `src/domain/` é **puro**: sem `expo-*`, sem `react`, sem `react-native`, sem `AsyncStorage`, sem `fetch`.
-- Componentes em `app/` e `components/` **não instanciam** entidades de domínio diretamente — passam pelo `GestorJogo` via `useSoccer()`.
+- Componentes em `app/` **não instanciam** entidades de domínio diretamente — passam pelo `GestorJogo` via `useSoccer()`.
 - Componente "burro" (JSX/estilo) separado de hook (lógica + leitura de estado).
 
 ### DDD pragmático
@@ -217,8 +224,8 @@ app/ (rotas Expo)  →  providers/contexts/hooks (cola React)  →  src/domain/ 
 
 ### React / React Native
 
-- Estado vive nos hooks/providers. Componentes lêem via `useSoccer()`.
-- Evite forçar re-render com `setState([])`. Quando precisar reagir a mudanças do `GestorJogo`, use um pattern reativo (observers tipados, store externo, ou estado derivado por seleção).
+- Estado vive nos hooks/providers de `src/app-shell/`. Componentes lêem via `useSoccer()` / `useGameSlice()`.
+- Evite forçar re-render com `setState([])`. Para reagir a mudanças do `GestorJogo`, use o pattern reativo de external store (`useGameSlice`), não observers ad hoc.
 - Listas grandes: use `FlatList`/`SectionList`, não `Array.map` dentro de `ScrollView`.
 - Imports devem respeitar o casing exato do arquivo (ex.: `./Player`, não `./player`) — falha em CI Linux.
 

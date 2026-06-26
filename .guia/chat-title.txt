@@ -1,1 +1,1 @@
-D-004 🧹 - #VALIDACAO - Corrigir PRIVACY.md (persistencia AsyncStorage ativa)
+D-002 🧹 - #VALIDACAO - Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md

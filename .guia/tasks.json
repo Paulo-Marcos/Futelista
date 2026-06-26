@@ -1173,15 +1173,25 @@
       "id": "D-002",
       "kind": "chore",
       "title": "Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "Docs apontam providers/contexts/hooks e app/(tabs)/ que nao existem; real e src/{domain,app-shell,infrastructure,shared} e app/(pelada)/. Acao: atualizar a secao Arquitetura/Conceitos. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #4, clean-code-review #7, proposal-architect #2). Skills-base: proposal-architect, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "CLAUDE.md"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-25.",
+        "Alinha secao Arquitetura do CLAUDE.md a estrutura real (src/app-shell, src/infrastructure, src/shared; app/(pelada))"
+      ],
+      "validations": [
+        "grep: sem mencoes a app/(tabs), MyProviders na raiz, providers/contexts/hooks na raiz"
+      ],
+      "pending": [
+        "rules/mobile.md ainda descreve estrutura antiga (demanda derivada)"
+      ],
       "dependsOn": [
         "D-001"
       ],

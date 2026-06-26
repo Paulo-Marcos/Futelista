@@ -1,6 +1,6 @@
 {
-  "taskId": "D-007",
-  "status": "Validada",
-  "title": "Verificar links de docs/ (AI_NAVIGATION, guias)",
-  "demandTitle": "D-007 \ud83e\uddf9 - #FINALIZADO - Verificar links de docs/ (AI_NAVIGATION, guias)"
+  "taskId": "D-002",
+  "status": "Aguardando validacao",
+  "title": "Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md",
+  "chatTitle": "D-002 \ud83e\uddf9 - #VALIDACAO - Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md"
 }
