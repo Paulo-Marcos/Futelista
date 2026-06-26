@@ -1,6 +1,6 @@
 {
-  "taskId": "D-017",
+  "taskId": "D-019",
   "status": "Aguardando validacao",
-  "title": "Envolver value do SoccerContext em useMemo",
-  "chatTitle": "D-017 \ud83e\uddf9 - #VALIDACAO - Envolver value do SoccerContext em useMemo"
+  "title": "Avaliar extrair reatividade/servicos de GestorJogo",
+  "chatTitle": "D-019 \ud83e\uddf9 - #VALIDACAO - Avaliar extrair reatividade/servicos de GestorJogo"
 }

@@ -8,6 +8,7 @@ import { Team, TeamSituation } from "./Team";
 import { CreateTeamFactory } from "./TeamBuilder/CreateTeam.factory";
 import { Timer, TimerStatus } from "./Timer";
 import { FinalResultProcessor } from "./FinalResult/FinalResult.processor";
+import { Observable } from "./Observable";
 
 /**
  * GestorJogo — agregado raiz da pelada.
@@ -46,8 +47,7 @@ export class GestorJogo {
   peladaId?: string;
   private updateResult = new FinalResultProcessor();
 
-  private _version = 0;
-  private listeners = new Set<() => void>();
+  private store = new Observable();
 
   constructor(name: string, rules: Rules, opcionais?: DadosExecucao) {
     this.name = name;
@@ -64,20 +64,16 @@ export class GestorJogo {
 
   /** Numero monotonico incrementado a cada notify(); usado como snapshot. */
   get version(): number {
-    return this._version;
+    return this.store.version;
   }
 
   /** Registra um listener; retorna funcao de unsubscribe. */
   subscribe(listener: () => void): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
+    return this.store.subscribe(listener);
   }
 
   private notify(): void {
-    this._version++;
-    this.listeners.forEach((listener) => listener());
+    this.store.notify();
   }
 
   // ----- Times e jogadores ------------------------------------------------
@@ -195,10 +191,7 @@ export class GestorJogo {
     });
 
     if (this.playing) {
-      const idsEmJogo = new Set([
-        this.playing.teamA.id,
-        this.playing.teamB.id,
-      ]);
+      const idsEmJogo = new Set([this.playing.teamA.id, this.playing.teamB.id]);
       this.next = this.next.filter((t) => !idsEmJogo.has(t.id));
     }
 
