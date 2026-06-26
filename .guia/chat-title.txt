@@ -1,1 +1,1 @@
-D-022 🧹 - #VALIDACAO - Decidir convencao PT/EN e renomear no GestorJogo
+D-029 🧹 - #VALIDACAO - Adotar gitmoji nos commits e decidir hook commit-msg

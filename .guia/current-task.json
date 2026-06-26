@@ -1,6 +1,6 @@
 {
-  "taskId": "D-022",
+  "taskId": "D-029",
   "status": "Aguardando validacao",
-  "title": "Decidir convencao PT/EN e renomear no GestorJogo",
-  "chatTitle": "D-022 \ud83e\uddf9 - #VALIDACAO - Decidir convencao PT/EN e renomear no GestorJogo"
+  "title": "Adotar gitmoji nos commits e decidir hook commit-msg",
+  "chatTitle": "D-029 \ud83e\uddf9 - #VALIDACAO - Adotar gitmoji nos commits e decidir hook commit-msg"
 }

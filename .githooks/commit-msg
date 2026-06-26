@@ -23,4 +23,8 @@ else
     exit 2
 fi
 
+# D-029: exige gitmoji ANTES do tipo Conventional Commits na 1a linha.
+# Roda primeiro; se rejeitar, aborta antes da checagem de lock.
+"$PY" $PY_ARGS "$ROOT/bin/check-gitmoji.py" "$1" || exit $?
+
 exec "$PY" $PY_ARGS "$ROOT/bin/check-lock.py" hook "$1"

@@ -434,15 +434,26 @@
       "id": "D-029",
       "kind": "chore",
       "title": "Adotar gitmoji nos commits e decidir hook commit-msg",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "[Confirmar] Nenhum commit usa gitmoji antes do tipo (unico desvio sistematico). Acao: adotar daqui pra frente; decidir se o hook commit-msg passa a exigir/validar. Historico passado e imutavel. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (conventional-commit-gitmoji #1). Skills-base: conventional-commit-gitmoji.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        ".githooks/commit-msg",
+        "bin/check-gitmoji.py"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "commit-msg passa a exigir gitmoji antes do tipo (via bin/check-gitmoji.py), rodando antes do check de lock. Excecoes: Merge/Revert/fixup. Commits auto do guia (sem --no-commit) sao rejeitados de proposito."
+      ],
+      "validations": [
+        "teste manual do hook: aceita emoji+tipo, rejeita sem emoji, libera Merge"
+      ],
+      "pending": [
+        "Fluxo: rodar guia finish/ready com --no-commit (o engine auto-commita sem emoji e seria rejeitado)"
+      ],
       "parentId": "E-006"
     },
     {
