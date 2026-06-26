@@ -2,6 +2,32 @@
 
 ---
 
+## [D-011] 🧹 Extrair subcomponentes e hooks de partida.tsx
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** partida.tsx ~2999 linhas com 15+ componentes num arquivo. Acao: mover subcomponentes+styles p/ src/shared/ui/partida/* e extrair hook usePartida; tela vira composicao. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1, clean-code-review #1). Skills-base: react-best-practices, clean-code.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `app/(pelada)/partida.tsx`
+- `src/shared/ui/partida/`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-26.
+- Extrai 17 subcomponentes + helpers da tela de Partida para src/shared/ui/partida/ (2998->628). Composicao e animacoes (Animated/loops/cleanup) preservadas; PlayerDot extraido como esta (pronto p/ D-015); StyleSheet particionado, orfas removidas. Estrutural, comportamento identico.
+
+### Validacao feita
+
+- npx tsc --noEmit (0); npx eslint partida + partida/**/* (0)
+
+### Validacao pendente
+
+- VALIDAR NO APP com atencao as ANIMACOES: campo, PlayerDot (gol burst), CenterDisc (pulse), GoalCelebration/Confetti, toasts, sheets (gol/troca/autor), scoreboard, banco
+
 ## [D-012] 🧹 Extrair subcomponentes e hooks de (pelada)/index.tsx
 
 - **Status:** Aguardando validacao

@@ -866,15 +866,26 @@
       "id": "D-011",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de partida.tsx",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "partida.tsx ~2999 linhas com 15+ componentes num arquivo. Acao: mover subcomponentes+styles p/ src/shared/ui/partida/* e extrair hook usePartida; tela vira composicao. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1, clean-code-review #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "app/(pelada)/partida.tsx",
+        "src/shared/ui/partida/"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Extrai 17 subcomponentes + helpers da tela de Partida para src/shared/ui/partida/ (2998->628). Composicao e animacoes (Animated/loops/cleanup) preservadas; PlayerDot extraido como esta (pronto p/ D-015); StyleSheet particionado, orfas removidas. Estrutural, comportamento identico."
+      ],
+      "validations": [
+        "npx tsc --noEmit (0); npx eslint partida + partida/**/* (0)"
+      ],
+      "pending": [
+        "VALIDAR NO APP com atencao as ANIMACOES: campo, PlayerDot (gol burst), CenterDisc (pulse), GoalCelebration/Confetti, toasts, sheets (gol/troca/autor), scoreboard, banco"
+      ],
       "parentId": "E-003"
     },
     {
