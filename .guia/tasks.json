@@ -25,20 +25,24 @@
       "id": "D-043",
       "kind": "chore",
       "title": "Atualizar estrutura de pastas em rules/mobile.md",
-      "status": "Em desenvolvimento",
+      "status": "Aguardando validacao",
       "origin": "Derivada do diagnostico 2026-06-24",
       "context": "Derivada da D-002: rules/mobile.md ainda descreve UI em components/providers/contexts/hooks na raiz e app/(tabs)/, mas o real e src/app-shell, src/shared/ui e app/(pelada). Skills-base: proposal-architect.",
       "createdAt": "2026-06-26",
       "updatedAt": "2026-06-26",
       "modifiedFiles": [
-        ".guia/DEMANDAS.md"
+        ".guia/DEMANDAS.md",
+        ".claude/rules/mobile.md"
       ],
       "summary": [
-        "Demanda criada via Guia Fluxo."
+        "Demanda criada via Guia Fluxo.",
+        "Atualiza estrutura de pastas em rules/mobile.md: src/app-shell (cola React), src/shared/ui (componentes, subpastas por tela), src/shared/theme (cores), app/(pelada) (rotas). Remove components/providers/contexts/hooks na raiz e app/(tabs). Reatividade (D-006) intacta."
       ],
-      "validations": [],
+      "validations": [
+        "grep sem components|providers|contexts|(tabs)|constants/Colors; arvore real conferida"
+      ],
       "pending": [
-        "Executar implementacao e validacoes."
+        "Validacao manual do desenvolvedor."
       ]
     },
     {

@@ -54,7 +54,7 @@
 
 ## [D-043] 🧹 Atualizar estrutura de pastas em rules/mobile.md
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Derivada do diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Derivada da D-002: rules/mobile.md ainda descreve UI em components/providers/contexts/hooks na raiz e app/(tabs)/, mas o real e src/app-shell, src/shared/ui e app/(pelada). Skills-base: proposal-architect.
@@ -62,19 +62,20 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `.claude/rules/mobile.md`
 
 ### O que foi feito
 
 - Demanda criada via Guia Fluxo.
+- Atualiza estrutura de pastas em rules/mobile.md: src/app-shell (cola React), src/shared/ui (componentes, subpastas por tela), src/shared/theme (cores), app/(pelada) (rotas). Remove components/providers/contexts/hooks na raiz e app/(tabs). Reatividade (D-006) intacta.
 
 ### Validacao feita
 
-- Nenhuma.
+- grep sem components|providers|contexts|(tabs)|constants/Colors; arvore real conferida
 
 ### Validacao pendente
 
-- Executar implementacao e validacoes.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-029] 🧹 Adotar gitmoji nos commits e decidir hook commit-msg
 

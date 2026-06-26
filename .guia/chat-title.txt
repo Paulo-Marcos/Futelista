@@ -1,1 +1,1 @@
-D-010 🧹 - #VALIDACAO - Registrar fechamento do ADR-0001 (router)
+D-043 🧹 - #VALIDACAO - Atualizar estrutura de pastas em rules/mobile.md

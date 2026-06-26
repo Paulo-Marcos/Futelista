@@ -1,6 +1,6 @@
 {
-  "taskId": "D-010",
+  "taskId": "D-043",
   "status": "Aguardando validacao",
-  "title": "Registrar fechamento do ADR-0001 (router)",
-  "chatTitle": "D-010 \ud83e\uddf9 - #VALIDACAO - Registrar fechamento do ADR-0001 (router)"
+  "title": "Atualizar estrutura de pastas em rules/mobile.md",
+  "chatTitle": "D-043 \ud83e\uddf9 - #VALIDACAO - Atualizar estrutura de pastas em rules/mobile.md"
 }
