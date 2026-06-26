@@ -1,1 +1,1 @@
-D-002 🧹 - #VALIDACAO - Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md
+D-021 🧹 - #VALIDACAO - Remover any do dominio em Rules.ts:54

@@ -645,15 +645,25 @@
       "id": "D-021",
       "kind": "chore",
       "title": "Remover any do dominio em Rules.ts:54",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "choosingTeams: any viola a regra 'sem any' do dominio. Acao: trocar por unknown/ChoosingTeams validado via includes. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #2, alta). Skills-base: clean-code, uncle-bob-craft.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/domain/Rules.ts"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-25.",
+        "Troca any por unknown em checkChoosingTeams (validacao de entrada); narrowing via as ChoosingTeams no includes"
+      ],
+      "validations": [
+        "npx jest src/domain/Rules (10/10)"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ],
       "parentId": "E-009"
     },
     {

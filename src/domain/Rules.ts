@@ -51,8 +51,8 @@ export class Rules {
   checkGoalLimit(goalLimit: number): void {
     if (goalLimit < 1) throw Error("Limite mínimo de gols é 1.");
   }
-  checkChoosingTeams(choosingTeams: any): void {
-    if (!Object.values(ChoosingTeams).includes(choosingTeams))
+  checkChoosingTeams(choosingTeams: unknown): void {
+    if (!Object.values(ChoosingTeams).includes(choosingTeams as ChoosingTeams))
       throw Error("Tipo de escolha inválida");
   }
   getDurationMatch(): number {

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-002",
+  "taskId": "D-021",
   "status": "Aguardando validacao",
-  "title": "Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md",
-  "chatTitle": "D-002 \ud83e\uddf9 - #VALIDACAO - Atualizar secao Arquitetura em CLAUDE.md e AGENTS.md"
+  "title": "Remover any do dominio em Rules.ts:54",
+  "chatTitle": "D-021 \ud83e\uddf9 - #VALIDACAO - Remover any do dominio em Rules.ts:54"
 }
