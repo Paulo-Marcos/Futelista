@@ -1,6 +1,6 @@
 ---
 name: clean-code
-description: "This skill embodies the principles of \"Clean Code\" by Robert C. Martin (Uncle Bob). Use it to transform \"code that works\" into \"code that is clean.\""
+description: "MICRO craft lens for code-level readability (Clean Code by R. C. Martin at the statement/function level + named Fowler refactorings). Use when reviewing or writing clean code to improve names, function size and single responsibility, deep nesting, parameter count, duplication, dead code, useless comments, and code smells — and to apply named refactorings (Extract Function/Variable, Rename, Guard Clause). Triggers on \"is this clean?\", \"is this name good?\", \"is this function too big?\", \"how to make this more readable?\", \"which refactoring applies?\". Complementary to (not overlapping) uncle-bob-craft, which owns the MACRO angle (architecture, SOLID, layer boundaries, design-pattern choice). Stay micro here; for structure/design defer to uncle-bob-craft."
 paths:
   - "src/domain/**"
   - "app/**"

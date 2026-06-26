@@ -1,6 +1,6 @@
 ---
 name: uncle-bob-craft
-description: "Use when performing code review, writing or refactoring code, or discussing architecture; complements clean-code and does not replace project linter/formatter."
+description: "MACRO craft lens for structure and design: architecture, the five SOLID principles, boundaries between layers, cohesion/coupling, design-pattern choice (and avoiding overengineering), and craft discipline (TDD, design). Use when reviewing or shaping how modules and layers fit together, validating dependency direction, judging SRP/OCP/LSP/ISP/DIP, deciding which design pattern fits, or refactoring toward a cleaner structure. Triggers on layer/boundary violations, coupling, cohesion, \"which pattern fits?\", \"is this the right architecture?\". Complementary to (not overlapping) clean-code, which owns the MICRO angle (names, function size, nesting, duplication, code smells, named Fowler refactorings). Stay macro here; for statement/function-level readability defer to clean-code. Does not replace project linter/formatter."
 paths:
   - "src/domain/**"
   - "app/**"

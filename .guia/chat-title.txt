@@ -1,1 +1,1 @@
-D-033 🧹 - #VALIDACAO - Retunar description de react-best-practices (tirar vies Next.js)
+D-034 🧹 - #VALIDACAO - Estreitar overlap clean-code x uncle-bob-craft
