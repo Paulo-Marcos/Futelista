@@ -4,7 +4,7 @@
 
 ## [D-001] 🧹 Reescrever AGENTS.md a partir do CLAUDE.md
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** AGENTS.md descreve stack do gerador-cortes (FastAPI/SQLAlchemy/n8n, vocab Projeto/Corte/Short) e cita .agents/ inexistente. Acao: reescrever espelhando o CLAUDE.md atual; corrigir caminhos p/ .claude/. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #1, proposal-architect #3). Skills-base: open-source-readiness, proposal-architect.
@@ -13,11 +13,17 @@
 
 - `.guia/DEMANDAS.md`
 - `AGENTS.md`
+- `PRIVACY.md`
+- `docs/adr/0002-reatividade-external-store.md`
+- `docs/desenvolvedor/arquitetura.md`
+- `docs/desenvolvedor/ui.md`
+- `src/domain/Team.ts`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Reescrevi AGENTS.md para refletir o FuteLista real, espelhando o CLAUDE.md: removi a stack herdada do gerador-cortes (FastAPI/SQLAlchemy/n8n/Gemini/FFmpeg, vocabulario Projeto/Corte/Short, camadas routers->services, caminhos .agents/). Agora descreve Expo Router + RN + TS estrito; estrutura real src/{domain,app-shell,infrastructure,shared} + app/(pelada)/; vocabulario Pelada/Partida/Time/Jogador/Vantagem/Proximos; enums de contrato PlayerSituation/TeamSituation/TimerStatus/ResultMatch/ChoosingTeams; FinalResult com as 5 estrategias; protocolo de lock e caminhos .claude/skills e .claude/rules.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -26,8 +32,13 @@
 
 ### Validacao pendente
 
-- Commit ficou rotulado como D-023 por race de chips concorrentes no mesmo repo; conteudo de AGENTS.md esta correto em HEAD~. CLAUDE.md ainda tem secao stale duplicada (e a D-002).
+- Nenhuma.
 
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T21:18:49-03:00
 
 ## [D-008] ✨ Escrever ADR-0003 persistencia Ports&Adapters
 
@@ -82,7 +93,7 @@
 
 ## [D-009] ✨ Escrever ADR modelagem Pelada x Execucao
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Novos agregados (Pelada tipo vs GestorJogo/Execucao sessao, AgregadosPelada, ConvitePelada) mudam a fronteira do agregado raiz, sem registro. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #4). Skills-base: proposal-architect, domain-driven-design.
@@ -91,12 +102,17 @@
 
 - `.guia/DEMANDAS.md`
 - `docs/adr/0004-modelagem-pelada-execucao.md`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
+- `PRIVACY.md`
+- `src/domain/Team.ts`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Escrevi ADR-0004 registrando a separação Pelada (tipo/cadastro) × GestorJogo (execução/sessão), ligados pelo id fraco peladaId, com Rules viajando por valor; documenta o lado certo de AgregadosPelada (cross-execução, identidade por nome), ConvitePelada (do tipo) e RelatorioExecucao (da sessão), com 3 alternativas e trade-offs. Formato idêntico aos ADRs 0001/0002, status aceito.
 - ATENÇÃO: por uma race com chip paralelo, o arquivo staged foi absorvido pelo commit acd4169 (D-032), que NÃO contém a marca [unlock:adicoes-exigem-autorizacao]. O conteúdo está íntegro em HEAD; não reescrevi história compartilhada.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -104,7 +120,13 @@
 
 ### Validacao pendente
 
-- Lock de adição não cumprido pelo commit final (marca de unlock ausente no acd4169 que absorveu o arquivo) — decidir se requer recommit/rewrite manual
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T21:27:42-03:00
 
 ## [D-007] 🧹 Verificar links de docs/ (AI_NAVIGATION, guias)
 

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-004",
-  "status": "Aguardando validacao",
-  "title": "Corrigir PRIVACY.md (persistencia AsyncStorage ativa)",
-  "chatTitle": "D-004 \ud83e\uddf9 - #VALIDACAO - Corrigir PRIVACY.md (persistencia AsyncStorage ativa)"
+  "taskId": "D-009",
+  "status": "Validada",
+  "title": "Escrever ADR modelagem Pelada x Execucao",
+  "demandTitle": "D-009 \u2728 - #FINALIZADO - Escrever ADR modelagem Pelada x Execucao"
 }

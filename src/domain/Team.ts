@@ -111,7 +111,6 @@ export class Team {
   }
 
   removePlayer(player: Player): Player {
-    //tava deletando mais de um.
     const index = this.players.indexOf(player);
     const deletedPlayer = this.players.splice(index, 1)[0];
     player.setSituation(PlayerSituation.STOPPED);

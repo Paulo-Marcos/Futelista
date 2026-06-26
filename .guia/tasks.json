@@ -748,27 +748,49 @@
       "id": "D-009",
       "kind": "feature",
       "title": "Escrever ADR modelagem Pelada x Execucao",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "Novos agregados (Pelada tipo vs GestorJogo/Execucao sessao, AgregadosPelada, ConvitePelada) mudam a fronteira do agregado raiz, sem registro. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #4). Skills-base: proposal-architect, domain-driven-design.",
       "createdAt": "2026-06-24",
       "updatedAt": "2026-06-25",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        "docs/adr/0004-modelagem-pelada-execucao.md"
+        "docs/adr/0004-modelagem-pelada-execucao.md",
+        ".guia/current-task.json",
+        ".guia/tasks.json",
+        "PRIVACY.md",
+        "src/domain/Team.ts"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
         "Escrevi ADR-0004 registrando a separa\u00e7\u00e3o Pelada (tipo/cadastro) \u00d7 GestorJogo (execu\u00e7\u00e3o/sess\u00e3o), ligados pelo id fraco peladaId, com Rules viajando por valor; documenta o lado certo de AgregadosPelada (cross-execu\u00e7\u00e3o, identidade por nome), ConvitePelada (do tipo) e RelatorioExecucao (da sess\u00e3o), com 3 alternativas e trade-offs. Formato id\u00eantico aos ADRs 0001/0002, status aceito.",
-        "ATEN\u00c7\u00c3O: por uma race com chip paralelo, o arquivo staged foi absorvido pelo commit acd4169 (D-032), que N\u00c3O cont\u00e9m a marca [unlock:adicoes-exigem-autorizacao]. O conte\u00fado est\u00e1 \u00edntegro em HEAD; n\u00e3o reescrevi hist\u00f3ria compartilhada."
+        "ATEN\u00c7\u00c3O: por uma race com chip paralelo, o arquivo staged foi absorvido pelo commit acd4169 (D-032), que N\u00c3O cont\u00e9m a marca [unlock:adicoes-exigem-autorizacao]. O conte\u00fado est\u00e1 \u00edntegro em HEAD; n\u00e3o reescrevi hist\u00f3ria compartilhada.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "confer\u00eancia manual contra src/domain/Pelada.ts e correlatos"
       ],
-      "pending": [
-        "Lock de adi\u00e7\u00e3o n\u00e3o cumprido pelo commit final (marca de unlock ausente no acd4169 que absorveu o arquivo) \u2014 decidir se requer recommit/rewrite manual"
-      ],
-      "parentId": "E-002"
+      "pending": [],
+      "parentId": "E-002",
+      "finishedAt": "2026-06-25T21:27:42-03:00",
+      "qualityReview": {
+        "candidates": [
+          "docs/adr/0004-modelagem-pelada-execucao.md",
+          "PRIVACY.md",
+          "src/domain/Team.ts"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "\u00fanica mudan\u00e7a de produto \u00e9 o ADR-0004 (documenta\u00e7\u00e3o em prosa, sem c\u00f3digo) \u2014 skills de qualidade de c\u00f3digo n\u00e3o se aplicam"
+      }
     },
     {
       "id": "D-008",
@@ -1039,27 +1061,53 @@
       "id": "D-001",
       "kind": "chore",
       "title": "Reescrever AGENTS.md a partir do CLAUDE.md",
-      "status": "Aguardando validacao",
+      "status": "Validada",
       "origin": "Diagnostico 2026-06-24",
       "context": "AGENTS.md descreve stack do gerador-cortes (FastAPI/SQLAlchemy/n8n, vocab Projeto/Corte/Short) e cita .agents/ inexistente. Acao: reescrever espelhando o CLAUDE.md atual; corrigir caminhos p/ .claude/. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #1, proposal-architect #3). Skills-base: open-source-readiness, proposal-architect.",
       "createdAt": "2026-06-24",
       "updatedAt": "2026-06-25",
       "modifiedFiles": [
         ".guia/DEMANDAS.md",
-        "AGENTS.md"
+        "AGENTS.md",
+        "PRIVACY.md",
+        "docs/adr/0002-reatividade-external-store.md",
+        "docs/desenvolvedor/arquitetura.md",
+        "docs/desenvolvedor/ui.md",
+        "src/domain/Team.ts"
       ],
       "summary": [
         "Em desenvolvimento desde 2026-06-25.",
-        "Reescrevi AGENTS.md para refletir o FuteLista real, espelhando o CLAUDE.md: removi a stack herdada do gerador-cortes (FastAPI/SQLAlchemy/n8n/Gemini/FFmpeg, vocabulario Projeto/Corte/Short, camadas routers->services, caminhos .agents/). Agora descreve Expo Router + RN + TS estrito; estrutura real src/{domain,app-shell,infrastructure,shared} + app/(pelada)/; vocabulario Pelada/Partida/Time/Jogador/Vantagem/Proximos; enums de contrato PlayerSituation/TeamSituation/TimerStatus/ResultMatch/ChoosingTeams; FinalResult com as 5 estrategias; protocolo de lock e caminhos .claude/skills e .claude/rules."
+        "Reescrevi AGENTS.md para refletir o FuteLista real, espelhando o CLAUDE.md: removi a stack herdada do gerador-cortes (FastAPI/SQLAlchemy/n8n/Gemini/FFmpeg, vocabulario Projeto/Corte/Short, camadas routers->services, caminhos .agents/). Agora descreve Expo Router + RN + TS estrito; estrutura real src/{domain,app-shell,infrastructure,shared} + app/(pelada)/; vocabulario Pelada/Partida/Time/Jogador/Vantagem/Proximos; enums de contrato PlayerSituation/TeamSituation/TimerStatus/ResultMatch/ChoosingTeams; FinalResult com as 5 estrategias; protocolo de lock e caminhos .claude/skills e .claude/rules.",
+        "Demanda finalizada via Guia Fluxo."
       ],
       "validations": [
         "revisao manual: AGENTS.md condiz com CLAUDE.md e com a arvore src/",
         "grep -nE 'FastAPI|SQLAlchemy|n8n|Gemini|FFmpeg|Projeto|Corte|Short|.agents|routers/|services/' AGENTS.md => nenhum termo proibido"
       ],
-      "pending": [
-        "Commit ficou rotulado como D-023 por race de chips concorrentes no mesmo repo; conteudo de AGENTS.md esta correto em HEAD~. CLAUDE.md ainda tem secao stale duplicada (e a D-002)."
-      ],
-      "parentId": "E-001"
+      "pending": [],
+      "parentId": "E-001",
+      "finishedAt": "2026-06-25T21:18:49-03:00",
+      "qualityReview": {
+        "candidates": [
+          "AGENTS.md",
+          "PRIVACY.md",
+          "docs/adr/0002-reatividade-external-store.md",
+          "docs/desenvolvedor/arquitetura.md",
+          "docs/desenvolvedor/ui.md",
+          "src/domain/Team.ts"
+        ],
+        "dimensions": [
+          "(a) qualidade do codigo (legibilidade, nomes, clean code)",
+          "(b) tamanho de funcoes/arquivos (funcao curta, arquivo coeso)",
+          "(c) responsabilidade unica (SRP) por funcao/classe/modulo",
+          "(d) cobertura/tests do que mudou",
+          "(e) necessidade de refatorar para boa qualidade - e refatorar antes de fechar"
+        ],
+        "skills": [],
+        "findings": [],
+        "checkedAt": "2026-06-25",
+        "skipped": "unica mudanca e AGENTS.md (documentacao markdown); sem codigo/funcoes/camadas/cobertura a avaliar pelas skills de qualidade"
+      }
     },
     {
       "id": "E-009",
