@@ -1,1 +1,1 @@
-D-019 🧹 - #VALIDACAO - Avaliar extrair reatividade/servicos de GestorJogo
+D-014 🧹 - #VALIDACAO - Extrair subcomponentes e hooks de jogadores.tsx

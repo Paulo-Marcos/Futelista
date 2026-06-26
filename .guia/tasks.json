@@ -780,15 +780,31 @@
       "id": "D-014",
       "kind": "chore",
       "title": "Extrair subcomponentes e hooks de jogadores.tsx",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "jogadores.tsx ~1393 linhas. Acao: extrair subcomponentes/hooks. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #1). Skills-base: react-best-practices, clean-code.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-25",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "app/(pelada)/jogadores.tsx",
+        "src/shared/ui/jogadores/AddButton.tsx",
+        "src/shared/ui/jogadores/LinhaJogador.tsx",
+        "src/shared/ui/jogadores/LinhaEdicao.tsx",
+        "src/shared/ui/jogadores/ModalAdicionarLote.tsx",
+        "src/shared/ui/jogadores/EstatisticasJogadorSheet.tsx",
+        "src/shared/ui/jogadores/StatTile.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-25.",
+        "Extrai 6 subcomponentes de jogadores.tsx para src/shared/ui/jogadores/ (1393->672 linhas); StyleSheet particionado por consumo. Estrutural, comportamento identico."
+      ],
+      "validations": [
+        "npx tsc --noEmit (0); npx eslint nos 7 arquivos (0)"
+      ],
+      "pending": [
+        "VALIDAR NO APP (Expo/emulador): tela Jogadores visualmente identica - adicionar, editar, lote, estatisticas, busca"
+      ],
       "parentId": "E-003"
     },
     {

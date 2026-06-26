@@ -1,6 +1,6 @@
 {
-  "taskId": "D-019",
+  "taskId": "D-014",
   "status": "Aguardando validacao",
-  "title": "Avaliar extrair reatividade/servicos de GestorJogo",
-  "chatTitle": "D-019 \ud83e\uddf9 - #VALIDACAO - Avaliar extrair reatividade/servicos de GestorJogo"
+  "title": "Extrair subcomponentes e hooks de jogadores.tsx",
+  "chatTitle": "D-014 \ud83e\uddf9 - #VALIDACAO - Extrair subcomponentes e hooks de jogadores.tsx"
 }
