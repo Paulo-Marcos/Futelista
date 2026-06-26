@@ -29,26 +29,26 @@ Atualize quando criar fluxos, telas, regras de domínio ou decisões importantes
 ### Camada de UI (Expo Router)
 
 - Layout raiz: [app/_layout.tsx](app/_layout.tsx)
-- Tabs: [app/(tabs)/_layout.tsx](app/(tabs)/_layout.tsx)
+- Tabs: [app/(pelada)/_layout.tsx](app/(pelada)/_layout.tsx)
 - Telas:
-  - Home: [app/(tabs)/index.tsx](app/(tabs)/index.tsx)
-  - Lista de jogadores: [app/(tabs)/list.tsx](app/(tabs)/list.tsx)
-  - Times (carrossel): [app/(tabs)/Teams.tsx](app/(tabs)/Teams.tsx)
+  - Home: [app/(pelada)/index.tsx](app/(pelada)/index.tsx)
+  - Lista de jogadores: [app/(pelada)/jogadores.tsx](app/(pelada)/jogadores.tsx)
+  - Times (carrossel): [app/(pelada)/times.tsx](app/(pelada)/times.tsx)
   - Gerenciamento: [app/(tabs)/GestorJogo.tsx](app/(tabs)/GestorJogo.tsx)
-  - Partida atual: [app/(tabs)/CurrentGame.tsx](app/(tabs)/CurrentGame.tsx)
+  - Partida atual: [app/(pelada)/partida.tsx](app/(pelada)/partida.tsx)
 
 ### Cola React ↔ domínio
 
-- Context: [contexts/soccerContext.ts](contexts/soccerContext.ts)
-- Provider: [providers/soccerProvider.tsx](providers/soccerProvider.tsx)
-- Hook de acesso: [hooks/useSoccer.ts](hooks/useSoccer.ts)
-- Composição de providers: [providers/myProviders.tsx](providers/myProviders.tsx)
+- Context: [src/app-shell/soccerContext.ts](src/app-shell/soccerContext.ts)
+- Provider: [src/app-shell/soccerProvider.tsx](src/app-shell/soccerProvider.tsx)
+- Hook de acesso: [src/app-shell/useSoccer.ts](src/app-shell/useSoccer.ts)
+- Composição de providers: [src/app-shell/myProviders.tsx](src/app-shell/myProviders.tsx)
 
 ### Componentes reutilizáveis
 
-- [components/ThemedText.tsx](components/ThemedText.tsx), [components/ThemedView.tsx](components/ThemedView.tsx)
-- [components/ParallaxScrollView.tsx](components/ParallaxScrollView.tsx)
-- Ícones e navegação: [components/navigation/TabBarIcon.tsx](components/navigation/TabBarIcon.tsx), [components/Icons.tsx](components/Icons.tsx)
+- [src/shared/ui/ThemedText.tsx](src/shared/ui/ThemedText.tsx), [src/shared/ui/ThemedView.tsx](src/shared/ui/ThemedView.tsx)
+- [src/shared/ui/ParallaxScrollView.tsx](src/shared/ui/ParallaxScrollView.tsx)
+- Ícones e navegação: [src/shared/navigation/TabBarIcon.tsx](src/shared/navigation/TabBarIcon.tsx), [src/shared/ui/Icons.tsx](src/shared/ui/Icons.tsx)
 
 ### Testes
 

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-027",
+  "taskId": "D-004",
   "status": "Aguardando validacao",
-  "title": "Criar release.yml disparado em tags v*.*.*",
-  "chatTitle": "D-027 \u2728 - #VALIDACAO - Criar release.yml disparado em tags v*.*.*"
+  "title": "Corrigir PRIVACY.md (persistencia AsyncStorage ativa)",
+  "chatTitle": "D-004 \ud83e\uddf9 - #VALIDACAO - Corrigir PRIVACY.md (persistencia AsyncStorage ativa)"
 }

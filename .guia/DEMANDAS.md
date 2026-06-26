@@ -2,9 +2,36 @@
 
 ---
 
+## [D-001] 🧹 Reescrever AGENTS.md a partir do CLAUDE.md
+
+- **Status:** Aguardando validacao
+- **Origem:** Diagnostico 2026-06-24
+- **Tipo:** Chore
+- **Contexto:** AGENTS.md descreve stack do gerador-cortes (FastAPI/SQLAlchemy/n8n, vocab Projeto/Corte/Short) e cita .agents/ inexistente. Acao: reescrever espelhando o CLAUDE.md atual; corrigir caminhos p/ .claude/. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #1, proposal-architect #3). Skills-base: open-source-readiness, proposal-architect.
+
+### Arquivos modificados/criados
+
+- `.guia/DEMANDAS.md`
+- `AGENTS.md`
+
+### O que foi feito
+
+- Em desenvolvimento desde 2026-06-25.
+- Reescrevi AGENTS.md para refletir o FuteLista real, espelhando o CLAUDE.md: removi a stack herdada do gerador-cortes (FastAPI/SQLAlchemy/n8n/Gemini/FFmpeg, vocabulario Projeto/Corte/Short, camadas routers->services, caminhos .agents/). Agora descreve Expo Router + RN + TS estrito; estrutura real src/{domain,app-shell,infrastructure,shared} + app/(pelada)/; vocabulario Pelada/Partida/Time/Jogador/Vantagem/Proximos; enums de contrato PlayerSituation/TeamSituation/TimerStatus/ResultMatch/ChoosingTeams; FinalResult com as 5 estrategias; protocolo de lock e caminhos .claude/skills e .claude/rules.
+
+### Validacao feita
+
+- revisao manual: AGENTS.md condiz com CLAUDE.md e com a arvore src/
+- grep -nE 'FastAPI|SQLAlchemy|n8n|Gemini|FFmpeg|Projeto|Corte|Short|.agents|routers/|services/' AGENTS.md => nenhum termo proibido
+
+### Validacao pendente
+
+- Commit ficou rotulado como D-023 por race de chips concorrentes no mesmo repo; conteudo de AGENTS.md esta correto em HEAD~. CLAUDE.md ainda tem secao stale duplicada (e a D-002).
+
+
 ## [D-008] ✨ Escrever ADR-0003 persistencia Ports&Adapters
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Camada de persistencia (porta RepositorioPelada + adapters AsyncStorage/EmMemoria + serializers + backup) adicionada sem ADR; decisao com trade-off real. Acao: criar docs/adr/0003. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #1, alta). Skills-base: proposal-architect.
@@ -12,23 +39,24 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `docs/adr/0003-persistencia-ports-adapters.md`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- ADR-0003 retroativo: porta RepositorioPelada no dominio + adapters AsyncStorage/EmMemoria, serializers (grafo ciclico, PAYLOAD_VERSION), storageKeys e backup JSON; injecao via soccerProvider. Formato espelha ADR-0001/0002 (contexto, decisao, 4 alternativas, consequencias boas/ruins/neutras), status Aceito.
 
 ### Validacao feita
 
-- Nenhuma.
+- conferência manual contra src/domain/ports e src/infrastructure/storage
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-004] 🧹 Corrigir PRIVACY.md (persistencia AsyncStorage ativa)
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** PRIVACY.md afirma que nao ha persistencia, mas AsyncStorage foi entregue na 1.0.0. Risco de compliance de loja. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #3). Skills-base: open-source-readiness.
@@ -36,23 +64,25 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `PRIVACY.md`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Corrigi a seção de dados/persistência: os dados da pelada são persistidos localmente no dispositivo via AsyncStorage (não mais descartados ao fechar), exclusivamente no aparelho, sem envio a servidor. Atualizei Portabilidade (export JSON local), Exclusão, o Expo SDK 51->54 e adicionei entrada no histórico (25/06/2026) + data de atualização.
+- ATENCAO: por corrida entre chips concorrentes, o D-026 rodou um commit abrangente e capturou meu PRIVACY.md ja staged; a mudanca ficou integra dentro do commit f27b142 em vez de um commit dedicado 'docs(D-004)'. Conteudo correto e versionado; nao fiz reescrita de historico para nao corromper o trabalho paralelo.
 
 ### Validacao feita
 
-- Nenhuma.
+- conferência manual contra src/infrastructure/storage e CHANGELOG
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-009] ✨ Escrever ADR modelagem Pelada x Execucao
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Novos agregados (Pelada tipo vs GestorJogo/Execucao sessao, AgregadosPelada, ConvitePelada) mudam a fronteira do agregado raiz, sem registro. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #4). Skills-base: proposal-architect, domain-driven-design.
@@ -60,23 +90,25 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `docs/adr/0004-modelagem-pelada-execucao.md`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Escrevi ADR-0004 registrando a separação Pelada (tipo/cadastro) × GestorJogo (execução/sessão), ligados pelo id fraco peladaId, com Rules viajando por valor; documenta o lado certo de AgregadosPelada (cross-execução, identidade por nome), ConvitePelada (do tipo) e RelatorioExecucao (da sessão), com 3 alternativas e trade-offs. Formato idêntico aos ADRs 0001/0002, status aceito.
+- ATENÇÃO: por uma race com chip paralelo, o arquivo staged foi absorvido pelo commit acd4169 (D-032), que NÃO contém a marca [unlock:adicoes-exigem-autorizacao]. O conteúdo está íntegro em HEAD; não reescrevi história compartilhada.
 
 ### Validacao feita
 
-- Nenhuma.
+- conferência manual contra src/domain/Pelada.ts e correlatos
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- Lock de adição não cumprido pelo commit final (marca de unlock ausente no acd4169 que absorveu o arquivo) — decidir se requer recommit/rewrite manual
 
 ## [D-007] 🧹 Verificar links de docs/ (AI_NAVIGATION, guias)
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Confirmar] README/CHANGELOG citam AI_NAVIGATION.md e guias; conferir que os arquivos linkados existem. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #7). Skills-base: open-source-readiness.
@@ -84,23 +116,27 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `AI_NAVIGATION.md`
+- `docs/desenvolvedor/ui.md`
+- `docs/desenvolvedor/arquitetura.md`
+- `docs/adr/0002-reatividade-external-store.md`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Varredura de links relativos em README/CHANGELOG/AI_NAVIGATION/docs (161 links). README e CHANGELOG: todos resolvem. Corrigi 14 links quebrados por refactor (raiz contexts/providers/hooks/components -> src/app-shell e src/shared; app/(tabs) -> app/(pelada)): 8 em ui.md, 1 em arquitetura.md, 2 em adr/0002, 11 em AI_NAVIGATION.md.
 
 ### Validacao feita
 
-- Nenhuma.
+- varredura manual/script de links relativos em README/CHANGELOG/docs; re-scan confirma 0 quebrados com alvo existente
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- 2 alvos inexistentes deixados como demanda derivada (nao criar arquivo): tela 'Gerenciamento' app/(tabs)/GestorJogo.tsx removida no refactor (AI_NAVIGATION.md:37); pasta docs/assets/screenshots/ ainda sem capturas (docs/README.md:36)
 
 ## [D-023] 🧹 Remover comentario-cicatriz em Team.ts:114
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Comentario '//tava deletando mais de um.' descreve bug antigo. Acao: remover (nome+teste ja documentam). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #4). Skills-base: clean-code.
@@ -108,23 +144,25 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `src/domain/Team.ts`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Removido o comentario-cicatriz '//tava deletando mais de um.' em removePlayer (Team.ts:114). Logica intacta; nome do metodo + regressao em Team.spec.ts ja documentam o comportamento.
+- ATENCAO: o working tree e compartilhado por varios chips guia concorrentes. O Team.ts staged foi varrido para o commit acd4169 (rotulado D-032) por outro processo; nao ha commit D-023 dedicado e nao reescrevi historico (seria destrutivo).
 
 ### Validacao feita
 
-- Nenhuma.
+- npx jest Team
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-032] 🧹 Adicionar paths: as 4 skills do projeto
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Opcional] Nenhuma skill do projeto declara paths:; vinculo escopo->skill vive so em prosa. Acao: paths: em domain-driven-design(src/domain/**), react-best-practices(app|components|providers|contexts|hooks), clean-code/uncle-bob-craft(ambos). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (skill-router #1). Skills-base: skill-router, skill-creator.
@@ -132,23 +170,27 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `.claude/skills/clean-code/SKILL.md`
+- `.claude/skills/uncle-bob-craft/SKILL.md`
+- `.claude/skills/domain-driven-design/SKILL.md`
+- `.claude/skills/react-best-practices/SKILL.md`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Adicionei o campo paths: (lista YAML de globs) ao frontmatter das 4 skills: domain-driven-design -> src/domain/**; react-best-practices -> camada de UI (app/components/providers/contexts/hooks/src/app-shell/src/shared); clean-code e uncle-bob-craft -> ambos os conjuntos. name/description/corpo intactos.
 
 ### Validacao feita
 
-- Nenhuma.
+- frontmatter YAML válido nas 4 skills (yaml.safe_load confirma paths em cada uma)
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-006] 🧹 Atualizar rules/mobile.md p/ apontar useGameSlice
 
-- **Status:** Em desenvolvimento
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** rules/mobile.md diz reatividade 'a definir em refactor futuro', mas ADR-0002 ja decidiu external store via useGameSlice. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #6). Skills-base: proposal-architect.
@@ -156,23 +198,35 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `.claude/rules/mobile.md`
+- `docs/adr/0002-reatividade-external-store.md`
+- `docs/desenvolvedor/arquitetura.md`
+- `docs/desenvolvedor/ui.md`
+- `src/domain/Team.ts`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Reescrevi a secao 'Estado e re-render' apontando o padrao reativo decidido: GestorJogo como external store (subscribe/version/notify) consumido via useGameSlice/useGameSliceRequired com useSyncExternalStore, e selector para subscrever o minimo. Removido o 'a definir em refactor futuro' e as opcoes observer/Zustand; adicionados links para ADR-0002 e useGameSlice.ts.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
-- Nenhuma.
+- conferência manual contra ADR-0002 e useGameSlice.ts
 
 ### Validacao pendente
 
 - Nenhuma.
 
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T21:11:48-03:00
 
 ## [D-005] 🧹 Ajustar CHANGELOG (lint no CI ja feito)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** CHANGELOG lista lint-no-CI como Planejado, mas ja esta ativo. Mover p/ 1.0.0/Adicionado. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #6). Skills-base: open-source-readiness.
@@ -181,11 +235,25 @@
 
 - `.guia/DEMANDAS.md`
 - `CHANGELOG.md`
+- `.claude/skills/clean-code/SKILL.md`
+- `.claude/skills/domain-driven-design/SKILL.md`
+- `.claude/skills/react-best-practices/SKILL.md`
+- `.claude/skills/uncle-bob-craft/SKILL.md`
+- `.eslintrc.js`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/reports/D-027-ready-20260625-210702.md`
+- `.guia/reports/D-027-start-20260625-012833.md`
+- `.guia/tasks.json`
+- `AGENTS.md`
+- `PRIVACY.md`
+- `src/domain/Team.ts`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
 - Movi a 'ativacao do passo de lint no CI' de [Nao lancado]/Planejado para [1.0.0]/Adicionado: a entrada de CI agora lista type-check + lint (eslint+prettier) + testes; o item planejado restou apenas a passada de formatacao prettier --write
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -193,7 +261,13 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
+
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T21:08:42-03:00
 
 ## [D-003] 🧹 Corrigir versoes de stack no README
 
@@ -237,31 +311,43 @@
 
 ## [D-028] 🧹 Adicionar .env* ao gitignore e criar .env.example
 
-- **Status:** Em desenvolvimento
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** .gitignore nao lista .env; sem rede de protecao se um segredo EAS/deploy surgir. Acao: ignorar .env* e criar template .env.example. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (open-source-readiness #5). Skills-base: open-source-readiness.
 
 ### Arquivos modificados/criados
 
+- `.gitignore`
+- `.env.example`
 - `.guia/DEMANDAS.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
+- `AI_NAVIGATION.md`
 
 ### O que foi feito
 
-- Em desenvolvimento desde 2026-06-25.
+- Adicionei .env/.env.local/.env*.local ao .gitignore e criei .env.example documentando chaves EXPO_PUBLIC_* e segredos EAS sem valor real. Inspecao do codigo: app so le Constants.expoConfig.version via expo-constants (app/configuracoes.tsx); nenhum process.env real, logo placeholders ficam comentados.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
-- Nenhuma.
+- git check-ignore .env
 
 ### Validacao pendente
 
 - Nenhuma.
 
+### Timing (D-052)
+
+- **Iniciada:** Nenhuma.
+- **Ready:** Nenhuma.
+- **Terminada:** 2026-06-25T21:13:31-03:00
 
 ## [D-026] ✨ Regra ESLint no-restricted-imports na fronteira do dominio
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Feature
 - **Contexto:** Pureza do dominio e so convencao; nada barra um import de react/react-native/expo em src/domain. Acao: ESLint no-restricted-imports (ou dependency-cruiser) com whitelist do polyfill react-native-get-random-values. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #5). Skills-base: clean-architecture-guardian, open-source-readiness.
@@ -269,19 +355,21 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `.eslintrc.js`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-25.
+- Adicionado overrides para src/domain/** no .eslintrc.js com no-restricted-imports barrando react, react-dom, react-native (e react-native/*), expo, expo-*, @expo/*, @react-native-async-storage/* e a camada de infra (@/providers|contexts|hooks|app-shell). Polyfill react-native-get-random-values preservado por barrar apenas o nome exato react-native, nunca react-native*. Pureza do dominio agora verificada por maquina.
 
 ### Validacao feita
 
-- Nenhuma.
+- npm run lint
+- teste negativo: probe temporario com imports de react/react-native/expo-constants/expo-router gerou 4 erros no-restricted-imports; react-native-get-random-values e uuid passaram
 
 ### Validacao pendente
 
-- Nenhuma.
-
+- npm run lint ja tinha 2 erros prettier/prettier PRE-EXISTENTES em src/domain/GestorJogo.ts e GestorJogo.integridade.spec.ts (fora do escopo desta demanda); minha mudanca nao adiciona nenhum erro novo
 
 ## [D-027] ✨ Criar release.yml disparado em tags v*.*.*
 
