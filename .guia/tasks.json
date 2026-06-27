@@ -820,15 +820,27 @@
       "id": "D-020",
       "kind": "chore",
       "title": "Mover derivacao de regra das telas p/ seletores no dominio",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "partida.tsx/index.tsx tem sort/filter/reduce que podem ser regra vazando da UI. Acao: auditar e mover calculo/ordenacao que e regra p/ seletor/metodo no dominio. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #3). Skills-base: clean-architecture-guardian, domain-driven-design.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "src/domain/GestorJogo.ts",
+        "src/domain/GestorJogo.totalPartidasEncerradas.spec.ts",
+        "app/(pelada)/jogadores.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Conservadora: move a unica regra clara (contar partidas com resultado) das telas para o dominio (GestorJogo.totalPartidasEncerradas + teste); jogadores.tsx passa a consumi-la. Demais filter/map nas telas sao apresentacao/UI-state (busca, estado de sheet, parsing) e ficam."
+      ],
+      "validations": [
+        "jest 58 suites/588 testes; tsc 0; eslint 0"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ],
       "parentId": "E-004"
     },
     {

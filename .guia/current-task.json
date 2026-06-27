@@ -1,6 +1,6 @@
 {
-  "taskId": "D-018",
+  "taskId": "D-020",
   "status": "Aguardando validacao",
-  "title": "Memoizar consumidores de selectors derivados",
-  "chatTitle": "D-018 \ud83e\uddf9 - #VALIDACAO - Memoizar consumidores de selectors derivados"
+  "title": "Mover derivacao de regra das telas p/ seletores no dominio",
+  "chatTitle": "D-020 \ud83e\uddf9 - #VALIDACAO - Mover derivacao de regra das telas p/ seletores no dominio"
 }

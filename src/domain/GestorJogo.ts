@@ -83,6 +83,16 @@ export class GestorJogo {
   }
 
   /**
+   * Total de partidas encerradas — uma partida conta quando tem resultado
+   * definido (`result !== undefined`). É a base do cálculo de % de presença
+   * individual dos jogadores. Regra de negócio antes derivada na tela
+   * (jogadores.tsx), trazida ao domínio para fonte única da verdade.
+   */
+  totalPartidasEncerradas(): number {
+    return this.matches.filter((m) => m.result !== undefined).length;
+  }
+
+  /**
    * Substitui a lista de jogadores pela informada — comportamento
    * destrutivo. Para acrescentar mantendo os existentes use `adicionarJogadores`.
    *

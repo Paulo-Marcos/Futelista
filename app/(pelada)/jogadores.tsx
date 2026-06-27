@@ -57,8 +57,8 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const temPartida = useGameSliceRequired((g) => g.playing !== undefined);
   // Total de partidas com resultado definido — usado para calcular % de
   // presença individual dos jogadores no sheet de estatísticas.
-  const totalPartidasEncerradas = useGameSliceRequired(
-    (g) => g.matches.filter((m) => m.result !== undefined).length,
+  const totalPartidasEncerradas = useGameSliceRequired((g) =>
+    g.totalPartidasEncerradas(),
   );
 
   const [novoNome, setNovoNome] = useState("");
