@@ -4,7 +4,7 @@
 
 ## [D-045] 🧹 Atualizar exemplos de nomes em rules/domain.md apos rename PT
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Derivada da D-022
 - **Tipo:** Chore
 - **Contexto:** A D-022 renomeou removeFromGame->tirarDoJogo, relocateTeam->realocarTime, addToNewTeam->adicionarAoNovoTime, mas rules/domain.md ainda cita os nomes antigos como exemplo de 'nomes em PT'. Atualizar para os nomes reais (agora de fato PT). Skills-base: clean-code.
@@ -13,11 +13,15 @@
 
 - `.guia/DEMANDAS.md`
 - `.claude/rules/domain.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Demanda criada via Guia Fluxo.
 - Atualiza exemplos de nomes em domain.md para os nomes PT reais pos-D-022 (tirarDoJogo, realocarTime, adicionarAoNovoTime).
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -25,11 +29,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-020] 🧹 Mover derivacao de regra das telas p/ seletores no dominio
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** partida.tsx/index.tsx tem sort/filter/reduce que podem ser regra vazando da UI. Acao: auditar e mover calculo/ordenacao que e regra p/ seletor/metodo no dominio. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-architecture-guardian #3). Skills-base: clean-architecture-guardian, domain-driven-design.
@@ -40,11 +44,15 @@
 - `src/domain/GestorJogo.ts`
 - `src/domain/GestorJogo.totalPartidasEncerradas.spec.ts`
 - `app/(pelada)/jogadores.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Conservadora: move a unica regra clara (contar partidas com resultado) das telas para o dominio (GestorJogo.totalPartidasEncerradas + teste); jogadores.tsx passa a consumi-la. Demais filter/map nas telas sao apresentacao/UI-state (busca, estado de sheet, parsing) e ficam.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -52,11 +60,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-018] 🧹 Memoizar consumidores de selectors derivados
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** goalEvents/goals/reservas recriados a cada tick alimentam consumidores nao-memoizados. Acao: memoizar consumidores e/ou retornar primitivos no selector. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #4). Skills-base: react-best-practices.
@@ -68,11 +76,15 @@
 - `src/shared/ui/MatchTimeline.tsx`
 - `src/shared/ui/partida/BenchRail.tsx`
 - `src/shared/ui/partida/SubstitutionSheet.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Memoiza MatchTimeline/BenchRail/SubstitutionSheet e estabiliza os derivados que os alimentam (goals via primitivos+useMemo, goalEvents por chave, reservas/gols com const de modulo) + handlers em useCallback. Evita re-render desses consumidores a cada tick. Comportamento identico.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -80,11 +92,11 @@
 
 ### Validacao pendente
 
-- VALIDAR NO APP: timeline de gols, banco de reservas, sheet de substituicao
+- Nenhuma.
 
 ## [D-024] 🧹 Converter ternarios com efeito colateral em if/else
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Ternario por efeito colateral em GestorJogo updateTeams:378-380 e Match countGoals:46-50. Acao: trocar por if/else. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (clean-code-review #5). Skills-base: clean-code.
@@ -94,11 +106,15 @@
 - `.guia/DEMANDAS.md`
 - `src/domain/Match.ts`
 - `src/domain/GestorJogo.ts`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Em desenvolvimento desde 2026-06-26.
 - Converte 2 ternarios usados por efeito colateral em if/else: Match.countGoals e GestorJogo.atualizarTimes. Comportamento identico; warning no-unused-expressions eliminado.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -106,11 +122,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-010] 🧹 Registrar fechamento do ADR-0001 (router)
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** [Confirmar] Se a tab-bar imperativa (createBottomTabNavigator) ja foi removida, registrar fechamento via novo ADR/nota (ADR e imutavel). Fonte: docs/diagnostico/diagnostico-2026-06-24.md (proposal-architect #5). Skills-base: proposal-architect.
@@ -125,6 +141,7 @@
 
 - Em desenvolvimento desde 2026-06-26.
 - Registra ADR-0005 fechando o estado transitorio do ADR-0001: tab-bar imperativa removida, navegacao 100% Expo Router file-based. Completa o indice do README (0003/0004/0005).
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -132,11 +149,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-044] 🧹 Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Derivada do diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Derivada das D-012/D-016: TeamCard (src/shared/ui), MiniPlacar e UltimaPartidaCard (src/shared/ui/home) nao tem consumidor (codigo morto, extraidos sem uso). Remover apos confirmar zero referencia. Skills-base: clean-code.
@@ -148,11 +165,15 @@
 - `src/shared/ui/home/MiniPlacar.tsx`
 - `src/shared/ui/home/UltimaPartidaCard.tsx`
 - `src/shared/ui/PlayerRow.tsx`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Demanda criada via Guia Fluxo.
 - Remove 3 componentes mortos sem consumidor (TeamCard, MiniPlacar, UltimaPartidaCard) extraidos sem uso nos refactors; ajusta comentario orfao em PlayerRow.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -160,11 +181,11 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-043] 🧹 Atualizar estrutura de pastas em rules/mobile.md
 
-- **Status:** Aguardando validacao
+- **Status:** Validada
 - **Origem:** Derivada do diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Derivada da D-002: rules/mobile.md ainda descreve UI em components/providers/contexts/hooks na raiz e app/(tabs)/, mas o real e src/app-shell, src/shared/ui e app/(pelada). Skills-base: proposal-architect.
@@ -173,11 +194,15 @@
 
 - `.guia/DEMANDAS.md`
 - `.claude/rules/mobile.md`
+- `.guia/chat-title.txt`
+- `.guia/current-task.json`
+- `.guia/tasks.json`
 
 ### O que foi feito
 
 - Demanda criada via Guia Fluxo.
 - Atualiza estrutura de pastas em rules/mobile.md: src/app-shell (cola React), src/shared/ui (componentes, subpastas por tela), src/shared/theme (cores), app/(pelada) (rotas). Remove components/providers/contexts/hooks na raiz e app/(tabs). Reatividade (D-006) intacta.
+- Demanda finalizada via Guia Fluxo.
 
 ### Validacao feita
 
@@ -185,7 +210,7 @@
 
 ### Validacao pendente
 
-- Validacao manual do desenvolvedor.
+- Nenhuma.
 
 ## [D-029] 🧹 Adotar gitmoji nos commits e decidir hook commit-msg
 

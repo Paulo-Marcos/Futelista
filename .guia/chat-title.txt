@@ -1,1 +1,1 @@
-D-045 🧹 - #VALIDACAO - Atualizar exemplos de nomes em rules/domain.md apos rename PT
+D-045 🧹 - #FINALIZADO - Atualizar exemplos de nomes em rules/domain.md apos rename PT
