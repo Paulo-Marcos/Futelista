@@ -2,6 +2,30 @@
   "schemaVersion": 1,
   "tasks": [
     {
+      "id": "D-045",
+      "kind": "chore",
+      "title": "Atualizar exemplos de nomes em rules/domain.md apos rename PT",
+      "status": "Aguardando validacao",
+      "origin": "Derivada da D-022",
+      "context": "A D-022 renomeou removeFromGame->tirarDoJogo, relocateTeam->realocarTime, addToNewTeam->adicionarAoNovoTime, mas rules/domain.md ainda cita os nomes antigos como exemplo de 'nomes em PT'. Atualizar para os nomes reais (agora de fato PT). Skills-base: clean-code.",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        ".claude/rules/domain.md"
+      ],
+      "summary": [
+        "Demanda criada via Guia Fluxo.",
+        "Atualiza exemplos de nomes em domain.md para os nomes PT reais pos-D-022 (tirarDoJogo, realocarTime, adicionarAoNovoTime)."
+      ],
+      "validations": [
+        "nomes citados existem no GestorJogo atual"
+      ],
+      "pending": [
+        "Validacao manual do desenvolvedor."
+      ]
+    },
+    {
       "id": "D-044",
       "kind": "chore",
       "title": "Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard",

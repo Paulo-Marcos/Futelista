@@ -1,1 +1,1 @@
-D-020 🧹 - #VALIDACAO - Mover derivacao de regra das telas p/ seletores no dominio
+D-045 🧹 - #VALIDACAO - Atualizar exemplos de nomes em rules/domain.md apos rename PT

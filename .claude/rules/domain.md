@@ -23,7 +23,7 @@ Exceções aceitas (são polyfills de runtime, não dependências de domínio):
 
 - Aplicar `@clean-code`, `@uncle-bob-craft`, `@domain-driven-design` (ver [.claude/skills/](../skills/)).
 - Funções pequenas (4–20 linhas).
-- Nomes em português quando refletirem o vocabulário do domínio (`removeFromGame`, `relocateTeam`, `addToNewTeam`).
+- Nomes em português quando refletirem o vocabulário do domínio (`tirarDoJogo`, `realocarTime`, `adicionarAoNovoTime`).
 - Mensagens de erro em português, descritivas, com o valor ofensor quando relevante.
 - Sem `any`. Tipos explícitos. Enums para estados (`PlayerSituation`, `TeamSituation`, `TimerStatus`).
 

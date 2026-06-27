@@ -1,6 +1,6 @@
 {
-  "taskId": "D-020",
+  "taskId": "D-045",
   "status": "Aguardando validacao",
-  "title": "Mover derivacao de regra das telas p/ seletores no dominio",
-  "chatTitle": "D-020 \ud83e\uddf9 - #VALIDACAO - Mover derivacao de regra das telas p/ seletores no dominio"
+  "title": "Atualizar exemplos de nomes em rules/domain.md apos rename PT",
+  "chatTitle": "D-045 \ud83e\uddf9 - #VALIDACAO - Atualizar exemplos de nomes em rules/domain.md apos rename PT"
 }
