@@ -56,7 +56,7 @@
 
 ## [D-044] 🧹 Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard
 
-- **Status:** Em desenvolvimento
+- **Status:** Aguardando validacao
 - **Origem:** Derivada do diagnostico 2026-06-24
 - **Tipo:** Chore
 - **Contexto:** Derivada das D-012/D-016: TeamCard (src/shared/ui), MiniPlacar e UltimaPartidaCard (src/shared/ui/home) nao tem consumidor (codigo morto, extraidos sem uso). Remover apos confirmar zero referencia. Skills-base: clean-code.
@@ -64,19 +64,23 @@
 ### Arquivos modificados/criados
 
 - `.guia/DEMANDAS.md`
+- `src/shared/ui/TeamCard.tsx`
+- `src/shared/ui/home/MiniPlacar.tsx`
+- `src/shared/ui/home/UltimaPartidaCard.tsx`
+- `src/shared/ui/PlayerRow.tsx`
 
 ### O que foi feito
 
 - Demanda criada via Guia Fluxo.
+- Remove 3 componentes mortos sem consumidor (TeamCard, MiniPlacar, UltimaPartidaCard) extraidos sem uso nos refactors; ajusta comentario orfao em PlayerRow.
 
 ### Validacao feita
 
-- Nenhuma.
+- tsc 0, eslint 0, jest 57 suites/585 testes
 
 ### Validacao pendente
 
-- Executar implementacao e validacoes.
-
+- Validacao manual do desenvolvedor.
 
 ## [D-043] 🧹 Atualizar estrutura de pastas em rules/mobile.md
 

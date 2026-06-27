@@ -20,7 +20,7 @@ type PlayerRowProps = {
 };
 
 /**
- * Linha de jogador reutilizável (Jogadores, Partida, dentro de TeamCard).
+ * Linha de jogador reutilizável (Jogadores, Partida, dentro de um time).
  *
  * Avatar circular com inicial do nome em cor derivada do id, nome principal,
  * badge de situação opcional, contador de gols opcional, slot livre à direita.

@@ -1,6 +1,6 @@
 {
-  "taskId": "D-024",
+  "taskId": "D-044",
   "status": "Aguardando validacao",
-  "title": "Converter ternarios com efeito colateral em if/else",
-  "chatTitle": "D-024 \ud83e\uddf9 - #VALIDACAO - Converter ternarios com efeito colateral em if/else"
+  "title": "Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard",
+  "chatTitle": "D-044 \ud83e\uddf9 - #VALIDACAO - Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard"
 }

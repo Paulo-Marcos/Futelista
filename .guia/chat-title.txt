@@ -1,1 +1,1 @@
-D-024 🧹 - #VALIDACAO - Converter ternarios com efeito colateral em if/else
+D-044 🧹 - #VALIDACAO - Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard

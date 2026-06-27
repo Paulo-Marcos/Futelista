@@ -5,20 +5,27 @@
       "id": "D-044",
       "kind": "chore",
       "title": "Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard",
-      "status": "Em desenvolvimento",
+      "status": "Aguardando validacao",
       "origin": "Derivada do diagnostico 2026-06-24",
       "context": "Derivada das D-012/D-016: TeamCard (src/shared/ui), MiniPlacar e UltimaPartidaCard (src/shared/ui/home) nao tem consumidor (codigo morto, extraidos sem uso). Remover apos confirmar zero referencia. Skills-base: clean-code.",
       "createdAt": "2026-06-26",
       "updatedAt": "2026-06-26",
       "modifiedFiles": [
-        ".guia/DEMANDAS.md"
+        ".guia/DEMANDAS.md",
+        "src/shared/ui/TeamCard.tsx",
+        "src/shared/ui/home/MiniPlacar.tsx",
+        "src/shared/ui/home/UltimaPartidaCard.tsx",
+        "src/shared/ui/PlayerRow.tsx"
       ],
       "summary": [
-        "Demanda criada via Guia Fluxo."
+        "Demanda criada via Guia Fluxo.",
+        "Remove 3 componentes mortos sem consumidor (TeamCard, MiniPlacar, UltimaPartidaCard) extraidos sem uso nos refactors; ajusta comentario orfao em PlayerRow."
       ],
-      "validations": [],
+      "validations": [
+        "tsc 0, eslint 0, jest 57 suites/585 testes"
+      ],
       "pending": [
-        "Executar implementacao e validacoes."
+        "Validacao manual do desenvolvedor."
       ]
     },
     {
