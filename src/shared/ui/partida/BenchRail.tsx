@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Player } from "@/src/domain/Player";
@@ -9,7 +10,7 @@ import { Typography } from "@/src/shared/theme/Colors";
 // BenchRail — trilho compacto centralizado verticalmente (top 50% / translateY -50%
 // via marginTop = -(altura/2)). Pressable: toque abre o SubstitutionSheet, igual ao
 // `<button class="bench">` do design.
-export function BenchRail({
+function BenchRailImpl({
   side,
   reserves,
   posicaoNaFila,
@@ -75,6 +76,10 @@ export function BenchRail({
     </Pressable>
   );
 }
+
+// React.memo: `reserves` agora chega com referência estável da tela (fallback de
+// módulo + memo por ids), então num tick puro o banco não re-renderiza.
+export const BenchRail = memo(BenchRailImpl);
 
 const styles = StyleSheet.create({
   // Banco — design `.bench`: largura 40, centralizado vertical via marginTop = -altura/2.

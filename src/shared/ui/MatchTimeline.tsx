@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import {
   type LayoutChangeEvent,
   Pressable,
@@ -37,7 +37,7 @@ type TimelineEntry = {
   goal: Goal;
 };
 
-export function MatchTimeline({
+function MatchTimelineImpl({
   goals,
   teamA,
   teamB,
@@ -193,6 +193,10 @@ export function MatchTimeline({
     </View>
   );
 }
+
+// React.memo: num tick puro do cronômetro as props (goals/teamA/teamB/handlers)
+// não mudam de referência — o memo evita o re-render por segundo.
+export const MatchTimeline = memo(MatchTimelineImpl);
 
 /**
  * Scroll horizontal com snap calculado dinamicamente: cada filho

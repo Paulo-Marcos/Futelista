@@ -1,6 +1,6 @@
 {
-  "taskId": "D-044",
+  "taskId": "D-018",
   "status": "Aguardando validacao",
-  "title": "Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard",
-  "chatTitle": "D-044 \ud83e\uddf9 - #VALIDACAO - Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard"
+  "title": "Memoizar consumidores de selectors derivados",
+  "chatTitle": "D-018 \ud83e\uddf9 - #VALIDACAO - Memoizar consumidores de selectors derivados"
 }

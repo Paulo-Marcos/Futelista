@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
@@ -22,7 +22,7 @@ export type ParTroca = {
   side: "A" | "B";
 };
 
-export function SubstitutionSheet({
+function SubstitutionSheetImpl({
   open,
   teamA,
   teamB,
@@ -371,6 +371,10 @@ export function SubstitutionSheet({
     </AppBottomSheet>
   );
 }
+
+// React.memo: num tick puro do cronômetro as props (open/teamA/teamB/reservas/
+// handlers) mantêm referência — o sheet não re-renderiza por segundo.
+export const SubstitutionSheet = memo(SubstitutionSheetImpl);
 
 const styles = StyleSheet.create({
   sheet: {

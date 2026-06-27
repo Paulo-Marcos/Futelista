@@ -36,6 +36,12 @@ import {
 import { SubstitutionToast } from "@/src/shared/ui/partida/SubstitutionToast";
 import { minutoDoGol } from "@/src/shared/ui/partida/helpers";
 
+// Constantes de módulo para fallbacks de array vazio — referência estável
+// entre renders (evita criar `[]` novo a cada tick do cronômetro, o que
+// re-renderizaria consumidores memoizados sem mudança real).
+const SEM_RESERVAS: Player[] = [];
+const SEM_GOLS: Goal[] = [];
+
 /**
  * Partida — a estrela do app.
  *
@@ -65,9 +71,30 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const status = useGameSliceRequired((g) => g.timer?.status);
   const restTime = useGameSliceRequired((g) => g.timer?.restTime ?? 0);
   const totalDuration = useGameSliceRequired((g) => g.rules.getDurationMatch());
-  const goals = useGameSliceRequired((g) => g.playing?.countGoals());
-  const goalEvents = useGameSliceRequired<Goal[]>(
-    (g) => g.playing?.goals ?? [],
+  // `countGoals()` recria `{ teamA, teamB }` a cada chamada (logo a cada tick).
+  // Lemos os números crus (primitivos, estáveis no tick) e remontamos o objeto
+  // via useMemo, dando referência estável quando o placar não mudou.
+  const goalsA = useGameSliceRequired(
+    (g) => g.playing?.countGoals().teamA ?? 0,
+  );
+  const goalsB = useGameSliceRequired(
+    (g) => g.playing?.countGoals().teamB ?? 0,
+  );
+  const goals = useMemo(
+    () => ({ teamA: goalsA, teamB: goalsB }),
+    [goalsA, goalsB],
+  );
+  // `g.playing?.goals` é a referência viva do domínio (estável entre ticks),
+  // mas o fallback `?? []` cria array novo a cada render. Derivamos uma chave
+  // estável (qtd + ids) e só renovamos o array quando o conteúdo muda de fato.
+  const goalEventsRaw = useGameSliceRequired<Goal[]>(
+    (g) => g.playing?.goals ?? SEM_GOLS,
+  );
+  const goalEventsKey = goalEventsRaw.map((g) => g.player.id).join("|");
+  const goalEvents = useMemo(
+    () => goalEventsRaw,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [goalEventsKey],
   );
   const goalLimit = useGameSliceRequired((g) => g.rules.goalLimit);
   const proximoTime = useGameSliceRequired((g) => g.next[0]);
@@ -104,7 +131,9 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     trintaSeg: boolean;
   }>({ matchId: null, doisMin: false, trintaSeg: false });
 
-  const reservas = proximoTime?.players ?? [];
+  // Fallback estável: `?? []` criaria array novo a cada render (cada tick),
+  // re-renderizando BenchRail/SubstitutionSheet sem mudança real.
+  const reservas = proximoTime?.players ?? SEM_RESERVAS;
 
   const safeAction = useCallback((fn: () => void) => {
     try {
@@ -114,6 +143,57 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       setErro(e instanceof Error ? e.message : String(e));
     }
   }, []);
+
+  // Handlers passados aos 3 consumidores memoizados (MatchTimeline / BenchRail
+  // / SubstitutionSheet). Estabilizados com useCallback ANTES do early-return
+  // abaixo (rules-of-hooks) para que o React.memo desses filhos realmente
+  // segure num tick puro do cronômetro — props inline renovariam a cada render.
+  const onUndoGol = useCallback(
+    () => safeAction(() => gestor.desfazerUltimoGol()),
+    [safeAction, gestor],
+  );
+  const onLongPressGol = useCallback((g: Goal) => setGolEmAcao(g), []);
+  const onAbrirTrocas = useCallback(() => setSubOpen(true), []);
+  const onFecharTrocas = useCallback(() => setSubOpen(false), []);
+  const onSubstituir = useCallback(
+    (side: "A" | "B", outPlayer: Player) => {
+      safeAction(() => {
+        if (!proximoTime || proximoTime.players.length === 0) {
+          throw Error("Não há jogador no próximo time para entrar.");
+        }
+        const inPlayer = proximoTime.players[0];
+        gestor.trocarJogadorPelaEsquerda(inPlayer, outPlayer);
+        setSubToast({ inP: inPlayer, outP: outPlayer, side });
+        // M-06: feedback visual da troca — destaca o jogador que acabou de
+        // entrar com o mesmo pulse usado em gol (`spotlight`). É limpo
+        // pelo useEffect do subToast logo abaixo.
+        setSpotlight(inPlayer.id);
+        setSubOpen(false);
+      });
+    },
+    [safeAction, proximoTime, gestor],
+  );
+  const onSubstituirMultiplos = useCallback(
+    (pares: ParTroca[]) => {
+      if (pares.length === 0) return;
+      safeAction(() => {
+        for (const par of pares) {
+          gestor.trocarJogadorPelaEsquerda(par.inP, par.outP);
+        }
+        const ultimo = pares[pares.length - 1];
+        setSubToast({
+          inP: ultimo.inP,
+          outP: ultimo.outP,
+          side: ultimo.side,
+          extras: pares.length - 1,
+        });
+        // M-06: pulsa o último jogador entrante (o que aparece no toast).
+        setSpotlight(ultimo.inP.id);
+        setSubOpen(false);
+      });
+    },
+    [safeAction, gestor],
+  );
 
   const registrarGol = useCallback(
     (side: "A" | "B", player: Player) => {
@@ -287,22 +367,6 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
       router.replace("/resultado");
     });
 
-  const onSubstituir = (side: "A" | "B", outPlayer: Player) => {
-    safeAction(() => {
-      if (!proximoTime || proximoTime.players.length === 0) {
-        throw Error("Não há jogador no próximo time para entrar.");
-      }
-      const inPlayer = proximoTime.players[0];
-      gestor.trocarJogadorPelaEsquerda(inPlayer, outPlayer);
-      setSubToast({ inP: inPlayer, outP: outPlayer, side });
-      // M-06: feedback visual da troca — destaca o jogador que acabou de
-      // entrar com o mesmo pulse usado em gol (`spotlight`). É limpo
-      // pelo useEffect do subToast logo abaixo.
-      setSpotlight(inPlayer.id);
-      setSubOpen(false);
-    });
-  };
-
   /**
    * Remove um gol arbitrário escolhido pelo long-press na timeline (F-11).
    * Pede confirmação destrutiva — o usuário acabou de tocar e segurar,
@@ -328,31 +392,6 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
   const onTrocarAutor = (gol: Goal, novoAutor: Player) => {
     setGolEditarAutor(null);
     safeAction(() => gestor.corrigirAutorDoGol(gol, novoAutor));
-  };
-
-  /**
-   * Aplica vários pares de troca em sequência. A última troca aparece no
-   * toast, com contador "+N" quando houve mais de uma. Erros do domínio
-   * (jogador que já saiu, time cheio) interrompem a sequência — o que
-   * já passou fica aplicado.
-   */
-  const onSubstituirMultiplos = (pares: ParTroca[]) => {
-    if (pares.length === 0) return;
-    safeAction(() => {
-      for (const par of pares) {
-        gestor.trocarJogadorPelaEsquerda(par.inP, par.outP);
-      }
-      const ultimo = pares[pares.length - 1];
-      setSubToast({
-        inP: ultimo.inP,
-        outP: ultimo.outP,
-        side: ultimo.side,
-        extras: pares.length - 1,
-      });
-      // M-06: pulsa o último jogador entrante (o que aparece no toast).
-      setSpotlight(ultimo.inP.id);
-      setSubOpen(false);
-    });
   };
 
   // Botão de controle de fluxo (Pausar/Continuar/Próximo) — design `Partida.tsx`:
@@ -392,7 +431,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
           side="left"
           reserves={reservas}
           posicaoNaFila={proximoTime ? 3 : null}
-          onOpen={() => setSubOpen(true)}
+          onOpen={onAbrirTrocas}
         />
 
         <View style={styles.halfTop}>
@@ -462,8 +501,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         goals={goalEvents}
         teamA={teamA}
         teamB={teamB}
-        onUndo={() => safeAction(() => gestor.desfazerUltimoGol())}
-        onLongPressGol={(g) => setGolEmAcao(g)}
+        onUndo={onUndoGol}
+        onLongPressGol={onLongPressGol}
       />
 
       {erro ? (
@@ -541,7 +580,7 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
         teamA={teamA}
         teamB={teamB}
         reservas={reservas}
-        onClose={() => setSubOpen(false)}
+        onClose={onFecharTrocas}
         onSub={onSubstituir}
         onSubMultiplos={onSubstituirMultiplos}
       />

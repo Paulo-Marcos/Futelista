@@ -863,15 +863,28 @@
       "id": "D-018",
       "kind": "chore",
       "title": "Memoizar consumidores de selectors derivados",
-      "status": "Backlog",
+      "status": "Aguardando validacao",
       "origin": "Diagnostico 2026-06-24",
       "context": "goalEvents/goals/reservas recriados a cada tick alimentam consumidores nao-memoizados. Acao: memoizar consumidores e/ou retornar primitivos no selector. Fonte: docs/diagnostico/diagnostico-2026-06-24.md (react-best-practices #4). Skills-base: react-best-practices.",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24",
-      "modifiedFiles": [],
-      "summary": [],
-      "validations": [],
-      "pending": [],
+      "updatedAt": "2026-06-26",
+      "modifiedFiles": [
+        ".guia/DEMANDAS.md",
+        "app/(pelada)/partida.tsx",
+        "src/shared/ui/MatchTimeline.tsx",
+        "src/shared/ui/partida/BenchRail.tsx",
+        "src/shared/ui/partida/SubstitutionSheet.tsx"
+      ],
+      "summary": [
+        "Em desenvolvimento desde 2026-06-26.",
+        "Memoiza MatchTimeline/BenchRail/SubstitutionSheet e estabiliza os derivados que os alimentam (goals via primitivos+useMemo, goalEvents por chave, reservas/gols com const de modulo) + handlers em useCallback. Evita re-render desses consumidores a cada tick. Comportamento identico."
+      ],
+      "validations": [
+        "tsc 0; eslint 0 nos 4 arquivos; jest 57 suites/585 testes"
+      ],
+      "pending": [
+        "VALIDAR NO APP: timeline de gols, banco de reservas, sheet de substituicao"
+      ],
       "parentId": "E-008"
     },
     {

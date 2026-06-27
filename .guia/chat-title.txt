@@ -1,1 +1,1 @@
-D-044 🧹 - #VALIDACAO - Remover componentes mortos TeamCard/MiniPlacar/UltimaPartidaCard
+D-018 🧹 - #VALIDACAO - Memoizar consumidores de selectors derivados
