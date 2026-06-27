@@ -2,7 +2,7 @@
 
 Como gerar binários instaláveis (iOS/Android) e publicar nas lojas usando o **EAS** (Expo Application Services).
 
-> ⚠️ O FuteLista ainda **não foi publicado**. Esta doc é o roteiro de quando for. Os comandos abaixo são padrão Expo 51 / EAS — adapte conforme o estado do projeto na hora do release.
+> **Estado atual (Expo 54):** o FuteLista já está disponível na **web** (<https://futelista.expo.app>) e como **APK Android** (via EAS). Ainda **não** foi para as lojas (Play/App Store). O caminho recomendado para cortar uma versão é o **release automatizado por tag** (seção abaixo); as seções de build/submit manual continuam válidas para casos pontuais.
 
 ---
 
@@ -17,6 +17,55 @@ Como gerar binários instaláveis (iOS/Android) e publicar nas lojas usando o **
 | Build de produção    | `eas build --profile production` | Antes de subir para App Store / Play Store. |
 | Submit nas lojas     | `eas submit`                | Enviar binário gerado para revisão.   |
 | OTA Update           | `eas update`                | Patch de JS/asset sem nova build.     |
+
+## Release automatizado por tag (`release.yml`) — caminho recomendado
+
+O projeto tem um workflow ([`.github/workflows/release.yml`](../../.github/workflows/release.yml)) que **dispara ao empurrar uma tag `vX.Y.Z`** e faz tudo sozinho: builda o APK no EAS, baixa o artefato e publica um **GitHub Release** com o APK anexado e as notas extraídas do CHANGELOG. Não roda em push normal nem em PR — só em tag de versão.
+
+### Quando cortar um release
+
+Quando você quer **congelar e distribuir** um conjunto de mudanças como uma versão baixável — **não a cada commit**. Tipicamente: terminou um lote de trabalho, validou no app, e quer um APK versionado. Decida o número por **SemVer** (ver seção [Versionamento](#versionamento)): PATCH para correção/manutenção, MINOR para função nova, MAJOR para quebra/marco grande.
+
+### Pré-requisito (uma vez): secret `EXPO_TOKEN`
+
+O build EAS no CI precisa de um access token do Expo:
+
+1. Crie em <https://expo.dev/accounts/_/settings/access-tokens> → **Create token** (copie — só aparece uma vez).
+2. Adicione como secret do repositório: **Settings → Secrets and variables → Actions → New repository secret**, nome `EXPO_TOKEN`. (Ou `gh secret set EXPO_TOKEN` e cole quando pedir — assim o token não passa por lugar nenhum além do prompt.)
+
+Confira que está lá com `gh secret list` antes de tagar, para não disparar um build fadado a falhar.
+
+### O ciclo (toda vez, 5 passos)
+
+```bash
+cd FuteLista/FuteLista
+
+# 1. Bump da versão em package.json E app.json (mesma versão nos dois)
+#    Ex.: "version": "1.0.0" -> "1.0.1"
+
+# 2. Mover a seção [Não lançado] -> [X.Y.Z] — AAAA-MM-DD no CHANGELOG.md,
+#    descrevendo o que mudou (Adicionado/Alterado/Corrigido/Removido).
+
+# 3. Commit da preparação (gitmoji obrigatório pelo hook commit-msg)
+git add package.json app.json CHANGELOG.md
+git commit -m "🔖 chore(release): preparar vX.Y.Z"
+git push origin main
+
+# 4. Criar e empurrar a tag — ISTO dispara o release.yml
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+5. Acompanhe em **Actions → Release**. Ao terminar, o APK e as notas aparecem em **Releases** (`https://github.com/Paulo-Marcos/Futelista/releases`).
+
+> A tag aponta para o commit que ela marca — garanta que o commit de preparação (passos 1–3) **já está na `main`** antes de tagar, para o workflow buildar o código certo.
+
+### Notas
+
+- A **web** (`eas deploy`, seção abaixo) é um passo **separado** — o `release.yml` cobre só o APK + GitHub Release. Rode `npm run deploy:web` quando quiser atualizar a web junto.
+- Versões já usadas não se reaproveitam (`v1.0.0` já existe). Sempre incremente.
+
+---
 
 ## Pré-requisitos
 
