@@ -1,30 +1,51 @@
 #!/bin/sh
-# Git hook commit-msg - valida travas em features/registry.yaml.
+# Git hook commit-msg - valida gitmoji+Conventional e travas em .guia/locks/registry.yaml.
+#
+# Travas: usa o validador glob do Guia Fluxo. Ordem de busca:
+#   1. core/lock/check-lock.py            (se o checker for vendorizado no repo)
+#   2. $CLAUDE_PLUGIN_ROOT/bin/check-lock.py  (plugin global; setado quando o
+#      commit roda dentro de uma sessao Claude Code)
+# Usa o validador glob (lock_api) que entende o perfil 'testes'.
 # Instale uma vez por clone:
 #     git config core.hooksPath .githooks
 
 ROOT="$(git rev-parse --show-toplevel)"
 
-# Em Windows, "python3" pode resolver para o alias do Microsoft Store
-# (WindowsApps/python3.exe) que NAO eh um interpretador real e abre o instalador.
-# Por isso preferimos "python" primeiro; se ausente, tentamos "py -3" e por
-# ultimo "python3".
-if command -v python >/dev/null 2>&1; then
-    PY=python
-    PY_ARGS=""
-elif command -v py >/dev/null 2>&1; then
-    PY=py
-    PY_ARGS="-3"
-elif command -v python3 >/dev/null 2>&1; then
-    PY=python3
-    PY_ARGS=""
-else
+# Procura um Python que efetivamente roda (filtra o stub do Microsoft Store no
+# Windows, que aparece no PATH mas falha ao invocar --version).
+PY=""
+for cmd in python3 python py; do
+    if command -v "$cmd" >/dev/null 2>&1 && "$cmd" --version >/dev/null 2>&1; then
+        PY="$cmd"
+        break
+    fi
+done
+
+if [ -z "$PY" ]; then
     echo "Erro: Python nao encontrado no PATH. Hook abortado." >&2
     exit 2
 fi
 
 # D-029: exige gitmoji ANTES do tipo Conventional Commits na 1a linha.
 # Roda primeiro; se rejeitar, aborta antes da checagem de lock.
-"$PY" $PY_ARGS "$ROOT/bin/check-gitmoji.py" "$1" || exit $?
+"$PY" "$ROOT/bin/check-gitmoji.py" "$1" || exit $?
 
-exec "$PY" $PY_ARGS "$ROOT/bin/check-lock.py" hook "$1"
+# Localiza o validador de locks glob. Repo com checker vendorizado primeiro,
+# depois o plugin global instalado (CLAUDE_PLUGIN_ROOT).
+CHECK=""
+if [ -f "$ROOT/core/lock/check-lock.py" ]; then
+    CHECK="$ROOT/core/lock/check-lock.py"
+elif [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -f "$CLAUDE_PLUGIN_ROOT/bin/check-lock.py" ]; then
+    CHECK="$CLAUDE_PLUGIN_ROOT/bin/check-lock.py"
+fi
+
+if [ -z "$CHECK" ]; then
+    echo "Guia Fluxo: validador de locks nao encontrado (core/lock ou \$CLAUDE_PLUGIN_ROOT/bin)." >&2
+    echo "Guia Fluxo: commit liberado SEM checagem de lock. Rode o commit dentro do Claude Code" >&2
+    echo "            ou vendorize o checker em core/lock/ para travar fora da sessao." >&2
+    exit 0
+fi
+
+# GUIA_PROJECT_ROOT faz o lock_api do plugin mirar o registry deste repo
+# (.guia/locks/registry.yaml), nao o do diretorio do plugin.
+exec env GUIA_PROJECT_ROOT="$ROOT" "$PY" "$CHECK" hook "$1"

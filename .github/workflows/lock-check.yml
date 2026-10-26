@@ -54,4 +54,4 @@ jobs:
           cat .commit-messages
 
       - name: Run lock check
-        run: python bin/check-lock.py ci --files .changed-files --messages .commit-messages
+        run: python core/lock/check-lock.py ci --files .changed-files --messages .commit-messages

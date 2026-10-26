@@ -1,0 +1,3 @@
+VERSAO=0.11.0
+Copiado verbatim de guia-fluxo/guia/0.11.0/bin (lock_api.py, check-lock.py).
+Nao editar aqui; re-copiar do plugin ao atualizar. Enforcement de .guia/locks/registry.yaml no hook e no CI.

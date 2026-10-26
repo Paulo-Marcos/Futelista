@@ -25,5 +25,69 @@
     "status": "Validada",
     "deprecatedAliasFor": "finish --no-commit",
     "lockOnValidate": false
+  },
+  "delivery": {
+    "mode": "pr",
+    "baseBranch": "main",
+    "commit": {
+      "format": "gitmoji-conventional"
+    },
+    "changelog": {
+      "style": "fragments"
+    },
+    "gate": {
+      "full": [
+        "npm test"
+      ]
+    },
+    "queue": {
+      "conflicts": "manager"
+    },
+    "worktree": {
+      "junctions": [
+        "node_modules"
+      ]
+    },
+    "audit": {
+      "statusContext": "Auditoria registrada"
+    }
+  },
+  "skills": {
+    "ready": [
+      "delivery-report"
+    ],
+    "quality": [
+      "clean-code-review",
+      "clean-architecture-guardian",
+      "react-best-practices"
+    ],
+    "audit": [
+      "pr-audit"
+    ],
+    "deps": [
+      "pr-bump"
+    ]
+  },
+  "autonomy": {
+    "default": "pr",
+    "ceiling": "queue",
+    "solo": "off",
+    "autoFinish": {
+      "kinds": [
+        "chore",
+        "test",
+        "docs",
+        "refactor",
+        "bug"
+      ]
+    },
+    "alwaysHumanLocks": "*"
+  },
+  "models": {
+    "enabled": "on",
+    "tiers": {
+      "normal": "sonnet"
+    },
+    "fable": "ask"
   }
 }
