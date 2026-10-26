@@ -112,10 +112,10 @@ As regras por área estão em [.claude/rules/](.claude/rules/).
 
 ### Antes de editar QUALQUER arquivo
 
-1. Verifique se ele aparece em [`features/registry.yaml`](features/registry.yaml).
-2. Se aparecer, **o arquivo está TRAVADO**: você pode lê-lo, mas **não pode editar, deletar, renomear, mover, nem criar substituto em outro caminho**.
-3. Para destravar, **peça autorização explícita ao desenvolvedor**. Não decida sozinho. Não tente burlar (renomear arquivo, refazer noutro lugar, dividir em vários).
-4. Se o arquivo NÃO aparece no registry, edite normalmente — respeitando os princípios abaixo.
+1. As travas vivem em [`.guia/locks/registry.yaml`](.guia/locks/registry.yaml) (perfil `testes`).
+2. **Perfil `testes`**: todo teste existente (`*.spec.*`, `*.test.*`, `*/__tests__/*`, `tests/*`, …) é **contrato** — não pode ser **editado, deletado nem renomeado** sem autorização. Criar arquivo novo (inclusive teste novo) e mexer em código de produção é **livre**.
+3. Para destravar um teste, **peça autorização explícita ao desenvolvedor**. Não decida sozinho. Não tente burlar (renomear, refazer noutro lugar, dividir em vários).
+4. Se o arquivo não casa com nenhuma trava, edite normalmente — respeitando os princípios abaixo.
 
 ### Como o desbloqueio funciona
 
@@ -125,22 +125,19 @@ Quando o desenvolvedor autorizar, ele incluirá no commit a marca:
 [unlock:<feature-id>] motivo: <razão curta>
 ```
 
-O hook `.githooks/commit-msg` e o workflow `.github/workflows/lock-check.yml` validam isso. Sem a marca, o commit é rejeitado (local e/ou no PR).
+O hook `.githooks/commit-msg` valida no commit (gitmoji + validador **glob** do Guia Fluxo contra `.guia/locks/registry.yaml`) e o workflow `.github/workflows/lock-check.yml` re-checa no PR. Sem a marca `[unlock:]`, um commit que altere um teste travado é rejeitado.
 
 ### Comandos úteis
 
 ```powershell
-# Listar travas ativas
-python bin/check-lock.py list
-
-# Checar se um conjunto de arquivos está travado
-python bin/check-lock.py check src/domain/GestorJogo.ts
+# Listar travas ativas (lê .guia/locks/registry.yaml)
+python core/lock/check-lock.py list
 
 # Instalar o hook git (uma vez por clone)
 git config core.hooksPath .githooks
 ```
 
-Detalhes completos em [features/README.md](features/README.md).
+Gestão das travas (travar/destravar, perfis) passa pelo plugin Guia Fluxo; o registry **autoritativo** é [`.guia/locks/registry.yaml`](.guia/locks/registry.yaml).
 
 ---
 

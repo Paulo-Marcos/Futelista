@@ -11,7 +11,7 @@ Como deixar o FuteLista rodando na sua máquina, em qual plataforma, e o que faz
 | Node.js                | 20 LTS             | Compatível com Expo 51             |
 | npm                    | 10+                | Gerenciador padrão do projeto      |
 | Git                    | qualquer recente   | Hooks de lock (`commit-msg`)       |
-| Python                 | 3.10+              | Script `bin/check-lock.py`         |
+| Python                 | 3.10+              | Script `core/lock/check-lock.py`   |
 | Expo Go (app no celular) | mais recente     | Modo de execução mais rápido       |
 
 Para emuladores (opcional):
@@ -73,14 +73,14 @@ npm run web
 
 ## Lock de funcionalidades
 
-Esse repo tem um **lock por arquivo**: arquivos listados em [features/registry.yaml](../../features/registry.yaml) não podem ser editados por agentes de IA (nem por você, sem marca explícita no commit).
+Esse repo tem **lock de testes** (perfil `testes`): os testes existentes listados em [.guia/locks/registry.yaml](../../.guia/locks/registry.yaml) são contrato — não podem ser editados, deletados nem renomeados sem marca explícita no commit. Arquivo novo e código de produção ficam livres.
 
 ```bash
-python bin/check-lock.py list                       # lista travas ativas
-python bin/check-lock.py check src/domain/Player.ts # checa um arquivo
+python core/lock/check-lock.py list                       # lista travas ativas
+python core/lock/check-lock.py check src/domain/AgregadosPelada.spec.ts # checa um arquivo
 ```
 
-Detalhes em [features/README.md](../../features/README.md) e [CLAUDE.md → Protocolo de Alteração](../../CLAUDE.md#protocolo-de-alteração-lock-de-funcionalidades).
+Detalhes em [CLAUDE.md → Protocolo de Alteração](../../CLAUDE.md#protocolo-de-alteração-lock-de-funcionalidades).
 
 ## Problemas comuns
 

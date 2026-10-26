@@ -237,7 +237,7 @@ Siga **SemVer** em `app.json`/`package.json`:
 - [ ] `CHANGELOG.md` com a entrada da nova versão.
 - [ ] Testar **manualmente** no iOS e Android (preview build).
 - [ ] Screenshots/metadata atualizados em App Store Connect / Play Console (se mudou UI).
-- [ ] `features/registry.yaml` revisado (nenhum lock pendurado bloqueando o release).
+- [ ] `.guia/locks/registry.yaml` revisado (nenhum lock pendurado bloqueando o release).
 - [ ] Tag git: `git tag v1.2.3 && git push --tags`.
 
 ## Próximo passo

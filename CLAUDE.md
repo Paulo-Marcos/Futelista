@@ -181,7 +181,7 @@ python core/lock/check-lock.py list
 git config core.hooksPath .githooks
 ```
 
-Gestão das travas (travar/destravar, perfis) passa pelo plugin Guia Fluxo; o registry **autoritativo** é [`.guia/locks/registry.yaml`](.guia/locks/registry.yaml). O antigo `features/registry.yaml` é legado inerte (nada mais o lê) — outras docs ainda o citam e serão migradas à parte.
+Gestão das travas (travar/destravar, perfis) passa pelo plugin Guia Fluxo; o registry **autoritativo** é [`.guia/locks/registry.yaml`](.guia/locks/registry.yaml). O antigo diretório `features/` foi removido; apenas docs históricas (CHANGELOG, COMMITS_PLAN, diagnósticos datados) ainda o citam como registro da época.
 
 ### Rastreabilidade de origem nos commits
 

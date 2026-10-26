@@ -12,7 +12,7 @@ comando acima passa a usa-los.
 
 ## Hooks disponiveis
 
-- **commit-msg** - valida travas declaradas em `features/registry.yaml`.
+- **commit-msg** - valida gitmoji e travas declaradas em `.guia/locks/registry.yaml`.
   Rejeita commits que modifiquem arquivos travados sem a marca
   `[unlock:<feature-id>] motivo: <razao>` na mensagem.
 
@@ -24,5 +24,5 @@ no PR e barra o merge de qualquer jeito.
 
 ## Dependencia
 
-Os hooks chamam `python bin/check-lock.py`. Requer Python 3.8+ e
-`pip install pyyaml`.
+Os hooks chamam `python core/lock/check-lock.py` (validador glob vendorizado
+do Guia Fluxo). Requer Python 3.10+ e `pip install pyyaml`.

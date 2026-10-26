@@ -58,8 +58,8 @@ Atualize quando criar fluxos, telas, regras de domínio ou decisões importantes
 
 ## Governança
 
-- Locks de feature: [features/registry.yaml](features/registry.yaml), guia completo em [features/README.md](features/README.md).
-- CLI de locks: [bin/check-lock.py](bin/check-lock.py).
+- Locks: [.guia/locks/registry.yaml](.guia/locks/registry.yaml) (perfil `testes`); protocolo em [CLAUDE.md → Protocolo de Alteração](CLAUDE.md).
+- CLI de locks: [core/lock/check-lock.py](core/lock/check-lock.py) (validador glob vendorizado do Guia Fluxo).
 - Hook git: [.githooks/commit-msg](.githooks/commit-msg).
 - CI: [.github/workflows/lock-check.yml](.github/workflows/lock-check.yml).
 - Regras por área: [.claude/rules/](.claude/rules/) (espelhado em [.agents/rules/](.agents/rules/)).
