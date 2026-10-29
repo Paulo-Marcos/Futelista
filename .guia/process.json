@@ -37,7 +37,7 @@
     },
     "gate": {
       "full": [
-        "npm test"
+        "node node_modules/jest/bin/jest.js --ci"
       ]
     },
     "queue": {
@@ -69,16 +69,17 @@
     ]
   },
   "autonomy": {
-    "default": "pr",
-    "ceiling": "queue",
-    "solo": "off",
+    "default": "pilot",
+    "ceiling": "pilot",
+    "solo": "on",
     "autoFinish": {
       "kinds": [
         "chore",
         "test",
         "docs",
         "refactor",
-        "bug"
+        "bug",
+        "feature"
       ]
     },
     "alwaysHumanLocks": "*"
