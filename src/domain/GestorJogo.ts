@@ -624,7 +624,15 @@ export class GestorJogo {
   // ----- Partida atual ----------------------------------------------------
 
   start(): void {
-    if (!this.timer || this.timer.status === TimerStatus.ENDED)
+    if (this.playing?.result !== undefined)
+      throw Error(
+        "A partida já foi encerrada. Defina a próxima partida antes de apitar.",
+      );
+    // O Timer só é trocado em `definirProximaPartida`; ENDED aqui é o fim
+    // natural da partida atual, que se encerra — não ganha cronômetro novo.
+    if (this.timer?.status === TimerStatus.ENDED)
+      throw Error("O tempo da partida acabou. Encerre a partida.");
+    if (!this.timer)
       this.timer = new Timer(
         this.rules.numberTimes,
         this.rules.getDurationMatch(),
@@ -644,14 +652,20 @@ export class GestorJogo {
     this.notify();
   }
 
-  marcarGol(team: Team, playerGoal: Player): void {
+  /**
+   * Retorna `true` se o gol foi registrado — a UI só comemora nesse caso.
+   */
+  marcarGol(team: Team, playerGoal: Player): boolean {
     // Sem partida ou sem cronômetro iniciado não há instante (ScreenTime) pra
     // carimbar o gol — vira no-op. O `this.timer!` original estourava quando
-    // havia partida aberta mas o tempo ainda não tinha sido iniciado.
-    if (!this.playing || !this.timer) return;
+    // havia partida aberta mas o tempo ainda não tinha sido iniciado. Partida
+    // com resultado também recusa: o gol deixaria o `result` desatualizado.
+    if (!this.playing || !this.timer) return false;
+    if (this.playing.result !== undefined) return false;
     this.playing.addGoal(team, playerGoal, this.timer.getTime());
     this.encerrarSeAtingiuLimite();
     this.notify();
+    return true;
   }
 
   /**
@@ -775,7 +789,8 @@ export class GestorJogo {
    * Reabre a partida recém-encerrada para análise (botão "Voltar à partida"
    * da tela de resultado). Limpa o resultado/vencedor — sem isso a UI pularia
    * de volta pro resultado — e deixa o cronômetro PAUSADO, pra o usuário
-   * revisar o jogo e então continuar ou encerrar de novo.
+   * revisar o jogo e então continuar ou encerrar de novo. Após o fim natural
+   * (tempo zerado) o cronômetro segue ENDED: só resta encerrar de novo.
    *
    * No-op quando não há partida ou ela ainda não tinha resultado definido.
    */
@@ -785,12 +800,15 @@ export class GestorJogo {
     partida.result = undefined;
     partida.winner = undefined;
     partida.loser = undefined;
-    if (this.timer) this.timer.status = TimerStatus.PAUSED;
+    this.timer?.reabrir();
     this.notify();
   }
 
   // Atualiza os novos times, considerando o resultado do jogo.
   definirProximaPartida(teamWithExternalAdvantage?: Team): void {
+    // Sem resultado a partida segue em campo: nada a girar, e descartar o
+    // cronômetro aqui zeraria o tempo da partida ainda em andamento.
+    if (this.playing?.result === undefined) return;
     this.arquivarPartidaEncerrada();
     this.updateResult.process({
       jogo: this,

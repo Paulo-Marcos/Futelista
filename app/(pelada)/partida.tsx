@@ -203,7 +203,8 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
           side === "A"
             ? (playing as NonNullable<typeof playing>).teamA
             : (playing as NonNullable<typeof playing>).teamB;
-        gestor.marcarGol(team, player);
+        // Antes do apito o domínio recusa o gol: sem registro, sem festa.
+        if (!gestor.marcarGol(team, player)) return;
         const afterA = (goals?.teamA ?? 0) + (side === "A" ? 1 : 0);
         const afterB = (goals?.teamB ?? 0) + (side === "B" ? 1 : 0);
         setCelebration({ player, side, scoreA: afterA, scoreB: afterB });
@@ -345,10 +346,9 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
 
   const teamA = playing.teamA;
   const teamB = playing.teamB;
-  const ready =
-    status === undefined ||
-    status === TimerStatus.CREATED ||
-    status === TimerStatus.ENDED;
+  // ENDED não é "pronto": o fim natural do último tempo pede Encerrar, não
+  // um INICIAR que recomeçaria a mesma partida com cronômetro novo.
+  const ready = status === undefined || status === TimerStatus.CREATED;
   const running = status === TimerStatus.STARTED;
   const paused = status === TimerStatus.PAUSED;
   const interval = status === TimerStatus.INTERVAL;

@@ -33,27 +33,45 @@ export class Timer {
 
   start(): void {
     if (this.status === TimerStatus.ENDED) throw Error("Não há mais etapas");
-    if (this.status === TimerStatus.PAUSED) return;
+    // Já rodando: um 2º setInterval faria o relógio correr em dobro (toque duplo).
+    if (
+      this.status === TimerStatus.PAUSED ||
+      this.status === TimerStatus.STARTED
+    )
+      return;
     this.status = TimerStatus.STARTED;
-    this.timeOutId = setInterval(() => {
-      this.restTime--;
-      this.onChange?.();
-      if (this.restTime <= 0) {
-        this.restTime = this.timeMatch;
-        this.stop();
-      }
-    }, 1000);
+    this.agendarTick();
   }
 
   pause(): void {
+    if (this.status === TimerStatus.ENDED) return;
     this.status = TimerStatus.PAUSED;
     clearInterval(this.timeOutId);
     this.onChange?.();
   }
 
   continue(): void {
+    if (this.status !== TimerStatus.PAUSED) return;
     this.status = TimerStatus.STARTED;
-    this.start();
+    this.agendarTick();
+  }
+
+  /**
+   * Reabre o cronômetro encerrado para revisão ("Voltar à partida"): fica
+   * PAUSADO só se ainda sobra tempo no tempo atual. No fim natural (tempo
+   * zerado) continua ENDED — pausar ali daria um tempo extra inteiro.
+   */
+  reabrir(): void {
+    if (this.status !== TimerStatus.ENDED || this.restTime <= 0) return;
+    this.status = TimerStatus.PAUSED;
+  }
+
+  private agendarTick(): void {
+    this.timeOutId = setInterval(() => {
+      this.restTime--;
+      this.onChange?.();
+      if (this.restTime <= 0) this.stop();
+    }, 1000);
   }
 
   stop(): void {
@@ -64,6 +82,8 @@ export class Timer {
       return;
     }
     this.currentNumberTime++;
+    // Só o próximo tempo recomeça cheio; no fim natural o relógio fica zerado.
+    this.restTime = this.timeMatch;
     this.status = TimerStatus.INTERVAL;
     this.onChange?.();
   }
