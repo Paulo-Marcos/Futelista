@@ -112,6 +112,10 @@ export class Team {
 
   removePlayer(player: Player): Player {
     const index = this.players.indexOf(player);
+    // splice(-1, 1) removeria o ÚLTIMO jogador do roster — um jogador que
+    // nada tem a ver com o pedido sumia do time em silêncio.
+    if (index === -1)
+      throw Error(`Jogador ${player.name} não está nesse time.`);
     const deletedPlayer = this.players.splice(index, 1)[0];
     player.setSituation(PlayerSituation.STOPPED);
     this.updateSizeTeam();

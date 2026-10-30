@@ -170,7 +170,18 @@ export class GestorJogo {
    * Usar sempre que uma operação puder ter mexido na composição dos times.
    */
   private recomputePlayersWithoutTeam(): void {
-    this.playersWithoutTeam = this.players.filter((p) => !p.currentTeam).length;
+    this.playersWithoutTeam = this.players.filter((p) =>
+      this.estaSemTime(p),
+    ).length;
+  }
+
+  /**
+   * Quem foi tirado do jogo (STOPPED) também fica sem `currentTeam`, mas
+   * saiu por escolha — não entra na contagem "sem time" nem é realocado
+   * automaticamente.
+   */
+  private estaSemTime(player: Player): boolean {
+    return !player.currentTeam && player.situation !== PlayerSituation.STOPPED;
   }
 
   /**
@@ -303,7 +314,7 @@ export class GestorJogo {
   realocarJogadoresSemTime(): void {
     if (this.playersWithoutTeam === 0) return;
     this.players.forEach((player) => {
-      if (!player.currentTeam) {
+      if (this.estaSemTime(player)) {
         this.adicionarAoUltimoTime(player);
       }
     });
@@ -342,7 +353,9 @@ export class GestorJogo {
     // do jogo, não trocou de time.
     teamToIn.switchPlayer(playerIn, playerOut);
     playerOut.setSituation(PlayerSituation.STOPPED);
+    playerOut.currentTeam = undefined;
     this.atualizarTimes(teamToOut);
+    this.recomputePlayersWithoutTeam();
     this.notify();
   }
 
@@ -356,6 +369,8 @@ export class GestorJogo {
       if (this.next[i].fullTeam) continue;
       this.realocarJogadores(this.next[i + 1], this.next[i]);
     }
+    // O último time pode ter doado todos os jogadores; vazio, não é time.
+    this.next = this.next.filter((team) => team.players.length > 0);
   }
 
   realocarJogadores(teamFrom: Team, teamTo: Team): void {
@@ -378,7 +393,9 @@ export class GestorJogo {
 
   // remover jogador da pelada sem incluir outro no lugar
   atualizarTimes(beginTeam: Team): void {
-    if (beginTeam.situation === TeamSituation.PLAYING) {
+    // A partida em andamento é a fonte de verdade de quem joga — não a
+    // `situation` do time, que pode ficar defasada (ex.: reidratação).
+    if (this.playing?.teams.has(beginTeam)) {
       this.redimensionarPartida(beginTeam);
     } else {
       this.redimensionarTimes(beginTeam);
@@ -386,10 +403,15 @@ export class GestorJogo {
   }
 
   tirarDoJogo(removedPlayer: Player): void {
-    const team = removedPlayer.currentTeam!;
+    const team = removedPlayer.currentTeam;
+    if (!team) throw Error("Só dá pra tirar do jogo quem está em um time.");
     team.removePlayer(removedPlayer);
     removedPlayer.setSituation(PlayerSituation.STOPPED);
+    // Sem zerar, o jogador seguia "apontando" para um time que não o tem
+    // mais — e um segundo removePlayer nesse time levava outro jogador.
+    removedPlayer.currentTeam = undefined;
     this.atualizarTimes(team);
+    this.recomputePlayersWithoutTeam();
     this.notify();
   }
 
@@ -422,12 +444,9 @@ export class GestorJogo {
       throw Error(
         "Não é possível remover jogador que está em partida em andamento.",
       );
-    if (player.currentTeam) {
-      this.tirarDoJogo(player);
-    } else if (this.playersWithoutTeam > 0) {
-      this.playersWithoutTeam--;
-    }
+    if (player.currentTeam) this.tirarDoJogo(player);
     this.players.splice(index, 1);
+    this.recomputePlayersWithoutTeam();
     this.notify();
   }
 
@@ -808,6 +827,7 @@ export class GestorJogo {
   }
 
   realocarTime(team: Team): void {
+    team.setSituation(TeamSituation.ON_NEXT);
     const lastTeam = this.next.pop();
     // Fila vazia (caso comum com só 2 times): não há time no fim pra absorver
     // jogadores incompletos — apenas recoloca `team`. Antes, `realocarJogadores`
