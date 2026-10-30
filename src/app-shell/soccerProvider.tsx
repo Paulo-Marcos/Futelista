@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  AUTOSAVE_DEBOUNCE_MS,
-  NOME_AVULSA_DEFAULT,
-} from "@/src/app-shell/constants";
+import { NOME_AVULSA_DEFAULT } from "@/src/app-shell/constants";
 import {
   definirPeladaAtivaId,
   lerPeladaAtivaId,
@@ -11,6 +8,7 @@ import {
 } from "@/src/app-shell/peladaAtiva";
 import { apagarFotoDoJogador } from "@/src/app-shell/fotoJogador";
 import { AgendaPelada, SoccerContext } from "@/src/app-shell/soccerContext";
+import { useAutosaveExecucao } from "@/src/app-shell/useAutosaveExecucao";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Pelada } from "@/src/domain/Pelada";
 import {
@@ -34,7 +32,8 @@ import { FalhaNoBoot } from "@/src/shared/ui/FalhaNoBoot";
  *  isso forçava o usuário a ver uma pelada vazia que ele nunca pediu.
  *
  * Durante a vida do app:
- *  - Subscribe no GestorJogo (quando ativo) dispara salvamento debounced.
+ *  - `useAutosaveExecucao` grava a execução ativa a cada mudança de estado
+ *    (não a cada tick) e mantém o cronômetro em dia com o relógio real.
  *  - `saving` reflete em tempo real escritas pendentes.
  */
 export const SoccerProvider = ({
@@ -103,25 +102,15 @@ export const SoccerProvider = ({
     setTentativaBoot((n) => n + 1);
   }, []);
 
-  useEffect(() => {
-    if (!gestor) return;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    const salvarDebounced = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        marcarSalvamento(() => repoRef.current.salvar(gestor)).catch((erro) => {
-          console.warn("[SoccerProvider] Falha ao salvar execução:", erro);
-        });
-      }, AUTOSAVE_DEBOUNCE_MS);
-    };
-
-    const desinscrever = gestor.subscribe(salvarDebounced);
-    return () => {
-      desinscrever();
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [gestor, marcarSalvamento]);
+  const salvarExecucao = useCallback(
+    (alvo: GestorJogo) => {
+      marcarSalvamento(() => repoRef.current.salvar(alvo)).catch((erro) => {
+        console.warn("[SoccerProvider] Falha ao salvar execução:", erro);
+      });
+    },
+    [marcarSalvamento],
+  );
+  useAutosaveExecucao(gestor, salvarExecucao);
 
   /**
    * Salva a execução anterior (se existir), persiste a próxima execução

@@ -6,7 +6,7 @@ import { Player, PlayerSituation } from "./Player";
 import { DataRules, Rules } from "./Rules";
 import { Team, TeamSituation } from "./Team";
 import { CreateTeamFactory } from "./TeamBuilder/CreateTeam.factory";
-import { Timer, TimerStatus } from "./Timer";
+import { EventoTimer, Timer, TimerStatus } from "./Timer";
 import { FinalResultProcessor } from "./FinalResult/FinalResult.processor";
 import { Observable } from "./Observable";
 
@@ -48,6 +48,7 @@ export class GestorJogo {
   private updateResult = new FinalResultProcessor();
 
   private store = new Observable();
+  private _versaoEstado = 0;
 
   constructor(name: string, rules: Rules, opcionais?: DadosExecucao) {
     this.name = name;
@@ -72,7 +73,22 @@ export class GestorJogo {
     return this.store.subscribe(listener);
   }
 
+  /**
+   * Cresce a cada mudança de estado persistível. Ticks do cronômetro não
+   * contam: o tempo deriva do relógio, então gravar por tick é desperdício.
+   */
+  get versaoEstado(): number {
+    return this._versaoEstado;
+  }
+
+  /** Repassa um evento do cronômetro: tick só avisa a UI; estado também conta como mudança. */
+  notificarCronometro(evento: EventoTimer): void {
+    if (evento === "tick") this.store.notify();
+    else this.notify();
+  }
+
   private notify(): void {
+    this._versaoEstado++;
     this.store.notify();
   }
 
@@ -636,7 +652,7 @@ export class GestorJogo {
       this.timer = new Timer(
         this.rules.numberTimes,
         this.rules.getDurationMatch(),
-        () => this.notify(),
+        (evento) => this.notificarCronometro(evento),
       );
     this.timer.start();
     this.notify();
@@ -650,6 +666,16 @@ export class GestorJogo {
   continue(): void {
     this.timer?.continue();
     this.notify();
+  }
+
+  /** Recalcula o cronômetro pelo relógio real (ex.: app voltou do segundo plano). */
+  sincronizarCronometro(): void {
+    this.timer?.sincronizar();
+  }
+
+  /** Solta o tick do cronômetro sem mudar o estado — execução saiu de cena. */
+  liberarCronometro(): void {
+    this.timer?.desligarTick();
   }
 
   /**

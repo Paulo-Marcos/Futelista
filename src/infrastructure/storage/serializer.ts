@@ -6,7 +6,7 @@ import { Rules, RulesData } from "@/src/domain/Rules";
 import { ScreenTime } from "@/src/domain/ScreenTime";
 import { Switch } from "@/src/domain/Switch";
 import { Team, TeamSituation } from "@/src/domain/Team";
-import { Timer, TimerStatus } from "@/src/domain/Timer";
+import { EventoTimer, Timer, TimerStatus } from "@/src/domain/Timer";
 
 /**
  * Serializador <-> reidratador do agregado GestorJogo.
@@ -85,6 +85,10 @@ type TimerDTO = {
   restTime: number;
   currentNumberTime: number;
   status: TimerStatus;
+  /** Tempo corrido no tempo atual até `iniciadoEm` (D-051+; ausente em saves antigos). */
+  decorridoMs?: number;
+  /** Instante (epoch ms) da largada em curso; null com o relógio parado. */
+  iniciadoEm?: number | null;
 };
 
 export type Payload = {
@@ -305,12 +309,15 @@ function buildMatchDTO(match: Match): MatchDTO {
 }
 
 function buildTimerDTO(timer: Timer): TimerDTO {
+  const estado = timer.exportarEstado();
   return {
-    numberTimes: timer.numberTimes,
-    timeMatch: timer.timeMatch,
+    numberTimes: estado.numberTimes,
+    timeMatch: estado.timeMatch,
     restTime: timer.restTime,
-    currentNumberTime: timer.currentNumberTime,
-    status: timer.status,
+    currentNumberTime: estado.currentNumberTime,
+    status: estado.status,
+    decorridoMs: estado.decorridoMs,
+    iniciadoEm: estado.iniciadoEm ?? null,
   };
 }
 
@@ -351,7 +358,9 @@ function buildGestorJogo(payload: Payload): GestorJogo {
     : undefined;
 
   if (payload.timer) {
-    jogo.timer = rehydrateTimer(payload.timer, () => jogo["notify"]?.());
+    jogo.timer = rehydrateTimer(payload.timer, (evento) =>
+      jogo.notificarCronometro(evento),
+    );
   }
 
   // Saves gerados por versões antigas (com bugs históricos de troca/remoção)
@@ -511,12 +520,31 @@ function relinkTeamHistories(
   });
 }
 
-function rehydrateTimer(dto: TimerDTO, onChange: () => void): Timer {
-  const timer = new Timer(dto.numberTimes, dto.timeMatch, onChange);
-  timer.restTime = dto.restTime;
-  timer.currentNumberTime = dto.currentNumberTime;
-  // Se o timer estava rodando, volta como pausado — sem callback de interval vivo.
-  timer.status =
-    dto.status === TimerStatus.STARTED ? TimerStatus.PAUSED : dto.status;
-  return timer;
+function rehydrateTimer(
+  dto: TimerDTO,
+  onChange: (evento: EventoTimer) => void,
+): Timer {
+  return Timer.restaurar(
+    {
+      numberTimes: dto.numberTimes,
+      timeMatch: dto.timeMatch,
+      currentNumberTime: dto.currentNumberTime,
+      status: dto.status,
+      decorridoMs: dto.decorridoMs ?? decorridoDoFormatoAntigo(dto),
+      iniciadoEm: dto.iniciadoEm ?? undefined,
+    },
+    onChange,
+  );
+}
+
+/**
+ * Saves anteriores à D-051 só guardavam `restTime`. Antes da D-048, o fim
+ * natural do último tempo gravava o tempo CHEIO em vez de zero — tratado
+ * aqui como zerado, senão "Voltar à partida" ganharia um tempo extra.
+ */
+function decorridoDoFormatoAntigo(dto: TimerDTO): number {
+  const fimNaturalAntigo =
+    dto.status === TimerStatus.ENDED && dto.restTime >= dto.timeMatch;
+  const restante = fimNaturalAntigo ? 0 : dto.restTime;
+  return (dto.timeMatch - restante) * 1000;
 }
