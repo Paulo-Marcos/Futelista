@@ -131,13 +131,14 @@ describe("Partida — CTA dinâmica", () => {
     expect(startSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("status ENDED: disco central volta ao estado INICIAR (recomeçar)", () => {
+  it("status ENDED: não oferece INICIAR e mantém o Encerrar", () => {
     const m = buildPartidaManager({ status: TimerStatus.ENDED });
     renderPartida(m);
 
     expect(
-      screen.getByLabelText("Apitar início (centro do campo)"),
-    ).toBeTruthy();
+      screen.queryByLabelText("Apitar início (centro do campo)"),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Encerrar" })).toBeTruthy();
   });
 });
 
