@@ -181,9 +181,7 @@ export class GestorJogo {
    * automaticamente.
    */
   private estaSemTime(player: Player): boolean {
-    return (
-      !player.currentTeam && player.situation !== PlayerSituation.STOPPED
-    );
+    return !player.currentTeam && player.situation !== PlayerSituation.STOPPED;
   }
 
   /**
