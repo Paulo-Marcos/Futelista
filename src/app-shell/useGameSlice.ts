@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
 import { GestorJogo } from "@/src/domain/GestorJogo";
@@ -33,6 +33,28 @@ export function useGameSliceRequired<T>(selector: (jogo: GestorJogo) => T): T {
     );
   }
   return selector(gestor);
+}
+
+/**
+ * Lê uma LISTA do GestorJogo com referência estável, segura contra mutação
+ * no lugar. O agregado faz `splice`/`push` nos próprios arrays (`next`,
+ * `players`, `team.players`), então a referência devolvida pelo seletor
+ * nunca muda — um `useMemo([lista])` ou `React.memo` no filho congelaria a
+ * versão antiga. Aqui a identidade da cópia segue a `chaveDoItem` de cada
+ * item: muda quando a composição/ordem muda, fica igual num tick puro.
+ */
+export function useGameListaRequired<T>(
+  selector: (jogo: GestorJogo) => readonly T[],
+  chaveDoItem: (item: T) => string,
+): T[] {
+  const lista = useGameSliceRequired(selector);
+  const chave = lista.map(chaveDoItem).join("|");
+  // `chave` é a dependência que importa: `lista` é a mesma referência viva.
+  const instantaneo = useMemo(
+    () => ({ chave, itens: [...lista] }),
+    [lista, chave],
+  );
+  return instantaneo.itens;
 }
 
 /**

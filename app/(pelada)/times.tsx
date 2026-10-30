@@ -12,7 +12,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import {
+  useGameListaRequired,
+  useGameSliceRequired,
+} from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { ChoosingTeams } from "@/src/domain/Rules";
 import { Team } from "@/src/domain/Team";
@@ -40,6 +43,10 @@ export default function TimesScreen() {
 
 type AcaoTime = "mover-fim" | "esvaziar" | "cancelar";
 
+function chaveDoTime(team: Team): string {
+  return `${team.id}:${team.players.map((p) => p.id).join(",")}`;
+}
+
 function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
@@ -49,7 +56,9 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
   const { scrollTo } = useLocalSearchParams<{ scrollTo?: string }>();
   const flatListRef = useRef<FlatList<Team> | null>(null);
 
-  const next = useGameSliceRequired((g) => g.next);
+  // `next` é mutado no lugar (mover para o fim, setPlayingGame, trocas): a
+  // cópia por chave é o que deixa a `fila` abaixo enxergar a nova ordem.
+  const next = useGameListaRequired((g) => g.next, chaveDoTime);
   const choosingTeams = useGameSliceRequired((g) => g.rules.choosingTeams);
   const advantageId = useGameSliceRequired((g) => g.advantageToNext?.id);
   const totalJogadores = useGameSliceRequired((g) => g.players.length);

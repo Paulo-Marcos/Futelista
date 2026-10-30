@@ -6,7 +6,10 @@ import { StyleSheet, Text, Vibration, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import {
+  useGameListaRequired,
+  useGameSliceRequired,
+} from "@/src/app-shell/useGameSlice";
 import { usePrefs } from "@/src/shared/prefs/prefsContext";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Goal } from "@/src/domain/Goal";
@@ -41,6 +44,10 @@ import { minutoDoGol } from "@/src/shared/ui/partida/helpers";
 // re-renderizaria consumidores memoizados sem mudança real).
 const SEM_RESERVAS: Player[] = [];
 const SEM_GOLS: Goal[] = [];
+
+function chaveDoGol(gol: Goal): string {
+  return `${gol.player.id}:${gol.team.id}:${gol.time.stroke}:${gol.time.timeStroke}`;
+}
 
 /**
  * Partida — a estrela do app.
@@ -84,20 +91,19 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     () => ({ teamA: goalsA, teamB: goalsB }),
     [goalsA, goalsB],
   );
-  // `g.playing?.goals` é a referência viva do domínio (estável entre ticks),
-  // mas o fallback `?? []` cria array novo a cada render. Derivamos uma chave
-  // estável (qtd + ids) e só renovamos o array quando o conteúdo muda de fato.
-  const goalEventsRaw = useGameSliceRequired<Goal[]>(
+  // `g.playing?.goals` recebe `push` no lugar: a cópia por chave é o que faz
+  // o MatchTimeline (memo) ver o gol novo, sem re-renderizar a cada tick.
+  const goalEvents = useGameListaRequired<Goal>(
     (g) => g.playing?.goals ?? SEM_GOLS,
-  );
-  const goalEventsKey = goalEventsRaw.map((g) => g.player.id).join("|");
-  const goalEvents = useMemo(
-    () => goalEventsRaw,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [goalEventsKey],
+    chaveDoGol,
   );
   const goalLimit = useGameSliceRequired((g) => g.rules.goalLimit);
   const proximoTime = useGameSliceRequired((g) => g.next[0]);
+  // Idem para o banco: a troca move jogadores no próprio `team.players`.
+  const reservas = useGameListaRequired<Player>(
+    (g) => g.next[0]?.players ?? SEM_RESERVAS,
+    (p) => p.id,
+  );
 
   const [erro, setErro] = useState<string | null>(null);
   const [scorerSide, setScorerSide] = useState<"A" | "B" | null>(null);
@@ -130,10 +136,6 @@ function PartidaInner({ gestor }: { gestor: GestorJogo }) {
     doisMin: boolean;
     trintaSeg: boolean;
   }>({ matchId: null, doisMin: false, trintaSeg: false });
-
-  // Fallback estável: `?? []` criaria array novo a cada render (cada tick),
-  // re-renderizando BenchRail/SubstitutionSheet sem mudança real.
-  const reservas = proximoTime?.players ?? SEM_RESERVAS;
 
   const safeAction = useCallback((fn: () => void) => {
     try {

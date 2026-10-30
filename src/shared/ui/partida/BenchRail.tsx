@@ -77,8 +77,9 @@ function BenchRailImpl({
   );
 }
 
-// React.memo: `reserves` agora chega com referência estável da tela (fallback de
-// módulo + memo por ids), então num tick puro o banco não re-renderiza.
+// React.memo: `reserves` chega da tela como cópia por chave de ids
+// (`useGameListaRequired`) — referência nova quando o banco muda, estável num
+// tick puro. Nunca passe aqui o `team.players` vivo: o memo congelaria o banco.
 export const BenchRail = memo(BenchRailImpl);
 
 const styles = StyleSheet.create({
