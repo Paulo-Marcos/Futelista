@@ -22,6 +22,17 @@ describe("GestorJogo — rotação da fila e integridade dos times", () => {
     return jogo;
   }
 
+  // `marcarGol` só carimba o gol com o cronômetro rodando.
+  function vencerComTimeA(jogo: GestorJogo): void {
+    const { teamA } = jogo.playing!;
+    jogo.start();
+    jogo.marcarGol(teamA, teamA.players[0]);
+    jogo.setResult();
+  }
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
   const QUATRO_TIMES = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2"];
   const TRES_TIMES = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -56,8 +67,7 @@ describe("GestorJogo — rotação da fila e integridade dos times", () => {
     it("time que sai da partida volta para ON_NEXT", () => {
       const jogo = jogoCom(TRES_TIMES);
       const { teamA, teamB } = jogo.playing!;
-      jogo.marcarGol(teamA, teamA.players[0]);
-      jogo.setResult();
+      vencerComTimeA(jogo);
 
       jogo.definirProximaPartida();
 
@@ -67,11 +77,10 @@ describe("GestorJogo — rotação da fila e integridade dos times", () => {
 
     it("tirar do jogo alguém de um time que já jogou redimensiona a fila, não a partida", () => {
       const jogo = jogoCom(QUATRO_TIMES);
-      const { teamA, teamB } = jogo.playing!;
+      const { teamB } = jogo.playing!;
       const timeD = jogo.next[1];
       const jogadoresDeD = [...timeD.players];
-      jogo.marcarGol(teamA, teamA.players[0]);
-      jogo.setResult();
+      vencerComTimeA(jogo);
       jogo.definirProximaPartida();
       const [b1, b2] = teamB.players;
 
