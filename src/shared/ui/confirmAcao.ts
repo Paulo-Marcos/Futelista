@@ -2,6 +2,7 @@ import { Alert, Platform } from "react-native";
 
 import {
   pedirConfirmacao,
+  pedirEscolha,
   temConfirmAcaoHost,
 } from "@/src/shared/ui/ConfirmAcaoHost";
 
@@ -71,33 +72,27 @@ export type Escolha<T extends string> = {
 
 /**
  * Apresenta múltiplas opções ao usuário e resolve com a opção escolhida
- * (ou `null` se cancelou). Em iOS/Android usa Alert.alert com N botões;
- * em web cai num `window.confirm` simplificado (1ª opção via OK, 2ª via
- * Cancel — outras opções não cabem no confirm nativo).
+ * (ou `null` se cancelou).
  *
- * Para a pergunta clássica de 3 opções (cancelar/A/B), no web a opção
- * "cancelar" é inferida pelo fechamento do dialog.
+ * Caminho preferido: `ConfirmAcaoHost` — modal com todas as N opções
+ * (D-050). Os diálogos nativos não servem como caminho principal: o
+ * `Alert.alert` do Android só mostra 3 botões e o `window.confirm` da
+ * web só tem OK/Cancelar.
+ *
+ * Fallback sem host: Alert em iOS/Android; na web, um `window.confirm`
+ * por opção, em ordem — Cancelar segue para a próxima e, esgotadas,
+ * resolve `null`. Nunca escolhe uma opção que o usuário não aceitou.
  */
-export function escolherOpcao<T extends string>(opcoes: {
+export async function escolherOpcao<T extends string>(opcoes: {
   titulo: string;
   mensagem: string;
   opcoes: Escolha<T>[];
 }): Promise<T | null> {
-  if (Platform.OS === "web") {
-    if (typeof window === "undefined" || typeof window.confirm !== "function") {
-      return Promise.resolve(null);
-    }
-    const principais = opcoes.opcoes.filter((o) => o.estilo !== "cancel");
-    if (principais.length === 0) return Promise.resolve(null);
-    if (principais.length === 1) {
-      const ok = window.confirm(`${opcoes.titulo}\n\n${opcoes.mensagem}`);
-      return Promise.resolve(ok ? principais[0].valor : null);
-    }
-    const ok = window.confirm(
-      `${opcoes.titulo}\n\n${opcoes.mensagem}\n\nOK = ${principais[0].label}, Cancelar = ${principais[1].label}`,
-    );
-    return Promise.resolve(ok ? principais[0].valor : principais[1].valor);
+  if (temConfirmAcaoHost()) {
+    // O host devolve um `valor` que veio de `opcoes.opcoes`, logo é um T.
+    return (await pedirEscolha(opcoes)) as T | null;
   }
+  if (Platform.OS === "web") return escolherPorConfirmSequencial(opcoes);
   return new Promise((resolve) => {
     Alert.alert(
       opcoes.titulo,
@@ -109,4 +104,19 @@ export function escolherOpcao<T extends string>(opcoes: {
       })),
     );
   });
+}
+
+function escolherPorConfirmSequencial<T extends string>(opcoes: {
+  titulo: string;
+  mensagem: string;
+  opcoes: Escolha<T>[];
+}): T | null {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") {
+    return null;
+  }
+  const principais = opcoes.opcoes.filter((o) => o.estilo !== "cancel");
+  const escolhida = principais.find((o) =>
+    window.confirm(`${opcoes.titulo}\n\n${opcoes.mensagem}\n\n${o.label}?`),
+  );
+  return escolhida?.valor ?? null;
 }

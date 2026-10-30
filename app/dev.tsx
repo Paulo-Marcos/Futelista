@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -23,13 +23,23 @@ import { SecondaryButton } from "@/src/shared/ui/SecondaryButton";
 import { Spacing, Typography } from "@/src/shared/theme/Colors";
 
 /**
+ * A rota existe em todo build (roteamento por arquivo), então um deep link
+ * para `/dev` alcançaria o painel em produção — com "Limpar storage".
+ * Fora de `__DEV__` ela só devolve o usuário para o início.
+ */
+export default function DevRoute() {
+  if (!__DEV__) return <Redirect href="/" />;
+  return <DevScreen />;
+}
+
+/**
  * Painel de desenvolvimento. Permite limpar o storage e aplicar
  * cenários pré-fabricados para testar a UI rápido.
  *
  * Após qualquer ação, recarrega o app via `router.replace("/")` —
  * o provider re-faz boot e detecta o novo estado.
  */
-export default function DevScreen() {
+function DevScreen() {
   const palette = usePalette();
   const router = useRouter();
   const { repositorio, exportarBackup } = useSoccer();
