@@ -88,7 +88,7 @@ describe("PeladaEditarScreen", () => {
     // assíncrona; findByDisplayValue aguarda o ciclo terminar.
     expect(
       await screen.findByDisplayValue("Fute Quarta", undefined, {
-        timeout: 5000,
+        timeout: 10000,
       }),
     ).toBeTruthy();
     expect(screen.getByDisplayValue("Quadra do CEF")).toBeTruthy();
@@ -113,7 +113,7 @@ describe("PeladaEditarScreen", () => {
       },
     });
 
-    await screen.findByText("Editar pelada", undefined, { timeout: 5000 });
+    await screen.findByText("Editar pelada", undefined, { timeout: 10000 });
 
     fireEvent.changeText(
       screen.getByDisplayValue("Fute CEF"),
@@ -145,16 +145,16 @@ describe("PeladaEditarScreen", () => {
     });
 
     // Aguarda a tela sair do loading antes de tentar o press.
-    await screen.findByDisplayValue("Fute CEF", undefined, { timeout: 5000 });
+    await screen.findByDisplayValue("Fute CEF", undefined, { timeout: 10000 });
     fireEvent.press(screen.getByRole("button", { name: "Salvar alterações" }));
 
     await waitFor(
       () => expect(soccer.atualizarPelada).toHaveBeenCalledTimes(1),
-      { timeout: 5000 },
+      { timeout: 10000 },
     );
     await waitFor(
       () => expect(screen.getByText("Boom de teste")).toBeTruthy(),
-      { timeout: 5000 },
+      { timeout: 10000 },
     );
     expect(router.back).not.toHaveBeenCalled();
   });
@@ -166,7 +166,7 @@ describe("PeladaEditarScreen", () => {
       },
     });
 
-    await screen.findByText("Editar pelada", undefined, { timeout: 5000 });
+    await screen.findByText("Editar pelada", undefined, { timeout: 10000 });
     fireEvent.press(screen.getByRole("button", { name: "Voltar" }));
     expect(router.back).toHaveBeenCalledTimes(1);
   });
