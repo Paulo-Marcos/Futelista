@@ -17,7 +17,11 @@ export const STORAGE_KEYS = {
   EXEC_LEGACY: `${STORAGE_NAMESPACE}pelada:`,
   /** Prefixo dos tipos de Pelada cadastrados. */
   PELADA_TIPO: `${STORAGE_NAMESPACE}peladaTipo:`,
-  /** Slot que guarda o id da execução ativa entre boots do app. */
+  /**
+   * Slot que guarda o id da execução ativa entre boots do app. Herdou o
+   * prefixo `EXEC_LEGACY`; quem varre esse prefixo precisa excluí-lo
+   * (renomear exigiria migrar o valor já salvo nos aparelhos).
+   */
   ATIVA_ID: `${STORAGE_NAMESPACE}pelada:ativa-id`,
   /** Preferência de tema visual (id da paleta + modo). */
   THEME: `${STORAGE_NAMESPACE}theme`,

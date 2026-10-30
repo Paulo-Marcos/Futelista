@@ -79,19 +79,28 @@ export class AsyncStoragePeladaRepository implements RepositorioPelada {
     const resumos = await this.lerTodasExecucoes();
     const ids = resumos.filter((r) => r.peladaId === peladaId).map((r) => r.id);
     const carregadas: GestorJogo[] = [];
+    // Uma execução corrompida não pode esconder as demais: este método
+    // alimenta os agregados da pelada, que somem por inteiro se ele rejeitar.
     for (const id of ids) {
-      const exec = await this.carregar(id);
-      if (exec) carregadas.push(exec);
+      try {
+        const exec = await this.carregar(id);
+        if (exec) carregadas.push(exec);
+      } catch {
+        continue;
+      }
     }
     return carregadas.sort((a, b) => a.createdAt - b.createdAt);
   }
 
   private async lerTodasExecucoes(): Promise<ResumoExecucao[]> {
     const keys = await AsyncStorage.getAllKeys();
+    // ATIVA_ID mora dentro do prefixo legado (`futelista:pelada:`), mas é um
+    // slot de id, não uma execução. Excluir aqui evita migrar a chave.
     const execKeys = keys.filter(
       (k) =>
-        k.startsWith(STORAGE_KEYS.EXEC) ||
-        k.startsWith(STORAGE_KEYS.EXEC_LEGACY),
+        k !== STORAGE_KEYS.ATIVA_ID &&
+        (k.startsWith(STORAGE_KEYS.EXEC) ||
+          k.startsWith(STORAGE_KEYS.EXEC_LEGACY)),
     );
     if (execKeys.length === 0) return [];
     const entries = await AsyncStorage.multiGet(execKeys);
