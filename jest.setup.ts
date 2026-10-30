@@ -11,7 +11,32 @@ import "react-native-gesture-handler/jestSetup";
 // Telas com carga assíncrona podem demorar mais sob contenção de CPU no runner
 // do CI (várias suítes competindo por poucos núcleos). O timeout padrão de 5s
 // gera falso-negativo nesses casos. Local roda rápido; isto só dá folga.
-jest.setTimeout(15000);
+// 30s porque o portão do ship roda com outros worktrees testando em paralelo
+// (CPU a 100%): telas de primeiro render chegaram a 11s com teto de 15s.
+jest.setTimeout(30000);
+
+// O index do react-native expõe cada componente por getter com `require`
+// preguiçoso: TextInput, ScrollView etc. só carregam no primeiro render que os
+// usa — dentro do relógio do teste. Com cache de transform frio (worktree novo,
+// CI) o Babel desses módulos leva >15s e estoura `findBy*`. Tocar os getters
+// aqui move esse custo para o setup, que não conta no timeout de nenhum teste.
+{
+  const RN = require("react-native");
+  void [
+    RN.ActivityIndicator,
+    RN.Animated,
+    RN.FlatList,
+    RN.Image,
+    RN.Modal,
+    RN.Pressable,
+    RN.ScrollView,
+    RN.Switch,
+    RN.Text,
+    RN.TextInput,
+    RN.TouchableOpacity,
+    RN.View,
+  ];
+}
 
 // ---------------------------------------------------------------------------
 // expo-router
