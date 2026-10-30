@@ -397,7 +397,9 @@ function TimesInner({ gestor }: { gestor: GestorJogo }) {
         <FlatList
           ref={flatListRef}
           data={fila}
-          keyExtractor={(team) => team.id}
+          // Chave por composição: o `Team` é o mesmo objeto mutado, e na
+          // partida o TeamQueue (memo) não recebe outra prop que mude.
+          keyExtractor={chaveDoTime}
           contentContainerStyle={[
             styles.scroll,
             { paddingBottom: insets.bottom + Spacing.xxl },
