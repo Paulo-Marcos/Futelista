@@ -34,7 +34,9 @@ describe("WithoutHandledScenario", () => {
         jogo,
         externalAdvantage: jogo.playing!.teamB,
       }),
-    ).toThrow("Não foi possível definir a próxima partida para esse resultado.");
+    ).toThrow(
+      "Não foi possível definir a próxima partida para esse resultado.",
+    );
   });
 
   it("não deverá fazer nada quando a partida ainda não tem resultado", () => {
