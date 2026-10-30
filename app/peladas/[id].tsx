@@ -57,16 +57,21 @@ export default function ExecucoesDePeladaScreen() {
   const [pelada, setPelada] = useState<Pelada | null>(null);
   const [execucoes, setExecucoes] = useState<ResumoExecucao[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [naoEncontrada, setNaoEncontrada] = useState(false);
   const [iniciando, setIniciando] = useState(false);
   const [artilheiros, setArtilheiros] = useState<Artilheiro[]>([]);
   const [sequencias, setSequencias] = useState<SequenciaVencedor[]>([]);
 
   const recarregar = useCallback(() => {
-    if (!peladaId) return;
+    if (!peladaId) {
+      setNaoEncontrada(true);
+      return;
+    }
     Promise.all([carregarPelada(peladaId), listarExecucoesDe(peladaId)])
       .then(([p, ex]) => {
         setPelada(p);
         setExecucoes(ex);
+        setNaoEncontrada(p === null);
         setErro(null);
       })
       .catch((e) => setErro(e instanceof Error ? e.message : String(e)));
@@ -291,7 +296,17 @@ export default function ExecucoesDePeladaScreen() {
         )}
       </View>
 
-      {pelada === null || execucoes === null ? (
+      {naoEncontrada ? (
+        <View style={styles.center}>
+          <EmptyState
+            icon="alert-circle-outline"
+            title="Pelada não encontrada"
+            description="A pelada pode ter sido removida em outro dispositivo."
+            actionLabel="Voltar"
+            onAction={() => router.back()}
+          />
+        </View>
+      ) : pelada === null || execucoes === null ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={palette.primary} />
         </View>

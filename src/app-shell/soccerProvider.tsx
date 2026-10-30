@@ -20,6 +20,7 @@ import {
 } from "@/src/domain/ports/RepositorioPelada";
 import { DataRules, Rules } from "@/src/domain/Rules";
 import { AsyncStoragePeladaRepository } from "@/src/infrastructure/storage/AsyncStoragePeladaRepository";
+import { FalhaNoBoot } from "@/src/shared/ui/FalhaNoBoot";
 
 /**
  * Provider raiz que orquestra Pelada (tipo) e Execução (sessão).
@@ -48,6 +49,8 @@ export const SoccerProvider = ({
   );
   const [gestor, setManager] = useState<GestorJogo | null>(null);
   const [bootConcluido, setBootConcluido] = useState(false);
+  const [erroBoot, setErroBoot] = useState<string | null>(null);
+  const [tentativaBoot, setTentativaBoot] = useState(0);
   const [saving, setSaving] = useState(false);
   const escritasPendentesRef = useRef(0);
 
@@ -67,6 +70,9 @@ export const SoccerProvider = ({
 
   useEffect(() => {
     let cancelado = false;
+    // Execução corrompida cai para "gestão" (dá para seguir usando o app);
+    // storage ilegível não: sem ele nenhuma escrita funcionaria, então o
+    // boot falha de forma visível e o usuário pode tentar de novo.
     async function carregar(): Promise<GestorJogo | null> {
       const id = await lerPeladaAtivaId();
       if (!id) return null;
@@ -77,14 +83,24 @@ export const SoccerProvider = ({
         return null;
       }
     }
-    carregar().then((carregada) => {
-      if (cancelado) return;
-      setManager(carregada);
-      setBootConcluido(true);
-    });
+    carregar()
+      .then((carregada) => {
+        if (cancelado) return;
+        setManager(carregada);
+        setBootConcluido(true);
+      })
+      .catch((erro: unknown) => {
+        if (cancelado) return;
+        setErroBoot(erro instanceof Error ? erro.message : String(erro));
+      });
     return () => {
       cancelado = true;
     };
+  }, [tentativaBoot]);
+
+  const tentarBootDeNovo = useCallback(() => {
+    setErroBoot(null);
+    setTentativaBoot((n) => n + 1);
   }, []);
 
   useEffect(() => {
@@ -391,6 +407,9 @@ export const SoccerProvider = ({
     ],
   );
 
+  if (erroBoot) {
+    return <FalhaNoBoot detalhe={erroBoot} onTentarDeNovo={tentarBootDeNovo} />;
+  }
   // Bloqueia render até terminar o boot (evita flicker estado-vazio).
   if (!bootConcluido) return null;
 
