@@ -16,7 +16,10 @@ import {
   type OrigemFoto,
 } from "@/src/app-shell/fotoJogador";
 import { useSoccer } from "@/src/app-shell/useSoccer";
-import { useGameSliceRequired } from "@/src/app-shell/useGameSlice";
+import {
+  useGameListaRequired,
+  useGameSliceRequired,
+} from "@/src/app-shell/useGameSlice";
 import { GestorJogo } from "@/src/domain/GestorJogo";
 import { Player } from "@/src/domain/Player";
 import { ChoosingTeams } from "@/src/domain/Rules";
@@ -48,7 +51,12 @@ function JogadoresInner({ gestor }: { gestor: GestorJogo }) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
-  const players = useGameSliceRequired((g) => g.players);
+  // `players` é mutado no lugar (adicionar/remover/renomear): a cópia por
+  // chave é o que faz a busca filtrada enxergar a lista atual.
+  const players = useGameListaRequired(
+    (g) => g.players,
+    (p) => `${p.id}:${p.name}`,
+  );
   const playersWithoutTeam = useGameSliceRequired((g) => g.playersWithoutTeam);
   const temTimesFormados = useGameSliceRequired((g) => g.next.length > 0);
   // M-07: drag-to-reorder só faz sentido em modos baseados em ordem,
