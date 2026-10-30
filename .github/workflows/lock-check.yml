@@ -46,12 +46,16 @@ jobs:
         run: |
           BASE="${{ steps.range.outputs.base }}"
           HEAD="${{ steps.range.outputs.head }}"
-          git diff --name-only --diff-filter=ACMR "$BASE" "$HEAD" > .changed-files
+          # --name-status: o checker precisa do status (A/M/D/R) para distinguir teste novo de teste alterado.
+          git diff --name-status --diff-filter=ACMRD "$BASE" "$HEAD" > .changed-files
           git log "$BASE..$HEAD" --pretty=%B > .commit-messages || git log -1 --pretty=%B > .commit-messages
           echo "---- arquivos alterados ----"
           cat .changed-files
           echo "---- mensagens de commit ----"
           cat .commit-messages
+
+      - name: Test lock check
+        run: python -m unittest discover -s tests/lock -v
 
       - name: Run lock check
         run: python core/lock/check-lock.py ci --files .changed-files --messages .commit-messages
